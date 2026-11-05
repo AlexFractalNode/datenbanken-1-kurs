@@ -24,6 +24,13 @@ from content import Content, load_all
 
 TEMPLATE_DIR = Path(__file__).parent / "typst"
 SPACE_RE = re.compile(r"^(lines|box):(\d+)$")
+SPACE_LIMITS = {"lines": (1, 40), "box": (10, 250)}  # lines: count, box: mm
+GLOSSARY_CHAR_BUDGET = 2200  # keeps the cheatsheet at two pages
+GLOSSARY_TRUNCATED_NOTE = "… weitere Begriffe: vollständig im Web-Glossar"
+
+
+class PdfError(Exception):
+    """Compilation problem (Typst error or warning) with a readable message."""
 
 
 def parse_space(spec: str) -> tuple[str, int]:
@@ -31,7 +38,11 @@ def parse_space(spec: str) -> tuple[str, int]:
     m = SPACE_RE.match(spec or "")
     if not m:
         raise ValueError(f"invalid space spec {spec!r}")
-    return m.group(1), int(m.group(2))
+    kind, n = m.group(1), int(m.group(2))
+    lo, hi = SPACE_LIMITS[kind]
+    if not lo <= n <= hi:
+        raise ValueError(f"space {spec!r}: {kind} must be between {lo} and {hi}")
+    return kind, n
 
 
 def _compile(template: str, data: dict[str, Any], target: Path) -> None:
@@ -41,11 +52,22 @@ def _compile(template: str, data: dict[str, Any], target: Path) -> None:
             shutil.copy(f, work / f.name)
         (work / "data.json").write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
         target.parent.mkdir(parents=True, exist_ok=True)
-        typst.compile(str(work / template), output=str(target), root=str(work))
+        try:
+            pdf_bytes, warnings = typst.compile_with_warnings(
+                str(work / template), root=str(work)
+            )
+        except (typst.TypstError, RuntimeError) as e:
+            raise PdfError(f"{template}: {e}") from e
+        if warnings:
+            msgs = "; ".join(str(getattr(w, "message", w)) for w in warnings)
+            raise PdfError(f"{template}: typst warning: {msgs}")
+        target.write_bytes(pdf_bytes)
 
 
 def _task_data(t: dict) -> dict:
     space = t.get("space", "")
+    if space == "none":
+        space = ""
     if space:
         parse_space(space)  # validate early
     return {
@@ -84,9 +106,14 @@ def build_cheatsheet(c: Content, out: Path) -> Path:
         {"id": t["id"], "title": t["title"], "subtopics": list(t.get("subtopics", []))}
         for t in c.topics
     ]
-    glossary = [
-        {"term": g.get("de", g["id"]), "definition": g.get("def_de", "")} for g in c.glossary
-    ]
+    glossary, used = [], 0
+    for g in c.glossary:
+        term, definition = g.get("de", g["id"]), g.get("def_de", "")
+        used += len(term) + len(definition) + 2
+        if used > GLOSSARY_CHAR_BUDGET:
+            glossary.append({"term": GLOSSARY_TRUNCATED_NOTE, "definition": ""})
+            break
+        glossary.append({"term": term, "definition": definition})
     target = out / "cheatsheet.pdf"
     _compile("cheatsheet.typ", {"topics": topics, "glossary": glossary}, target)
     return target
@@ -128,7 +155,7 @@ def main(argv: list[str] | None = None) -> int:
         build_spickzettel(out)
         for tid in sorted(c.tasks):
             build_topic_sheets(c, tid, out)
-    except (typst.TypstError, ValueError, KeyError, OSError) as e:
+    except (PdfError, typst.TypstError, RuntimeError, ValueError, KeyError, OSError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1
     return 0

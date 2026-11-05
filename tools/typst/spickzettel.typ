@@ -14,6 +14,6 @@
     width: box-size, height: box-size,
     stroke: (paint: black, thickness: 0.8pt, dash: "dashed"),
   )[
-    #align(top + left)[#text(size: 7pt, fill: luma(150))[ ✂ ]]
+    #align(top + left)[#text(size: 7pt, fill: luma(150))[ Schnitt ]]
   ]
 ]

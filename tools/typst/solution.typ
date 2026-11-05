@@ -10,7 +10,7 @@
 #v(6mm)
 
 #for (i, t) in data.tasks.enumerate() {
-  block(breakable: false)[
+  block(breakable: true)[
     #task-head(t, i + 1)
     #text(weight: "bold")[Lösung]
     #md(t.solution)

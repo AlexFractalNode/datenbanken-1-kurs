@@ -6,7 +6,7 @@
 #text(size: 18pt, weight: "bold")[#data.title]
 
 #for (i, t) in data.tasks.enumerate() {
-  block(breakable: false)[
+  block(breakable: true)[
     #task-head(t, i + 1)
     #md(t.prompt)
     #if data.solutions {

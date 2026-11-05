@@ -25,7 +25,7 @@
 }
 
 // Render a Markdown string.
-#let md(s) = cmarker.render(s, scope: (:))
+#let md(s) = cmarker.render(s, scope: (:), raw-typst: false)
 
 // Write space below a task: "lines:N" -> N ruled lines of 8 mm, "box:H" -> framed box of H mm.
 #let write-space(spec) = {
@@ -45,7 +45,8 @@
   }
 }
 
-#let task-head(t, no) = [
+// Sticky: the heading stays together with the content that follows.
+#let task-head(t, no) = block(sticky: true, width: 100%)[
   #text(weight: "bold")[Aufgabe #no] #h(1fr) #text(weight: "bold")[#t.points Punkte]
   #v(-2pt)
   #line(length: 100%, stroke: 0.5pt)

@@ -7,14 +7,20 @@ Usage: anki_export.py [--out dist/anki] [--root .] [--lang de] [--per-topic]
 * Note type with fields Front / Back / Quelle; the note GUID is
   ``genanki.guid_for(card id)`` so re-imports update instead of duplicating.
 * Markdown is converted to HTML with the ``markdown`` package. A card's
-  ``diagram`` value references ``<topic dir>/diagrams/<name>.svg``, which is
-  shipped as media; a missing file is reported as a warning and skipped.
+  ``diagram`` value (a simple name) is looked up as ``<--diagrams>/<tNN>/<name>.svg``
+  (default ``dist/diagrams``), then ``<topic dir>/diagrams/<name>.svg``, and shipped
+  as media ``<tNN>-<name>.svg``; a missing file is a warning and skipped.
+* Raw HTML in the Markdown is escaped.
 """
 
 from __future__ import annotations
 
 import argparse
+import html
+import re
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 import genanki
@@ -46,10 +52,15 @@ MODEL = genanki.Model(
 )
 
 _MD_EXT = ["extra", "sane_lists"]
+DIAGRAM_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*(\.[A-Za-z0-9_-]+)*$")
 
 
 def md_to_html(text: str) -> str:
-    return markdown.markdown(text, extensions=_MD_EXT)
+    """Markdown -> HTML; raw HTML in the source is escaped, not passed through."""
+    md = markdown.Markdown(extensions=_MD_EXT)
+    md.preprocessors.deregister("html_block")
+    md.inlinePatterns.deregister("html")
+    return md.convert(text)
 
 
 def deck_id(tid: str) -> int:
@@ -64,23 +75,39 @@ def _source_text(c: Content, card: dict) -> str:
     titles = {s["id"]: s.get("title", s["id"]) for s in c.sources}
     parts = []
     for s in card.get("sources", []) or []:
-        parts.append(f'{titles.get(s["id"], s["id"])}, {s["ref"]}')
+        parts.append(html.escape(f'{titles.get(s["id"], s["id"])}, {s["ref"]}'))
     return "; ".join(parts)
 
 
-def build_deck(c: Content, tid: str, media: list[str]) -> genanki.Deck:
+def _find_svg(c: Content, tid: str, name: str, diagrams: Path | None) -> Path | None:
+    candidates = []
+    if diagrams is not None:
+        candidates.append(diagrams / tid / f"{name}.svg")
+    if tid in c.topic_dirs:
+        candidates.append(c.topic_dirs[tid] / "diagrams" / f"{name}.svg")
+    return next((p for p in candidates if p.is_file()), None)
+
+
+def build_deck(
+    c: Content, tid: str, media: list[str], stage: Path, diagrams: Path | None = None
+) -> genanki.Deck:
     deck = genanki.Deck(deck_id(tid), f"DB1::{tid} {_topic_title(c, tid)}")
-    diag_dir = c.topic_dirs.get(tid, Path()) / "diagrams"
     for card in c.cards.get(tid, []):
         back = md_to_html(card["back"])
         name = card.get("diagram")
-        if name:
-            svg = diag_dir / f"{name}.svg"
-            if svg.is_file():
-                media.append(str(svg))
-                back += f'<img src="{svg.name}">'
-            else:
+        if name is not None:
+            if not isinstance(name, str) or not DIAGRAM_NAME_RE.match(name):
+                raise ValueError(f"{card['id']}: diagram must be a simple name, got {name!r}")
+            svg = _find_svg(c, tid, name, diagrams)
+            if svg is None:
                 print(f"warning: {card['id']}: diagram {name}.svg not found", file=sys.stderr)
+            else:
+                target = stage / f"{tid}-{name}.svg"
+                if not target.exists():
+                    shutil.copyfile(svg, target)
+                if str(target) not in media:
+                    media.append(str(target))
+                back += f'<img src="{target.name}">'
         note = genanki.Note(
             model=MODEL,
             fields=[md_to_html(card["front"]), back, _source_text(c, card)],
@@ -91,26 +118,30 @@ def build_deck(c: Content, tid: str, media: list[str]) -> genanki.Deck:
     return deck
 
 
-def export(c: Content, out: Path, per_topic: bool = False) -> list[Path]:
+def export(
+    c: Content, out: Path, per_topic: bool = False, diagrams: Path | None = None
+) -> list[Path]:
     out.mkdir(parents=True, exist_ok=True)
     tids = sorted(t for t in c.cards if c.cards[t])
-    decks, media_by_topic = {}, {}
-    for tid in tids:
-        media_by_topic[tid] = []
-        decks[tid] = build_deck(c, tid, media_by_topic[tid])
     written = []
-
-    def write(name: str, selected: list[str]) -> None:
-        media = [m for t in selected for m in media_by_topic[t]]
-        pkg = genanki.Package([decks[t] for t in selected], media_files=media)
-        path = out / name
-        pkg.write_to_file(str(path))
-        written.append(path)
-
-    write(f"db1-{c.lang}.apkg", tids)
-    if per_topic:
+    with tempfile.TemporaryDirectory() as tmp:
+        stage = Path(tmp)
+        decks, media_by_topic = {}, {}
         for tid in tids:
-            write(f"db1-{c.lang}-{tid}.apkg", [tid])
+            media_by_topic[tid] = []
+            decks[tid] = build_deck(c, tid, media_by_topic[tid], stage, diagrams)
+
+        def write(name: str, selected: list[str]) -> None:
+            media = [m for t in selected for m in media_by_topic[t]]
+            pkg = genanki.Package([decks[t] for t in selected], media_files=media)
+            path = out / name
+            pkg.write_to_file(str(path))
+            written.append(path)
+
+        write(f"db1-{c.lang}.apkg", tids)
+        if per_topic:
+            for tid in tids:
+                write(f"db1-{c.lang}-{tid}.apkg", [tid])
     return written
 
 
@@ -120,6 +151,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--root", default=".")
     ap.add_argument("--lang", default="de")
     ap.add_argument("--per-topic", action="store_true")
+    ap.add_argument("--diagrams", default="dist/diagrams", help="rendered SVGs: <dir>/<tNN>/<name>.svg")
     args = ap.parse_args(argv)
     c = load_all(Path(args.root), args.lang)
     if c.errors:
@@ -127,7 +159,7 @@ def main(argv: list[str] | None = None) -> int:
             print(f"error: {e}", file=sys.stderr)
         return 1
     try:
-        export(c, Path(args.out), args.per_topic)
+        export(c, Path(args.out), args.per_topic, Path(args.diagrams))
     except (OSError, KeyError, ValueError) as e:
         print(f"error: {e}", file=sys.stderr)
         return 1

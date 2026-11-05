@@ -21,7 +21,7 @@
 #v(2mm)
 #columns(2, gutter: 8mm)[
   #for g in data.glossary [
-    *#g.term*: #g.definition \
+    #if g.definition == "" [_#g.term _] else [*#g.term*: #g.definition] \
   ]
 ]
 #v(1fr)

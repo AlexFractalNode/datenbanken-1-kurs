@@ -29,7 +29,7 @@
 #pagebreak()
 
 #for (i, t) in data.tasks.enumerate() {
-  block(breakable: false)[
+  block(breakable: true)[
     #task-head(t, i + 1)
     #md(t.prompt)
     #write-space(t.space)

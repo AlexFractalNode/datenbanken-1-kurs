@@ -27,5 +27,5 @@
       points: 3
     - criterion: Platzhalter-Kriterium B
       points: 3
-  space: box:6
+  space: box:12
   sql_ref: t04-s001
