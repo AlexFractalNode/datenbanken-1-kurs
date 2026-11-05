@@ -45,7 +45,7 @@ FB_ONLY_SQL = re.compile(
     re.IGNORECASE,
 )
 STANDARD_FETCH_FIRST = re.compile(r"\bfetch\s+first\b", re.IGNORECASE)
-TOPIC_FILES = {"summary.md", *ELEMENT_FILES}
+TOPIC_FILES = {"summary.md", "pitfalls.md", *ELEMENT_FILES}
 DIAGRAM_SUFFIXES = {".dot", ".svg"}
 REVIEWED_STATUSES = {"reviewed", "verified"}
 SQL_STRING_LITERAL = re.compile(r"'(?:[^']|'')*'")
@@ -196,6 +196,21 @@ def _check_lang(ctx: _Ctx, c: Content) -> None:
                 _check_sources(ctx, slabel, sm.meta["sources"])
                 if review_rules:
                     _check_status(ctx, slabel, sm.meta, with_tasks)
+
+        # pitfalls (optional, plain Markdown, optional frontmatter)
+        if tid in c.pitfalls:
+            meta = c.pitfalls[tid][0]
+            plabel = _rel(root, d / "pitfalls.md")
+            if meta is not None:
+                errs = _schema_errors("pitfalls", meta, plabel)
+                ctx.errs.extend(errs)
+                if not errs:
+                    if meta["id"] != f"{tid}-pitfalls":
+                        ctx.err(plabel, f"frontmatter id {meta['id']} must be {tid}-pitfalls")
+                    if "lang" in meta and meta["lang"] != lang:
+                        ctx.err(plabel, f"frontmatter lang {meta['lang']} does not match {lang}")
+                    if review_rules and "status" in meta:
+                        _check_status(ctx, plabel, {"status": meta["status"], "reviews": meta.get("reviews", [])}, with_tasks)
 
         # element files
         for fname, attr in ELEMENT_FILES.items():

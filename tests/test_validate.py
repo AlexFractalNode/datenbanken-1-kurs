@@ -384,3 +384,38 @@ def test_standard_fetch_first_not_flagged(root):
 def test_solution_pg_without_pg_engine(root):
     errs = _sql_err(root, "SELECT 1 FROM t", engines=["fb"], solution_pg="SELECT 1 FROM t")
     assert _has(errs, "solution_pg")
+
+
+# --- pitfalls.md -----------------------------------------------------------
+
+
+def test_pitfalls_plain_markdown_ok(root):
+    import content
+
+    (root / TOPIC / "pitfalls.md").write_text("- Platzhalter-Fehler\n", encoding="utf-8")
+    assert _errs(root) == []
+    meta, body = content.load_all(root).pitfalls["t04"]
+    assert meta is None and "Platzhalter-Fehler" in body
+
+
+def test_pitfalls_frontmatter_ok_and_loaded(root):
+    import content
+
+    (root / TOPIC / "pitfalls.md").write_text(
+        "---\nid: t04-pitfalls\nlang: de\nstatus: draft\nreviews: []\n---\n\n- x\n", encoding="utf-8"
+    )
+    assert _errs(root) == []
+    meta, body = content.load_all(root).pitfalls["t04"]
+    assert meta["id"] == "t04-pitfalls" and body.strip() == "- x"
+
+
+def test_pitfalls_frontmatter_id_mismatch(root):
+    (root / TOPIC / "pitfalls.md").write_text("---\nid: t05-pitfalls\n---\n\n- x\n", encoding="utf-8")
+    assert _has(_errs(root), "pitfalls")
+
+
+def test_pitfalls_reviewed_requires_reviews(root):
+    (root / TOPIC / "pitfalls.md").write_text(
+        "---\nid: t04-pitfalls\nstatus: reviewed\nreviews: [fach]\n---\n\n- x\n", encoding="utf-8"
+    )
+    assert _has(_errs(root), "pitfalls.md") and _has(_errs(root), "leak")

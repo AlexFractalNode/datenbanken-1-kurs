@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pitfalls.schema.json",
+  "title": "pitfalls.md frontmatter (optional)",
+  "type": "object",
+  "required": [
+    "id"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^t(0[1-9]|1[0-3])-pitfalls$"
+    },
+    "lang": {
+      "enum": [
+        "de",
+        "en"
+      ]
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "reviewed",
+        "verified"
+      ]
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "fach",
+          "aufgaben",
+          "leak",
+          "en"
+        ]
+      },
+      "uniqueItems": true
+    }
+  }
+}

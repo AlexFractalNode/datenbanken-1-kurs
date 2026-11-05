@@ -103,6 +103,7 @@ class Content:
     quiz: dict[str, list] = field(default_factory=dict)
     tasks: dict[str, list] = field(default_factory=dict)
     sql_tasks: dict[str, list] = field(default_factory=dict)
+    pitfalls: dict[str, tuple[Any, str]] = field(default_factory=dict)  # tid -> (meta|None, body)
     exams: dict[str, Any] = field(default_factory=dict)  # "e01" -> exam mapping
     glossary: list = field(default_factory=list)
     sources: list = field(default_factory=list)
@@ -153,6 +154,7 @@ def load_all(root: Path, lang: str = "de") -> Content:
             tid = m.group(1)
             c.topic_dirs[tid] = d
             _load_summary(c, tid, d / "summary.md")
+            _load_pitfalls(c, tid, d / "pitfalls.md")
             for fname, attr in ELEMENT_FILES.items():
                 getattr(c, attr)[tid] = _read_yaml(c, d / fname, [])
 
@@ -193,3 +195,24 @@ def _load_summary(c: Content, tid: str, path: Path) -> None:
         c.errors.append(f"{_rel(c.root, path)}: cannot parse frontmatter: {first_line(e)}")
         return
     c.summaries[tid] = Summary(meta=meta, body=body, path=path)
+
+
+def _load_pitfalls(c: Content, tid: str, path: Path) -> None:
+    """pitfalls.md is plain Markdown with optional frontmatter -> (meta | None, body)."""
+    if not path.is_file():
+        return
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (UnicodeDecodeError, OSError) as e:
+        c.errors.append(f"{_rel(c.root, path)}: cannot read file: {first_line(e)}")
+        return
+    parts = split_frontmatter(text)
+    if parts is None:
+        c.pitfalls[tid] = (None, text)
+        return
+    try:
+        meta = load_yaml_text(parts[0])
+    except yaml.YAMLError as e:
+        c.errors.append(f"{_rel(c.root, path)}: cannot parse frontmatter: {first_line(e)}")
+        return
+    c.pitfalls[tid] = (meta, parts[1])
