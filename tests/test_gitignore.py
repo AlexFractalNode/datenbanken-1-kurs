@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 def _ignored(path: str) -> bool:
     r = subprocess.run(
-        ["git", "check-ignore", "-q", "--no-index", path],
+        ["git", "-c", "core.excludesFile=", "check-ignore", "-q", "--no-index", path],
         cwd=ROOT,
         capture_output=True,
     )
@@ -25,6 +25,7 @@ def test_allowlist():
         "dist/book.pdf",
         "slides.pptx",
         "a.zip",
+        "notes.gitattributes",
     ]
     must_be_tracked = [
         "content/de/topics/t01-x/summary.md",
@@ -39,9 +40,17 @@ def test_allowlist():
         "pyproject.toml",
         "package.json",
         ".gitignore",
+        ".gitattributes",
         ".python-version",
     ]
     for p in must_be_ignored:
         assert _ignored(p), f"{p} should be ignored"
     for p in must_be_tracked:
         assert not _ignored(p), f"{p} should not be ignored"
+
+
+def test_gitattributes_content():
+    lines = (ROOT / ".gitattributes").read_text(encoding="utf-8").splitlines()
+    assert "* text=auto eol=lf" in lines
+    assert "*.png binary" in lines
+    assert "*.svg text" in lines

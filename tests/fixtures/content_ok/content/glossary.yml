@@ -1,0 +1,6 @@
+- id: g-platzhalter
+  de: Platzhalterbegriff
+  en: placeholder term
+  keep_english: false
+  def_de: Platzhalter-Definition.
+  def_en: Placeholder definition.

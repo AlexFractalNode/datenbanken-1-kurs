@@ -15,6 +15,7 @@
 !/CONTRIBUTING.md
 !/CHANGELOG.md
 !/.gitignore
+!/.gitattributes
 !/pyproject.toml
 !/uv.lock
 !/package.json

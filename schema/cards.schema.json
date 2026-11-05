@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cards.schema.json",
+  "title": "cards.yml",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "status",
+      "reviews",
+      "front",
+      "back"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^t(0[1-9]|1[0-3])-c\\d{3}$"
+      },
+      "status": {
+        "enum": [
+          "draft",
+          "reviewed",
+          "verified"
+        ]
+      },
+      "reviews": {
+        "type": "array",
+        "items": {
+          "enum": [
+            "fach",
+            "aufgaben",
+            "leak",
+            "en"
+          ]
+        },
+        "uniqueItems": true
+      },
+      "sources": {
+        "$ref": "#/$defs/sources"
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "front": {
+        "type": "string",
+        "minLength": 1
+      },
+      "back": {
+        "type": "string",
+        "minLength": 1
+      },
+      "diagram": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "ref"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

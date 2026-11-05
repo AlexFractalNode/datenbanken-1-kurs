@@ -1,0 +1,16 @@
+- id: placeholder-docs
+  title: Platzhalter-Dokumentation
+  author: Platzhalter-Autor
+  url: https://example.org/docs
+  license: Platzhalter-Lizenz
+  accessed: "2026-01-01"
+  kind: docs
+  topics: [t04]
+  refs:
+    - Kapitel 1
+- id: placeholder-oer
+  title: Platzhalter-Lehrbuch
+  url: https://example.org/oer
+  license: CC BY-SA 4.0
+  accessed: "2026-01-01"
+  kind: oer

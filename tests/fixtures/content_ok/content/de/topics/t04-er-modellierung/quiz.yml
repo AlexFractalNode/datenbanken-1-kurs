@@ -1,0 +1,27 @@
+- id: t04-q001
+  status: draft
+  reviews: []
+  type: single
+  question: Platzhalter-Frage 1
+  options:
+    - text: Option A
+      correct: true
+      explain: Platzhalter-Erklärung A
+    - text: Option B
+      correct: false
+      explain: Platzhalter-Erklärung B
+    - text: Option C
+      correct: false
+      explain: Platzhalter-Erklärung C
+- id: t04-q002
+  status: draft
+  reviews: []
+  type: truefalse
+  question: Platzhalter-Frage 2
+  options:
+    - text: wahr
+      correct: false
+      explain: Platzhalter-Erklärung wahr
+    - text: falsch
+      correct: true
+      explain: Platzhalter-Erklärung falsch

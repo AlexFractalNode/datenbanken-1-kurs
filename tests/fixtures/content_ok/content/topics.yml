@@ -1,0 +1,13 @@
+- id: t01
+  slug: grundlagen
+  order: 1
+  title: Platzhalter-Thema 1
+  subtopics:
+    - Platzhalter-Unterpunkt 1
+- id: t04
+  slug: er-modellierung
+  order: 4
+  title: Platzhalter-Thema 4
+  subtopics:
+    - Platzhalter-Unterpunkt 1
+    - Platzhalter-Unterpunkt 2

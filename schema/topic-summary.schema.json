@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "topic-summary.schema.json",
+  "title": "summary.md frontmatter",
+  "type": "object",
+  "required": [
+    "id",
+    "lang",
+    "title",
+    "order",
+    "status",
+    "reviews",
+    "sources"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^t(0[1-9]|1[0-3])$"
+    },
+    "lang": {
+      "enum": [
+        "de",
+        "en"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "order": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "reviewed",
+        "verified"
+      ]
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "fach",
+          "aufgaben",
+          "leak",
+          "en"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "sources": {
+      "$ref": "#/$defs/sources"
+    },
+    "translation": {
+      "const": "pending"
+    }
+  },
+  "$defs": {
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "ref"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

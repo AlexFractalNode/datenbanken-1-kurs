@@ -1,0 +1,20 @@
+- id: t04-c001
+  status: reviewed
+  reviews: [fach, leak]
+  front: Platzhalter-Frage 1
+  back: Platzhalter-Antwort 1
+- id: t04-c002
+  status: draft
+  reviews: []
+  front: Platzhalter-Frage 2
+  back: Platzhalter-Antwort 2
+  tags: [platzhalter]
+- id: t04-c003
+  status: draft
+  reviews: []
+  sources:
+    - id: placeholder-oer
+      ref: Kapitel 2
+  front: Platzhalter-Frage 3
+  back: Platzhalter-Antwort 3
+  diagram: platzhalter-diagramm

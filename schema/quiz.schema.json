@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quiz.schema.json",
+  "title": "quiz.yml",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "status",
+      "reviews",
+      "type",
+      "question",
+      "options"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^t(0[1-9]|1[0-3])-q\\d{3}$"
+      },
+      "status": {
+        "enum": [
+          "draft",
+          "reviewed",
+          "verified"
+        ]
+      },
+      "reviews": {
+        "type": "array",
+        "items": {
+          "enum": [
+            "fach",
+            "aufgaben",
+            "leak",
+            "en"
+          ]
+        },
+        "uniqueItems": true
+      },
+      "sources": {
+        "$ref": "#/$defs/sources"
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "type": {
+        "enum": [
+          "single",
+          "multi",
+          "truefalse"
+        ]
+      },
+      "question": {
+        "type": "string",
+        "minLength": 1
+      },
+      "options": {
+        "type": "array",
+        "minItems": 2,
+        "items": {
+          "type": "object",
+          "required": [
+            "text",
+            "correct",
+            "explain"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1
+            },
+            "correct": {
+              "type": "boolean"
+            },
+            "explain": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "ref"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

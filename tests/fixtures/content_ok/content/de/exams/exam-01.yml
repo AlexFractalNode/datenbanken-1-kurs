@@ -1,0 +1,33 @@
+title: Platzhalter-Klausur 1
+minutes: 90
+tasks:
+  - id: e01-p001
+    topic: t04
+    status: draft
+    reviews: []
+    type: erm-model
+    difficulty: 2
+    points: 45
+    minutes: 40
+    prompt: Platzhalter-Klausuraufgabe 1
+    solution: Platzhalter-Lösung 1
+    rubric:
+      - criterion: Platzhalter-Kriterium A
+        points: 25
+      - criterion: Platzhalter-Kriterium B
+        points: 20
+    space: box:12
+  - id: e01-p002
+    topic: t04
+    status: draft
+    reviews: []
+    type: explain
+    difficulty: 3
+    points: 45
+    minutes: 45
+    prompt: Platzhalter-Klausuraufgabe 2
+    solution: Platzhalter-Lösung 2
+    rubric:
+      - criterion: Platzhalter-Kriterium A
+        points: 45
+    space: lines:10

@@ -3,7 +3,11 @@ name = "datenbanken-1-kurs"
 version = "0.1.0"
 description = "Open learning course for relational databases (tooling)"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "firebird-driver>=2.1.2",
+    "jsonschema>=4.26.0",
+    "pyyaml>=6.0.3",
+]
 
 [dependency-groups]
 dev = ["pytest>=8", "pyyaml>=6"]

@@ -1,0 +1,13 @@
+- id: t04-s001
+  status: draft
+  reviews: []
+  db: musikschule
+  kind: query
+  prompt: Platzhalter-SQL-Aufgabe 1
+  solution: SELECT FIRST 3 * FROM platzhalter ORDER BY id
+  solution_pg: SELECT * FROM platzhalter ORDER BY id LIMIT 3
+  engines: [fb, pg]
+  ordered: true
+  hints:
+    - Platzhalter-Hinweis
+  paper_mode: write

@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "sql-tasks.schema.json",
+  "title": "sql-tasks.yml",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "status",
+      "reviews",
+      "db",
+      "kind",
+      "prompt",
+      "solution"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^t(0[1-9]|1[0-3])-s\\d{3}$"
+      },
+      "status": {
+        "enum": [
+          "draft",
+          "reviewed",
+          "verified"
+        ]
+      },
+      "reviews": {
+        "type": "array",
+        "items": {
+          "enum": [
+            "fach",
+            "aufgaben",
+            "leak",
+            "en"
+          ]
+        },
+        "uniqueItems": true
+      },
+      "sources": {
+        "$ref": "#/$defs/sources"
+      },
+      "tags": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "db": {
+        "enum": [
+          "musikschule",
+          "firma"
+        ]
+      },
+      "kind": {
+        "enum": [
+          "query",
+          "ddl",
+          "dml"
+        ]
+      },
+      "prompt": {
+        "type": "string",
+        "minLength": 1
+      },
+      "solution": {
+        "type": "string",
+        "minLength": 1
+      },
+      "engines": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "enum": [
+            "fb",
+            "pg"
+          ]
+        },
+        "uniqueItems": true
+      },
+      "solution_pg": {
+        "type": "string",
+        "minLength": 1
+      },
+      "dialect_note": {
+        "type": "string",
+        "minLength": 1
+      },
+      "ordered": {
+        "type": "boolean"
+      },
+      "check": {
+        "type": "string",
+        "minLength": 1
+      },
+      "hints": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "paper_mode": {
+        "enum": [
+          "write",
+          "predict"
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "ref"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}
