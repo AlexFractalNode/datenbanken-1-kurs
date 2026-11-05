@@ -419,3 +419,30 @@ def test_pitfalls_reviewed_requires_reviews(root):
         "---\nid: t04-pitfalls\nstatus: reviewed\nreviews: [fach]\n---\n\n- x\n", encoding="utf-8"
     )
     assert _has(_errs(root), "pitfalls.md") and _has(_errs(root), "leak")
+
+
+# --- round 2 ---------------------------------------------------------------
+
+
+def test_de_exam_translation_pending_is_error_and_budget_still_checked(root):
+    def f(d):
+        d["translation"] = "pending"
+        d["tasks"][1]["minutes"] = 70
+
+    _mutate(root, "content/de/exams/exam-01.yml", f)
+    errs = _errs(root)
+    assert _has(errs, "translation is only allowed in EN")
+    assert _has(errs, "minutes")
+
+
+def test_rows_window_frame_not_flagged(root):
+    assert _sql_err(root, "SELECT SUM(x) OVER (ORDER BY y ROWS 2 PRECEDING) FROM t") == []
+    assert _sql_err(root, "SELECT SUM(x) OVER (ORDER BY y ROWS 1 FOLLOWING) FROM t") == []
+    assert _sql_err(root, "SELECT SUM(x) OVER (ORDER BY y ROWS BETWEEN 1 PRECEDING AND CURRENT ROW) FROM t") == []
+    assert _has(_sql_err(root, "SELECT * FROM t ROWS 2 TO 5"), "solution_pg")
+
+
+@pytest.mark.parametrize("name", [".gitkeep", "Thumbs.db", ".DS_Store"])
+def test_ignorable_files_in_topic_dir(root, name):
+    (root / TOPIC / name).write_text("", encoding="utf-8")
+    assert _errs(root) == []

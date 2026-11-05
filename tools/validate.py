@@ -39,12 +39,13 @@ ELEMENT_SCHEMA = {
 FB_ONLY_SQL = re.compile(
     r"\b(?:first|skip)\s+(?:\d+|\?|\(|:\w+)"
     r"|\bgen_id\s*\("
-    r"|\brows\s+(?:\d+|\?|:\w+)"
+    r"|\brows\s+(?!\S+\s+(?:preceding|following)\b)(?:\d+|\?|:\w+)"
     r"|\bexecute\s+block\b"
     r"|\bset\s+term\b",
     re.IGNORECASE,
 )
 STANDARD_FETCH_FIRST = re.compile(r"\bfetch\s+first\b", re.IGNORECASE)
+IGNORED_FILES = {".gitkeep", "Thumbs.db", ".DS_Store"}
 TOPIC_FILES = {"summary.md", "pitfalls.md", *ELEMENT_FILES}
 DIAGRAM_SUFFIXES = {".dot", ".svg"}
 REVIEWED_STATUSES = {"reviewed", "verified"}
@@ -246,6 +247,8 @@ def _check_lang(ctx: _Ctx, c: Content) -> None:
         ctx.errs.extend(errs)
         if errs:
             continue
+        if lang != "en" and "translation" in exam:
+            ctx.err(elabel, "translation is only allowed in EN exams")
         for t in exam["tasks"]:
             ilabel = f"{elabel}:{t['id']}"
             register(ilabel, t["id"])
@@ -259,8 +262,8 @@ def _check_lang(ctx: _Ctx, c: Content) -> None:
             _check_task(ctx, ilabel, t)
             if "sql_ref" in t:
                 sql_refs.append((ilabel, t["sql_ref"]))
-        if exam.get("translation") == "pending":
-            continue  # untranslated stub: the budget is checked on the DE exam
+        if lang == "en" and exam.get("translation") == "pending":
+            continue  # untranslated EN stub: the budget is checked on the DE exam
         points = sum(t["points"] for t in exam["tasks"])
         minutes = sum(t["minutes"] for t in exam["tasks"])
         if abs(points - EXAM_POINTS) > EXAM_POINTS_TOLERANCE:
@@ -281,7 +284,7 @@ def _check_dir_contents(ctx: _Ctx, d: Path) -> None:
         return
     for p in entries:
         label = _rel(ctx.root, p)
-        if p.is_file() and p.name in TOPIC_FILES:
+        if p.is_file() and (p.name in TOPIC_FILES or p.name in IGNORED_FILES):
             continue
         if p.is_dir() and p.name == "diagrams":
             try:
