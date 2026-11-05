@@ -1,0 +1,20 @@
+- id: pg-docs
+  title: PostgreSQL Documentation
+  url: https://www.postgresql.org/docs/current/
+  license: PostgreSQL License
+  accessed: 2026-11-01
+  kind: docs
+- id: wp-erm
+  title: Entity-Relationship-Modell
+  author: Wikipedia-Autoren
+  url: https://de.wikipedia.org/wiki/Entity-Relationship-Modell
+  license: CC BY-SA 4.0
+  accessed: 2026-11-01
+  kind: wiki
+- id: fr-book
+  title: Ein Lehrbuch zu Datenbanksystemen
+  author: Beispiel Autorin
+  url: https://example.org/buch
+  license: Alle Rechte vorbehalten
+  accessed: 2026-11-01
+  kind: further-reading

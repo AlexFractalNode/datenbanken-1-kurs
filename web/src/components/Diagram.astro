@@ -1,0 +1,38 @@
+---
+/**
+ * Renders a Graphviz DOT diagram (Chen notation) to inline SVG at build time.
+ * Either `topic` + `name` (file `diagrams/<name>.dot` of the topic) or inline `dot`.
+ * Invalid DOT fails the build on purpose, so broken diagrams never ship.
+ */
+import { getDiagram } from '../lib/content';
+import { diagramFigureHtml, renderDot } from '../lib/diagram';
+
+interface Props {
+  topic?: string;
+  name?: string;
+  dot?: string;
+  caption?: string;
+  /** Content root override (tests). */
+  root?: string;
+}
+
+const { topic, name, dot: inlineDot, caption, root } = Astro.props;
+
+let dot: string;
+if (inlineDot !== undefined) {
+  dot = inlineDot;
+} else if (topic && name) {
+  dot = root ? getDiagram(topic, name, root) : getDiagram(topic, name);
+} else {
+  throw new Error('Diagram needs either `dot` or `topic` + `name`.');
+}
+
+/** Graph-level label (a `label="…"` statement on its own line) as fallback caption. */
+const graphLabel = /^\s*label\s*=\s*"([^"]+)"/m.exec(dot)?.[1];
+const label = caption ?? graphLabel ?? `Diagramm ${name ?? ''}`.trim();
+// A graph label is drawn inside the SVG already; only show a caption when it adds something.
+const showCaption = caption !== undefined && caption !== graphLabel;
+const html = diagramFigureHtml(await renderDot(dot), label, showCaption ? caption : undefined);
+---
+
+<Fragment set:html={html} />

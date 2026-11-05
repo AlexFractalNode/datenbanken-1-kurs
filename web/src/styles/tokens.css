@@ -1,0 +1,98 @@
+/*
+ * Design tokens. Concept "Karteikasten": warm index-card paper, ink-blue navigation rail,
+ * petrol as the action colour and a rust "key" colour for IDs (like primary-key markers).
+ *
+ * Every colour is declared once with light-dark(); the scheme follows prefers-color-scheme and can be
+ * overridden with <html data-theme="light|dark">. tests/tokens.test.ts checks WCAG AA for all pairs.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces */
+  --c-bg: light-dark(#f4f1e8, #11161b);
+  --c-surface: light-dark(#fffcf5, #192028);
+  --c-surface-2: light-dark(#ebe6d8, #212a33);
+  --c-line: light-dark(#d9d2c0, #2c3640);
+  --c-control-border: light-dark(#7a7364, #7d8891);
+
+  /* Text */
+  --c-text: light-dark(#1c2228, #e8e4d8);
+  --c-text-muted: light-dark(#4f575e, #a9b0b6);
+
+  /* Action colour (petrol) */
+  --c-accent: light-dark(#0a5f6a, #63c7d1);
+  --c-accent-strong: light-dark(#074852, #8ad8e0);
+  --c-accent-soft: light-dark(#dcecea, #15363b);
+  --c-on-accent: light-dark(#ffffff, #08181b);
+
+  /* Key colour (IDs, markers) */
+  --c-key: light-dark(#9b3a0e, #f2a56e);
+  --c-key-soft: light-dark(#f6e3d6, #3a2416);
+
+  /* Status */
+  --c-danger: light-dark(#a1241b, #ff8f80);
+  --c-danger-soft: light-dark(#f8e1de, #3b1714);
+  --c-on-danger: light-dark(#ffffff, #1a0806);
+  --c-warn-text: light-dark(#6b4a00, #f3d27a);
+  --c-warn-soft: light-dark(#f8ecc8, #33290d);
+  --c-ok-text: light-dark(#1f5e2e, #8fd6a0);
+  --c-ok-soft: light-dark(#ddefdf, #13301b);
+
+  /* Navigation rail */
+  --c-nav-bg: light-dark(#1d2b35, #0b0f13);
+  --c-nav-text: light-dark(#e9e5da, #d9d5ca);
+  --c-nav-active-bg: light-dark(#f4f1e8, #11161b);
+  --c-nav-active-text: light-dark(#1c2228, #e8e4d8);
+
+  /* Focus ring: mid luminance so it reads on paper and on the dark rail */
+  --c-focus: light-dark(#d25a10, #ffb070);
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Charter, 'Bitstream Charter', Georgia, serif;
+  --font-mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  --fs-xs: 0.8125rem;
+  --fs-sm: 0.9375rem;
+  --fs-base: 1.0625rem;
+  --fs-lg: 1.25rem;
+  --fs-xl: clamp(1.5rem, 1.2rem + 1.2vw, 1.875rem);
+  --fs-2xl: clamp(1.875rem, 1.4rem + 2.2vw, 2.75rem);
+  --lh-tight: 1.2;
+  --lh-base: 1.6;
+
+  /* Spacing (4px grid) */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.5rem;
+  --sp-6: 2rem;
+  --sp-7: 3rem;
+
+  /* Shape */
+  --radius-sm: 4px;
+  --radius: 8px;
+  --radius-lg: 14px;
+  --shadow-card: 0 1px 0 var(--c-line), 0 6px 18px -12px rgb(0 0 0 / 0.35);
+  --rail-width: 15.5rem;
+  --measure: 70ch;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 160ms;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+  }
+}

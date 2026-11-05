@@ -1,0 +1,23 @@
+---
+import Placeholder from '../components/Placeholder.astro';
+import Base from '../layouts/Base.astro';
+import { getExams } from '../lib/content';
+
+const exams = getExams();
+---
+
+<Base title="Klausur" description="Klausur-Simulation mit 90-Minuten-Timer und Selbstbewertung." noindex>
+  <header class="page-head">
+    <h1>Klausur-Simulation</h1>
+  </header>
+  <Placeholder
+    unit="exam"
+    heading="Die Klausur-Simulation folgt"
+    prepared={exams.length ? `${exams.length === 1 ? 'Eine Probeklausur ist' : `${exams.length} Probeklausuren sind`} bereits vorbereitet.` : undefined}
+  >
+    <p>
+      Hier schreibst du bald eine Probeklausur mit 90-Minuten-Timer und bewertest dich anschließend selbst anhand des
+      Rasters. Das Ergebnis wird als Prozentwert angezeigt.
+    </p>
+  </Placeholder>
+</Base>

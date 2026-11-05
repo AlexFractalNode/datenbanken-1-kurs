@@ -1,0 +1,5 @@
+graph entitaet {
+  Kunde [shape=box];
+  Name [shape=ellipse];
+  Kunde -- Name;
+}

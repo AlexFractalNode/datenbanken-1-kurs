@@ -1,0 +1,10 @@
+- id: t01
+  slug: grundlagen
+  order: 1
+  title: Grundlagen & Begriffe
+  subtopics: []
+- id: t02
+  slug: datenbankmodelle
+  order: 2
+  title: Datenbankmodelle & Architektur
+  subtopics: []

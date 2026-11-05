@@ -1,0 +1,30 @@
+---
+/**
+ * Visible source note (spec §8): "Basiert auf: <Titel> (<Lizenz>), <ref>" for every source.
+ * The title links to the source; the visible text equals formatSourceNote().
+ */
+import type { ResolvedSource } from '../lib/content';
+
+interface Props {
+  sources: ResolvedSource[];
+  /** Heading for the box variant; omit for an inline note under an element. */
+  heading?: string;
+}
+
+const { sources, heading } = Astro.props;
+---
+
+{
+  sources.length > 0 && (
+    <aside class:list={['source-note', { 'source-note--box': heading }]} aria-label={heading ?? 'Quellen'}>
+      {heading && <h2 class="source-note__heading">{heading}</h2>}
+      <ul class="source-note__list">
+        {sources.map((s) => (
+          <li>
+            Basiert auf: <a href={s.source.url} rel="noopener">{s.source.title}</a> ({s.source.license}){s.ref.trim() && `, ${s.ref.trim()}`}
+          </li>
+        ))}
+      </ul>
+    </aside>
+  )
+}

@@ -1,0 +1,90 @@
+---
+import SourceNote from '../components/SourceNote.astro';
+import Base from '../layouts/Base.astro';
+import { getTopic, getTopics } from '../lib/content';
+import { DIFFICULTY_LABEL, TASK_TYPE_LABEL } from '../lib/labels';
+import { renderMarkdown } from '../lib/markdown';
+import { withBase } from '../lib/nav';
+
+const groups = getTopics()
+  .map((topic) => ({ topic, tasks: getTopic(topic.id).tasks }))
+  .filter((g) => g.tasks.length > 0);
+const total = groups.reduce((n, g) => n + g.tasks.length, 0);
+---
+
+<Base title="Aufgaben" description="Papier-Aufgaben mit Lösung und Bewertungsraster.">
+  <header class="page-head">
+    <h1>Papier-Aufgaben</h1>
+    <p class="lead">
+      Erst auf Papier lösen, dann Lösung und Bewertungsraster aufdecken. So trainierst du für eine Klausur ohne Rechner.
+    </p>
+  </header>
+
+  <div data-verify-unit="task-list" data-verify-state={total ? 'ready' : 'empty'} data-verify-count={total}>
+    {
+      total === 0 ? (
+        <section class="empty-state" aria-labelledby="no-tasks">
+          <h2 id="no-tasks">Noch keine Aufgaben veröffentlicht</h2>
+          <p>
+            Die Aufgaben entstehen gerade. Schau solange in die <a href={withBase('themen/')}>Themen</a>.
+          </p>
+        </section>
+      ) : (
+        groups.map(({ topic, tasks }) => (
+          <section id={topic.id} aria-labelledby={`${topic.id}-heading`}>
+            <h2 id={`${topic.id}-heading`}>
+              <span class="key">{topic.id}</span> {topic.title}
+            </h2>
+            <div class="task-list">
+              {tasks.map((task) => (
+                <article class="card" id={task.id} aria-labelledby={`${task.id}-title`}>
+                  <div class="task__head">
+                    <span class="key">{task.id}</span>
+                    <h3 id={`${task.id}-title`} class="visually-hidden">
+                      Aufgabe {task.id}: {TASK_TYPE_LABEL[task.type]}
+                    </h3>
+                    <ul class="task__facts">
+                      <li>{TASK_TYPE_LABEL[task.type]}</li>
+                      <li>{DIFFICULTY_LABEL[task.difficulty]}</li>
+                      <li>{task.points} Punkte</li>
+                      <li>ca. {task.minutes} Min.</li>
+                    </ul>
+                  </div>
+                  <div class="prose" set:html={renderMarkdown(task.prompt, 4)} />
+                  <details>
+                    <summary>Lösung und Bewertungsraster anzeigen</summary>
+                    <div class="prose" set:html={renderMarkdown(task.solution, 4)} />
+                    <table class="rubric">
+                      <caption class="visually-hidden">Bewertungsraster {task.id}</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">Kriterium</th>
+                          <th scope="col">Punkte</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {task.rubric.map((r) => (
+                          <tr>
+                            <td>{r.criterion}</td>
+                            <td>{r.points}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <th scope="row">Summe</th>
+                          <td>{task.points}</td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </details>
+                  <SourceNote sources={task.resolvedSources} />
+                </article>
+              ))}
+            </div>
+          </section>
+        ))
+      )
+    }
+  </div>
+</Base>

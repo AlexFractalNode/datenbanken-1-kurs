@@ -1,0 +1,19 @@
+---
+import ProgressTransfer from '../components/ProgressTransfer';
+import ThemeSwitch from '../components/ThemeSwitch';
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Einstellungen" description="Farbschema wählen und Lernfortschritt sichern." noindex>
+  <header class="page-head">
+    <h1>Einstellungen</h1>
+    <p class="lead">Alles bleibt lokal in deinem Browser. Es gibt kein Konto und keinen Server, der deine Daten sieht.</p>
+  </header>
+
+  <section class="panel" aria-labelledby="look-heading">
+    <h2 id="look-heading">Darstellung</h2>
+    <ThemeSwitch client:load variant="full" />
+  </section>
+
+  <ProgressTransfer client:load />
+</Base>

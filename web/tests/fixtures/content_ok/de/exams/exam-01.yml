@@ -1,0 +1,17 @@
+title: Probeklausur 1
+minutes: 90
+tasks:
+  - id: e01-p001
+    topic: t04
+    status: draft
+    reviews: []
+    type: erm-model
+    difficulty: 2
+    points: 90
+    minutes: 90
+    prompt: Modelliere eine kleine Bibliothek.
+    solution: Entitätstypen `Buch`, `Leser`, Beziehungstyp `leiht`.
+    rubric:
+      - criterion: Modell vollständig
+        points: 90
+    space: box:200

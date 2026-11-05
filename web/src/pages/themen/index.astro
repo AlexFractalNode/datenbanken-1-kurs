@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getOverview } from '../../lib/content';
+import { STATUS_CLASS, STATUS_LABEL, plural } from '../../lib/labels';
+import { withBase } from '../../lib/nav';
+
+const overview = getOverview();
+---
+
+<Base title="Themen" description="Alle Themen des Lernkurses Datenbanken 1 im Überblick.">
+  <header class="page-head">
+    <h1>Themen</h1>
+    <p class="lead">Die Reihenfolge folgt dem Weg vom Begriff über das Modell bis zur Abfrage.</p>
+  </header>
+
+  <ol class="register" data-verify-unit="topic-list" data-verify-state={overview.length ? 'ready' : 'empty'} data-verify-count={overview.length}>
+    {
+      overview.map((o) => (
+        <li class="register__row">
+          <span class="key">{o.topic.id}</span>
+          <span class="register__title">
+            <a href={withBase(`themen/${o.topic.id}/`)}>{o.topic.title}</a>
+          </span>
+          <span class="register__meta">
+            <span>{plural(o.topic.subtopics.length, 'Unterpunkt', 'Unterpunkte')}</span>
+            {o.status ? <span class={STATUS_CLASS[o.status]}>{STATUS_LABEL[o.status]}</span> : <span class="badge">in Arbeit</span>}
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+</Base>

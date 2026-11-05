@@ -1,0 +1,14 @@
+# Minimal fixture for web tests (two topics, only t04 has content).
+- id: t01
+  slug: grundlagen
+  order: 1
+  title: Grundlagen & Begriffe
+  subtopics:
+    - Datenbank und DBMS
+- id: t04
+  slug: er-modellierung
+  order: 4
+  title: ER-Modellierung
+  subtopics:
+    - Entitätstyp und Attribute
+    - Kardinalitäten

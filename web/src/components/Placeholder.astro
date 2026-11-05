@@ -1,0 +1,23 @@
+---
+/** Placeholder for sections that follow in later releases; reports `empty` via the verify contract. */
+import { withBase } from '../lib/nav';
+
+interface Props {
+  unit: string;
+  heading: string;
+  /** How much content already exists for this section (shown as a hint). */
+  prepared?: string;
+}
+
+const { unit, heading, prepared } = Astro.props;
+---
+
+<section class="empty-state" data-verify-unit={unit} data-verify-state="empty" data-verify-count="0" aria-labelledby={`${unit}-heading`}>
+  <h2 id={`${unit}-heading`}>{heading}</h2>
+  <slot />
+  {prepared && <p class="meta">{prepared}</p>}
+  <p>
+    Bis dahin: Lies die <a href={withBase('themen/')}>Zusammenfassungen der Themen</a> oder übe mit den
+    <a href={withBase('aufgaben/')}>Papier-Aufgaben</a>.
+  </p>
+</section>

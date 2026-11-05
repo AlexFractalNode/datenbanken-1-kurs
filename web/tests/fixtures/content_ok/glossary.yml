@@ -1,0 +1,18 @@
+- id: g-entitaetstyp
+  de: Entitätstyp
+  en: entity type
+  keep_english: false
+  def_de: Zusammenfassung gleichartiger Objekte der Miniwelt mit denselben Attributen.
+  def_en: A set of similar real-world objects that share the same attributes.
+- id: g-kardinalitaet
+  de: Kardinalität
+  en: cardinality
+  keep_english: false
+  def_de: Angabe, mit wie vielen Entitäten eine Entität in einer Beziehung höchstens verbunden sein darf.
+  def_en: States with how many entities an entity may be related at most.
+- id: g-join
+  de: Join
+  en: join
+  keep_english: true
+  def_de: Verknüpfung zweier Relationen über eine Bedingung.
+  def_en: Combination of two relations based on a condition.

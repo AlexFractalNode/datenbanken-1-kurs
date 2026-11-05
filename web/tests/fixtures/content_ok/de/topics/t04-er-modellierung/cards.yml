@@ -1,0 +1,20 @@
+- id: t04-c001
+  status: draft
+  reviews: []
+  front: Was ist ein Entitätstyp?
+  back: Eine Menge gleichartiger Objekte mit denselben Attributen.
+  tags: [grundbegriff]
+- id: t04-c002
+  status: draft
+  reviews: []
+  front: Wie wird ein Beziehungstyp in Chen-Notation dargestellt?
+  back: Als **Raute** zwischen den beteiligten Entitätstypen.
+  diagram: beziehung
+- id: t04-c003
+  status: draft
+  reviews: []
+  front: Was bedeutet die Kardinalität 1:n?
+  back: Einer Entität der einen Seite sind beliebig viele der anderen zugeordnet.
+  sources:
+    - id: pg-docs
+      ref: Kapitel 5.4

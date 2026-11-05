@@ -1,0 +1,32 @@
+- id: t04-p001
+  status: draft
+  reviews: []
+  type: define-example
+  difficulty: 1
+  points: 4
+  minutes: 5
+  prompt: Erkläre den Begriff *Entitätstyp* und nenne ein Beispiel.
+  solution: Ein Entitätstyp fasst gleichartige Objekte zusammen, z. B. `Kunde`.
+  rubric:
+    - criterion: Definition
+      points: 2
+    - criterion: Beispiel
+      points: 2
+  space: lines:6
+- id: t04-p002
+  status: draft
+  reviews: []
+  type: erm-model
+  difficulty: 2
+  points: 6
+  minutes: 10
+  prompt: Modelliere Kunden, die Bestellungen aufgeben.
+  solution: Entitätstypen `Kunde` und `Bestellung`, Beziehungstyp `gibt_auf` mit 1:n.
+  rubric:
+    - criterion: Entitätstypen
+      points: 2
+    - criterion: Beziehungstyp
+      points: 2
+    - criterion: Kardinalität
+      points: 2
+  space: box:80

@@ -1,0 +1,91 @@
+---
+import Base from '../layouts/Base.astro';
+import { getExams, getFurtherReading, getSources } from '../lib/content';
+import { REPO_URL } from '../lib/nav';
+
+const releaseBase = `${REPO_URL}/releases/latest/download`;
+const exams = getExams();
+
+const downloads = [
+  {
+    title: 'Anki-Kartenstapel',
+    file: 'db1-de.apkg',
+    text: 'Alle Lernkarten als Anki-Deck, ein Unterdeck pro Thema. Lässt sich mit dem Fortschritt in Anki weiterlernen.',
+  },
+  ...exams.flatMap((exam) => [
+    { title: exam.title, file: `${exam.slug}.pdf`, text: `Zum Ausdrucken, ${exam.minutes} Minuten Bearbeitungszeit.` },
+    { title: `${exam.title} – Lösung`, file: `${exam.slug}-loesung.pdf`, text: 'Musterlösung mit Bewertungsraster zur Selbstkontrolle.' },
+  ]),
+  { title: 'Cheatsheet', file: 'cheatsheet.pdf', text: 'Die wichtigsten Begriffe, Notationen und SQL-Bausteine auf zwei A4-Seiten.' },
+];
+
+const furtherReading = getFurtherReading();
+const usedSources = Object.values(getSources())
+  .filter((s) => s.kind !== 'further-reading')
+  .sort((a, b) => a.title.localeCompare(b.title, 'de'));
+---
+
+<Base title="Downloads" description="Anki-Deck, Probeklausuren und Cheatsheet zum Herunterladen.">
+  <header class="page-head">
+    <h1>Downloads</h1>
+    <p class="lead">Material zum Offline-Lernen. Die Dateien gehören zur jeweils neuesten Version des Kurses.</p>
+  </header>
+
+  <section aria-labelledby="files-heading" data-verify-unit="downloads" data-verify-state="ready" data-verify-count={downloads.length}>
+    <h2 id="files-heading" class="visually-hidden">Dateien</h2>
+    <ul class="download-list">
+      {
+        downloads.map((d) => (
+          <li class="card">
+            <h3>{d.title}</h3>
+            <p>{d.text}</p>
+            <p>
+              <a class="button button--ghost" href={`${releaseBase}/${d.file}`} download>
+                {d.file} herunterladen
+              </a>
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="meta">
+      Alle Versionen und Änderungen: <a href={`${REPO_URL}/releases`}>Releases auf GitHub</a>.
+    </p>
+  </section>
+
+  {
+    usedSources.length > 0 && (
+      <section aria-labelledby="sources-heading">
+        <h2 id="sources-heading">Verwendete Quellen</h2>
+        <ul>
+          {usedSources.map((s) => (
+            <li>
+              <a href={s.url} rel="noopener">
+                {s.title}
+              </a>
+              {s.author && `, ${s.author}`} ({s.license}), abgerufen am {s.accessed}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    furtherReading.length > 0 && (
+      <section aria-labelledby="reading-heading">
+        <h2 id="reading-heading">Weiterführende Literatur</h2>
+        <ul>
+          {furtherReading.map((s) => (
+            <li>
+              <a href={s.url} rel="noopener">
+                {s.title}
+              </a>
+              {s.author && `, ${s.author}`}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+</Base>

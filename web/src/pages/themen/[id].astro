@@ -1,0 +1,149 @@
+---
+import Diagram from '../../components/Diagram.astro';
+import SourceNote from '../../components/SourceNote.astro';
+import Base from '../../layouts/Base.astro';
+import { getDiagram, getTopic, getTopics, type Topic } from '../../lib/content';
+import { STATUS_CLASS, STATUS_LABEL } from '../../lib/labels';
+import { findDiagramRefs, renderMarkdownWithDiagrams } from '../../lib/markdown';
+import { withBase } from '../../lib/nav';
+
+export function getStaticPaths() {
+  const topics = getTopics();
+  return topics.map((topic, i) => ({
+    params: { id: topic.id },
+    props: { topic, prev: topics[i - 1] ?? null, next: topics[i + 1] ?? null },
+  }));
+}
+
+interface Props {
+  topic: Topic;
+  prev: Topic | null;
+  next: Topic | null;
+}
+
+const { topic, prev, next } = Astro.props;
+const bundle = getTopic(topic.id);
+const { summary, cards, quiz, tasks, sqlTasks, pitfalls, diagrams } = bundle;
+const elementCount = cards.length + quiz.length + tasks.length + sqlTasks.length;
+
+// Diagrams referenced in the summary (`![Alt](diagrams/x.dot)`) are rendered inline;
+// the "Diagramme" section only lists the remaining ones.
+const loadDot = (name: string) => getDiagram(topic.id, name);
+const summaryHtml = summary ? await renderMarkdownWithDiagrams(summary.body, loadDot) : null;
+const pitfallsHtml = pitfalls ? await renderMarkdownWithDiagrams(pitfalls, loadDot, 3) : null;
+const embedded = new Set([...findDiagramRefs(summary?.body ?? ''), ...findDiagramRefs(pitfalls ?? '')]);
+const extraDiagrams = diagrams.filter((d) => !embedded.has(d.name));
+const state = summary || elementCount > 0 ? 'ready' : 'empty';
+
+const jumps = [
+  { label: 'Karten lernen', href: withBase(`karten/?thema=${topic.id}`), count: cards.length },
+  { label: 'Quiz', href: withBase(`quiz/?thema=${topic.id}`), count: quiz.length },
+  { label: 'Papier-Aufgaben', href: withBase(`aufgaben/#${topic.id}`), count: tasks.length },
+  { label: 'SQL-Playground', href: withBase(`playground/?thema=${topic.id}`), count: sqlTasks.length },
+].filter((j) => j.count > 0);
+---
+
+<Base title={topic.title} description={`${topic.id}: ${topic.title} – Zusammenfassung, typische Fehler und Übungen.`}>
+  <article data-verify-unit="topic-page" data-verify-state={state} data-verify-count={elementCount} data-topic={topic.id}>
+    <header class="page-head">
+      <p class="eyebrow">
+        <a href={withBase('themen/')}>Themen</a>
+        <span aria-hidden="true">/</span>
+        <span class="key">{topic.id}</span>
+        {summary && <span class={STATUS_CLASS[summary.status]}>{STATUS_LABEL[summary.status]}</span>}
+      </p>
+      <h1>{topic.title}</h1>
+    </header>
+
+    <div class="topic-layout">
+      <div class="topic-layout__main">
+        {
+          summaryHtml ? (
+            <section class="prose" aria-label="Zusammenfassung" set:html={summaryHtml} />
+          ) : (
+            <section class="empty-state" aria-labelledby="empty-heading">
+              <h2 id="empty-heading">Zusammenfassung folgt</h2>
+              <p>Für dieses Thema sind noch keine Inhalte veröffentlicht. Diese Punkte werden behandelt:</p>
+            </section>
+          )
+        }
+
+        {
+          pitfallsHtml && (
+            <section class="pitfalls" aria-labelledby="pitfalls-heading">
+              <h2 id="pitfalls-heading">Typische Fehler</h2>
+              <Fragment set:html={pitfallsHtml} />
+            </section>
+          )
+        }
+
+        {
+          extraDiagrams.length > 0 && (
+            <section aria-labelledby="diagrams-heading">
+              <h2 id="diagrams-heading">Diagramme</h2>
+              {extraDiagrams.map((d) => (
+                <Diagram topic={topic.id} name={d.name} />
+              ))}
+            </section>
+          )
+        }
+
+        {summary && <SourceNote sources={summary.resolvedSources} heading="Quellen" />}
+      </div>
+
+      <aside class="topic-layout__aside" aria-label="Zum Thema">
+        {
+          jumps.length > 0 && (
+            <nav class="panel" aria-labelledby="jumps-heading">
+              <h2 id="jumps-heading" class="source-note__heading">
+                Üben
+              </h2>
+              <ul class="jump-list">
+                {jumps.map((j) => (
+                  <li>
+                    <a href={j.href}>
+                      {j.label} <span class="count">{j.count}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )
+        }
+        {
+          topic.subtopics.length > 0 && (
+            <section class="panel" aria-labelledby="subtopics-heading">
+              <h2 id="subtopics-heading" class="source-note__heading">
+                Inhalte
+              </h2>
+              <ul>
+                {topic.subtopics.map((s) => (
+                  <li>{s}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+      </aside>
+    </div>
+
+    <nav class="pager" aria-label="Weitere Themen">
+      {
+        prev ? (
+          <a href={withBase(`themen/${prev.id}/`)} rel="prev">
+            ← <span class="key">{prev.id}</span> {prev.title}
+          </a>
+        ) : (
+          <span />
+        )
+      }
+      {
+        next && (
+          <a href={withBase(`themen/${next.id}/`)} rel="next">
+            <span class="key">{next.id}</span> {next.title} →
+          </a>
+        )
+      }
+    </nav>
+  </article>
+</Base>

@@ -1,0 +1,16 @@
+---
+import Placeholder from '../components/Placeholder.astro';
+import Base from '../layouts/Base.astro';
+import { getOverview } from '../lib/content';
+
+const cards = getOverview().reduce((n, o) => n + o.counts.cards, 0);
+---
+
+<Base title="Karten" description="Karteikarten mit verteilter Wiederholung." noindex>
+  <header class="page-head">
+    <h1>Karteikarten</h1>
+  </header>
+  <Placeholder unit="flashcards" heading="Der Kartentrainer folgt" prepared={`${cards} Karten sind bereits vorbereitet.`}>
+    <p>Hier lernst du bald mit verteilter Wiederholung: Karten, die du sicher kannst, kommen seltener, schwierige öfter.</p>
+  </Placeholder>
+</Base>

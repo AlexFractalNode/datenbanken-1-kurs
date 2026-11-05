@@ -1,0 +1,61 @@
+---
+import Base from '../layouts/Base.astro';
+import { getExams, getOverview } from '../lib/content';
+import { withBase } from '../lib/nav';
+
+const overview = getOverview();
+const exams = getExams();
+
+/** Suggested phases by topic order; topics outside the ranges land in the last phase. */
+const PHASES = [
+  { title: 'Begriffe und Modelle', from: 1, to: 3, goal: 'Grundbegriffe sicher erklären und Architekturen einordnen.' },
+  { title: 'Modellieren', from: 4, to: 6, goal: 'ER-Modelle aus Texten erstellen und in Relationen überführen.' },
+  { title: 'Theorie der Relationen', from: 7, to: 8, goal: 'Normalformen prüfen und Ausdrücke der relationalen Algebra auswerten.' },
+  { title: 'SQL und Anwendung', from: 9, to: Infinity, goal: 'Tabellen anlegen, Daten ändern und Abfragen schreiben – auch ohne Rechner.' },
+];
+
+const phases = PHASES.map((p) => ({
+  ...p,
+  topics: overview.filter((o) => o.topic.order >= p.from && o.topic.order <= p.to),
+})).filter((p) => p.topics.length > 0);
+---
+
+<Base title="Lernplan" description="Vorschlag für eine sinnvolle Reihenfolge beim Lernen.">
+  <header class="page-head">
+    <h1>Lernplan</h1>
+    <p class="lead">
+      Ein Vorschlag in vier Phasen. Jede Phase baut auf der vorherigen auf; plane pro Thema eine Lerneinheit plus Wiederholung
+      mit den Karten.
+    </p>
+  </header>
+
+  <ol class="plan" data-verify-unit="study-plan" data-verify-state={phases.length ? 'ready' : 'empty'} data-verify-count={overview.length}>
+    {
+      phases.map((p) => (
+        <li class="plan__phase panel">
+          <h2>{p.title}</h2>
+          <p>{p.goal}</p>
+          <ul>
+            {p.topics.map((o) => (
+              <li>
+                <span class="key">{o.topic.id}</span> <a href={withBase(`themen/${o.topic.id}/`)}>{o.topic.title}</a>
+                {o.taskMinutes > 0 && <span class="meta"> – Aufgaben ca. {o.taskMinutes} Min.</span>}
+              </li>
+            ))}
+          </ul>
+        </li>
+      ))
+    }
+    <li class="plan__phase panel">
+      <h2>Generalprobe</h2>
+      <p>
+        {
+          exams.length > 0
+            ? `Schreibe ${exams.length === 1 ? 'die Probeklausur' : `die ${exams.length} Probeklausuren`} unter Echtbedingungen (90 Minuten, ohne Hilfsmittel) und bewerte dich mit dem Raster.`
+            : 'Sobald die Probeklausuren veröffentlicht sind, schreibst du sie unter Echtbedingungen (90 Minuten).'
+        }
+      </p>
+      <p><a href={withBase('klausur/')}>Zur Klausur-Simulation</a></p>
+    </li>
+  </ol>
+</Base>

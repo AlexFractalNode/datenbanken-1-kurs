@@ -1,0 +1,8 @@
+graph beziehung {
+  label="Kunde gibt Bestellung auf";
+  Kunde [shape=box];
+  Bestellung [shape=box];
+  gibt_auf [shape=diamond, label="gibt auf"];
+  Kunde -- gibt_auf [label="1"];
+  gibt_auf -- Bestellung [label="n"];
+}

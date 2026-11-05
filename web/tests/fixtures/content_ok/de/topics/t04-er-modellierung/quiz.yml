@@ -1,0 +1,24 @@
+- id: t04-q001
+  status: draft
+  reviews: []
+  type: single
+  question: Welches Symbol steht in Chen-Notation für einen Entitätstyp?
+  options:
+    - text: Rechteck
+      correct: true
+      explain: Entitätstypen werden als Rechtecke gezeichnet.
+    - text: Raute
+      correct: false
+      explain: Die Raute steht für Beziehungstypen.
+- id: t04-q002
+  status: draft
+  reviews: []
+  type: truefalse
+  question: Ein abgeleitetes Attribut wird gestrichelt dargestellt.
+  options:
+    - text: wahr
+      correct: true
+      explain: Abgeleitete Attribute erhalten eine gestrichelte Ellipse.
+    - text: falsch
+      correct: false
+      explain: Doch, die Darstellung ist gestrichelt.

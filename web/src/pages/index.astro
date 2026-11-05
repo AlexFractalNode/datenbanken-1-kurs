@@ -1,0 +1,83 @@
+---
+import Base from '../layouts/Base.astro';
+import { getExams, getOverview } from '../lib/content';
+import { STATUS_CLASS, STATUS_LABEL } from '../lib/labels';
+import { withBase } from '../lib/nav';
+
+const overview = getOverview();
+const exams = getExams();
+const totals = overview.reduce(
+  (acc, o) => ({
+    cards: acc.cards + o.counts.cards,
+    quiz: acc.quiz + o.counts.quiz,
+    tasks: acc.tasks + o.counts.tasks,
+    sqlTasks: acc.sqlTasks + o.counts.sqlTasks,
+  }),
+  { cards: 0, quiz: 0, tasks: 0, sqlTasks: 0 },
+);
+const withContent = overview.filter((o) => o.hasSummary).length;
+const coverage = overview.length === 0 ? 0 : Math.round((withContent / overview.length) * 100);
+const state = overview.length === 0 ? 'empty' : 'ready';
+---
+
+<Base title="Dashboard">
+  <div data-verify-unit="dashboard" data-verify-state={state} data-verify-count={overview.length}>
+    <header class="page-head">
+      <p class="eyebrow"><span class="key">DB1</span> Offener Lernkurs</p>
+      <h1>Datenbanken verstehen – von ER-Modell bis SQL</h1>
+      <p class="lead">
+        {overview.length} Themen mit Zusammenfassungen, Lernkarten, Quizfragen, Papier-Aufgaben und SQL-Übungen. Dein
+        Fortschritt bleibt in deinem Browser.
+      </p>
+    </header>
+
+    <ul class="stats" aria-label="Kursumfang">
+      <li><strong>{totals.cards}</strong> <span>Karten</span></li>
+      <li><strong>{totals.quiz}</strong> <span>Quizfragen</span></li>
+      <li><strong>{totals.tasks}</strong> <span>Aufgaben</span></li>
+      <li><strong>{totals.sqlTasks}</strong> <span>SQL-Aufgaben</span></li>
+      <li><strong>{exams.length}</strong> <span>Probeklausuren</span></li>
+    </ul>
+
+    <section class="panel" aria-labelledby="progress-heading">
+      <h2 id="progress-heading">Dein Stand</h2>
+      <div data-verify-unit="dashboard-progress" data-verify-state="empty" data-verify-count="0">
+        <p>
+          Noch kein Lernfortschritt gespeichert. Fällige Karten, Fortschritt pro Thema und deine Lernserie erscheinen
+          hier, sobald du mit Karten und Quiz übst.
+        </p>
+      </div>
+      <p class="meta">
+        Inhaltsstand: {withContent} von {overview.length} Themen haben eine Zusammenfassung ({coverage} %).
+      </p>
+    </section>
+
+    <section aria-labelledby="topics-heading">
+      <h2 id="topics-heading">Themen</h2>
+      <ol class="register">
+        {
+          overview.map((o) => (
+            <li class="register__row">
+              <span class="key">{o.topic.id}</span>
+              <span class="register__title">
+                <a href={withBase(`themen/${o.topic.id}/`)}>{o.topic.title}</a>
+              </span>
+              <span class="register__meta">
+                {o.hasSummary ? (
+                  <>
+                    <span>{o.counts.cards} Karten</span>
+                    <span>{o.counts.quiz} Quiz</span>
+                    <span>{o.counts.tasks + o.counts.sqlTasks} Aufgaben</span>
+                    {o.status && <span class={STATUS_CLASS[o.status]}>{STATUS_LABEL[o.status]}</span>}
+                  </>
+                ) : (
+                  <span class="badge">in Arbeit</span>
+                )}
+              </span>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </div>
+</Base>

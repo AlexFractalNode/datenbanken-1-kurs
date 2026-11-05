@@ -1,0 +1,13 @@
+- id: t04-s001
+  status: draft
+  reviews: []
+  db: firma
+  kind: query
+  prompt: Gib die ersten drei Abteilungen alphabetisch aus.
+  solution: SELECT FIRST 3 name FROM abteilung ORDER BY name;
+  solution_pg: SELECT name FROM abteilung ORDER BY name LIMIT 3;
+  engines: [fb, pg]
+  ordered: true
+  hints:
+    - Sortiere nach dem Namen.
+  paper_mode: write

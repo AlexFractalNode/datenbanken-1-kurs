@@ -1,0 +1,19 @@
+---
+import Placeholder from '../components/Placeholder.astro';
+import Base from '../layouts/Base.astro';
+import { getOverview } from '../lib/content';
+
+const sql = getOverview().reduce((n, o) => n + o.counts.sqlTasks, 0);
+---
+
+<Base title="Playground" description="SQL im Browser üben." noindex>
+  <header class="page-head">
+    <h1>SQL-Playground</h1>
+  </header>
+  <Placeholder unit="playground" heading="Der SQL-Playground folgt" prepared={`${sql} SQL-Aufgaben sind bereits vorbereitet.`}>
+    <p>
+      Hier führst du bald SQL direkt im Browser gegen zwei Beispieldatenbanken aus – mit automatischer Prüfung und Hinweisen
+      zu Unterschieden zwischen Firebird und PostgreSQL.
+    </p>
+  </Placeholder>
+</Base>

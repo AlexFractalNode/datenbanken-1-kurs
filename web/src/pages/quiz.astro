@@ -1,0 +1,16 @@
+---
+import Placeholder from '../components/Placeholder.astro';
+import Base from '../layouts/Base.astro';
+import { getOverview } from '../lib/content';
+
+const quiz = getOverview().reduce((n, o) => n + o.counts.quiz, 0);
+---
+
+<Base title="Quiz" description="Quizfragen mit Sofort-Feedback." noindex>
+  <header class="page-head">
+    <h1>Quiz</h1>
+  </header>
+  <Placeholder unit="quiz" heading="Das Quiz folgt" prepared={`${quiz} Fragen sind bereits vorbereitet.`}>
+    <p>Hier beantwortest du bald Fragen mit sofortiger Rückmeldung und Erklärung zu jeder Antwort.</p>
+  </Placeholder>
+</Base>
