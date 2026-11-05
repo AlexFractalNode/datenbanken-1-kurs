@@ -1,0 +1,54 @@
+// Firma: ER-Diagramm in Chen-Notation.
+// Rechteck = Entitaetstyp, Raute = Beziehungstyp, Ellipse = Attribut
+// (Schluessel unterstrichen). Kantenbeschriftung = Kardinalitaet (1, n, m).
+graph firma {
+    graph [layout=neato, overlap=false, splines=true, sep="+12", fontname="Helvetica"];
+    node [fontname="Helvetica", fontsize=11];
+    edge [fontname="Helvetica", fontsize=10];
+
+    node [shape=box, style=bold];
+    abteilung [label="Abteilung"];
+    mitarbeiter [label="Mitarbeiter"];
+    projekt [label="Projekt"];
+
+    node [shape=diamond, style=solid];
+    r_gehoert [label="gehört zu"];
+    r_leitet [label="leitet"];
+    r_vorgesetzt [label="ist vorgesetzt"];
+    r_federfuehrend [label="verantwortet"];
+    r_arbeitet [label="arbeitet mit"];
+
+    mitarbeiter -- r_gehoert [label="n"];
+    r_gehoert -- abteilung [label="1"];
+    mitarbeiter -- r_leitet [label="1"];
+    r_leitet -- abteilung [label="1"];
+    mitarbeiter -- r_vorgesetzt [label="Vorgesetzte: 1"];
+    r_vorgesetzt -- mitarbeiter [label="Unterstellte: n"];
+    abteilung -- r_federfuehrend [label="1"];
+    r_federfuehrend -- projekt [label="n"];
+    mitarbeiter -- r_arbeitet [label="m"];
+    r_arbeitet -- projekt [label="n"];
+
+    node [shape=ellipse, style=solid, fontsize=10];
+    a_abteilung_id [label=<<u>abteilung_id</u>>]; abteilung -- a_abteilung_id;
+    a_abt_bez [label="bezeichnung"]; abteilung -- a_abt_bez;
+    a_standort [label="standort"]; abteilung -- a_standort;
+
+    a_mitarbeiter_id [label=<<u>mitarbeiter_id</u>>]; mitarbeiter -- a_mitarbeiter_id;
+    a_vorname [label="vorname"]; mitarbeiter -- a_vorname;
+    a_nachname [label="nachname"]; mitarbeiter -- a_nachname;
+    a_email [label="email"]; mitarbeiter -- a_email;
+    a_eintritt [label="eintritt"]; mitarbeiter -- a_eintritt;
+    a_gehalt [label="gehalt"]; mitarbeiter -- a_gehalt;
+    a_provision [label="provision"]; mitarbeiter -- a_provision;
+
+    a_projekt_id [label=<<u>projekt_id</u>>]; projekt -- a_projekt_id;
+    a_titel [label="titel"]; projekt -- a_titel;
+    a_start [label="startdatum"]; projekt -- a_start;
+    a_ende [label="enddatum"]; projekt -- a_ende;
+    a_budget [label="budget"]; projekt -- a_budget;
+    a_beschreibung [label="beschreibung"]; projekt -- a_beschreibung;
+
+    a_stunden [label="stunden"]; r_arbeitet -- a_stunden;
+    a_rolle [label="rolle"]; r_arbeitet -- a_rolle;
+}

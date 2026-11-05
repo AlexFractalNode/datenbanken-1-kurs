@@ -1,0 +1,131 @@
+// Musikschule: ER-Diagramm in Chen-Notation.
+// Rechteck = Entitaetstyp, Raute = Beziehungstyp, Ellipse = Attribut
+// (Schluessel unterstrichen), Dreieck = Generalisierung (ist ein).
+// Kantenbeschriftung = Kardinalitaet (1, n, m).
+graph musikschule {
+    graph [layout=neato, overlap=false, splines=true, sep="+12", fontname="Helvetica"];
+    node [fontname="Helvetica", fontsize=11];
+    edge [fontname="Helvetica", fontsize=10];
+
+    // Entitaetstypen
+    node [shape=box, style=bold];
+    person [label="Person"];
+    lehrkraft [label="Lehrkraft"];
+    schueler [label="Schüler"];
+    instrument [label="Instrument"];
+    kurs [label="Kurs"];
+    raum [label="Raum"];
+    termin [label="Termin"];
+    ausleihe [label="Ausleihe"];
+    zahlung [label="Zahlung"];
+
+    // Generalisierung (nicht disjunkt, partiell)
+    isa [shape=triangle, style=solid, label="ist ein"];
+    person -- isa;
+    isa -- lehrkraft;
+    isa -- schueler;
+
+    // Beziehungstypen
+    node [shape=diamond, style=solid];
+    r_belegt [label="belegt"];
+    r_unterrichtet [label="unterrichtet"];
+    r_haupt [label="spielt"];
+    r_kurs_instr [label="lehrt"];
+    r_kurs_raum [label="findet statt in"];
+    r_termin_kurs [label="hat"];
+    r_termin_raum [label="ausweichen in"];
+    r_leiht [label="leiht"];
+    r_leihobjekt [label="betrifft"];
+    r_vertritt [label="vertritt"];
+    r_zahlt [label="zahlt"];
+    r_zahlung_kurs [label="für Kurs"];
+    r_zahlung_ausleihe [label="für Ausleihe"];
+
+    schueler -- r_belegt [label="m"];
+    r_belegt -- kurs [label="n"];
+    lehrkraft -- r_unterrichtet [label="1"];
+    r_unterrichtet -- kurs [label="n"];
+    lehrkraft -- r_haupt [label="n"];
+    r_haupt -- instrument [label="1"];
+    kurs -- r_kurs_instr [label="n"];
+    r_kurs_instr -- instrument [label="1"];
+    kurs -- r_kurs_raum [label="n"];
+    r_kurs_raum -- raum [label="1"];
+    kurs -- r_termin_kurs [label="1"];
+    r_termin_kurs -- termin [label="n"];
+    termin -- r_termin_raum [label="n"];
+    r_termin_raum -- raum [label="1"];
+    schueler -- r_leiht [label="1"];
+    r_leiht -- ausleihe [label="n"];
+    ausleihe -- r_leihobjekt [label="n"];
+    r_leihobjekt -- instrument [label="1"];
+    lehrkraft -- r_vertritt [label="Vertreter: m"];
+    r_vertritt -- lehrkraft [label="Vertretene: n"];
+    schueler -- r_zahlt [label="1"];
+    r_zahlt -- zahlung [label="n"];
+    zahlung -- r_zahlung_kurs [label="n"];
+    r_zahlung_kurs -- kurs [label="1"];
+    zahlung -- r_zahlung_ausleihe [label="n"];
+    r_zahlung_ausleihe -- ausleihe [label="1"];
+
+    // Attribute
+    node [shape=ellipse, style=solid, fontsize=10];
+    a_person_id [label=<<u>person_id</u>>]; person -- a_person_id;
+    a_vorname [label="vorname"]; person -- a_vorname;
+    a_nachname [label="nachname"]; person -- a_nachname;
+    a_geburtsdatum [label="geburtsdatum"]; person -- a_geburtsdatum;
+    a_email [label="email"]; person -- a_email;
+    a_telefon [label="telefon"]; person -- a_telefon;
+    a_ort [label="ort"]; person -- a_ort;
+
+    a_eingestellt [label="eingestellt_am"]; lehrkraft -- a_eingestellt;
+    a_stundensatz [label="stundensatz"]; lehrkraft -- a_stundensatz;
+
+    a_eintritt [label="eintritt"]; schueler -- a_eintritt;
+    a_ermaessigt [label="ermaessigt"]; schueler -- a_ermaessigt;
+
+    a_instrument_id [label=<<u>instrument_id</u>>]; instrument -- a_instrument_id;
+    a_instr_bez [label="bezeichnung"]; instrument -- a_instr_bez;
+    a_familie [label="familie"]; instrument -- a_familie;
+    a_leihgebuehr [label="leihgebuehr"]; instrument -- a_leihgebuehr;
+
+    a_raum_id [label=<<u>raum_id</u>>]; raum -- a_raum_id;
+    a_raum_bez [label="bezeichnung"]; raum -- a_raum_bez;
+    a_etage [label="etage"]; raum -- a_etage;
+    a_plaetze [label="plaetze"]; raum -- a_plaetze;
+    a_klavier [label="hat_klavier"]; raum -- a_klavier;
+
+    a_kurs_id [label=<<u>kurs_id</u>>]; kurs -- a_kurs_id;
+    a_titel [label="titel"]; kurs -- a_titel;
+    a_niveau [label="niveau"]; kurs -- a_niveau;
+    a_max [label="max_teilnehmer"]; kurs -- a_max;
+    a_gebuehr [label="gebuehr_monat"]; kurs -- a_gebuehr;
+    a_start [label="startdatum"]; kurs -- a_start;
+    a_ende [label="enddatum"]; kurs -- a_ende;
+    a_beschreibung [label="beschreibung"]; kurs -- a_beschreibung;
+
+    a_angemeldet [label="angemeldet_am"]; r_belegt -- a_angemeldet;
+    a_abgemeldet [label="abgemeldet_am"]; r_belegt -- a_abgemeldet;
+    a_rabatt [label="rabatt_prozent"]; r_belegt -- a_rabatt;
+
+    a_termin_id [label=<<u>termin_id</u>>]; termin -- a_termin_id;
+    a_datum [label="datum"]; termin -- a_datum;
+    a_uhrzeit [label="uhrzeit"]; termin -- a_uhrzeit;
+    a_dauer [label="dauer_min"]; termin -- a_dauer;
+    a_ausgefallen [label="ausgefallen"]; termin -- a_ausgefallen;
+
+    a_ausleihe_id [label=<<u>ausleihe_id</u>>]; ausleihe -- a_ausleihe_id;
+    a_inventar [label="inventar_nr"]; ausleihe -- a_inventar;
+    a_ausgabe [label="ausgabe"]; ausleihe -- a_ausgabe;
+    a_rueckgabe [label="rueckgabe"]; ausleihe -- a_rueckgabe;
+
+    a_von [label="von"]; r_vertritt -- a_von;
+    a_bis [label="bis"]; r_vertritt -- a_bis;
+    a_grund [label="grund"]; r_vertritt -- a_grund;
+
+    a_zahlung_id [label=<<u>zahlung_id</u>>]; zahlung -- a_zahlung_id;
+    a_betrag [label="betrag"]; zahlung -- a_betrag;
+    a_faellig [label="faellig_am"]; zahlung -- a_faellig;
+    a_bezahlt [label="bezahlt_am"]; zahlung -- a_bezahlt;
+    a_zahlungsart [label="zahlungsart"]; zahlung -- a_zahlungsart;
+}
