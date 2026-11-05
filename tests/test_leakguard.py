@@ -17,14 +17,13 @@ def rules(findings):
 def test_blocks_pdf_anywhere():
     f = scan_paths(["a/b/c/Skript.PDF", "x.pdf"], {})
     assert [x.path for x in f] == ["a/b/c/Skript.PDF", "x.pdf"]
-    assert rules(f) == {"forbidden-extension"}
+    assert rules(f) == {"extension-not-allowed"}
     assert isinstance(f[0], Finding)
 
 
 def test_blocks_dot_claude():
     f = scan_paths([".claude/x.json", "tools/.claude/y.md", ".CLAUDE/z"], {})
-    assert len(f) == 3
-    assert rules(f) == {"forbidden-path"}
+    assert sum(x.rule == "forbidden-path" for x in f) == 3
 
 
 def test_blocks_file_over_1mb():
@@ -37,8 +36,8 @@ def test_blocks_file_over_1mb():
 def test_allows_svg_in_diagrams():
     assert scan_paths(["content/de/diagrams/er.svg"], {}) == []
     assert scan_paths(["web/public/logo.png"], {}) == []
-    assert rules(scan_paths(["content/de/er.png"], {})) == {"forbidden-image"}
-    assert rules(scan_paths(["content/de/er.jpg"], {})) == {"forbidden-image"}
+    assert rules(scan_paths(["content/de/er.png"], {})) == {"extension-not-allowed"}
+    assert rules(scan_paths(["content/de/er.jpg"], {})) == {"extension-not-allowed"}
     for ext in ["avif", "psd", "eps", "svgz", "jxl", "heif", "heic", "tga", "gif", "bmp",
                 "tif", "tiff", "webp", "ico", "jpg", "jpeg", "docx", "doc", "xlsx", "xls",
                 "odt", "ods", "odp", "ppt", "pptx", "pdf", "7z", "rar", "gz", "tar", "zip",

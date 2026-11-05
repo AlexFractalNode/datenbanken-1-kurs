@@ -44,6 +44,21 @@ def test_existing_hook_warns_and_is_backed_up(tmp_path):
     assert "leakguard" in hook.read_text(encoding="utf-8")
 
 
+def test_existing_bak_is_not_overwritten(tmp_path):
+    repo = _repo(tmp_path)
+    terms = tmp_path / "t.txt"
+    terms.write_text("x\n", encoding="utf-8")
+    hooks = repo / ".git" / "hooks"
+    (hooks / "pre-commit").write_text("#!/bin/sh\necho second\n", encoding="utf-8")
+    (hooks / "pre-commit.bak").write_text("#!/bin/sh\necho first\n", encoding="utf-8")
+    r = subprocess.run([sys.executable, str(SCRIPT), "--terms", str(terms)],
+                       cwd=repo, capture_output=True, text=True)
+    assert r.returncode == 0
+    assert "first" in (hooks / "pre-commit.bak").read_text(encoding="utf-8")
+    baks = [p for p in hooks.glob("pre-commit.bak*") if p.name != "pre-commit.bak"]
+    assert len(baks) == 1 and "second" in baks[0].read_text(encoding="utf-8")
+
+
 def test_respects_core_hooks_path(tmp_path):
     repo = _repo(tmp_path)
     terms = tmp_path / "t.txt"

@@ -13,6 +13,7 @@ import os
 import shlex
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 
@@ -75,6 +76,12 @@ def main(argv: list[str] | None = None) -> int:
                 print(f"unchanged {path}")
                 continue
             backup = path.with_name(name + ".bak")
+            if backup.exists():
+                backup = path.with_name(f"{name}.bak.{time.strftime('%Y%m%d%H%M%S')}")
+                n = 1
+                while backup.exists():
+                    backup = path.with_name(f"{name}.bak.{time.strftime('%Y%m%d%H%M%S')}.{n}")
+                    n += 1
             print(f"install_hooks: warning: {path} exists; moving it to {backup}", file=sys.stderr)
             os.replace(path, backup)
         path.write_text(body, encoding="utf-8", newline="\n")

@@ -2,8 +2,8 @@ import shutil
 import subprocess
 import sys
 
-from leakguard import scan_text
-from test_leakguard import SCRIPT, TERM, git, make_repo, run
+from leakguard import scan_paths, scan_text
+from test_leakguard import SCRIPT, TERM, git, make_repo, rules, run
 
 HOOKS = SCRIPT.parent / "install_hooks.py"
 DOT = "." + "claude"
@@ -28,11 +28,12 @@ def test_extensionless_binary_blocked(tmp_path):
     repo = make_repo(tmp_path)
     (repo / "tools").mkdir()
     (repo / "tools" / "blob").write_bytes(b"\x00\x01\x02binary")
-    (repo / "tools" / "text").write_text("plain\n", encoding="utf-8")
+    (repo / "tools" / "text.md").write_text("plain\n", encoding="utf-8")
     git(repo, "add", "-A")
     r = run(["--staged"], repo)
     assert r.returncode == 1
     assert "tools/blob" in r.stdout and "tools/text" not in r.stdout
+    assert "extension-not-allowed" in r.stdout
 
 
 def test_force_added_outside_allowlist_found(tmp_path):
@@ -123,7 +124,7 @@ def test_path_with_space_and_umlaut(tmp_path):
     git(repo, "add", "-f", "-A")
     r = run(["--staged"], repo)
     assert r.returncode == 1
-    assert "forbidden-extension" in r.stdout
+    assert "extension-not-allowed" in r.stdout
 
 
 def test_range_finds_leak_added_then_removed(tmp_path):
@@ -152,10 +153,46 @@ def test_unreadable_file_fails_closed(tmp_path):
     assert r.returncode == 1 and "unreadable" in r.stdout
 
 
-def test_comment_lines_in_commit_msg_ignored(tmp_path):
+def test_comment_lines_in_commit_msg_are_scanned(tmp_path):
     msg = tmp_path / "m"
     msg.write_text(f"feat: x\n# {TERM}\n", encoding="utf-8")
-    assert run(["--commit-msg", str(msg), "--terms", terms_file(tmp_path)], tmp_path).returncode == 0
+    assert run(["--commit-msg", str(msg), "--terms", terms_file(tmp_path)], tmp_path).returncode == 1
+
+
+def test_extension_allowlist():
+    for ok in ["a.md", "b.yml", "c.yaml", "d.json", "e.py", "f.mjs", "g.cjs", "h.js", "i.ts",
+               "j.tsx", "k.jsx", "web/src/p.astro", "l.css", "m.html", "n.svg", "o.dot",
+               "p.sql", "q.txt", "r.toml", "uv.lock", "s.typ", "t.csv", "u.sh", ".gitignore",
+               ".gitattributes", ".python-version", "LICENSE", "LICENSE-CONTENT",
+               "web/public/logo.png", "X.MD"]:
+        assert scan_paths([ok], {}) == [], ok
+    for bad in ["a.tgz", "b.rtf", "c.epub", "d.xlsm", "Makefile", "LICENSE2", "e.png",
+                "web/src/f.png", "g.Dockerfile"]:
+        assert rules(scan_paths([bad], {})) == {"extension-not-allowed"}, bad
+
+
+def test_nul_bytes_blocked_regardless_of_extension(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / "a.md").write_bytes(b"text\x00more")
+    git(repo, "add", "a.md")
+    r = run(["--staged"], repo)
+    assert r.returncode == 1 and "binary-content" in r.stdout
+
+
+def test_png_under_web_public_allowed_even_with_nul(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / "web" / "public").mkdir(parents=True)
+    (repo / "web" / "public" / "l.png").write_bytes(b"\x89PNG\r\n\x1a\n\x00\x00")
+    git(repo, "add", "web/public/l.png")
+    assert run(["--staged"], repo).returncode == 0
+
+
+def test_allowed_astro_and_license_pass(tmp_path):
+    repo = make_repo(tmp_path)
+    (repo / "web").mkdir()
+    (repo / "web" / "p.astro").write_text("---\n---\n<p>x</p>\n", encoding="utf-8")
+    git(repo, "add", "web/p.astro")
+    assert run(["--staged"], repo).returncode == 0
 
 
 def test_missing_terms_file_exit_2(tmp_path):

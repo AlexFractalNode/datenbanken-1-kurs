@@ -21,15 +21,13 @@ from dataclasses import dataclass
 from pathlib import PurePosixPath
 
 MAX_BYTES = 1024 * 1024
-# Blocked formats. .svg is allowed anywhere; .png only below web/public/.
-IMAGE_EXT = {
-    ".avif", ".psd", ".eps", ".svgz", ".jxl", ".heif", ".heic", ".tga", ".gif",
-    ".bmp", ".tif", ".tiff", ".webp", ".ico", ".jpg", ".jpeg",
+# Allowlist of file types. .png is additionally allowed below web/public/.
+ALLOWED_EXT = {
+    ".md", ".yml", ".yaml", ".json", ".py", ".mjs", ".cjs", ".js", ".ts", ".tsx", ".jsx",
+    ".astro", ".css", ".html", ".svg", ".dot", ".sql", ".txt", ".toml", ".lock", ".typ",
+    ".csv", ".sh",
 }
-FORBIDDEN_EXT = {
-    ".docx", ".doc", ".xlsx", ".xls", ".odt", ".ods", ".odp", ".ppt", ".pptx",
-    ".pdf", ".7z", ".rar", ".gz", ".tar", ".zip", ".exe", ".apkg",
-}
+ALLOWED_NAMES = {"LICENSE", "LICENSE-CONTENT", ".gitignore", ".gitattributes", ".python-version"}
 FORBIDDEN_DIRS = {".claude"}
 NULL_SHA_RE = re.compile(r"^0+$")
 _ZERO_WIDTH = dict.fromkeys(map(ord, "​‌‍﻿"), None)
@@ -55,12 +53,12 @@ def scan_paths(paths: list[str], sizes: dict[str, int]) -> list[Finding]:
         ext = p.suffix.lower()
         if any(part.lower() in FORBIDDEN_DIRS for part in p.parts):
             findings.append(Finding(raw, "forbidden-path", "path inside a forbidden directory"))
-        if ext in FORBIDDEN_EXT:
-            findings.append(Finding(raw, "forbidden-extension", f"{ext} files are not allowed"))
-        elif ext in IMAGE_EXT:
-            findings.append(Finding(raw, "forbidden-image", f"{ext} images are not allowed"))
-        elif ext == ".png" and not path.startswith("web/public/"):
-            findings.append(Finding(raw, "forbidden-image", ".png only allowed under web/public/"))
+        if p.name in ALLOWED_NAMES or ext in ALLOWED_EXT:
+            pass
+        elif ext == ".png" and path.startswith("web/public/"):
+            pass
+        else:
+            findings.append(Finding(raw, "extension-not-allowed", f"file type {ext or p.name!r} is not allowed"))
         size = sizes.get(raw)
         if size is not None and size > MAX_BYTES:
             findings.append(Finding(raw, "file-too-large", f"{size} bytes exceeds {MAX_BYTES}"))
@@ -114,6 +112,14 @@ def scan_text(name: str, text: str, terms: list[str]) -> list[Finding]:
 
 def is_binary(data: bytes) -> bool:
     return b"\0" in data[:8192]
+
+
+def scan_binary(path: str, data: bytes) -> list[Finding]:
+    """NUL bytes in the first 8 KiB block a file, except png below web/public/."""
+    p = path.replace("\\", "/")
+    if is_binary(data) and not (p.lower().endswith(".png") and p.startswith("web/public/")):
+        return [Finding(path, "binary-content", "file contains NUL bytes")]
+    return []
 
 
 def scan_bytes(name: str, data: bytes, terms: list[str]) -> list[Finding]:
@@ -204,8 +210,7 @@ def _check_blobs(entries, terms, allowed, seen) -> list[Finding]:
         if size > MAX_BYTES:
             continue
         data = _git(["cat-file", "blob", sha])
-        if not PurePosixPath(path).suffix and is_binary(data):
-            findings.append(Finding(path, "binary-no-extension", "binary content without extension"))
+        findings += scan_binary(path, data)
         findings += scan_bytes(path, data, terms)
     return findings
 
@@ -266,8 +271,7 @@ def _scan_tree(terms, allowed) -> list[Finding]:
         findings += scan_paths([n], {n: len(data)})
         if len(data) > MAX_BYTES:
             continue
-        if not PurePosixPath(n).suffix and is_binary(data):
-            findings.append(Finding(n, "binary-no-extension", "binary content without extension"))
+        findings += scan_binary(n, data)
         findings += scan_bytes(n, data, terms)
     return findings
 
@@ -293,7 +297,7 @@ def main(argv: list[str] | None = None) -> int:
         findings: list[Finding] = []
         if args.commit_msg:
             with open(args.commit_msg, encoding="utf-8", errors="replace") as fh:
-                body = "\n".join(l for l in fh.read().splitlines() if not l.startswith("#"))
+                body = fh.read()  # every line is scanned, including '#' comment lines
             findings += scan_text("commit message", body, terms)
         if args.staged or args.range or args.history or args.tree:
             _ROOT = _git(["rev-parse", "--show-toplevel"], text=True).strip()
