@@ -52,7 +52,8 @@
       "uniqueItems": true
     },
     "sources": {
-      "$ref": "#/$defs/sources"
+      "$ref": "#/$defs/sources",
+      "minItems": 1
     },
     "translation": {
       "const": "pending"

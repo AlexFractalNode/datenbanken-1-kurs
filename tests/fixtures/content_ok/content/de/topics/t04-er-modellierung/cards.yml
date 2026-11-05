@@ -1,6 +1,6 @@
 - id: t04-c001
   status: reviewed
-  reviews: [fach, leak]
+  reviews: [fach, aufgaben, leak]
   front: Platzhalter-Frage 1
   back: Platzhalter-Antwort 1
 - id: t04-c002

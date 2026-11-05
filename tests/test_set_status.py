@@ -40,7 +40,7 @@ def test_add_review_is_idempotent_and_keeps_other_content(root):
     assert _run(root, "t04", "--add-review", "fach") == 0
     assert _run(root, "t04", "--add-review", "fach") == 0
     cards = _y(root, f"{TOPIC}/cards.yml")
-    assert [c["reviews"] for c in cards] == [["fach", "leak"], ["fach"], ["fach"]]
+    assert [c["reviews"] for c in cards] == [["fach", "aufgaben", "leak"], ["fach"], ["fach"]]
     after = (root / TOPIC / "cards.yml").read_text(encoding="utf-8")
     assert "front: Platzhalter-Frage 3" in after and "diagram:" in after
     assert before.count("\n") == after.count("\n")
@@ -91,3 +91,64 @@ def test_unknown_scope_and_stage(root):
     with pytest.raises(SystemExit):
         _run(root, "t04", "--add-review", "bogus")
     assert _run(root, "t04") == 2
+
+
+def _add_en(root):
+    en = root / "content/en/topics/t04-er-modellierung"
+    en.mkdir(parents=True)
+    (en / "summary.md").write_text(
+        "---\nid: t04\nlang: en\ntitle: x\norder: 4\nstatus: draft\nreviews: []\n"
+        "sources:\n  - id: placeholder-docs\n    ref: r\ntranslation: pending\n---\n\nText\n",
+        encoding="utf-8",
+    )
+    (en / "cards.yml").write_text(
+        "- id: t04-c001\n  status: draft\n  reviews: []\n  front: f\n  back: b\n", encoding="utf-8"
+    )
+    return en
+
+
+def test_add_review_en_touches_only_en(root):
+    en = _add_en(root)
+    assert _run(root, "t04", "--add-review", "en") == 0
+    assert _y(root, "content/en/topics/t04-er-modellierung/cards.yml")[0]["reviews"] == ["en"]
+    assert "reviews: [en]" in (en / "summary.md").read_text(encoding="utf-8")
+    assert all("en" not in c["reviews"] for c in _y(root, f"{TOPIC}/cards.yml"))
+
+
+def test_add_review_en_with_promote_keeps_en_review(root):
+    _add_en(root)
+    for stage in ("fach", "leak", "aufgaben"):
+        assert _run(root, "t04", "--add-review", stage) == 0
+    assert _run(root, "t04", "--add-review", "en", "--promote") == 0
+    assert _y(root, "content/en/topics/t04-er-modellierung/cards.yml")[0]["reviews"] == ["en"]
+    assert all(c["status"] == "reviewed" for c in _y(root, f"{TOPIC}/cards.yml"))
+    assert all("en" not in c["reviews"] for c in _y(root, f"{TOPIC}/cards.yml"))
+
+
+def test_add_review_en_without_en_files(root):
+    assert _run(root, "t04", "--add-review", "en") == 2
+
+
+def test_topic_without_tasks_needs_only_fach_leak(root):
+    (root / TOPIC / "tasks.yml").unlink()
+    (root / TOPIC / "sql-tasks.yml").unlink()
+    assert _run(root, "t04", "--add-review", "fach") == 0
+    assert _run(root, "t04", "--add-review", "leak") == 0
+    assert _run(root, "t04", "--promote") == 0
+    assert all(c["status"] == "reviewed" for c in _y(root, f"{TOPIC}/cards.yml"))
+    assert validate.run(root, min_totals=False) == []
+
+
+def test_inline_comments_preserved(root):
+    p = root / TOPIC / "cards.yml"
+    p.write_text(
+        p.read_text(encoding="utf-8")
+        .replace("reviews: [fach, aufgaben, leak]", "reviews: [fach, leak]  # keep me", 1)
+        .replace("status: reviewed", "status: reviewed  # and me", 1),
+        encoding="utf-8",
+    )
+    for s in ("fach", "leak", "aufgaben"):
+        assert _run(root, "t04", "--add-review", s) == 0
+    text = p.read_text(encoding="utf-8")
+    assert "reviews: [fach, aufgaben, leak]  # keep me" in text
+    assert "status: reviewed  # and me" in text

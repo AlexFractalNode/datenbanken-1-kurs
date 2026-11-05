@@ -112,19 +112,61 @@ def test_exam_points_and_minutes(root):
     assert _has(_errs(root), "points")
 
 
-def test_en_parity_requires_pending_marker(root):
+EN_SUMMARY = (
+    "---\nid: t04\nlang: en\ntitle: Placeholder topic 4\norder: 4\nstatus: draft\n"
+    "reviews: []\nsources:\n  - id: placeholder-docs\n    ref: chapter 1\n{extra}---\n\nText.\n"
+)
+
+
+def _add_en(root, topic_pending=True, exam=True, exam_pending=True):
     en = root / "content/en/topics/t04-er-modellierung"
-    en.mkdir(parents=True)
-    summary = (
-        "---\nid: t04\nlang: en\ntitle: Placeholder topic 4\norder: 4\nstatus: draft\n"
-        "reviews: []\nsources:\n  - id: placeholder-docs\n    ref: chapter 1\n{extra}---\n\nText.\n"
-    )
-    (en / "summary.md").write_text(summary.format(extra=""), encoding="utf-8")
-    assert _has(_errs(root), "translation: pending")
-    (en / "summary.md").write_text(
-        summary.format(extra="translation: pending\n"), encoding="utf-8"
-    )
+    en.mkdir(parents=True, exist_ok=True)
+    extra = "translation: pending\n" if topic_pending else ""
+    (en / "summary.md").write_text(EN_SUMMARY.format(extra=extra), encoding="utf-8")
+    if exam:
+        ex = root / "content/en/exams"
+        ex.mkdir(parents=True, exist_ok=True)
+        pend = "translation: pending\n" if exam_pending else ""
+        (ex / "exam-01.yml").write_text(
+            f"title: Placeholder exam\nminutes: 90\n{pend}tasks: []\n", encoding="utf-8"
+        )
+
+
+def test_no_en_dir_is_ok(root):
+    assert not (root / "content/en").exists()
     assert _errs(root) == []
+
+
+def test_en_parity_requires_pending_marker(root):
+    _add_en(root, topic_pending=False)
+    assert _has(_errs(root), "translation: pending")
+    _add_en(root, topic_pending=True)
+    assert _errs(root) == []
+
+
+def test_en_dir_requires_counterparts(root):
+    (root / "content/en").mkdir()
+    errs = _errs(root)
+    assert _has(errs, "topic t04") and _has(errs, "no EN counterpart")
+    assert _has(errs, "exam e01")
+    _add_en(root, exam=False)
+    errs = _errs(root)
+    assert _has(errs, "exam e01") and not _has(errs, "topic t04")
+    _add_en(root)
+    assert _errs(root) == []
+
+
+def test_en_exam_incomplete_requires_pending(root):
+    _add_en(root, exam_pending=False)
+    assert _has(_errs(root), "EN exam is incomplete")
+
+
+def test_en_exam_tasks_not_a_list_is_error_not_crash(root):
+    _add_en(root)
+    (root / "content/en/exams/exam-01.yml").write_text(
+        "title: x\nminutes: 90\ntranslation: pending\ntasks: nope\n", encoding="utf-8"
+    )
+    assert _has(_errs(root), "tasks")
 
 
 def test_min_totals(root):
@@ -144,3 +186,201 @@ def test_cli_exit_codes(root):
     assert validate.main(["--root", str(root), "--no-min"]) == 0
     (root / "sources.yml").unlink()
     assert validate.main(["--root", str(root), "--no-min"]) == 1
+
+
+# --- schema hardness -------------------------------------------------------
+
+
+def _mutate(root, rel, fn):
+    data = _load(root, rel)
+    fn(data)
+    _dump(root, rel, data)
+
+
+def test_missing_status_message(root):
+    _mutate(root, f"{TOPIC}/cards.yml", lambda d: d[0].pop("status"))
+    assert _has(_errs(root), "'status' is a required property")
+
+
+def test_missing_id(root):
+    _mutate(root, f"{TOPIC}/cards.yml", lambda d: d[0].pop("id"))
+    assert _has(_errs(root), "'id' is a required property")
+
+
+def test_empty_rubric(root):
+    _mutate(root, f"{TOPIC}/tasks.yml", lambda d: d[0].update(rubric=[]))
+    assert _has(_errs(root), "rubric")
+
+
+def test_points_zero(root):
+    _mutate(root, f"{TOPIC}/tasks.yml", lambda d: d[0].update(points=0))
+    assert _has(_errs(root), "points")
+
+
+def test_cards_as_mapping(root):
+    (root / TOPIC / "cards.yml").write_text("id: t04-c001\n", encoding="utf-8")
+    assert _has(_errs(root), "is not of type 'array'")
+
+
+def test_quiz_one_option(root):
+    _mutate(root, f"{TOPIC}/quiz.yml", lambda d: d[0].update(options=d[0]["options"][:1]))
+    assert _has(_errs(root), "options")
+
+
+def test_single_with_two_correct(root):
+    def f(d):
+        d[0]["options"][1]["correct"] = True
+
+    _mutate(root, f"{TOPIC}/quiz.yml", f)
+    assert _has(_errs(root), "exactly 1 correct")
+
+
+def test_unknown_sql_ref(root):
+    _mutate(root, f"{TOPIC}/tasks.yml", lambda d: d[1].update(sql_ref="t04-s099"))
+    assert _has(_errs(root), "sql_ref t04-s099 does not exist")
+
+
+def test_duplicate_topic_id(root):
+    _mutate(root, "content/topics.yml", lambda d: d.append(dict(d[1], order=9)))
+    assert _has(_errs(root), "duplicate topic id t04")
+
+
+def test_broken_yaml_does_not_raise(root):
+    import content
+
+    (root / TOPIC / "cards.yml").write_text("a: [\n", encoding="utf-8")
+    c = content.load_all(root)
+    assert any("cards.yml" in e for e in c.errors)
+    assert _has(_errs(root), "cards.yml")
+
+
+def test_empty_error_message_yaml_error_does_not_raise(root):
+    import content
+
+    (root / TOPIC / "summary.md").write_bytes(b"\xff\xfe---\n")
+    c = content.load_all(root)
+    assert c.errors
+
+
+def test_duplicate_yaml_key(root):
+    p = root / TOPIC / "cards.yml"
+    p.write_text(
+        p.read_text(encoding="utf-8").replace("  back: Platzhalter-Antwort 1\n", "  back: a\n  back: b\n", 1),
+        encoding="utf-8",
+    )
+    assert _has(_errs(root), "duplicate key")
+
+
+def test_summary_requires_sources(root):
+    p = root / TOPIC / "summary.md"
+    t = p.read_text(encoding="utf-8").replace(
+        "sources:\n  - id: placeholder-docs\n    ref: Kapitel 1\n", "sources: []\n"
+    )
+    p.write_text(t, encoding="utf-8")
+    assert _has(_errs(root), "sources")
+
+
+def test_accessed_must_be_real_date(root):
+    _mutate(root, "sources.yml", lambda d: d[0].update(accessed="2026-02-30"))
+    assert _has(_errs(root), "accessed")
+
+
+# --- status / reviews consistency -----------------------------------------
+
+
+def test_reviewed_requires_reviews(root):
+    def f(d):
+        d[1]["status"] = "reviewed"
+        d[1]["reviews"] = ["fach", "leak"]  # topic has tasks -> aufgaben needed
+
+    _mutate(root, f"{TOPIC}/cards.yml", f)
+    errs = _errs(root)
+    assert _has(errs, "t04-c002") and _has(errs, "aufgaben")
+    _mutate(root, f"{TOPIC}/cards.yml", lambda d: d[1].update(reviews=["fach", "aufgaben", "leak"]))
+    assert _errs(root) == []
+
+
+def test_reviewed_summary_requires_reviews(root):
+    p = root / TOPIC / "summary.md"
+    p.write_text(p.read_text(encoding="utf-8").replace("status: draft", "status: verified"), encoding="utf-8")
+    errs = _errs(root)
+    assert _has(errs, "summary.md") and _has(errs, "leak")
+
+
+def test_reviewed_exam_task_requires_aufgaben(root):
+    def f(d):
+        d["tasks"][0]["status"] = "reviewed"
+        d["tasks"][0]["reviews"] = ["fach", "leak"]
+
+    _mutate(root, "content/de/exams/exam-01.yml", f)
+    assert _has(_errs(root), "e01-p001") and _has(_errs(root), "aufgaben")
+
+
+def test_topic_without_tasks_needs_only_fach_leak(root):
+    (root / TOPIC / "tasks.yml").unlink()
+    (root / TOPIC / "sql-tasks.yml").unlink()
+
+    def f(d):
+        d[1]["status"] = "reviewed"
+        d[1]["reviews"] = ["fach", "leak"]
+
+    _mutate(root, f"{TOPIC}/cards.yml", f)
+    assert _errs(root) == []
+
+
+# --- structure -------------------------------------------------------------
+
+
+def test_unknown_file_in_topic_dir(root):
+    (root / TOPIC / "notes.txt").write_text("x", encoding="utf-8")
+    assert _has(_errs(root), "notes.txt")
+
+
+def test_diagrams_allowed(root):
+    d = root / TOPIC / "diagrams"
+    d.mkdir()
+    (d / "a.dot").write_text("digraph{}", encoding="utf-8")
+    (d / "a.svg").write_text("<svg/>", encoding="utf-8")
+    assert _errs(root) == []
+    (d / "a.exe").write_text("x", encoding="utf-8")
+    assert _has(_errs(root), "a.exe")
+
+
+def test_topic_without_folder_error_in_full_mode_warning_otherwise(root, capsys):
+    errs = _errs(root, min_totals=True)
+    assert _has(errs, "t01") and _has(errs, "no folder")
+    assert not _has(_errs(root, min_totals=False), "t01")
+    assert validate.main(["--root", str(root), "--no-min"]) == 0
+    assert "warning" in capsys.readouterr().err
+
+
+def _sql_err(root, solution, **kw):
+    def f(d):
+        d[0]["solution"] = solution
+        d[0].pop("solution_pg", None)
+        d[0].update(kw)
+
+    _mutate(root, f"{TOPIC}/sql-tasks.yml", f)
+    return _errs(root)
+
+
+@pytest.mark.parametrize(
+    "sol",
+    [
+        "SELECT * FROM t ROWS 3",
+        "EXECUTE BLOCK AS BEGIN END",
+        "SET TERM ^ ;",
+        "SELECT FIRST :n * FROM t",
+    ],
+)
+def test_more_firebird_syntax_detected(root, sol):
+    assert _has(_sql_err(root, sol), "solution_pg")
+
+
+def test_standard_fetch_first_not_flagged(root):
+    assert _sql_err(root, "SELECT * FROM t FETCH FIRST 3 ROWS ONLY") == []
+
+
+def test_solution_pg_without_pg_engine(root):
+    errs = _sql_err(root, "SELECT 1 FROM t", engines=["fb"], solution_pg="SELECT 1 FROM t")
+    assert _has(errs, "solution_pg")

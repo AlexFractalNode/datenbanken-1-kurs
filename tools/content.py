@@ -44,6 +44,32 @@ _Loader.yaml_implicit_resolvers = {
 }
 
 
+def _construct_mapping_no_dupes(loader, node, deep=False):
+    seen = set()
+    for key_node, _ in node.value:
+        if key_node.tag == "tag:yaml.org,2002:merge":
+            continue
+        try:
+            key = loader.construct_object(key_node, deep=True)
+            hash(key)
+        except Exception:  # noqa: BLE001 - let the default constructor report it
+            continue
+        if key in seen:
+            raise yaml.constructor.ConstructorError(
+                None, None, f"duplicate key {key!r}", key_node.start_mark
+            )
+        seen.add(key)
+    return yaml.SafeLoader.construct_mapping(loader, node, deep)
+
+
+_Loader.construct_mapping = _construct_mapping_no_dupes  # type: ignore[method-assign]
+
+
+def first_line(e: BaseException) -> str:
+    lines = str(e).splitlines()
+    return lines[0] if lines else type(e).__name__
+
+
 def load_yaml_text(text: str) -> Any:
     return yaml.load(text, Loader=_Loader)  # noqa: S506 - safe subclass
 
@@ -98,8 +124,8 @@ def _read_yaml(c: Content, path: Path, default: Any) -> Any:
         return default
     try:
         data = load_yaml(path)
-    except (yaml.YAMLError, UnicodeDecodeError) as e:
-        c.errors.append(f"{_rel(c.root, path)}: cannot parse YAML: {str(e).splitlines()[0] if str(e) else e}")
+    except (yaml.YAMLError, UnicodeDecodeError, OSError) as e:
+        c.errors.append(f"{_rel(c.root, path)}: cannot read YAML: {first_line(e)}")
         return default
     return default if data is None else data
 
@@ -114,7 +140,12 @@ def load_all(root: Path, lang: str = "de") -> Content:
 
     topics_dir = content_dir / lang / "topics"
     if topics_dir.is_dir():
-        for d in sorted(p for p in topics_dir.iterdir() if p.is_dir()):
+        try:
+            subdirs = sorted(p for p in topics_dir.iterdir() if p.is_dir())
+        except OSError as e:
+            c.errors.append(f"{_rel(root, topics_dir)}: cannot list directory: {first_line(e)}")
+            subdirs = []
+        for d in subdirs:
             m = TOPIC_DIR_RE.match(d.name)
             if not m:
                 c.errors.append(f"{_rel(root, d)}: directory name must match tNN-slug")
@@ -127,7 +158,12 @@ def load_all(root: Path, lang: str = "de") -> Content:
 
     exams_dir = content_dir / lang / "exams"
     if exams_dir.is_dir():
-        for f in sorted(p for p in exams_dir.iterdir() if p.is_file()):
+        try:
+            exam_paths = sorted(p for p in exams_dir.iterdir() if p.is_file())
+        except OSError as e:
+            c.errors.append(f"{_rel(root, exams_dir)}: cannot list directory: {first_line(e)}")
+            exam_paths = []
+        for f in exam_paths:
             m = EXAM_FILE_RE.match(f.name)
             if not m:
                 c.errors.append(f"{_rel(root, f)}: exam file name must match exam-NN.yml")
@@ -143,8 +179,8 @@ def _load_summary(c: Content, tid: str, path: Path) -> None:
         return
     try:
         text = path.read_text(encoding="utf-8")
-    except UnicodeDecodeError:
-        c.errors.append(f"{_rel(c.root, path)}: not valid UTF-8")
+    except (UnicodeDecodeError, OSError) as e:
+        c.errors.append(f"{_rel(c.root, path)}: cannot read file: {first_line(e)}")
         return
     parts = split_frontmatter(text)
     if parts is None:
@@ -154,6 +190,6 @@ def _load_summary(c: Content, tid: str, path: Path) -> None:
     try:
         meta = load_yaml_text(fm)
     except yaml.YAMLError as e:
-        c.errors.append(f"{_rel(c.root, path)}: cannot parse frontmatter: {str(e).splitlines()[0]}")
+        c.errors.append(f"{_rel(c.root, path)}: cannot parse frontmatter: {first_line(e)}")
         return
     c.summaries[tid] = Summary(meta=meta, body=body, path=path)

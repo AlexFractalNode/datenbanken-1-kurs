@@ -12,7 +12,7 @@ Usage: set_status.py <topic-id|exam-id> [--add-review {fach,aufgaben,leak,en}]
   on every item, otherwise nothing is written and the exit code is 1.
 
 Files are edited textually (only the ``reviews`` and ``status`` lines), so
-comments and formatting are preserved. Every edit is verified by re-parsing;
+comments (also inline comments on those lines) and formatting are preserved. Every edit is verified by re-parsing;
 nothing is written unless only the intended fields changed.
 
 Exit codes: 0 ok, 1 promotion refused, 2 usage error / scope not found / failure.
@@ -60,7 +60,8 @@ def _set_key(lines: list[str], start: int, end: int, indent: str, key: str, valu
             # block-style list: consume following simple scalar items
             while j < end and SCALAR_ITEM_RE.match(lines[j]) and len(lines[j]) - len(lines[j].lstrip()) >= len(indent):
                 j += 1
-        lines[i:j] = [f"{indent}{key}: {value}"]
+        comment = re.search(r"(\s+#.*)$", m.group(1))
+        lines[i:j] = [f"{indent}{key}: {value}{comment.group(1) if comment else ''}"]
         return
     raise EditError(f"key '{key}' not found")
 
@@ -221,7 +222,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         # stage 'en' touches EN files; everything else (and promotion) the DE files
         review_lang = "en" if args.stage == "en" else "de"
-        plans: list[tuple[_Target, list[dict]]] = []
+        plans: dict[Path, tuple[_Target, list[dict]]] = {}
         review_targets = _collect(root, scope, review_lang)
         if args.stage:
             if not review_targets:
@@ -232,15 +233,13 @@ def main(argv: list[str] | None = None) -> int:
                 for it in new_items:
                     have = set(it.get("reviews") or []) | {args.stage}
                     it["reviews"] = [s for s in STAGES if s in have]
-                plans.append((t, new_items))
+                plans[t.path] = (t, new_items)
 
         if args.promote:
             de_targets = review_targets if review_lang == "de" else _collect(root, scope, "de")
             if not de_targets:
                 print(f"scope {scope} not found for lang de", file=sys.stderr)
                 return 2
-            by_path = {t.path: (t, items) for t, items in plans} if review_lang == "de" else {}
-            promote_plans: list[tuple[_Target, list[dict]]] = []
             has_tasks = any(
                 t.kind == "exam" or t.path.name in ("tasks.yml", "sql-tasks.yml")
                 for t in de_targets
@@ -248,23 +247,24 @@ def main(argv: list[str] | None = None) -> int:
             )
             required = {"fach", "leak"} | ({"aufgaben"} if has_tasks else set())
             problems = []
+            promote_plans: dict[Path, tuple[_Target, list[dict]]] = {}
             for t in de_targets:
-                items = copy.deepcopy(by_path[t.path][1] if t.path in by_path else t.items)
+                items = copy.deepcopy(plans[t.path][1] if t.path in plans else t.items)
                 for it in items:
                     missing = required - set(it.get("reviews") or [])
                     if missing:
                         problems.append(f"{t.path.name}:{it.get('id')} lacks {', '.join(sorted(missing))}")
                     elif it.get("status") != "verified":
                         it["status"] = "reviewed"
-                promote_plans.append((t, items))
+                promote_plans[t.path] = (t, items)
             if problems:
                 print("cannot promote:", file=sys.stderr)
-                for p in problems:
-                    print(f"  {p}", file=sys.stderr)
+                for p_ in problems:
+                    print(f"  {p_}", file=sys.stderr)
                 return 1
-            plans = promote_plans
+            plans.update(promote_plans)  # keeps non-DE plans (e.g. the EN review)
 
-        outputs = [(t, t.apply(items)) for t, items in plans]
+        outputs = [(t, t.apply(items)) for t, items in plans.values()]
     except EditError as e:
         print(f"error: {e}", file=sys.stderr)
         return 2
