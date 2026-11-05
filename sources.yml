@@ -1,0 +1,777 @@
+# Registry offener Quellen (Task A10). Felder: id, title, author?, url, license, accessed, kind, topics, refs.
+# kind: docs | oer | wiki | further-reading. further-reading hat bewusst keine topics.
+# refs sind Kandidaten (Abschnitte/Anker), keine geprueften Zitate.
+
+# ---------- DBMS-Dokumentation ----------
+- id: postgresql-17-docs-sql
+  title: "PostgreSQL 17 Documentation, Teil II: The SQL Language"
+  author: PostgreSQL Global Development Group
+  url: "https://www.postgresql.org/docs/17/sql.html"
+  license: "PostgreSQL License"
+  accessed: "2026-11-05"
+  kind: docs
+  topics: [t05, t09, t10, t11, t12, t13]
+  refs:
+    - "Kap. 5 Data Definition: https://www.postgresql.org/docs/17/ddl.html"
+    - "5.2 Default Values: https://www.postgresql.org/docs/17/ddl-default.html"
+    - "5.5 Constraints (CHECK, NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY): https://www.postgresql.org/docs/17/ddl-constraints.html"
+    - "5.7 Modifying Tables (ALTER TABLE): https://www.postgresql.org/docs/17/ddl-alter.html"
+    - "5.8 Privileges: https://www.postgresql.org/docs/17/ddl-priv.html"
+    - "Kap. 6 Data Manipulation (INSERT, UPDATE, DELETE): https://www.postgresql.org/docs/17/dml.html"
+    - "Kap. 7 Queries (Joins, GROUP BY, Mengenoperationen, LIMIT): https://www.postgresql.org/docs/17/queries.html"
+    - "Kap. 8 Data Types: https://www.postgresql.org/docs/17/datatype.html"
+    - "Kap. 9 Functions and Operators: https://www.postgresql.org/docs/17/functions.html"
+    - "4.2 Value Expressions, Subquery Expressions: https://www.postgresql.org/docs/17/sql-expressions.html"
+    - "9.24 Subquery Expressions (IN, ANY, ALL, EXISTS): https://www.postgresql.org/docs/17/functions-subquery.html"
+    - "Kap. 11 Indexes: https://www.postgresql.org/docs/17/indexes.html"
+    - "Kap. 37 Triggers: https://www.postgresql.org/docs/17/triggers.html"
+    - "CREATE VIEW (Sichten): https://www.postgresql.org/docs/17/sql-createview.html"
+
+- id: postgresql-17-docs-sql-commands
+  title: "PostgreSQL 17 Documentation, SQL Commands (Referenz)"
+  author: PostgreSQL Global Development Group
+  url: "https://www.postgresql.org/docs/17/sql-commands.html"
+  license: "PostgreSQL License"
+  accessed: "2026-11-05"
+  kind: docs
+  topics: [t09, t10, t11, t12, t13]
+  refs:
+    - "CREATE TABLE: https://www.postgresql.org/docs/17/sql-createtable.html"
+    - "CREATE DOMAIN: https://www.postgresql.org/docs/17/sql-createdomain.html"
+    - "CREATE SEQUENCE: https://www.postgresql.org/docs/17/sql-createsequence.html"
+    - "ALTER TABLE: https://www.postgresql.org/docs/17/sql-altertable.html"
+    - "DROP TABLE: https://www.postgresql.org/docs/17/sql-droptable.html"
+    - "SELECT: https://www.postgresql.org/docs/17/sql-select.html"
+    - "INSERT: https://www.postgresql.org/docs/17/sql-insert.html"
+    - "UPDATE: https://www.postgresql.org/docs/17/sql-update.html"
+    - "DELETE: https://www.postgresql.org/docs/17/sql-delete.html"
+    - "CREATE VIEW: https://www.postgresql.org/docs/17/sql-createview.html"
+    - "CREATE TRIGGER: https://www.postgresql.org/docs/17/sql-createtrigger.html"
+    - "CREATE INDEX: https://www.postgresql.org/docs/17/sql-createindex.html"
+    - "CREATE PROCEDURE: https://www.postgresql.org/docs/17/sql-createprocedure.html"
+    - "GRANT: https://www.postgresql.org/docs/17/sql-grant.html"
+    - "REVOKE: https://www.postgresql.org/docs/17/sql-revoke.html"
+
+- id: firebird-30-language-reference
+  title: "Firebird 3.0 Language Reference"
+  author: Firebird Project and all contributing authors
+  url: "https://firebirdsql.org/file/documentation/html/en/refdocs/fblangref30/firebird-30-language-reference.html"
+  license: "Public Documentation License Version 1.0"
+  accessed: "2026-11-05"
+  kind: docs
+  topics: [t05, t09, t10, t11, t12, t13]
+  refs:
+    - "Kap. 3 Data Types and Subtypes: …#fblangref30-datatypes"
+    - "Kap. 4 Common Language Elements (u. a. Domains, Constraints): …#fblangref30-commons"
+    - "Kap. 5 Data Definition (DDL) Statements (CREATE TABLE, ALTER TABLE, DOMAIN, GENERATOR, INDEX, VIEW): …#fblangref30-ddl"
+    - "Kap. 6 Data Manipulation (DML) Statements (SELECT mit FIRST/SKIP, INSERT, UPDATE, DELETE): …#fblangref30-dml"
+    - "Kap. 7 Procedural SQL (PSQL) Statements (Trigger, Stored Procedures): …#fblangref30-psql"
+    - "Kap. 8 Built-in Scalar Functions: …#fblangref30-functions"
+    - "Kap. 9 Aggregate Functions: …#fblangref30-aggfuncs"
+    - "Kap. 13 Security (GRANT, REVOKE): …#fblangref30-security"
+    - "Appendix H License Notice: …#fblangref30-license"
+
+- id: sqlite-documentation
+  title: "SQLite Documentation"
+  author: SQLite Consortium / D. Richard Hipp et al.
+  url: "https://www.sqlite.org/docs.html"
+  license: "Public Domain"
+  accessed: "2026-11-05"
+  kind: docs
+  topics: [t05, t09, t10, t11, t12, t13]
+  refs:
+    - "Datatypes In SQLite: https://www.sqlite.org/datatype3.html"
+    - "CREATE TABLE: https://www.sqlite.org/lang_createtable.html"
+    - "Foreign Key Support (ON DELETE/ON UPDATE): https://www.sqlite.org/foreignkeys.html"
+    - "SELECT: https://www.sqlite.org/lang_select.html"
+    - "NULL Handling in SQLite: https://www.sqlite.org/nulls.html"
+    - "INSERT / UPDATE / DELETE: https://www.sqlite.org/lang_insert.html ; https://www.sqlite.org/lang_update.html ; https://www.sqlite.org/lang_delete.html"
+    - "ALTER TABLE / DROP TABLE: https://www.sqlite.org/lang_altertable.html ; https://www.sqlite.org/lang_droptable.html"
+    - "CREATE VIEW: https://www.sqlite.org/lang_createview.html"
+    - "CREATE TRIGGER: https://www.sqlite.org/lang_createtrigger.html"
+    - "CREATE INDEX: https://www.sqlite.org/lang_createindex.html"
+    - "Prepared Statements (sqlite3_prepare, Parameterbindung): https://www.sqlite.org/c3ref/prepare.html"
+    - "SQLite Copyright (Lizenznachweis): https://www.sqlite.org/copyright.html"
+
+# ---------- Wikibooks / OER ----------
+- id: wikibooks-einfuehrung-in-sql
+  title: "Einführung in SQL (Wikibooks)"
+  author: Wikibooks-Autoren
+  url: "https://de.wikibooks.org/wiki/Einführung_in_SQL"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t09, t10, t11]
+  refs:
+    - "Inhaltsverzeichnis (Kapitel Abfragen, Daten manipulieren, Struktur ändern): https://de.wikibooks.org/wiki/Einführung_in_SQL:_Inhaltsverzeichnis"
+
+- id: watt-database-design-2e
+  title: "Database Design – 2nd Edition"
+  author: Adrienne Watt, Nelson Eng
+  url: "https://opentextbc.ca/dbdesign01/"
+  license: "CC BY 4.0"
+  accessed: "2026-11-05"
+  kind: oer
+  topics: [t01, t02, t03, t04, t05, t06, t07, t09, t11, t13]
+  refs:
+    - "Kap. 2 Fundamental Concepts; Kap. 3 Characteristics and Benefits of a Database"
+    - "Kap. 4 Types of Data Models; Kap. 5 Data Modelling; Kap. 6 Classification of DBMS"
+    - "Kap. 7 The Relational Data Model"
+    - "Kap. 8 The Entity Relationship Data Model; Kap. 10 ER Modelling"
+    - "Kap. 9 Integrity Rules and Constraints"
+    - "Kap. 11 Functional Dependencies; Kap. 12 Normalization"
+    - "Kap. 13 Database Development Process"
+    - "Kap. 14 Database Users"
+    - "Kap. 15 SQL Structured Query Language; Kap. 16 SQL Data Manipulation Language"
+    - "Lizenznachweis (Katalogseite): https://open.umn.edu/opentextbooks/textbooks/database-design-2nd-edition"
+
+- id: oer-informatik-datenbanken
+  title: "OER Informatik: Datenbanken (ERM, Relationenmodell, Normalisierung, SQL)"
+  author: Hannes Stein
+  url: "https://oer-informatik.de/"
+  license: "CC BY 4.0"
+  accessed: "2026-11-05"
+  kind: oer
+  topics: [t01, t04, t05, t06, t07, t09, t10, t11, t12, t13]
+  refs:
+    - "DB-Konzepte: https://oer-informatik.de/datenbankkonzepte"
+    - "DBMS: https://oer-informatik.de/dbms"
+    - "ER-Modell: https://oer-informatik.de/erm"
+    - "Relationenmodell: https://oer-informatik.de/relationenmodell"
+    - "Normalisierung: https://oer-informatik.de/normalisierung"
+    - "SQL DDL: https://oer-informatik.de/sql-ddl-basics"
+    - "SQL INSERT/UPDATE/DELETE: https://oer-informatik.de/sql-dml-insert ; https://oer-informatik.de/sql-dml-update ; https://oer-informatik.de/sql-dml-delete"
+    - "Selektion/Projektion: https://oer-informatik.de/sql-dml-selektion-projektion"
+    - "Aggregatfunktionen: https://oer-informatik.de/sql-groupfunctions"
+    - "JOIN: https://oer-informatik.de/sql-join"
+    - "Unterabfragen: https://oer-informatik.de/sql-unterabfragen"
+    - "Benutzer und Rechte (DCL): https://oer-informatik.de/sql-dcl"
+    - "Lizenznachweis: https://oer-informatik.de/impressum"
+
+- id: inf-schule-datenbanksysteme
+  title: "inf-schule.de: Datenbanksysteme"
+  author: inf-schule.de-Autorenteam
+  url: "https://inf-schule.de/datenbanksysteme"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: oer
+  topics: [t03, t04, t06, t10, t13]
+  refs:
+    - "Entwurf von Datenbanken (ER-Modelle): https://inf-schule.de/datenbanksysteme/ermodelle"
+    - "Zugriff auf Datenbanken: https://inf-schule.de/datenbanksysteme/zugriff"
+    - "Datenbank für Geodaten (SQL-Abfragen): https://inf-schule.de/datenbanksysteme/terra"
+    - "Datenbank für Soz. Netzwerk: https://inf-schule.de/datenbanksysteme/gbuch"
+    - "Lizenznachweis: https://inf-schule.de/infschule/lizenz"
+
+# ---------- Wikipedia (de), je Artikel ein Eintrag ----------
+- id: wp-daten
+  title: "Daten (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Daten"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01]
+  refs: ["Begriff Daten, Abgrenzung zu Information"]
+
+- id: wp-information
+  title: "Information (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Information"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01]
+  refs: ["Begriffsabgrenzung Daten/Information/Wissen"]
+
+- id: wp-wissen
+  title: "Wissen (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Wissen"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01]
+  refs: ["Einleitung, Abgrenzung zu Daten und Information"]
+
+- id: wp-persistenz-informatik
+  title: "Persistenz (Informatik) (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Persistenz_(Informatik)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01]
+  refs: ["persistente vs. transiente Daten"]
+
+- id: wp-datenbank
+  title: "Datenbank (Wikipedia; enthält Weiterleitungen Datenbanksystem, Datenbankmanagementsystem)"
+  url: "https://de.wikipedia.org/wiki/Datenbank"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01, t02, t13]
+  refs: ["Datenbank, DBMS, Datenbanksystem", "Aufgaben/Funktionen eines DBMS", "Datenbankanwendung"]
+
+- id: wp-miniwelt
+  title: "Miniwelt (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Miniwelt"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01, t03]
+  refs: ["Begriff Miniwelt"]
+
+- id: wp-data-dictionary
+  title: "Data-Dictionary (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Data-Dictionary"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01]
+  refs: ["Data Dictionary"]
+
+- id: wp-schema-informatik
+  title: "Schema (Informatik) (Wikipedia; Weiterleitung von Datenbankschema)"
+  url: "https://de.wikipedia.org/wiki/Schema_(Informatik)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01, t02]
+  refs: ["Datenbankschema vs. Ausprägung"]
+
+- id: wp-datenbankadministrator
+  title: "Datenbankadministrator (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Datenbankadministrator"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01]
+  refs: ["Benutzerrollen"]
+
+- id: wp-edgar-f-codd
+  title: "Edgar F. Codd (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Edgar_F._Codd"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01, t02]
+  refs: ["Relationales Modell, Codd-Regeln (Kandidat; der Artikel 'Codd'sche Regeln' existiert nicht)"]
+
+- id: wp-datenbankmodell
+  title: "Datenbankmodell (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Datenbankmodell"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t02]
+  refs: ["Modellbegriff und Überblick über Datenbankmodelle"]
+
+- id: wp-hierarchisches-datenbankmodell
+  title: "Hierarchisches Datenbankmodell (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Hierarchisches_Datenbankmodell"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t02]
+  refs: ["Hierarchisches Modell"]
+
+- id: wp-relationale-datenbank
+  title: "Relationale Datenbank (Wikipedia; Weiterleitung von Relationales Datenbankmodell)"
+  url: "https://de.wikipedia.org/wiki/Relationale_Datenbank"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t02, t05, t06]
+  refs: ["Relationales Modell, Überblick", "Relation, Tupel, Attribut"]
+
+- id: wp-objektdatenbank
+  title: "Objektdatenbank (Wikipedia; Weiterleitung von Objektorientierte Datenbank)"
+  url: "https://de.wikipedia.org/wiki/Objektdatenbank"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t02]
+  refs: ["Objektorientiertes Datenbankmodell"]
+
+- id: wp-objektrelationale-datenbank
+  title: "Objektrelationale Datenbank (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Objektrelationale_Datenbank"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t02]
+  refs: ["Objektrelationales Modell"]
+
+- id: wp-ansi-sparc-architektur
+  title: "ANSI-SPARC-Architektur (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/ANSI-SPARC-Architektur"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t02]
+  refs: ["Drei-Ebenen-Architektur", "Datenunabhängigkeit"]
+
+- id: wp-datenunabhaengigkeit
+  title: "Datenunabhängigkeit (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Datenunabhängigkeit"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t02]
+  refs: ["logische und physische Datenunabhängigkeit"]
+
+- id: wp-datenmodellierung
+  title: "Datenmodellierung (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Datenmodellierung"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t03, t04]
+  refs: ["konzeptionelles, logisches, physisches Datenmodell (Phasen)"]
+
+- id: wp-entity-relationship-modell
+  title: "Entity-Relationship-Modell (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Entity-Relationship-Modell"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t03, t04, t06]
+  refs: ["Entitätstyp, Attribute, Beziehungstypen", "Notationen (Chen, Min-Max)", "Überführung in das relationale Modell"]
+
+- id: wp-schluessel-datenbank
+  title: "Schlüssel (Datenbank) (Wikipedia; Weiterleitung von Primärschlüssel, Fremdschlüssel)"
+  url: "https://de.wikipedia.org/wiki/Schlüssel_(Datenbank)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t04, t05, t09]
+  refs: ["Super-, Kandidaten-, Primär-, Fremdschlüssel", "künstlicher Schlüssel/Autowert"]
+
+- id: wp-unified-modeling-language
+  title: "Unified Modeling Language (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Unified_Modeling_Language"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t04]
+  refs: ["Klassendiagramm als alternative Notation (Multiplizitäten)"]
+
+- id: wp-temporale-datenbank
+  title: "Temporale Datenbank (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Temporale_Datenbank"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t04]
+  refs: ["Zeitbezug (Gültigkeits-/Transaktionszeit)"]
+
+- id: wp-relation-datenbank
+  title: "Relation (Datenbank) (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Relation_(Datenbank)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t05, t08]
+  refs: ["Relation, Tupel, Attribut"]
+
+- id: wp-wertemenge
+  title: "Wertemenge (Wikipedia; Weiterleitung von Wertebereich)"
+  url: "https://de.wikipedia.org/wiki/Wertemenge"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t05]
+  refs: ["Domäne/Wertebereich"]
+
+- id: wp-referentielle-integritaet
+  title: "Referentielle Integrität (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Referentielle_Integrität"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t05, t09, t11]
+  refs: ["Fremdschlüssel-Bedingung", "referenzielle Aktionen (CASCADE, SET NULL, RESTRICT)"]
+
+- id: wp-datenintegritaet
+  title: "Datenintegrität (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Datenintegrität"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t05, t12]
+  refs: ["Integritätsarten", "deklarative vs. prozedurale Sicherung"]
+
+- id: wp-normalisierung-datenbank
+  title: "Normalisierung (Datenbank) (Wikipedia; enthält BCNF, 4NF)"
+  url: "https://de.wikipedia.org/wiki/Normalisierung_(Datenbank)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t07]
+  refs:
+    - "Vorgehen: Ziel Konsistenzerhöhung durch Redundanzvermeidung"
+    - "Normalformen: 1NF, 2NF, 3NF, BCNF, 4NF, 5NF"
+
+- id: wp-funktionale-abhaengigkeit
+  title: "Funktionale Abhängigkeit (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Funktionale_Abhängigkeit"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t07]
+  refs: ["Definition, volle und transitive Abhängigkeit"]
+
+- id: wp-denormalisierung
+  title: "Denormalisierung (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Denormalisierung"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t07]
+  refs: ["Gründe und Nachteile der Denormalisierung"]
+
+- id: wp-relationale-algebra
+  title: "Relationale Algebra (Wikipedia; enthält Semijoin)"
+  url: "https://de.wikipedia.org/wiki/Relationale_Algebra"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t08]
+  refs: ["Selektion, Projektion, Umbenennung", "Mengenoperationen", "Produkt und Verbund", "Semijoin"]
+
+- id: wp-join-sql
+  title: "Join (SQL) (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Join_(SQL)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t08, t10]
+  refs: ["Inner, Outer, Natural, Cross Join"]
+
+- id: wp-sql
+  title: "SQL (Wikipedia; Weiterleitung von Structured Query Language)"
+  url: "https://de.wikipedia.org/wiki/SQL"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t09, t10, t11]
+  refs: ["Sprachelemente", "Datentypen", "NULL und dreiwertige Logik"]
+
+- id: wp-data-definition-language
+  title: "Data Definition Language (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Data_Definition_Language"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t09]
+  refs: ["CREATE, ALTER, DROP"]
+
+- id: wp-data-manipulation-language
+  title: "Data Manipulation Language (Wikipedia; enthält Weiterleitung Data Query Language)"
+  url: "https://de.wikipedia.org/wiki/Data_Manipulation_Language"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t09, t10, t11]
+  refs: ["INSERT, UPDATE, DELETE", "Abgrenzung DQL"]
+
+- id: wp-data-control-language
+  title: "Data Control Language (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Data_Control_Language"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t09, t13]
+  refs: ["GRANT, REVOKE"]
+
+- id: wp-datentyp
+  title: "Datentyp (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Datentyp"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t09]
+  refs: ["allgemeiner Datentypbegriff"]
+
+- id: wp-dreiwertige-logik
+  title: "Dreiwertige Logik (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Dreiwertige_Logik"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t10]
+  refs: ["Kleene-Logik (SQL: TRUE/FALSE/UNKNOWN)"]
+
+- id: wp-aggregatfunktion
+  title: "Aggregatfunktion (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Aggregatfunktion"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t10]
+  refs: ["COUNT, SUM, AVG, MIN, MAX"]
+
+- id: wp-abfragesprache
+  title: "Abfragesprache (Wikipedia; Weiterleitung von Datenbankabfrage)"
+  url: "https://de.wikipedia.org/wiki/Abfragesprache"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t10]
+  refs: ["Datenbankabfrage"]
+
+- id: wp-transaktion-informatik
+  title: "Transaktion (Informatik) (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Transaktion_(Informatik)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t11]
+  refs: ["Kontext für DML-Änderungen (COMMIT/ROLLBACK)"]
+
+- id: wp-sicht-datenbank
+  title: "Sicht (Datenbank) (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Sicht_(Datenbank)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t12]
+  refs: ["Sichten und Änderbarkeit"]
+
+- id: wp-datenbanktrigger
+  title: "Datenbanktrigger (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Datenbanktrigger"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t12]
+  refs: ["BEFORE/AFTER-Trigger"]
+
+- id: wp-gespeicherte-prozedur
+  title: "Gespeicherte Prozedur (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Gespeicherte_Prozedur"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t12]
+  refs: ["Stored Procedures"]
+
+- id: wp-datenbankindex
+  title: "Datenbankindex (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Datenbankindex"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t12]
+  refs: ["Zweck von Indexen"]
+
+- id: wp-schichtenarchitektur
+  title: "Schichtenarchitektur (Wikipedia; Weiterleitung von Mehrschichtenarchitektur)"
+  url: "https://de.wikipedia.org/wiki/Schichtenarchitektur"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t13]
+  refs: ["Datenbankanwendungen und Schichten"]
+
+- id: wp-open-database-connectivity
+  title: "Open Database Connectivity (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Open_Database_Connectivity"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t13]
+  refs: ["ODBC"]
+
+- id: wp-java-database-connectivity
+  title: "Java Database Connectivity (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Java_Database_Connectivity"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t13]
+  refs: ["JDBC"]
+
+- id: wp-sql-injection
+  title: "SQL-Injection (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/SQL-Injection"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t13]
+  refs: ["Funktionsweise", "Gegenmaßnahmen / Prepared Statements"]
+
+- id: wp-prepared-statement
+  title: "Prepared Statement (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Prepared_Statement"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t13]
+  refs: ["Parametrisierte Anweisungen"]
+
+# ---------- Primärliteratur / weiterführend (nur Verweis, keine topics) ----------
+- id: codd-1970-relational-model
+  title: "A Relational Model of Data for Large Shared Data Banks"
+  author: E. F. Codd
+  url: "https://doi.org/10.1145/362384.362685"
+  license: "urheberrechtlich geschützt (ACM), nur Verweis"
+  accessed: "2026-11-05"
+  kind: further-reading
+
+- id: chen-1976-er-model
+  title: "The Entity-Relationship Model – Toward a Unified View of Data"
+  author: Peter P. Chen
+  url: "https://doi.org/10.1145/320434.320440"
+  license: "urheberrechtlich geschützt (ACM), nur Verweis"
+  accessed: "2026-11-05"
+  kind: further-reading
+
+# ---------- Ergänzung (zweiter Rechercheschritt) ----------
+- id: wikibooks-relationenalgebra-und-sql
+  title: "Relationenalgebra und SQL (Wikibooks)"
+  author: Wikibooks-Autoren
+  url: "https://de.wikibooks.org/wiki/Relationenalgebra_und_SQL"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t08, t10]
+  refs:
+    - "Mengenoperationen (Vereinigung, Differenz, Durchschnitt): https://de.wikibooks.org/wiki/Relationenalgebra_und_SQL:_Mengenoperationen"
+    - "Kartesisches Produkt: https://de.wikibooks.org/wiki/Relationenalgebra_und_SQL:_Kartesisches_Produkt"
+    - "Projektion: https://de.wikibooks.org/wiki/Relationenalgebra_und_SQL:_Projektion"
+    - "Selektion: https://de.wikibooks.org/wiki/Relationenalgebra_und_SQL:_Selektion"
+    - "Join (Equi-, Natural-, Semi-, Outer-Join): https://de.wikibooks.org/wiki/Relationenalgebra_und_SQL:_Join"
+    - "Umbenennung: https://de.wikibooks.org/wiki/Relationenalgebra_und_SQL:_Umbenennung"
+    - "Gruppierung und Aggregatfunktionen: https://de.wikibooks.org/wiki/Relationenalgebra_und_SQL:_Gruppierungsoperator_und_Aggregatfunktionen"
+
+- id: wikibooks-en-relational-database-design
+  title: "Relational Database Design (English Wikibooks)"
+  author: Wikibooks contributors
+  url: "https://en.wikibooks.org/wiki/Relational_Database_Design"
+  license: "Creative Commons Attribution-ShareAlike (Version im Seitenfooter nicht genannt)"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t05, t06, t07, t08]
+  refs:
+    - "Relationships (ER-Diagramme, Abbildung auf Tabellen/Fremdschlüssel; teils unvollständig): https://en.wikibooks.org/wiki/Relational_Database_Design/Relationships"
+    - "Constraints (Kapitel im Inhaltsverzeichnis)"
+    - "Normalization (Kapitel im Inhaltsverzeichnis)"
+    - "Retrieving Data (relationale Algebra; Kapitel im Inhaltsverzeichnis)"
+
+- id: oer-informatik-erm
+  title: "Modellierung einer Datenbank: Entity-Relationship-Modell (OER Informatik)"
+  author: Hannes Stein
+  url: "https://oer-informatik.de/erm"
+  license: "CC BY 4.0"
+  accessed: "2026-11-05"
+  kind: oer
+  topics: [t03, t04]
+  refs:
+    - "Konzeptueller Datenbankentwurf (Ziele, Entwurfsschritte): https://oer-informatik.de/erm"
+    - "Kardinalitäten lesen, Feste Anzahlen und Optionalität"
+    - "Besondere Beziehungstypen (rekursiv, ternär)"
+    - "Erweiterte Notationsmittel (mehrwertige/abgeleitete Attribute, schwache Entitätstypen)"
+    - "Modellierungsphasen, Nominalextraktion"
+    - "Lizenznachweis: https://oer-informatik.de/impressum"
+
+- id: oer-informatik-relationenmodell
+  title: "Von Attributwolken zur Schlüsselbeziehung: das Relationenmodell (OER Informatik)"
+  author: Hannes Stein
+  url: "https://oer-informatik.de/relationenmodell"
+  license: "CC BY 4.0"
+  accessed: "2026-11-05"
+  kind: oer
+  topics: [t05, t06]
+  refs:
+    - "Vom konzeptuellen ins logische Modell"
+    - "Transformationsschritte: Primärschlüssel wählen, Kardinalitäten in Fremdschlüssel transformieren (1:N, M:N, 1:1)"
+    - "Transformation von schwachen Entitätstypen"
+    - "Lizenznachweis: https://oer-informatik.de/impressum"
+
+- id: wpen-relational-algebra
+  title: "Relational algebra (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Relational_algebra"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t08]
+  refs: ["Primitive operators", "Joins and join-like operators", "Set operators"]
+
+- id: wpen-codds-12-rules
+  title: "Codd's 12 rules (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Codd%27s_12_rules"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t01, t02]
+  refs: ["Rules 0 bis 12 (u. a. Rule 4 Katalog, Rule 8/9 Datenunabhängigkeit, Rule 10 Integrität)"]
+
+- id: wpen-database-design
+  title: "Database design (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Database_design"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t03]
+  refs: ["Determining data to be stored / Phasen des Entwurfs", "Conceptual, logical and physical design"]
+
+- id: wpen-entity-relationship-model
+  title: "Entity–relationship model (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t04, t06]
+  refs: ["Entity-Relationship-Konzepte, Notationen", "Mapping to relational schema (Kandidat)"]
+
+- id: wpen-database-normalization
+  title: "Database normalization (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Database_normalization"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t07]
+  refs: ["Normal forms", "Update/insertion/deletion anomalies"]
+
+- id: wpen-functional-dependency
+  title: "Functional dependency (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Functional_dependency"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t07]
+  refs: ["Definition, Armstrong's axioms"]
+
+- id: wpen-relational-model
+  title: "Relational model (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Relational_model"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t02, t05]
+  refs: ["Relation, tuple, attribute, domain", "Keys and integrity constraints"]
+
+- id: wpen-three-schema-approach
+  title: "Three-schema approach (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Three-schema_approach"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t02]
+  refs: ["ANSI-SPARC levels, logical and physical data independence"]
+
+- id: wpen-sql-injection
+  title: "SQL injection (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/SQL_injection"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t13]
+  refs: ["Mitigation: parameterized statements"]
+
+- id: wpen-join-sql
+  title: "Join (SQL) (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Join_(SQL)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-05"
+  kind: wiki
+  topics: [t08, t10]
+  refs: ["Inner, outer, cross, natural join; semi-join"]
