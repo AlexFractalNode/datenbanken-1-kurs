@@ -1,0 +1,34 @@
+# Allowlist: ignore everything at the root, then re-include public paths.
+/*
+!/content/
+!/schema/
+!/db/
+!/web/
+!/tools/
+!/tests/
+!/package/
+!/.github/
+!/sources.yml
+!/README.md
+!/LICENSE
+!/LICENSE-CONTENT
+!/CONTRIBUTING.md
+!/CHANGELOG.md
+!/.gitignore
+!/pyproject.toml
+!/uv.lock
+!/package.json
+!/package-lock.json
+!/.python-version
+!/docker-compose.test.yml
+
+# Never versioned, anywhere
+.claude/
+node_modules/
+dist/
+.venv/
+__pycache__/
+.pytest_cache/
+**/*.pdf
+**/*.pptx
+**/*.zip

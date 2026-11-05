@@ -1,0 +1,153 @@
+# Themen des Kurses (Reihenfolge, Unterpunkte). Single Source fuer Navigation und Autoren-Briefings.
+- id: t01
+  slug: grundlagen
+  order: 1
+  title: Grundlagen & Begriffe
+  subtopics:
+    - Daten, Information, Wissen
+    - persistente vs. transiente Daten
+    - Redundanz und Konsistenz
+    - Datenbank, DBMS, Datenbanksystem, Data Dictionary
+    - Miniwelt
+    - Schema vs. Ausprägung (Instanz)
+    - Benutzerrollen
+    - Anforderungen an DBMS (Codd-Regeln, DBMS-Funktionen)
+- id: t02
+  slug: datenbankmodelle
+  order: 2
+  title: Datenbankmodelle & Architektur
+  subtopics:
+    - Modellbegriff
+    - hierarchisches Modell und Netzwerkmodell
+    - relationales Modell (Überblick)
+    - objektorientierte und objektrelationale Modelle
+    - ANSI-SPARC-Drei-Ebenen-Architektur
+    - logische und physische Datenunabhängigkeit
+- id: t03
+  slug: entwicklungsprozess
+  order: 3
+  title: Entwicklungsprozess
+  subtopics:
+    - Phasenmodell des Datenbankentwurfs
+    - Anforderungsanalyse (Informations- und Verarbeitungsanforderungen)
+    - konzeptioneller Entwurf
+    - logischer Entwurf
+    - physischer Entwurf
+    - Sichtenintegration (Konsolidierung)
+    - Validierung und Wartung
+- id: t04
+  slug: er-modellierung
+  order: 4
+  title: ER-Modellierung
+  subtopics:
+    - Entitätstyp, Entität, Attributarten (einfach, zusammengesetzt, mehrwertig, abgeleitet)
+    - Schlüsselarten (Super-, Kandidaten-, Primär-, künstlicher, Fremdschlüssel)
+    - Beziehungstypen und Kardinalitäten in Chen-Notation
+    - (min,max)-Notation und Umrechnung zur Chen-Notation
+    - schwache Entitätstypen und Rollen
+    - rekursive und n-äre Beziehungen
+    - Generalisierung/Spezialisierung, Aggregation
+    - Zeitbezug im ER-Modell
+    - ER-Modell aus Text erstellen und lesen
+- id: t05
+  slug: relationales-modell
+  order: 5
+  title: Relationales Modell & Integrität
+  subtopics:
+    - Relation, Tupel, Attribut, Domäne
+    - Entitätsintegrität
+    - referenzielle Integrität
+    - Domänenintegrität
+    - benutzerdefinierte Integrität
+    - deklarative vs. prozedurale Integritätssicherung
+    - Eigenschaften von Fremdschlüsseln
+- id: t06
+  slug: erm-nach-relationen
+  order: 6
+  title: ERM → Relationen
+  subtopics:
+    - Abbildung von Entitätstypen und Attributen
+    - Abbildung von 1:1-, 1:n- und m:n-Beziehungen
+    - ternäre Beziehungen
+    - rekursive Beziehungen
+    - Generalisierung (drei Abbildungsvarianten mit Vor- und Nachteilen)
+    - schwache Entitätstypen
+    - Reihenfolge beim Anlegen der Tabellen
+- id: t07
+  slug: normalisierung
+  order: 7
+  title: Normalisierung
+  subtopics:
+    - Anomalien (Einfüge-, Änderungs-, Löschanomalie)
+    - funktionale Abhängigkeit
+    - volle und transitive Abhängigkeit
+    - verlustfreie Zerlegung
+    - 0. bis 3. Normalform
+    - Denormalisierung
+    - Ausblick BCNF und 4. Normalform
+- id: t08
+  slug: relationale-algebra
+  order: 8
+  title: Relationale Algebra
+  subtopics:
+    - Selektion, Projektion, Umbenennung
+    - kartesisches Produkt
+    - Theta-, Equi- und natürlicher Verbund (Join)
+    - äußerer Verbund und Semi-Join
+    - Vereinigung, Durchschnitt, Differenz
+    - Ausdrücke auswerten und schachteln
+- id: t09
+  slug: sql-ddl
+  order: 9
+  title: SQL-Grundlagen & DDL
+  subtopics:
+    - Sprachklassen (DDL, DML, DQL, DCL)
+    - Datentypen
+    - CREATE TABLE mit PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, DEFAULT, NOT NULL
+    - referenzielle Aktionen ON DELETE / ON UPDATE
+    - automatische Schlüsselwerte (Identity, Generatoren/Sequenzen)
+    - ALTER TABLE und DROP
+    - Domänen (CREATE DOMAIN)
+- id: t10
+  slug: sql-dql
+  order: 10
+  title: SQL-DQL
+  subtopics:
+    - Projektion, DISTINCT, Alias, berechnete Spalten
+    - WHERE mit Vergleichen, LIKE, BETWEEN, IN
+    - NULL und dreiwertige Logik
+    - Sortierung und Ergebnisbegrenzung (FIRST/SKIP bzw. FETCH/LIMIT)
+    - Aggregatfunktionen, GROUP BY, HAVING
+    - Inner, Outer und Natural Join
+    - Mengenoperationen
+    - Unterabfragen (IN, ANY, ALL, EXISTS, korreliert)
+    - Datums-, Zeichenketten- und Konvertierungsfunktionen
+    - logische Auswertungsreihenfolge einer Abfrage
+- id: t11
+  slug: sql-dml
+  order: 11
+  title: SQL-DML
+  subtopics:
+    - INSERT
+    - UPDATE
+    - DELETE
+    - Wirkung referenzieller Aktionen
+    - automatische Schlüsselwerte beim Einfügen
+- id: t12
+  slug: views-trigger-procedures
+  order: 12
+  title: Views, Trigger, Stored Procedures, Index
+  subtopics:
+    - Sichten (Views) und ihre Änderbarkeit
+    - Trigger (BEFORE/AFTER) und prozedurale Integrität
+    - Stored Procedures (Grundidee)
+    - Indexe (Zweck, Primärschlüssel-Index)
+- id: t13
+  slug: anwendungszugriff
+  order: 13
+  title: Anwendungszugriff & Sicherheit
+  subtopics:
+    - Datenbankanwendungen und Schichten
+    - Schnittstellen (ODBC, JDBC)
+    - SQL-Injection und Prepared Statements
+    - Rechtevergabe (GRANT, REVOKE) im Überblick
