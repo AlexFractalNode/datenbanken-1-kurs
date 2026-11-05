@@ -164,10 +164,11 @@ def test_extension_allowlist():
                "j.tsx", "k.jsx", "web/src/p.astro", "l.css", "m.html", "n.svg", "o.dot",
                "p.sql", "q.txt", "r.toml", "uv.lock", "s.typ", "t.csv", "u.sh", ".gitignore",
                ".gitattributes", ".python-version", "LICENSE", "LICENSE-CONTENT",
-               "web/public/logo.png", "X.MD"]:
+               "web/public/logo.png", "X.MD", "Dockerfile", "tools/fbrunner.Dockerfile",
+               "a.DOCKERFILE"]:
         assert scan_paths([ok], {}) == [], ok
     for bad in ["a.tgz", "b.rtf", "c.epub", "d.xlsm", "Makefile", "LICENSE2", "e.png",
-                "web/src/f.png", "g.Dockerfile"]:
+                "web/src/f.png", "Dockerfile.bak", "dockerfile"]:
         assert rules(scan_paths([bad], {})) == {"extension-not-allowed"}, bad
 
 

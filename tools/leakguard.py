@@ -25,9 +25,9 @@ MAX_BYTES = 1024 * 1024
 ALLOWED_EXT = {
     ".md", ".yml", ".yaml", ".json", ".py", ".mjs", ".cjs", ".js", ".ts", ".tsx", ".jsx",
     ".astro", ".css", ".html", ".svg", ".dot", ".sql", ".txt", ".toml", ".lock", ".typ",
-    ".csv", ".sh",
+    ".csv", ".sh", ".dockerfile",
 }
-ALLOWED_NAMES = {"LICENSE", "LICENSE-CONTENT", ".gitignore", ".gitattributes", ".python-version"}
+ALLOWED_NAMES = {"Dockerfile", "LICENSE", "LICENSE-CONTENT", ".gitignore", ".gitattributes", ".python-version"}
 FORBIDDEN_DIRS = {".claude"}
 NULL_SHA_RE = re.compile(r"^0+$")
 _ZERO_WIDTH = dict.fromkeys(map(ord, "​‌‍﻿"), None)
