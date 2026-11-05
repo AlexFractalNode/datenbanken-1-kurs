@@ -99,13 +99,23 @@ def _norm_terms(terms: list[str]) -> list[str]:
     return [t for t in (norm(t) for t in terms) if t]
 
 
+SHORT_TERM_MAX = 4
+
+
+def _term_matches(needle: str, hay: str) -> bool:
+    """Terms up to 4 chars match whole words only; longer ones match as substrings."""
+    if len(needle) <= SHORT_TERM_MAX:
+        return re.search(rf"(?<![0-9a-z]){re.escape(needle)}(?![0-9a-z])", hay) is not None
+    return needle in hay
+
+
 def scan_text(name: str, text: str, terms: list[str]) -> list[Finding]:
     """Normalized, case-insensitive match; reports neither term nor position."""
     needles = _norm_terms(terms)
     if not needles:
         return []
     hay = norm(text)
-    if any(n in hay for n in needles):
+    if any(_term_matches(n, hay) for n in needles):
         return [Finding(name, "blocked-term", "contains a blocked term")]
     return []
 
@@ -141,6 +151,8 @@ def scan_bytes(name: str, data: bytes, terms: list[str]) -> list[Finding]:
     if bom or is_binary(data):
         low = data.lower()
         for n in needles:
+            if len(n) <= SHORT_TERM_MAX:
+                continue  # short terms are whole-word only; binaries are blocked anyway
             for enc in ("utf-8", "utf-16-le", "utf-16-be", "cp1252"):
                 try:
                     pat = n.encode(enc)

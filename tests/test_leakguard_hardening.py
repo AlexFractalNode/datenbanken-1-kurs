@@ -81,6 +81,35 @@ def test_normalization():
     assert len(scan_text("a", "Ｇeheimwort", ["geheimwort"])) == 1  # fullwidth G
 
 
+def test_short_terms_match_whole_words_only():
+    short = ["xq7"]
+    assert scan_text("a", "sha512-ab/xq7mn", short) == []
+    assert scan_text("a", "abxq7", short) == []
+    assert len(scan_text("a", "siehe XQ7-Modul", short)) == 1
+    assert len(scan_text("a", "(xq7)", short)) == 1
+    assert len(scan_text("a", "xq7 am Anfang", short)) == 1
+    assert len(scan_text("a", "x\nxq7", short)) == 1
+    # four characters is still short, five is a substring match
+    assert scan_text("a", "abcdxx", ["abcd"]) == []
+    assert len(scan_text("a", "abcdxx", ["abcdx"])) == 1
+    assert len(scan_text("a", "foo" + TERM + "bar", [TERM])) == 1
+
+
+def test_short_terms_skipped_in_byte_search():
+    from leakguard import scan_bytes
+    assert scan_bytes("a", b"\x00ab" + "xq7".encode("utf-16-le") + b"\x00", ["xq7"]) == []
+    assert len(scan_bytes("a", b"\x00ab" + TERM.encode("utf-16-le") + b"\x00", [TERM])) == 1
+
+
+def test_short_term_whole_word_in_commit_msg_and_filename(tmp_path):
+    msg = tmp_path / "m"
+    msg.write_text("fix: touch abxq7mn\n", encoding="utf-8")
+    t = terms_file(tmp_path, "xq7\n")
+    assert run(["--commit-msg", str(msg), "--terms", t], tmp_path).returncode == 0
+    msg.write_text("fix: touch xq7 module\n", encoding="utf-8")
+    assert run(["--commit-msg", str(msg), "--terms", t], tmp_path).returncode == 1
+
+
 def test_binary_with_nul_and_term(tmp_path):
     repo = make_repo(tmp_path)
     (repo / "a.md").write_bytes(b"\x00\x01" + TERM.upper().encode() + b"\x02")
