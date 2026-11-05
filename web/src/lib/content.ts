@@ -46,7 +46,7 @@ const sourceSchema = z.looseObject({
   id: z.string(),
   title: z.string(),
   author: z.string().optional(),
-  url: z.string(),
+  url: z.string().regex(/^https?:\/\/[^\s/?#]+\.[^\s]*$/i, 'url must be an absolute http(s) URL'),
   license: z.string(),
   accessed: dateString,
   kind: z.enum(['docs', 'oer', 'wiki', 'further-reading']),
@@ -300,7 +300,7 @@ export function stripTitleHeading(md: string, title: string): string {
 // Sources
 // ---------------------------------------------------------------------------
 
-export function getSources(root: string = contentRoot()): Record<string, Source> {
+function loadSources(root: string): Record<string, Source> {
   const candidates = [join(root, 'sources.yml'), join(root, '..', 'sources.yml')];
   const path = candidates.find(isFile);
   if (!path) return {};
@@ -334,7 +334,7 @@ export function getFurtherReading(root: string = contentRoot()): Source[] {
 // Topics
 // ---------------------------------------------------------------------------
 
-export function getTopics(root: string = contentRoot()): Topic[] {
+function loadTopics(root: string): Topic[] {
   const path = join(root, 'topics.yml');
   if (!isFile(path)) throw new Error(`topics.yml not found in content root ${root}`);
   return readList(topicSchema, path).sort((a, b) => a.order - b.order);
@@ -370,7 +370,7 @@ function findTopic(id: string, root: string): Topic {
   return topic;
 }
 
-export function getTopic(id: string, root: string = contentRoot()): TopicBundle {
+function loadTopic(id: string, root: string): TopicBundle {
   const topic = findTopic(id, root);
   const dir = topicDir(topic, root);
   const empty: TopicBundle = { topic, summary: null, cards: [], quiz: [], tasks: [], sqlTasks: [], pitfalls: null, diagrams: [] };
@@ -457,7 +457,7 @@ export function getOverview(root: string = contentRoot()): TopicOverview[] {
 
 const EXAM_FILE = /^exam-(\d{2})\.yml$/;
 
-export function getExams(root: string = contentRoot()): Exam[] {
+function loadExams(root: string): Exam[] {
   const dir = join(root, LANG, 'exams');
   if (!isDir(dir)) return [];
   const sources = getSources(root);
@@ -481,8 +481,55 @@ export function getExams(root: string = contentRoot()): Exam[] {
     });
 }
 
-export function getGlossary(root: string = contentRoot()): GlossaryEntry[] {
+function loadGlossary(root: string): GlossaryEntry[] {
   const path = [join(root, 'glossary.yml'), join(root, LANG, 'glossary.yml')].find(isFile);
   if (!path) return [];
   return readList(glossarySchema, path).sort((a, b) => a.de.localeCompare(b.de, 'de'));
+}
+
+// ---------------------------------------------------------------------------
+// Public, cached accessors
+// ---------------------------------------------------------------------------
+
+/**
+ * Parsed content is cached per content root and key: a build renders many pages from the same files.
+ * `astro dev` (NODE_ENV=development) bypasses the cache so content edits show up on reload.
+ */
+const cache = new Map<string, Map<string, unknown>>();
+
+function cached<T>(root: string, key: string, load: () => T): T {
+  if (process.env.NODE_ENV === 'development') return load();
+  const absRoot = resolve(root);
+  let perRoot = cache.get(absRoot);
+  if (!perRoot) {
+    perRoot = new Map();
+    cache.set(absRoot, perRoot);
+  }
+  if (!perRoot.has(key)) perRoot.set(key, load());
+  return perRoot.get(key) as T;
+}
+
+/** Drops all cached content (tests, long-running processes). */
+export function clearContentCache(): void {
+  cache.clear();
+}
+
+export function getSources(root: string = contentRoot()): Record<string, Source> {
+  return cached(root, 'sources', () => loadSources(root));
+}
+
+export function getTopics(root: string = contentRoot()): Topic[] {
+  return cached(root, 'topics', () => loadTopics(root));
+}
+
+export function getTopic(id: string, root: string = contentRoot()): TopicBundle {
+  return cached(root, `topic:${id}`, () => loadTopic(id, root));
+}
+
+export function getExams(root: string = contentRoot()): Exam[] {
+  return cached(root, 'exams', () => loadExams(root));
+}
+
+export function getGlossary(root: string = contentRoot()): GlossaryEntry[] {
+  return cached(root, 'glossary', () => loadGlossary(root));
 }

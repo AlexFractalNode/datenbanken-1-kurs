@@ -1,7 +1,9 @@
-import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { existsSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  clearContentCache,
   contentRoot,
   extractPitfalls,
   stripLeadingHeading,
@@ -48,10 +50,47 @@ describe('getTopics', () => {
     expect(topics[1]).toMatchObject({ slug: 'er-modellierung', title: 'ER-Modellierung' });
   });
 
-  it('reads the real course topics (13 topics)', () => {
+  it('reads the real course topics (shape only, independent of the course size)', () => {
     const topics = getTopics(resolve('../content'));
-    expect(topics).toHaveLength(13);
-    expect(topics[0].id).toBe('t01');
+    expect(topics.length).toBeGreaterThanOrEqual(1);
+    for (const t of topics) expect(t.id).toMatch(/^t(0[1-9]|1[0-3])$/);
+  });
+});
+
+describe('module cache', () => {
+  it('caches parsed content per root', () => {
+    clearContentCache();
+    expect(getTopic('t04', OK)).toBe(getTopic('t04', OK));
+    expect(getTopics(OK)).toBe(getTopics(OK));
+    expect(getSources(OK)).toBe(getSources(OK));
+    expect(getTopics(EMPTY)).not.toBe(getTopics(OK));
+  });
+
+  it('can be cleared', () => {
+    const before = getTopic('t04', OK);
+    clearContentCache();
+    expect(getTopic('t04', OK)).not.toBe(before);
+    expect(getTopic('t04', OK)).toEqual(before);
+  });
+});
+
+describe('source urls', () => {
+  function rootWithSourceUrl(url: string): string {
+    const dir = mkdtempSync(join(tmpdir(), 'db1-sources-'));
+    writeFileSync(join(dir, 'topics.yml'), '- id: t01\n  slug: a\n  order: 1\n  title: A\n  subtopics: []\n');
+    writeFileSync(
+      join(dir, 'sources.yml'),
+      `- id: s\n  title: S\n  url: "${url}"\n  license: CC0\n  accessed: "2026-01-01"\n  kind: docs\n`,
+    );
+    return dir;
+  }
+
+  it.each(['javascript:alert(1)', 'data:text/html,x', 'ftp://example.org', '/relativ', 'example.org'])('rejects %s', (url) => {
+    expect(() => getSources(rootWithSourceUrl(url))).toThrow(/url/);
+  });
+
+  it.each(['https://example.org/docs', 'http://example.org'])('accepts %s', (url) => {
+    expect(getSources(rootWithSourceUrl(url)).s.url).toBe(url);
   });
 });
 

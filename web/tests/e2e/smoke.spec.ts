@@ -36,6 +36,10 @@ for (const { path, unit, state } of PAGES) {
     await page.goto(path);
     await expect(page.locator(`[data-verify-unit="${unit}"]`).first()).toHaveAttribute('data-verify-state', state);
     await expect(page.locator('h1')).toHaveCount(1);
+    // Page-level units must be unique so tests can address them unambiguously.
+    await expect(page.locator('[data-verify-unit="theme-toggle"]')).toHaveCount(1);
+    await expect(page.locator('[data-verify-unit="theme-toggle"]')).toBeVisible();
+    await expect(page.locator(`[data-verify-unit="${unit}"]`)).toHaveCount(1);
     // Mobile first: nothing may push the page wider than the viewport (wide tables scroll in place).
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);

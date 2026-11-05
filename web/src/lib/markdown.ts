@@ -1,6 +1,10 @@
 /**
  * Markdown → HTML at build time (summaries, card backs, task prompts and solutions).
- * Content comes from the validated repository content, not from users; it is trusted input.
+ *
+ * Defence in depth: the content is reviewed, but the output is still sanitised –
+ * raw HTML (block and inline) is escaped and shown as text, and link/image targets are limited to
+ * http:, https:, mailto:, relative paths and anchors. Unsafe links keep only their text, unsafe
+ * images only their alt text.
  *
  * Diagrams: an image whose target is `diagrams/<name>.dot` (e.g. `![Alt](diagrams/er.dot)`) is
  * rendered to an inline SVG figure by `renderMarkdownWithDiagrams`; the alt text becomes the
@@ -15,6 +19,31 @@ function minHeadingDepth(tokens: Token[]): number {
   let min = 7;
   for (const token of tokens) if (token.type === 'heading') min = Math.min(min, (token as Tokens.Heading).depth);
   return min;
+}
+
+const SAFE_SCHEMES = new Set(['http', 'https', 'mailto']);
+
+/** Decodes numeric/named HTML entities that could hide a scheme (e.g. `&#106;avascript:`). */
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&#x([0-9a-f]+);?/gi, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);?/g, (_, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&colon;/gi, ':')
+    .replace(/&tab;|&newline;/gi, '');
+}
+
+/** True for http(s)/mailto URLs, relative paths and anchors; false for javascript:, data:, vbscript: … */
+export function isSafeUrl(url: string): boolean {
+  let normalized = decodeEntities(url);
+  try {
+    normalized = decodeURIComponent(normalized);
+  } catch {
+    // keep the entity-decoded value; malformed escapes cannot form a scheme
+  }
+  // Browsers ignore control characters and whitespace inside the scheme.
+  normalized = normalized.replace(/[\u0000- \u007f-\u009f]/g, '');
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(normalized);
+  return scheme ? SAFE_SCHEMES.has(scheme[1].toLowerCase()) : true;
 }
 
 function isDiagramImage(token: Token): token is Tokens.Image {
@@ -50,8 +79,20 @@ function createMarked(svgs: Map<string, string>): Marked {
       image(token: Tokens.Image) {
         const match = DIAGRAM_HREF.exec(token.href);
         const svg = match ? svgs.get(match[1]) : undefined;
-        if (svg === undefined) return false;
-        return `<span class="diagram__canvas" role="img" aria-label="${escapeAttr(token.text)}">${svg}</span>`;
+        if (svg !== undefined) {
+          return `<span class="diagram__canvas" role="img" aria-label="${escapeAttr(token.text)}">${svg}</span>`;
+        }
+        if (!isSafeUrl(token.href)) return escapeAttr(token.text);
+        return false;
+      },
+      link(token: Tokens.Link) {
+        if (isSafeUrl(token.href)) return false;
+        return this.parser.parseInline(token.tokens);
+      },
+      // Raw HTML is never passed through; it is shown as text.
+      html(token: Tokens.HTML | Tokens.Tag) {
+        const escaped = escapeAttr(token.text);
+        return 'block' in token && token.block ? `<p>${escaped.trim()}</p>\n` : escaped;
       },
     },
   };

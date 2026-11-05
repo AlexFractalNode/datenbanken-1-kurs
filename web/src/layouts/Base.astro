@@ -74,10 +74,6 @@ const isHome = Astro.url.pathname.replace(/index\.html$/, '') === withBase('');
             }
           </ul>
         </nav>
-        <div class="rail__foot">
-          <ThemeSwitch client:load variant="compact" />
-          <span>Farbschema</span>
-        </div>
       </header>
 
       <main id="main" class="main" tabindex="-1" data-pagefind-body={noindex ? undefined : ''}>
