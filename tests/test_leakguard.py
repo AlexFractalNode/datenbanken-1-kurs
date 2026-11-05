@@ -7,6 +7,7 @@ from leakguard import Finding, scan_paths, scan_text
 
 SCRIPT = Path(__file__).resolve().parent.parent / "tools" / "leakguard.py"
 TERM = "geheimwort42"
+ALLOWED = ["a.md", "b.md", "ok.md", "tools", ".gitignore", "web"]
 
 
 def rules(findings):
@@ -21,8 +22,8 @@ def test_blocks_pdf_anywhere():
 
 
 def test_blocks_dot_claude():
-    f = scan_paths([".claude/x.json", "tools/.claude/y.md"], {})
-    assert len(f) == 2
+    f = scan_paths([".claude/x.json", "tools/.claude/y.md", ".CLAUDE/z"], {})
+    assert len(f) == 3
     assert rules(f) == {"forbidden-path"}
 
 
@@ -38,6 +39,11 @@ def test_allows_svg_in_diagrams():
     assert scan_paths(["web/public/logo.png"], {}) == []
     assert rules(scan_paths(["content/de/er.png"], {})) == {"forbidden-image"}
     assert rules(scan_paths(["content/de/er.jpg"], {})) == {"forbidden-image"}
+    for ext in ["avif", "psd", "eps", "svgz", "jxl", "heif", "heic", "tga", "gif", "bmp",
+                "tif", "tiff", "webp", "ico", "jpg", "jpeg", "docx", "doc", "xlsx", "xls",
+                "odt", "ods", "odp", "ppt", "pptx", "pdf", "7z", "rar", "gz", "tar", "zip",
+                "exe", "apkg"]:
+        assert scan_paths([f"content/x.{ext}"], {}), ext
 
 
 def test_terms_case_insensitive():
@@ -83,6 +89,8 @@ def make_repo(tmp_path):
     repo = tmp_path / "repo"
     repo.mkdir()
     git(repo, "init", "-b", "main")
+    allow = "\n".join(f"!/{n}" for n in ALLOWED) + "\n"
+    (repo / ".gitignore").write_text(allow, encoding="utf-8")
     return repo
 
 

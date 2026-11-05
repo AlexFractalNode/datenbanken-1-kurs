@@ -30,6 +30,32 @@ def test_installs_both_hooks(tmp_path):
     assert '"$1"' in msg
 
 
+def test_existing_hook_warns_and_is_backed_up(tmp_path):
+    repo = _repo(tmp_path)
+    terms = tmp_path / "t.txt"
+    terms.write_text("x\n", encoding="utf-8")
+    hook = repo / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\necho mine\n", encoding="utf-8")
+    r = subprocess.run([sys.executable, str(SCRIPT), "--terms", str(terms)],
+                       cwd=repo, capture_output=True, text=True)
+    assert r.returncode == 0
+    assert "warning" in r.stderr.lower()
+    assert "mine" in (repo / ".git" / "hooks" / "pre-commit.bak").read_text(encoding="utf-8")
+    assert "leakguard" in hook.read_text(encoding="utf-8")
+
+
+def test_respects_core_hooks_path(tmp_path):
+    repo = _repo(tmp_path)
+    terms = tmp_path / "t.txt"
+    terms.write_text("x\n", encoding="utf-8")
+    subprocess.run(["git", "config", "core.hooksPath", "myhooks"], cwd=repo, check=True)
+    r = subprocess.run([sys.executable, str(SCRIPT), "--terms", str(terms)],
+                       cwd=repo, capture_output=True, text=True)
+    assert r.returncode == 0, r.stderr
+    assert (repo / "myhooks" / "pre-commit").is_file()
+    assert not (repo / ".git" / "hooks" / "pre-commit").exists()
+
+
 def test_missing_terms_file_fails(tmp_path):
     repo = _repo(tmp_path)
     r = subprocess.run(
