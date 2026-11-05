@@ -5,13 +5,24 @@ description = "Open learning course for relational databases (tooling)"
 requires-python = ">=3.12"
 dependencies = [
     "firebird-driver>=2.1.2",
+    "genanki>=0.13.1",
     "jsonschema>=4.26.0",
+    "markdown>=3.11.2",
     "pyyaml>=6.0.3",
+    "typst>=0.15.2",
 ]
 
 [dependency-groups]
-dev = ["pytest>=8", "pyyaml>=6"]
+dev = [
+    "anki>=25.7.2",
+    "pypdf>=6.21.4",
+    "pytest>=8",
+    "pyyaml>=6",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["tools"]
+markers = [
+    "firebird: needs a Firebird 3 server (docker-compose.test.yml); skipped if unreachable unless SQLTEST_REQUIRE_FB=1",
+]

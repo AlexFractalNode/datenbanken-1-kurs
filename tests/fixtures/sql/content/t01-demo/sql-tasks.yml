@@ -1,0 +1,34 @@
+# Fixture for tests/test_sqltest.py: placeholder tasks, not course content.
+- id: t01-s001
+  status: draft
+  reviews: []
+  db: demo
+  kind: query
+  prompt: Platzhalter, sortierte Abfrage.
+  ordered: true
+  solution: |
+    SELECT kuerzel, preis, angelegt
+    FROM artikel
+    ORDER BY preis DESC, kuerzel;
+- id: t01-s002
+  status: draft
+  reviews: []
+  db: demo
+  kind: query
+  prompt: Platzhalter, die zwei teuersten Artikel ohne Reihenfolge.
+  ordered: false
+  solution: SELECT FIRST 2 bezeichnung FROM artikel ORDER BY preis DESC, artikel_id
+  solution_pg: SELECT bezeichnung FROM artikel ORDER BY preis DESC, artikel_id LIMIT 2
+  dialect_note: Platzhalter.
+- id: t01-s003
+  status: draft
+  reviews: []
+  db: demo
+  kind: dml
+  prompt: Platzhalter, Preisänderung mit Prüfabfrage.
+  solution: |
+    UPDATE artikel SET preis = preis * 2 WHERE preis < 5;
+    INSERT INTO artikel (kuerzel, bezeichnung, preis, angelegt)
+    VALUES ('EEE', 'Platzhalter Epsilon', 1.00, DATE '2024-04-01');
+  check: SELECT artikel_id, kuerzel, preis FROM artikel WHERE preis <= 5
+  ordered: false

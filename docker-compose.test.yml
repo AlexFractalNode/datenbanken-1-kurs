@@ -1,0 +1,45 @@
+# Test infrastructure for tools/sqltest.py (Firebird 3 side).
+#
+#   docker compose -f docker-compose.test.yml up -d firebird
+#   uv run tools/sqltest.py --engines fb,pg
+#
+# Image: official firebirdsql/firebird, pinned to 3.0.14 (Debian trixie).
+# The SYSDBA password is a throwaway default for this local test container;
+# override it with FB_PASSWORD. The port is bound to localhost only.
+#
+# fb_runner.py needs libfbclient. Hosts that have it (CI: apt install
+# libfbclient2) run the runner directly; everywhere else sqltest.py calls
+#   docker compose -f docker-compose.test.yml run --rm -T fbrunner
+# which runs the same script inside a container that has the client library.
+name: db1-sqltest
+
+services:
+  firebird:
+    image: docker.io/firebirdsql/firebird:3.0.14
+    environment:
+      FIREBIRD_ROOT_PASSWORD: ${FB_PASSWORD:-masterkey}
+    ports:
+      - "127.0.0.1:${FB_PORT:-3050}:3050"
+    tmpfs:
+      - /var/lib/firebird/data:mode=1777
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/3050'"]
+      interval: 2s
+      timeout: 2s
+      retries: 30
+
+  fbrunner:
+    build:
+      context: .
+      dockerfile: tools/fbrunner.Dockerfile
+    profiles: ["runner"]
+    environment:
+      FB_HOST: firebird
+      FB_PORT: "3050"
+      FB_USER: SYSDBA
+      FB_PASSWORD: ${FB_PASSWORD:-masterkey}
+    volumes:
+      - ./tools:/app/tools:ro
+    depends_on:
+      firebird:
+        condition: service_healthy
