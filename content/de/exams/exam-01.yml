@@ -1,0 +1,842 @@
+title: "Probeklausur 1: Kleingartenverein „Lindenwiese“"
+minutes: 90
+tasks:
+- id: e01-p001
+  topic: t01
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: oer-informatik-datenbanken
+      ref: "DBMS: https://oer-informatik.de/dbms (Aufgaben eines DBMS)"
+    - id: watt-database-design-2e
+      ref: "Kap. 3 Characteristics and Benefits of a Database"
+    - id: wp-datenbank
+      ref: "Aufgaben/Funktionen eines DBMS"
+  tags: [dbms-anforderungen, codd, transfer, dateiablage]
+  type: explain
+  difficulty: 1
+  points: 4
+  minutes: 4
+  prompt: |-
+    Der Kleingartenverein „Lindenwiese“ veranstaltet eine Jungpflanzenbörse: Mitglieder bieten Setzlinge an, andere Mitglieder reservieren sie. Bisher liegt dafür **eine** Tabellenkalkulationsdatei auf einem gemeinsamen Netzlaufwerk im Vereinsheim. Alle Mitglieder dürfen sie öffnen und bearbeiten. Wer zuletzt speichert, überschreibt die Datei; ältere Fassungen werden nicht aufbewahrt.
+
+    Nenne **vier** der Anforderungen an ein DBMS nach Codd, die diese Lösung nicht erfüllt. Beschreibe zu jeder ein **konkretes** Problem, das in der Börse auftreten kann, und wie ein DBMS es verhindert. Integration, Operationen und Katalog zählen hier nicht.
+  solution: |-
+    Vier der folgenden (andere passende Fälle sind gleichwertig):
+
+    - **Konsistenzüberwachung (Integritätssicherung):** In der Spalte Stückzahl steht „ein paar“ oder −3, oder jemand reserviert ein Angebot, das es nicht gibt. Ein DBMS weist solche Werte über Datentypen, `CHECK` und Fremdschlüssel ab.
+    - **Zugriffskontrolle:** Jedes Mitglied kann fremde Angebote und Reservierungen ändern oder löschen. Ein DBMS vergibt Rechte je Benutzer bzw. Rolle, z. B. darf nur die Börsenleitung Angebote löschen.
+    - **Benutzersichten:** Alle sehen alle Spalten, also auch E-Mail-Adressen und Telefonnummern der anderen. Ein DBMS bietet Sichten, die z. B. nur Pflanze, Stückzahl und Namen der Anbieter:in zeigen.
+    - **Transaktionen:** Ein Mitglied tauscht seine Reservierung von Tomaten gegen Paprika: alte Zeile löschen, neue eintragen. Stürzt der Rechner nach dem Löschen ab, ist die alte Reservierung weg und die neue fehlt. Ein DBMS führt beides ganz oder gar nicht aus (`COMMIT`/`ROLLBACK`).
+    - **Synchronisation (Mehrbenutzerbetrieb):** Zwei Mitglieder haben die Datei gleichzeitig geöffnet und tragen je eine Reservierung ein. Wer zuletzt speichert, überschreibt die Datei, die andere Reservierung ist verloren. Ein DBMS isoliert gleichzeitige Vorgänge, sodass beide Änderungen erhalten bleiben.
+    - **Datensicherung (Recovery):** Ein Mitglied speichert versehentlich eine leere Fassung oder die Datei wird beim Speichern beschädigt. Ohne aufbewahrte Fassungen ist der Bestand verloren. Ein DBMS stellt mit Sicherung und Protokoll den letzten bestätigten Stand wieder her.
+
+    Synchronisation und Datensicherung zählen nur mit einem konkreten Fehlerfall wie oben, denn manche Werkzeuge bieten dafür Teilersatz (Zusammenführen, Versionsverlauf), den es hier ausdrücklich nicht gibt.
+  rubric:
+    - criterion: "je Anforderung (höchstens vier gewertet): passender Name (0,5) und konkretes Börsenproblem samt Wirkung des DBMS (0,5)"
+      points: 4
+  space: lines:12
+- id: e01-p002
+  topic: t02
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-ansi-sparc-architektur
+      ref: "Drei-Ebenen-Architektur, Datenunabhängigkeit"
+    - id: wp-datenunabhaengigkeit
+      ref: "logische und physische Datenunabhängigkeit"
+    - id: wp-hierarchisches-datenbankmodell
+      ref: "Aufbau: Baum, Eltern-Kind-Beziehung, n:m über Redundanz oder virtuelle Eltern-Kind-Beziehungen"
+    - id: wpen-network-model
+      ref: "Overview (Datensatz mit mehreren übergeordneten Datensätzen)"
+    - id: watt-database-design-2e
+      ref: "Kap. 4 Types of Data Models"
+  tags: [ansi-sparc, datenunabhaengigkeit, hierarchisch, netzwerk, relational]
+  type: explain
+  difficulty: 1
+  points: 4
+  minutes: 4
+  prompt: |-
+    Entscheide für jede Aussage, ob sie **richtig** oder **falsch** ist, und begründe in einem Satz. Bei falschen Aussagen gibst du an, was stattdessen gilt.
+
+    1. „Damit die Angebote der Börse schneller nach Datum sortiert ausgegeben werden, legt der Verein einen Index auf `angebot(eingestellt_am)` an. Die Abfragen der App bleiben unverändert und liefern dieselben Ergebnisse.“
+    2. „Die Spalte `mitglied.email` wird in `mail_adresse` umbenannt. Die App liest über eine Sicht, die die Spalte weiterhin unter dem Namen `email` liefert, und läuft unverändert weiter. Das ist physische Datenunabhängigkeit.“
+    3. „Im hierarchischen Datenbankmodell kann ein Datensatz mehrere übergeordnete Datensätze haben, z. B. eine Reservierung unter dem Angebot und zugleich unter dem reservierenden Mitglied.“
+    4. „Im relationalen Modell entsteht die Beziehung zwischen einer Reservierung und ihrem Angebot dadurch, dass in der Reservierung derselbe Wert steht wie im Schlüssel des Angebots.“
+  solution: |-
+    1. **Richtig.** Ein Index gehört zur internen Ebene. Wegen der **physischen Datenunabhängigkeit** ändern sich Abfragen und Ergebnisse nicht; ob der Index genutzt wird, entscheidet das DBMS.
+    2. **Falsch.** Die Beobachtung stimmt, der Begriff nicht: Geändert wird das konzeptionelle Schema (ein Spaltenname), die Sicht auf der externen Ebene fängt die Änderung ab. Das ist **logische** Datenunabhängigkeit.
+    3. **Falsch.** Im hierarchischen Modell (Baum) hat jeder Datensatz außer der Wurzel **genau einen** übergeordneten Datensatz. m:n-Zusammenhänge gehen dort nur über Kopien oder virtuelle Eltern-Kind-Beziehungen. Mehrere übergeordnete Datensätze erlaubt das **Netzwerkmodell**.
+    4. **Richtig.** Beziehungen entstehen über **gleiche Werte** (Fremdschlüssel verweist auf Primärschlüssel), nicht über gespeicherte Zeiger wie im hierarchischen oder im Netzwerkmodell.
+  rubric:
+    - criterion: "1) richtig (0,5); Index = interne Ebene, physische Datenunabhängigkeit (0,5)"
+      points: 1
+    - criterion: "2) falsch (0,5); logische Datenunabhängigkeit, weil das konzeptionelle Schema geändert wird (0,5)"
+      points: 1
+    - criterion: "3) falsch (0,5); genau ein übergeordneter Datensatz, mehrere erst im Netzwerkmodell (0,5)"
+      points: 1
+    - criterion: "4) richtig (0,5); Beziehung über Werte bzw. Fremdschlüssel statt Zeiger (0,5)"
+      points: 1
+  space: lines:10
+- id: e01-p003
+  topic: t03
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-datenmodellierung
+      ref: "Abschnitt „Verfahren“ (konzeptionelles, logisches, physisches Schema)"
+    - id: wpen-database-design
+      ref: "Conceptual, logical and physical design"
+    - id: watt-database-design-2e
+      ref: "Kap. 13 Database Development Process"
+  tags: [phasenmodell, entwurfsphasen, wartung, validierung, ruecksprung]
+  type: explain
+  difficulty: 1
+  points: 6
+  minutes: 5
+  prompt: |-
+    Bei der Entwicklung der Datenbank für die Jungpflanzenbörse entstehen diese Ergebnisse (ungeordnet):
+
+    1. Notiz der Börsenleitung: „Jeden Freitag eine Liste aller nicht abgeholten Reservierungen.“
+    2. ER-Diagramm mit Mitglied, Angebot und Reservierung.
+    3. Relationenschema angebot(<u>angebot_nr</u>, anbieter_nr → mitglied, pflanze, …) usw., alle Relationen in 3NF.
+    4. Skript mit `CREATE TABLE`, `CREATE VIEW` und `GRANT` für Firebird 3.
+    5. Index auf `reservierung(abgeholt_am)`.
+    6. Ein Jahr nach dem Start: Spalte `kategorie` ergänzen, App und Dokumente anpassen.
+
+    a) Ordne jedes Ergebnis einer Phase des Datenbankentwurfs zu (Phasenmodell mit sechs Phasen). (3 P)
+    b) Welche der Ergebnisse 2 bis 5 hängen **nicht** vom gewählten DBMS-Produkt ab? (1 P)
+    c) Angenommen, beim Schreiben des Skripts aus 4 fragt die Entwicklerin nach, und die Börsenleitung entscheidet: Zwei Mitglieder dürfen ein Angebot **gemeinsam** einstellen. (Die späteren Aufgaben gehen weiter von genau einer Anbieter:in je Angebot aus.) Nenne die nötigen Änderungen an den Ergebnissen 2 und 3. Warum ändert man nicht einfach nur das Skript? (2 P)
+  solution: |-
+    a)
+    1. **Anforderungsanalyse** (Verarbeitungsanforderung: Auswertung mit Häufigkeit)
+    2. **konzeptioneller Entwurf**
+    3. **logischer Entwurf** (Relationenschema, Normalisierung)
+    4. **Datendefinition** (DDL-Skript mit Tabellen, Sichten, Rechten)
+    5. **physischer Entwurf** (Index)
+    6. **Implementierung und Wartung** (Schemaänderung im Betrieb, die Phasen werden im Kleinen erneut durchlaufen)
+
+    b) **2** (unabhängig von Datenmodell und DBMS) und **3** (hängt vom relationalen Datenmodell ab, nicht vom Produkt). 4 und 5 sind produktabhängig.
+
+    c)
+    - **Ergebnis 2:** Die Beziehung Mitglied–Angebot (bietet an) wird m:n.
+    - **Ergebnis 3:** Neue Relation anbieter(<u>angebot_nr → angebot, mitglied_nr → mitglied</u>); `anbieter_nr` entfällt in `angebot`.
+    - Erst danach wird das Skript angepasst. Die Validierung begleitet jede Phase: Hier hat die Prüfung in der Datendefinition eine Lücke aus der Anforderungsanalyse aufgedeckt. Man springt zurück und zieht alle betroffenen Ergebnisse nach, damit Modell, Schema und Skript übereinstimmen. Ein nur im Skript geänderter Stand würde den Entwurfsdokumenten widersprechen und spätere Änderungen erschweren.
+  rubric:
+    - criterion: "a) je richtig zugeordnetem Ergebnis 0,5"
+      points: 3
+    - criterion: "b) 2 und 3 genannt (je 0,5); jedes zusätzlich genannte Ergebnis 4 oder 5 −0,5, nicht unter 0"
+      points: 1
+    - criterion: "c) ER-Modell: Mitglied–Angebot m:n"
+      points: 0.5
+    - criterion: "c) Relationenschema: eigene Relation für die Anbieter:innen, anbieter_nr entfällt"
+      points: 0.5
+    - criterion: "c) Rücksprung bzw. Nachziehen der Ergebnisse 2 und 3 vor dem Skript"
+      points: 0.5
+    - criterion: "c) Begründung: sonst widersprechen Modell und Schema dem Skript bzw. spätere Änderungen werden teurer (der Begriff Validierung wird nicht verlangt)"
+      points: 0.5
+  space: lines:12
+- id: e01-p004
+  topic: t04
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-entity-relationship-modell
+      ref: "Entitätstyp, Attribute, Beziehungstypen; rekursive Beziehungen; Notationen (Chen, Min-Max)"
+    - id: oer-informatik-erm
+      ref: "Kardinalitäten lesen; Besondere Beziehungstypen (rekursiv); Erweiterte Notationsmittel (mehrwertige Attribute)"
+  tags: [erm, chen, min-max, attributarten, rekursiv, rollen, eins-zu-eins, feste-obergrenze]
+  type: erm-model
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Der Verein führt einen Pflegeplan für seine Gemeinschaftsflächen (Festwiese, Obstwiese, Wege). Es gelten folgende Anforderungen:
+
+    - Ein Mitglied wird über seine Mitglieds-Nr. identifiziert. Gespeichert werden außerdem Vor- und Nachname, die zusammen den Namen bilden, sowie die Qualifikationen des Mitglieds (z. B. Motorsägenschein, Erste Hilfe); manche Mitglieder haben keine, andere mehrere.
+    - Jede Gemeinschaftsfläche hat eine Flächen-Nr., eine Bezeichnung und eine Größe in m².
+    - Jedes Mitglied trägt sich für mindestens eine und höchstens drei Flächen in den Pflegeplan ein, jeweils mit **einem** festen Wochentag. Für eine Fläche können sich beliebig viele Mitglieder eintragen, auch keines.
+    - Eine Fläche kann eine Pat:in haben, höchstens eine. Ein Mitglied ist Pat:in von höchstens einer Fläche.
+    - Jedes Mitglied darf ein anderes Mitglied als feste Urlaubsvertretung benennen, höchstens eines. Ein Mitglied kann für beliebig viele andere die Vertretung sein, auch für keines.
+
+    Erstelle ein ER-Diagramm in **Chen-Notation** mit allen Attributen und Schlüsseln. Gib an jeder Beziehung die Chen-Kardinalität **und** die (min,max)-Angaben an.
+  solution: |-
+    Diagramm als Text (Rechteck = Entitätstyp, Raute = Beziehungstyp, Ellipse = Attribut). An jeder Kante steht beim Entitätstyp bzw. bei der Rolle zuerst die Chen-Angabe, dann die (min,max)-Angabe.
+
+    **Entitätstypen und Attribute**
+    - **Mitglied:** <u>Mitglieds-Nr.</u>; Name als zusammengesetztes Attribut mit den Teil-Ellipsen Vorname und Nachname; Qualifikation als mehrwertiges Attribut (doppelte Ellipse).
+    - **Fläche:** <u>Flächen-Nr.</u>, Bezeichnung, Größe_m².
+
+    **Beziehungstypen**
+    ```
+    [Mitglied] m (1,3) — ⟨pflegt⟩ — n (0,n) [Fläche]
+               Attribut an der Raute: Wochentag
+    [Mitglied] 1 (0,1) — ⟨ist Pat:in von⟩ — 1 (0,1) [Fläche]
+    [Mitglied] Rolle Vertretung   1 (0,n) — ⟨vertritt⟩ —
+               Rolle Vertretene:r n (0,1) [Mitglied]   (beide Kanten am selben Rechteck)
+    ```
+
+    Hinweise:
+    - ⟨pflegt⟩: Ein Mitglied hat 1 bis 3 Einträge, also (1,3) beim Mitglied; die Chen-Angabe bei Fläche ist n oder die feste Zahl 3. Der Wochentag gehört zum Paar aus Mitglied und Fläche, also an die Raute.
+    - ⟨ist Pat:in von⟩ ist 1:1 und auf beiden Seiten optional.
+    - ⟨vertritt⟩ ist rekursiv. Ohne Rollennamen an beiden Kanten wäre nicht lesbar, wer wen vertritt. Jedes Mitglied hat höchstens eine Vertretung, deshalb (0,1) bei der Rolle Vertretene:r und Chen 1 bei der Rolle Vertretung.
+  rubric:
+    - criterion: "Mitglied und Fläche mit unterstrichenem Schlüssel (je 0,5)"
+      points: 1
+    - criterion: "Name zusammengesetzt (0,5), Qualifikation mehrwertig (0,5), übrige einfache Attribute vollständig am richtigen Typ (0,5)"
+      points: 1.5
+    - criterion: "pflegt: Chen m:n bzw. m:3 (0,5); (min,max) Mitglied (1,3) (0,5), Fläche (0,n) (0,5); Wochentag an der Raute (0,5)"
+      points: 2
+    - criterion: "ist Pat:in von: Chen 1:1 (0,5); (min,max) Mitglied (0,1) (0,5), Fläche (0,1) (0,5)"
+      points: 1.5
+    - criterion: "vertritt: rekursive Raute mit zwei Kanten zu Mitglied und zwei Rollennamen"
+      points: 1
+    - criterion: "vertritt: Chen 1 bei Vertretung, n bei Vertretene:r (0,5); (min,max) Vertretung (0,n), Vertretene:r (0,1) (0,5)"
+      points: 1
+  space: box:190
+- id: e01-p005
+  topic: t04
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-entity-relationship-modell
+      ref: "Beziehungen mit spezieller Semantik: Spezialisierung und Generalisierung (is-a; total, partiell, disjunkt, überlappend)"
+    - id: oer-informatik-erm
+      ref: "Erweiterte Notationsmittel (schwache Entitätstypen); Kardinalitäten lesen"
+  tags: [erm-lesen, generalisierung, spezialisierung, disjunkt, partiell, subtyp-vs-schwach]
+  type: erm-read
+  difficulty: 2
+  points: 4
+  minutes: 4
+  prompt: |-
+    Ein weiterer Ausschnitt des Vereinsmodells (Chen-Notation, an jeder Kante zuerst die Chen-Kardinalität, dann die (min,max)-Angabe des Entitätstyps). Laut Satzung darf niemand zugleich Fachberater:in und Vorstandsmitglied sein.
+
+    ```
+    [Mitglied] (Mitglieds-Nr. unterstrichen, Name, Eintrittsdatum)
+        △ is-a  (disjunkt, partiell)
+        ├── [Fachberater:in]    (Fachgebiet, Zertifikat_bis)
+        └── [Vorstandsmitglied] (Amt, gewählt_am)
+
+    [Fachberater:in] 1 (0,n) — ⟨hält⟩ — n (1,1) [Schulung]
+    [Schulung] (Schulungs-Nr. unterstrichen, Datum, Thema)
+    ```
+
+    a) Erkläre, was „disjunkt“ und was „partiell“ hier bedeuten, jeweils an einem konkreten Mitglied. (1,5 P)
+    b) Welche Attribute hat eine Fachberater:in? Beschreibe ⟨hält⟩ in zwei Sätzen, je Richtung mit Unter- und Obergrenze. (1,5 P)
+    c) Vergleiche den Subtyp Vorstandsmitglied mit einem schwachen Entitätstyp: Nenne eine Gemeinsamkeit und einen Unterschied. (1 P)
+  solution: |-
+    a)
+    - **Disjunkt:** Ein Mitglied gehört zu höchstens einem Subtyp. Die Kassiererin ist Vorstandsmitglied und darf deshalb nicht zugleich Fachberaterin sein.
+    - **Partiell:** Nicht jedes Mitglied gehört zu einem Subtyp. Ein neues Mitglied ohne Amt und ohne Fachgebiet ist nur Mitglied.
+
+    b) Eine Fachberater:in hat die **geerbten** Attribute Mitglieds-Nr. (Schlüssel), Name und Eintrittsdatum sowie die **eigenen** Attribute Fachgebiet und Zertifikat_bis.
+    - Jede Schulung wird von **genau einer** Fachberater:in gehalten.
+    - Eine Fachberater:in hält **keine bis beliebig viele** Schulungen.
+    Gewöhnliche Mitglieder können keine Schulung halten, weil die Beziehung am Subtyp hängt.
+
+    c)
+    - **Gemeinsamkeit:** Beide sind einseitig existenzabhängig: Ein Vorstandsmitglied gibt es nur zusammen mit seiner Mitglied-Entität, eine schwache Entität nur zusammen mit ihrem Besitzer. (Manche Darstellungen nennen Subtypen deshalb ebenfalls „schwach“.)
+    - **Unterschied:** Das Vorstandsmitglied erbt den **vollständigen** Schlüssel (Mitglieds-Nr.) und braucht keinen eigenen Schlüsselteil. Ein schwacher Entitätstyp wird erst durch den Besitzerschlüssel **plus** einen eigenen partiellen Schlüssel über eine identifizierende Beziehung eindeutig. Gleichwertig: Die Verbindung ist is-a statt einer identifizierenden Beziehung.
+  rubric:
+    - criterion: "a) disjunkt erklärt mit passendem Beispiel"
+      points: 0.75
+    - criterion: "a) partiell erklärt mit passendem Beispiel (partiell hier nicht mit Teilnahme an einer Beziehung verwechselt)"
+      points: 0.75
+    - criterion: "b) geerbte und eigene Attribute vollständig"
+      points: 0.75
+    - criterion: "b) zwei Sätze mit (1,1) bei Schulung und (0,n) bei Fachberater:in"
+      points: 0.75
+    - criterion: "c) Gemeinsamkeit: einseitige Existenzabhängigkeit (0,5); Unterschied: geerbter vollständiger Schlüssel bzw. is-a statt partiellem Schlüssel und identifizierender Beziehung (0,5)"
+      points: 1
+  space: lines:12
+- id: e01-p006
+  topic: t06
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: oer-informatik-relationenmodell
+      ref: "Transformationsschritte: Kardinalitäten in Fremdschlüssel transformieren (1:N, M:N); schwache Entitätstypen"
+    - id: wp-objektrelationale-abbildung
+      ref: "Abbildung von Vererbungshierarchien (Tabelle pro Vererbungshierarchie, pro Unterklasse)"
+    - id: firebird-30-language-reference
+      ref: "Kap. 5 DDL: CREATE TABLE (PRIMARY KEY, FOREIGN KEY, ON DELETE/ON UPDATE)"
+  tags: [erm-relationen, erm-ddl, schwache-entitaet, generalisierung, anlage-reihenfolge]
+  type: erm-to-sql
+  difficulty: 3
+  points: 12
+  minutes: 9
+  prompt: |-
+    Der Verein verleiht Gartengeräte an seine Mitglieder. Gegeben ist folgendes ER-Modell. An jeder Kante steht beim Entitätstyp zuerst die Chen-Kardinalität, dann dessen (min,max)-Angabe.
+
+    **Entitätstypen**
+    - **Mitglied** und **Gerät** sind samt ihren übrigen Beziehungen schon überführt:
+      - mitglied(<u>mitglied_nr</u>, vorname, nachname, …), `mitglied_nr INTEGER`
+      - geraet(<u>inventar_nr</u>, bezeichnung, anschaffungsjahr, …), `inventar_nr INTEGER`
+    - Spezialisierung von Gerät (is-a, **disjunkt und partiell**): **Motorgerät** (Kraftstoff) und **Akkugerät** (Spannung_V). Eine Schubkarre ist nur ein Gerät.
+    - schwacher Entitätstyp **Buchung** (partieller Schlüssel Datum, außerdem Abholzeit): Ein Gerät kann je Tag höchstens einmal gebucht werden.
+
+    **Beziehungstypen (noch zu überführen)**
+    ```
+    1. [Gerät]    1 (0,n) — ⟨⟨hat⟩⟩ (identifizierend) — n (1,1) [Buchung]
+    2. [Mitglied] 1 (0,n) — ⟨tätigt⟩ — n (1,1) [Buchung]
+    3. [Mitglied] m (0,n) — ⟨ist eingewiesen für⟩ — n (0,n) [Motorgerät]
+       Attribut an der Raute: eingewiesen_am
+    ```
+
+    a) Gib die Relationen für Motorgerät, Akkugerät, Buchung und die Beziehung 3 in Kurzschreibweise an: Primärschlüssel unterstrichen, Fremdschlüssel mit Pfeil auf die Zieltabelle. Bilde die Spezialisierung mit der **vertikalen Fragmentierung** (Class Table Inheritance) ab. Gib an, welche Fremdschlüssel außerhalb des Primärschlüssels `NOT NULL` sein müssen. (5 P)
+    b) Schreibe die Anweisung `CREATE TABLE buchung` in Firebird 3 mit allen Schlüsseln. Wähle für beide Fremdschlüssel eine Aktion beim Löschen und begründe sie in je einem Satz. (5 P)
+    c) Gib eine Reihenfolge an, in der deine Tabellen aus a) angelegt werden können. (1 P)
+    d) Nenne einen Grund aus **diesem** Modell, warum hier die vertikale Fragmentierung besser passt als eine Gesamttabelle für alle Geräte („virtuelle“ Fragmentierung, Single Table Inheritance), und begründe ihn. (1 P)
+  solution: |-
+    a)
+    - motorgeraet(<u>inventar_nr → geraet</u>, kraftstoff)
+    - akkugeraet(<u>inventar_nr → geraet</u>, spannung_v)
+    - buchung(<u>inventar_nr → geraet, datum</u>, abholzeit, mitglied_nr → mitglied), `mitglied_nr NOT NULL`
+    - einweisung(<u>mitglied_nr → mitglied, inventar_nr → motorgeraet</u>, eingewiesen_am)
+
+    Begründungen: Die Subtyp-Tabellen haben PK = FK auf `geraet`. Buchung ist schwach: PK = Besitzer-FK + partieller Schlüssel. ⟨tätigt⟩ ist 1:n mit Buchung (1,1), also FK in `buchung` und `NOT NULL`. Die Einweisung ist m:n und wird zur Zwischentabelle; ihr FK zeigt auf `motorgeraet`, nicht auf `geraet`, weil nur Motorgeräte eine Einweisung brauchen.
+
+    b)
+    ```sql
+    CREATE TABLE buchung (
+      inventar_nr INTEGER NOT NULL,
+      datum       DATE    NOT NULL,
+      abholzeit   TIME,
+      mitglied_nr INTEGER NOT NULL,
+      CONSTRAINT pk_buchung PRIMARY KEY (inventar_nr, datum),
+      CONSTRAINT fk_buchung_geraet FOREIGN KEY (inventar_nr)
+        REFERENCES geraet (inventar_nr) ON DELETE CASCADE ON UPDATE CASCADE,
+      CONSTRAINT fk_buchung_mitglied FOREIGN KEY (mitglied_nr)
+        REFERENCES mitglied (mitglied_nr)
+    );
+    ```
+    - In Firebird 3 setzt `PRIMARY KEY` im `CREATE TABLE` die Schlüsselspalten automatisch auf NOT NULL; das ausdrückliche `NOT NULL` bei `inventar_nr` und `datum` schadet nicht, ist aber nicht nötig. Nur ein nachträgliches `ALTER TABLE … ADD PRIMARY KEY` verlangt, dass die Spalten schon NOT NULL sind. `mitglied_nr` braucht das `NOT NULL` dagegen ausdrücklich.
+    - FK auf `geraet`: `ON DELETE CASCADE`, weil eine Buchung als schwacher Typ ohne ihr Gerät keinen Sinn hat. Vertretbar ist auch `NO ACTION` mit der Begründung, dass ein Gerät mit Buchungshistorie nicht gelöscht werden soll.
+    - FK auf `mitglied`: keine Aktion (`NO ACTION`), damit beim Löschen eines Mitglieds nicht still nachvollziehbare Buchungen verschwinden. Vertretbar ist auch `CASCADE` mit der Begründung, dass Buchungen ausgetretener Mitglieder (z. B. künftige Termine) entfallen sollen.
+    - `SET NULL` ist bei beiden falsch, weil beide Spalten Pflicht sind; `SET DEFAULT` am identifizierenden FK `inventar_nr` würde Buchungen einem anderen Gerät zuordnen und zählt ebenfalls nicht.
+
+    Für die Fremdschlüssel von `einweisung` und der Subtyp-Tabellen ist `ON DELETE CASCADE` (mit `ON UPDATE CASCADE`) naheliegend; `NO ACTION` ist dort ebenfalls vertretbar. In a) wird die Löschaktion nicht bewertet.
+
+    c) motorgeraet, akkugeraet, buchung (untereinander beliebig) → einweisung. Die vorgegebenen Tabellen existieren schon. Jede Reihenfolge ist richtig, in der jede Tabelle nach allen Tabellen kommt, auf die sie verweist; hier also einweisung nach motorgeraet.
+
+    d) `einweisung` soll nur auf **Motorgeräte** verweisen. Bei der vertikalen Fragmentierung zeigt der FK auf die Tabelle `motorgeraet`, und das DBMS lässt nur Inventarnummern von Motorgeräten zu. In einer Gesamttabelle gibt es nur **eine** Tabelle `geraet`; ein FK kann dort nicht auf Zeilen mit einem bestimmten Typ-Attribut eingeschränkt werden, eine Einweisung für eine Schubkarre wäre also möglich.
+    Gleichwertig: Pflichtangaben je Subtyp (z. B. Kraftstoff bei Motorgeräten) gingen in der Gesamttabelle nur über einen `CHECK` mit dem Typ-Attribut, nicht über `NOT NULL`, und für die Schubkarre blieben beide Spalten NULL.
+  rubric:
+    - criterion: "a) motorgeraet und akkugeraet mit PK = FK auf geraet und eigenem Attribut"
+      points: 1.5
+    - criterion: "a) buchung mit PK (inventar_nr, datum) als Besitzer-FK + partieller Schlüssel"
+      points: 1
+    - criterion: "a) buchung.mitglied_nr als FK, NOT NULL"
+      points: 0.5
+    - criterion: "a) einweisung mit PK aus beiden FKs (1), FK auf motorgeraet statt geraet (0,5), Attribut eingewiesen_am (0,5)"
+      points: 2
+    - criterion: "b) Spalten mit passenden Typen, mitglied_nr NOT NULL (ein ausdrückliches NOT NULL auf den PK-Spalten wird nicht verlangt)"
+      points: 1
+    - criterion: "b) PRIMARY KEY (inventar_nr, datum)"
+      points: 1
+    - criterion: "b) beide FOREIGN KEY … REFERENCES korrekt"
+      points: 1
+    - criterion: "b) Löschaktion für den FK auf geraet begründet (CASCADE oder NO ACTION mit Begründung; SET NULL/SET DEFAULT zählen nicht)"
+      points: 1
+    - criterion: "b) Löschaktion für den FK auf mitglied begründet (NO ACTION oder CASCADE mit Begründung; SET NULL zählt nicht)"
+      points: 1
+    - criterion: "c) gültige Reihenfolge, bewertet gegen das eigene Schema aus a)"
+      points: 1
+    - criterion: "d) passender, auf das Modell bezogener Grund (0,5) mit Begründung (0,5)"
+      points: 1
+  space: lines:30
+- id: e01-p007
+  topic: t07
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-normalisierung-datenbank
+      ref: "Normalformen 1NF, 2NF, 3NF"
+    - id: wp-funktionale-abhaengigkeit
+      ref: "Formale Definition, volle funktionale Abhängigkeit, Attributhülle"
+    - id: oer-informatik-datenbanken
+      ref: "Normalisierung (https://oer-informatik.de/normalisierung): Anomalien, 2NF, 3NF"
+  tags: [normalisierung, schluesselkandidat, primattribut, 2nf, 3nf, aenderungsanomalie]
+  type: normalize
+  difficulty: 2
+  points: 12
+  minutes: 11
+  prompt: |-
+    Der Verein vermietet Räume seines Vereinsheims an Mitglieder, z. B. für Feiern. Die Belegungen stehen in dieser Tabelle (Ausschnitt):
+
+    | Datum | Raum | SchluesselNr | Kapazitaet | MitgliedNr | MitgliedName | Anlass | Personen |
+    |---|---|---|---|---|---|---|---|
+    | 07.06.2025 | Saal | S-1 | 60 | M12 | Paula Brandt | Geburtstag | 40 |
+    | 07.06.2025 | Terrasse | S-3 | 25 | M31 | Jonas Ebert | Grillabend | 20 |
+    | 14.06.2025 | Saal | S-1 | 60 | M31 | Jonas Ebert | Jubiläum | 55 |
+    | 21.06.2025 | Küche | S-2 | 8 | M12 | Paula Brandt | Einkochkurs | 6 |
+
+    Es gelten diese Regeln:
+    - Jeder Raum hat genau einen Schlüssel mit eigener Schlüsselnummer, und jede Schlüsselnummer gehört zu genau einem Raum. Jeder Raum hat eine feste Kapazität.
+    - Ein Raum wird je Tag höchstens einmal vergeben, und zwar an genau ein Mitglied mit Anlass und Personenzahl. Ein Mitglied darf am selben Tag mehrere Räume belegen.
+    - Jedes Mitglied hat eine Nummer und einen Namen.
+
+    Die Tabelle enthält nur atomare Werte und ist in 1NF.
+
+    a) Gib alle nicht-trivialen funktionalen Abhängigkeiten mit minimaler linker Seite an. Abhängigkeiten, die nur durch Transitivität folgen, darfst du weglassen. (3 P)
+    b) Bestimme alle Schlüsselkandidaten und nenne die Primattribute (Attribute, die in mindestens einem Schlüsselkandidaten vorkommen). (2 P)
+    c) Welche höchste Normalform erfüllt die Tabelle? Begründe mit einer konkreten Abhängigkeit und beachte dabei alle Schlüsselkandidaten. (2 P)
+    d) Zerlege die Tabelle verlustfrei in die 3NF. Gib alle Relationen mit Primärschlüssel, Fremdschlüsseln und gegebenenfalls `UNIQUE` an. (4 P)
+    e) Zeige an der Ausgangstabelle eine **Änderungsanomalie**. (1 P)
+  solution: |-
+    a)
+    - F1: Raum → SchluesselNr, Kapazitaet
+    - F2: SchluesselNr → Raum
+    - F3: Datum, Raum → MitgliedNr, Anlass, Personen
+    - F4: MitgliedNr → MitgliedName
+
+    Gleichwertig ist jede äquivalente Überdeckung, z. B. Raum → SchluesselNr, SchluesselNr → Raum, Kapazitaet und F3/F4 wie oben. (Abgeleitet und damit optional: SchluesselNr → Kapazitaet bzw. Raum → Kapazitaet; Datum, SchluesselNr → MitgliedNr, Anlass, Personen.)
+
+    b) Datum steht auf keiner rechten Seite und gehört deshalb zu jedem Schlüsselkandidaten; allein reicht es nicht. Schlüsselkandidaten sind **{Datum, Raum}** und **{Datum, SchluesselNr}**: Aus beiden lassen sich alle Attribute herleiten, und keine echte Teilmenge genügt. Primattribute: **Datum, Raum, SchluesselNr**.
+
+    c) Nur **1NF**. Das Nichtschlüsselattribut Kapazitaet hängt schon von Raum ab, einem echten Teil des Schlüsselkandidaten {Datum, Raum}, und ebenso von SchluesselNr als Teil von {Datum, SchluesselNr}. Das ist eine partielle Abhängigkeit, die 2NF ist verletzt. Raum → SchluesselNr verletzt die 2NF dagegen nicht, weil SchluesselNr ein Primattribut ist.
+
+    d)
+    - Raum(<u>Raum</u>, SchluesselNr, Kapazitaet), `SchluesselNr UNIQUE` (Alternativschlüssel)
+    - Mitglied(<u>MitgliedNr</u>, MitgliedName)
+    - Belegung(<u>Datum, Raum → Raum</u>, MitgliedNr → Mitglied, Anlass, Personen)
+
+    Verlustfrei, weil die gemeinsamen Attribute Raum bzw. MitgliedNr jeweils Schlüssel einer Teilrelation sind. Gleichwertig ist Raum mit Primärschlüssel SchluesselNr und Belegung(<u>Datum, SchluesselNr → Raum</u>, …). Bleibt SchluesselNr zusätzlich in Belegung stehen, ist das wegen des Primattributs formal noch 3NF, aber redundant (die BCNF wäre verletzt); das gibt keinen Abzug.
+
+    e) **Änderungsanomalie:** Der Saal wird umgebaut und fasst künftig 80 Personen. Die Kapazität muss in beiden Saal-Zeilen (07.06. und 14.06.) geändert werden. Wird eine vergessen, hat der Saal zwei verschiedene Kapazitäten. Gleichwertig: Paula Brandt ändert ihren Namen, der in zwei Zeilen steht.
+  rubric:
+    - criterion: "a) Raum → SchluesselNr und SchluesselNr → Raum (je 0,5); Kapazitaet abhängig von Raum oder von SchluesselNr (0,5); jede äquivalente Überdeckung zählt"
+      points: 1.5
+    - criterion: "a) F3 mit zusammengesetzter linker Seite"
+      points: 1
+    - criterion: "a) F4"
+      points: 0.5
+    - criterion: "b) beide Schlüsselkandidaten (je 0,75)"
+      points: 1.5
+    - criterion: "b) Primattribute Datum, Raum, SchluesselNr"
+      points: 0.5
+    - criterion: "c) nur 1NF (folgerichtig aus den eigenen FDs und Schlüsseln aus a) und b))"
+      points: 0.5
+    - criterion: "c) konkrete partielle Abhängigkeit eines Nichtschlüsselattributs (Kapazitaet von Raum bzw. SchluesselNr)"
+      points: 1
+    - criterion: "c) Begründung berücksichtigt den zweiten Schlüsselkandidaten (z. B. Kapazitaet auch partiell von SchluesselNr, oder SchluesselNr als Primattribut erkannt)"
+      points: 0.5
+    - criterion: "d) Raum-Relation mit Kapazität und UNIQUE auf dem Alternativschlüssel"
+      points: 1.5
+    - criterion: "d) Mitglied ausgelagert"
+      points: 1
+    - criterion: "d) Belegung mit Primärschlüssel und beiden Fremdschlüsseln; Zerlegungen, die aus den eigenen FDs aus a) folgerichtig sind, erhalten die Punkte in d)"
+      points: 1.5
+    - criterion: "e) Änderungsanomalie an konkreten Zeilen gezeigt (mehrfach gespeicherte Kapazität oder Mitgliedsname)"
+      points: 1
+  space: lines:28
+- id: e01-p008
+  topic: t08
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-relationale-algebra
+      ref: "Selektion, Projektion, Umbenennung; Produkt und Verbund; Semijoin"
+    - id: wikibooks-relationenalgebra-und-sql
+      ref: "Umbenennung; Kartesisches Produkt; Join (Equi-, Natural-, Semi-Join)"
+  tags: [relationale-algebra, natuerlicher-join, umbenennung, selbstverbund, semi-join, kartesisches-produkt]
+  type: relalg
+  difficulty: 2
+  points: 6
+  minutes: 5
+  prompt: |-
+    Auf der Obstwiese des Vereins ernten Mitglieder die Bäume ab. Gegeben ist ein vereinfachter Ausschnitt mit drei Relationen. Ein ⋈ ohne Bedingung bezeichnet den natürlichen Join.
+
+    `Baum(bnr, sorte, pflanzjahr)`: (1, Apfel, 2008), (2, Birne, 2015), (3, Apfel, 2019), (4, Kirsche, 2012)
+
+    `Mitglied(mnr, name)`: (12, Brandt), (31, Ebert), (40, Wolf), (55, Yilmaz)
+
+    `Ernte(bnr, mnr, jahr)`: (1, 12, 2024), (1, 31, 2025), (2, 31, 2025), (3, 31, 2025), (4, 40, 2024)
+
+    a) Gib einen Ausdruck der relationalen Algebra für die Namen der Mitglieder an, die 2025 einen Apfelbaum abgeerntet haben, und das Ergebnis. (2 P)
+    b) Gib mit Hilfe der Umbenennung ρ einen Ausdruck für alle Paare von Baumnummern an, deren Bäume dieselbe Sorte haben. Jedes Paar soll nur einmal vorkommen, kein Baum mit sich selbst. Gib das Ergebnis an. (1,5 P)
+    c) Werte `Ernte ⋊ Mitglied` aus (rechter Semi-Join: Das Ergebnis hat nur die Attribute der rechten Relation) und beschreibe in einem Satz, was der Ausdruck liefert. (1,5 P)
+    d) Wie viele Attribute und wie viele Tupel hat `Baum × Mitglied`? (1 P)
+  solution: |-
+    a) `π_{name}(σ_{sorte='Apfel'}(Baum) ⋈ σ_{jahr=2025}(Ernte) ⋈ Mitglied)`
+
+    Apfelbäume sind 1 und 3; 2025 wurden beide von Mitglied 31 abgeerntet. Ergebnis: {(Ebert)}. Ebert steht nur **einmal** im Ergebnis, weil Relationen Mengen sind und π Duplikate entfernt. Gleichwertig sind Equi-Joins mit ausdrücklichen Bedingungen.
+
+    b) `π_{bnr, bnr2}(Baum ⋈_{sorte=sorte2 ∧ bnr<bnr2} ρ_{B2(bnr2, sorte2, pflanzjahr2)}(Baum))`
+
+    Ergebnis: {(1, 3)}. Ohne ρ hätten beide Seiten dieselben Attributnamen, und der Verbund ließe sich nicht formulieren. Die Bedingung `bnr<bnr2` schließt Paare mit sich selbst und gespiegelte Paare aus. Gleichwertig ist ein Produkt mit anschließender Selektion.
+
+    c) Mitglieder mit mindestens einem Partner in Ernte sind 12, 31 und 40. Ergebnis: {(12, Brandt), (31, Ebert), (40, Wolf)}. Der Ausdruck liefert die Mitglieder, die mindestens einmal geerntet haben; Yilmaz (55) fehlt, weil es zu ihm keine Ernte gibt.
+
+    d) 3 + 2 = **5 Attribute** (bnr, sorte, pflanzjahr, mnr, name) und 4 · 4 = **16 Tupel**.
+  rubric:
+    - criterion: "a) Selektionen auf Sorte und Jahr (0,5), Joins (0,5), Projektion auf name (0,5)"
+      points: 1.5
+    - criterion: "a) Ergebnis {Ebert}, nur einmal"
+      points: 0.5
+    - criterion: "b) Umbenennung einer Kopie von Baum und Verbund bzw. Produkt mit Gleichheit der Sorte (0,5); Ausschluss von Selbst- und gespiegelten Paaren (0,5)"
+      points: 1
+    - criterion: "b) Ergebnis {(1, 3)}, bei Bedingung bnr > bnr2 entsprechend {(3, 1)}"
+      points: 0.5
+    - criterion: "c) Ergebnis mit den drei Mitgliedern 12, 31, 40 und nur deren Attributen"
+      points: 1
+    - criterion: "c) zutreffende Beschreibung in einem Satz"
+      points: 0.5
+    - criterion: "d) 5 Attribute (0,5), 16 Tupel (0,5)"
+      points: 1
+  space: lines:12
+- id: e01-p009
+  topic: t05
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-integritaetsbedingung
+      ref: "Abschnitt „Definition“"
+    - id: wp-referentielle-integritaet
+      ref: "Begriffe und ihre Bedeutung; Löschweitergabe"
+    - id: firebird-30-language-reference
+      ref: "Kap. 5 DDL: CREATE TABLE (FOREIGN KEY mit ON DELETE SET NULL/SET DEFAULT)"
+    - id: postgresql-17-docs-sql
+      ref: "5.5 Constraints (Primary Keys, Foreign Keys)"
+  tags: [integritaet, entitaetsintegritaet, referenzielle-integritaet, domaene, set-null, set-default, bewertung]
+  type: explain
+  difficulty: 2
+  points: 6
+  minutes: 5
+  prompt: |-
+    Für die Obstwiese ist dieses Schema geplant (Kurzschreibweise, ausführlicher als der Ausschnitt der vorigen Aufgabe):
+
+    - sorte(<u>sorte_nr</u>, name)
+    - baum(<u>baum_nr</u>, sorte_nr → sorte, pflanzjahr, pate_nr → mitglied); nicht jeder Baum hat eine Pat:in
+    - ernte(<u>ernte_nr</u>, baum_nr → baum, mitglied_nr → mitglied, datum, menge_kg)
+
+    Ernten sollen für die Jahresstatistik dauerhaft erhalten bleiben. In der Entwurfsbesprechung fallen vier Vorschläge. Gib zu jedem an, welche Integritätsart er betrifft (Entitäts-, referenzielle, Domänen- oder benutzerdefinierte Integrität), und bewerte ihn kurz. Ist er nicht sinnvoll, nenne eine bessere Lösung.
+
+    1. „`pflanzjahr` wird `VARCHAR(10)`, damit man bei alten Bäumen auch ‚ca. 1990‘ eintragen kann.“
+    2. „Der Fremdschlüssel `baum.pate_nr` bekommt `ON DELETE SET NULL`. Wird eine Pat:in gelöscht, hat der Baum eben keine Pat:in mehr.“
+    3. „`ernte.baum_nr` bekommt `DEFAULT 0` und `ON DELETE SET DEFAULT`, damit die Ernten gefällter Bäume erhalten bleiben.“
+    4. „`ernte` bekommt keinen Primärschlüssel. Doppelte Zeilen stören nicht, wir bilden ohnehin nur Summen.“
+  solution: |-
+    1. **Domänenintegrität.** Nicht sinnvoll: Ein Textfeld nimmt beliebige Werte an („alt“, „19xx“), und mit dem Jahr lässt sich nicht mehr rechnen, vergleichen oder sortieren. Besser `SMALLINT` mit `CHECK` auf einen plausiblen Bereich, die Unsicherheit als eigene Spalte, z. B. `pflanzjahr_geschaetzt BOOLEAN`.
+    2. **Referenzielle Integrität** (referenzielle Aktion). Sinnvoll: Die Patenschaft ist optional, `pate_nr` ist NULL-fähig, und das ist die Voraussetzung für `SET NULL`. Der Baum bleibt erhalten. Vertretbar ist auch `NO ACTION`, wenn vor dem Löschen eine neue Pat:in bestimmt werden soll.
+    3. **Referenzielle Integrität.** Nur unter einer Bedingung tragfähig: `SET DEFAULT` setzt `baum_nr` auf 0. Das gelingt nur, wenn es in `baum` eine Platzhalterzeile 0 (z. B. „gefällter Baum“) gibt, sonst scheitert das Löschen. Außerdem verlieren die Ernten die Zuordnung zum konkreten Baum. Besser: Bäume nicht löschen, sondern als gefällt kennzeichnen (z. B. Spalte `gefaellt_am`) und beim FK `NO ACTION` lassen.
+    4. **Entitätsintegrität.** Nicht sinnvoll: Ohne Primärschlüssel lässt sich eine einzelne Ernte nicht eindeutig ansprechen (ändern, löschen). Eine versehentlich doppelt erfasste Ernte verfälscht die Summen und ist von einer echten zweiten Ernte nicht zu unterscheiden. `ernte_nr` als Primärschlüssel beibehalten, z. B. als Identity-Spalte.
+  rubric:
+    - criterion: "1) Domänenintegrität (0,5); nicht sinnvoll mit Begründung und besserer Lösung (1)"
+      points: 1.5
+    - criterion: "2) referenzielle Integrität (0,5); sinnvoll, weil optional und NULL-fähig (1); gleichwertig begründete andere Bewertung zählt"
+      points: 1.5
+    - criterion: "3) referenzielle Integrität (0,5); Platzhalterzeile als Voraussetzung oder Verlust der Baumzuordnung erkannt, Alternative genannt (1); gleichwertig begründete Bewertung zählt"
+      points: 1.5
+    - criterion: "4) Entitätsintegrität (0,5); nicht sinnvoll, weil Zeilen nicht identifizierbar bzw. Dubletten Summen verfälschen (1)"
+      points: 1.5
+  space: lines:16
+- id: e01-p010
+  topic: t09
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: firebird-30-language-reference
+      ref: "Kap. 5 Data Definition (DDL) Statements: CREATE TABLE, CREATE DOMAIN, ALTER TABLE"
+    - id: postgresql-17-docs-sql-commands
+      ref: "CREATE TABLE; CREATE DOMAIN; ALTER TABLE"
+  tags: [ddl, create-table, constraints, identity, default, on-delete-cascade, domaene, alter-table]
+  type: sql-write
+  difficulty: 2
+  points: 9
+  minutes: 8
+  prompt: |-
+    Lege für die Jungpflanzenbörse in **Firebird 3** die Tabelle `angebot` an. Die Tabelle `mitglied` mit dem Primärschlüssel `mitglied_nr INTEGER` existiert bereits.
+
+    a) Tabelle `angebot` (7 P):
+    - `angebot_nr`: ganze Zahl, Primärschlüssel, wird vom DBMS automatisch fortlaufend vergeben
+    - `anbieter_nr`: Pflicht, verweist auf das anbietende Mitglied. Wird ein Mitglied gelöscht, sollen seine Angebote automatisch mitgelöscht werden.
+    - `pflanze`: Text bis 40 Zeichen, Pflicht
+    - `stueck`: ganze Zahl, Pflicht, mindestens 1, Standardwert 1
+    - `preis`: Betrag in Euro mit zwei Nachkommastellen, optional (leer = zum Tausch), falls angegeben nicht negativ
+    - `eingestellt_am`: Datum, Pflicht, Standardwert ist das Tagesdatum
+    - Dasselbe Mitglied darf dieselbe Pflanze nicht zweimal am selben Tag einstellen.
+
+    b) Später bekommt jedes Angebot eine Kategorie, nämlich 'Gemüse', 'Kräuter', 'Blumen' oder 'Obst'. Lege dafür eine Domäne an und ergänze damit in `angebot` die optionale Spalte `kategorie`. (2 P)
+  solution: |-
+    a)
+    ```sql
+    CREATE TABLE angebot (
+      angebot_nr     INTEGER GENERATED BY DEFAULT AS IDENTITY,
+      anbieter_nr    INTEGER      NOT NULL,
+      pflanze        VARCHAR(40)  NOT NULL,
+      stueck         SMALLINT     DEFAULT 1 NOT NULL,
+      preis          NUMERIC(6,2),
+      eingestellt_am DATE         DEFAULT CURRENT_DATE NOT NULL,
+      CONSTRAINT pk_angebot PRIMARY KEY (angebot_nr),
+      CONSTRAINT fk_angebot_anbieter FOREIGN KEY (anbieter_nr)
+        REFERENCES mitglied (mitglied_nr) ON DELETE CASCADE,
+      CONSTRAINT uq_angebot UNIQUE (anbieter_nr, pflanze, eingestellt_am),
+      CONSTRAINT ck_angebot_stueck CHECK (stueck >= 1),
+      CONSTRAINT ck_angebot_preis CHECK (preis >= 0)
+    );
+    ```
+    - In Firebird steht `DEFAULT` vor `NOT NULL`. Eine Identity-Spalte ist automatisch `NOT NULL`.
+    - Ist `preis` NULL, ergibt der CHECK UNKNOWN und gilt als erfüllt. Tauschangebote werden also angenommen.
+    - Gleichwertig: ein Generator bzw. eine Sequenz mit `BEFORE INSERT`-Trigger statt der Identity-Spalte; `INTEGER` statt `SMALLINT`; `DECIMAL(p,2)` oder eine andere Präzision bei `preis`; Constraints ohne Namen. `GENERATED ALWAYS AS IDENTITY` gibt es in Firebird 3 nicht.
+
+    b)
+    ```sql
+    CREATE DOMAIN d_kategorie AS VARCHAR(10)
+      CHECK (VALUE IN ('Gemüse', 'Kräuter', 'Blumen', 'Obst'));
+
+    ALTER TABLE angebot ADD kategorie d_kategorie;
+    ```
+    In Firebird ohne das Schlüsselwort `COLUMN` (PostgreSQL erlaubt `ADD COLUMN`). Eine Domäne hat in Firebird 3 höchstens einen CHECK. Die vorhandenen Zeilen erhalten NULL, das ist erlaubt, weil die Spalte optional ist.
+  rubric:
+    - criterion: "a) angebot_nr als Identity-Spalte und PRIMARY KEY (Generator/Sequenz mit Trigger gleichwertig; GENERATED ALWAYS, das es in Firebird 3 nicht gibt, 0,5)"
+      points: 1
+    - criterion: "a) passende Datentypen (ganze Zahl, VARCHAR(40), NUMERIC/DECIMAL mit 2 Nachkommastellen, DATE)"
+      points: 1
+    - criterion: "a) NOT NULL auf allen Pflichtspalten, preis NULL-fähig"
+      points: 0.5
+    - criterion: "a) stueck mit DEFAULT 1 (0,5) und CHECK (stueck >= 1) (0,5)"
+      points: 1
+    - criterion: "a) CHECK (preis >= 0)"
+      points: 0.5
+    - criterion: "a) eingestellt_am mit DEFAULT CURRENT_DATE; die Reihenfolge DEFAULT vor NOT NULL wird für die ganze Tabelle nur einmal mit −0,5 abgezogen"
+      points: 1
+    - criterion: "a) FOREIGN KEY auf mitglied mit ON DELETE CASCADE"
+      points: 1
+    - criterion: "a) UNIQUE (anbieter_nr, pflanze, eingestellt_am)"
+      points: 1
+    - criterion: "b) CREATE DOMAIN mit Basistyp und CHECK (VALUE IN (…)) mit den vier Werten"
+      points: 1
+    - criterion: "b) ALTER TABLE angebot ADD kategorie d_kategorie ohne COLUMN (0,5); Spalte optional, also kein NOT NULL in Domäne oder Spalte (0,5)"
+      points: 1
+  space: lines:24
+- id: e01-p011
+  topic: t10
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: firebird-30-language-reference
+      ref: "Kap. 6 DML: SELECT; Kap. 9 Aggregate Functions"
+    - id: oer-informatik-datenbanken
+      ref: "JOIN; Aggregatfunktionen; Unterabfragen"
+    - id: wp-dreiwertige-logik
+      ref: "NULL-Vergleiche (UNKNOWN)"
+  tags: [select, join, group-by, having, not-exists, "null"]
+  type: sql-write
+  difficulty: 3
+  points: 11
+  minutes: 10
+  prompt: |-
+    Gegeben ist das Schema der Jungpflanzenbörse (Firebird 3):
+
+    ```
+    mitglied     (mitglied_nr, vorname, nachname, beitritt, email)
+    angebot      (angebot_nr, anbieter_nr → mitglied, pflanze, stueck, preis,
+                  eingestellt_am)
+    reservierung (angebot_nr → angebot, mitglied_nr → mitglied, stueck,
+                  abgeholt_am)
+    ```
+
+    - `email` kann NULL sein. `preis` ist NULL bei Tauschangeboten.
+    - Primärschlüssel von `reservierung` ist (`angebot_nr`, `mitglied_nr`). `reservierung.stueck` ist die reservierte Stückzahl, `abgeholt_am` ist NULL, solange nicht abgeholt wurde.
+
+    Schreibe die Abfragen in SQL.
+
+    a) Alle Tauschangebote: Angebotsnummer, Pflanze, Stückzahl und Nachname der Anbieter:in, die zuletzt eingestellten zuerst. (3 P)
+    b) Überbuchte Angebote: Angebotsnummer, Pflanze, angebotene Stückzahl und Summe der reservierten Stück, und zwar nur für Angebote, bei denen insgesamt mehr Stück reserviert als angeboten sind. (4 P)
+    c) Angebote, die vor dem 1. Mai 2025 eingestellt wurden und noch **keine** Reservierung haben: Angebotsnummer, Pflanze und Nachname der Anbieter:in. Verwende für „keine Reservierung“ eine Unterabfrage. (4 P)
+  solution: |-
+    a)
+    ```sql
+    SELECT a.angebot_nr, a.pflanze, a.stueck, m.nachname
+    FROM angebot a
+    JOIN mitglied m ON m.mitglied_nr = a.anbieter_nr
+    WHERE a.preis IS NULL
+    ORDER BY a.eingestellt_am DESC;
+    ```
+    `a.preis = NULL` wäre falsch: Der Vergleich ergibt UNKNOWN und liefert keine Zeile.
+
+    b)
+    ```sql
+    SELECT a.angebot_nr, a.pflanze, a.stueck, SUM(r.stueck) AS reserviert
+    FROM angebot a
+    JOIN reservierung r ON r.angebot_nr = a.angebot_nr
+    GROUP BY a.angebot_nr, a.pflanze, a.stueck
+    HAVING SUM(r.stueck) > a.stueck;
+    ```
+    Alle nicht aggregierten Spalten der SELECT-Liste stehen im `GROUP BY`; deshalb darf `a.stueck` auch im `HAVING` stehen. Die Bedingung auf die Summe gehört ins `HAVING`, nicht ins `WHERE`.
+
+    c)
+    ```sql
+    SELECT a.angebot_nr, a.pflanze, m.nachname
+    FROM angebot a
+    JOIN mitglied m ON m.mitglied_nr = a.anbieter_nr
+    WHERE a.eingestellt_am < DATE '2025-05-01'
+      AND NOT EXISTS (
+        SELECT 1
+        FROM reservierung r
+        WHERE r.angebot_nr = a.angebot_nr
+      );
+    ```
+    Gleichwertig: `a.angebot_nr NOT IN (SELECT angebot_nr FROM reservierung)`. Das ist hier sicher, weil `reservierung.angebot_nr` als Teil des Primärschlüssels nie NULL ist. Für das Datum sind `DATE '2025-05-01'`, `'2025-05-01'` und in Firebird auch `'01.05.2025'` gleichwertig; die ISO-Form mit `DATE` ist portabel.
+  rubric:
+    - criterion: "a) Join angebot–mitglied über anbieter_nr"
+      points: 1
+    - criterion: "a) preis IS NULL (nicht = NULL)"
+      points: 1
+    - criterion: "a) Spaltenliste (0,5) und ORDER BY eingestellt_am DESC (0,5)"
+      points: 1
+    - criterion: "b) Join angebot–reservierung"
+      points: 1
+    - criterion: "b) GROUP BY mit allen nicht aggregierten Spalten"
+      points: 1
+    - criterion: "b) SUM(r.stueck) in der Ausgabe"
+      points: 0.5
+    - criterion: "b) HAVING SUM(r.stueck) > a.stueck"
+      points: 1
+    - criterion: "b) richtige Spalten, Stückzahlen von angebot und reservierung nicht verwechselt"
+      points: 0.5
+    - criterion: "c) NOT EXISTS bzw. NOT IN als Unterabfrage (1); richtige Verknüpfung über angebot_nr, korreliert bei EXISTS (1)"
+      points: 2
+    - criterion: "c) Datumsbedingung; DATE '2025-05-01', '2025-05-01' oder in Firebird '01.05.2025' gleichwertig"
+      points: 0.5
+    - criterion: "c) Join auf mitglied für den Nachnamen"
+      points: 1
+    - criterion: "c) kein innerer Join auf reservierung in der äußeren Abfrage, richtige Spalten"
+      points: 0.5
+  space: lines:28
+- id: e01-p012
+  topic: t11
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: firebird-30-language-reference
+      ref: "Kap. 6 DML: INSERT, UPDATE, DELETE"
+    - id: wp-referentielle-integritaet
+      ref: "Löschweitergabe, Kaskadierung"
+  tags: [dml, insert, update, delete, unterabfrage, kaskade]
+  type: sql-write
+  difficulty: 2
+  points: 4
+  minutes: 4
+  prompt: |-
+    Schema wie in der vorigen Aufgabe. Die Fremdschlüssel wirken beim Löschen so:
+    - `angebot → mitglied`: Angebote werden mit ihrem Mitglied gelöscht (wie in Aufgabe 10 a) gefordert).
+    - `reservierung → angebot`: Reservierungen werden mit ihrem Angebot gelöscht.
+    - `reservierung → mitglied`: keine Löschaktion.
+
+    Schreibe die Anweisungen in Firebird-3-SQL.
+
+    a) Mitglied 31 reserviert 2 Stück von Angebot 108. (1 P)
+    b) Mitglied 31 holt diese Reservierung am 3. Mai 2025 ab. (1 P)
+    c) Lösche alle noch nicht abgeholten Reservierungen zu Angeboten, die vor dem 1. April 2025 eingestellt wurden. (1 P)
+    d) Mitglied 12 hat zwei Angebote; zu einem davon hat Mitglied 40 eine Reservierung. Mitglied 12 selbst hat nichts reserviert. Was bewirkt `DELETE FROM mitglied WHERE mitglied_nr = 12;`? (1 P)
+  solution: |-
+    a)
+    ```sql
+    INSERT INTO reservierung (angebot_nr, mitglied_nr, stueck)
+    VALUES (108, 31, 2);
+    ```
+    `abgeholt_am` bleibt NULL.
+
+    b)
+    ```sql
+    UPDATE reservierung
+    SET abgeholt_am = DATE '2025-05-03'
+    WHERE angebot_nr = 108 AND mitglied_nr = 31;
+    ```
+    Beide Spalten des Primärschlüssels gehören in die Bedingung, sonst träfe die Änderung alle Reservierungen von Angebot 108 bzw. von Mitglied 31.
+
+    c)
+    ```sql
+    DELETE FROM reservierung
+    WHERE abgeholt_am IS NULL
+      AND angebot_nr IN (SELECT angebot_nr FROM angebot
+                         WHERE eingestellt_am < DATE '2025-04-01');
+    ```
+    Für die Datumswerte sind `DATE '2025-04-01'`, `'2025-04-01'` und in Firebird auch `'01.04.2025'` gleichwertig.
+
+    d) Mitglied 12 wird gelöscht. Seine beiden Angebote werden mitgelöscht. Dadurch wird auch die Reservierung von Mitglied 40 zu diesem Angebot gelöscht, weil die Löschung über `angebot` weiter auf `reservierung` wirkt (zweistufige Kaskade). Mitglied 40 selbst bleibt erhalten.
+  rubric:
+    - criterion: "a) INSERT mit Spaltenliste und passenden Werten"
+      points: 1
+    - criterion: "b) UPDATE mit Datumswert (DATE '2025-05-03', '2025-05-03' oder in Firebird '03.05.2025' gleichwertig) und beiden PK-Spalten in der Bedingung"
+      points: 1
+    - criterion: "c) abgeholt_am IS NULL (0,5) und Unterabfrage bzw. gleichwertige Bedingung auf eingestellt_am (0,5); Datumsformen wie in b) gleichwertig"
+      points: 1
+    - criterion: "d) Angebote von Mitglied 12 mitgelöscht (0,5); Reservierung von Mitglied 40 über die zweite Stufe mitgelöscht (0,5)"
+      points: 1
+  space: lines:14
+- id: e01-p013
+  topic: t12
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-datenbanktrigger
+      ref: "BEFORE/AFTER-Trigger"
+    - id: firebird-30-language-reference
+      ref: "Kap. 7 Procedural SQL (PSQL) Statements: Trigger, EXCEPTION"
+  tags: [trigger, check, tabellenuebergreifend, prozedurale-integritaet, ausloeseereignisse]
+  type: explain
+  difficulty: 3
+  points: 3
+  minutes: 3
+  prompt: |-
+    In der Börse darf niemand ein eigenes Angebot reservieren: `reservierung.mitglied_nr` darf nicht gleich der `anbieter_nr` des zugehörigen Angebots sein.
+
+    a) Warum lässt sich diese Regel nicht zuverlässig mit einem `CHECK` in `reservierung` sichern? (1 P)
+    b) Die Regel soll mit Triggern vollständig gelten. Gib an, **auf welchen Tabellen** und **bei welchen Ereignissen** ein Trigger nötig ist, und beschreibe jeweils kurz, was er prüft. (2 P)
+  solution: |-
+    a) Ein `CHECK` bezieht sich auf die Werte der eigenen Zeile. Die `anbieter_nr` steht aber in einer anderen Tabelle. PostgreSQL verbietet Unterabfragen im CHECK. Firebird erlaubt sie, prüft sie aber nur, wenn sich die Reservierungszeile ändert. Die Regel kann aber auch von der anderen Seite verletzt werden (siehe b).
+
+    b)
+    - **reservierung, BEFORE INSERT und BEFORE UPDATE** (von `angebot_nr` oder `mitglied_nr`): Der Trigger liest die `anbieter_nr` des Angebots `NEW.angebot_nr` und löst eine Exception aus, wenn sie gleich `NEW.mitglied_nr` ist.
+    - **angebot, BEFORE UPDATE** (von `anbieter_nr`): Der Trigger prüft, ob es zu diesem Angebot eine Reservierung des neuen Anbieters gibt (`mitglied_nr = NEW.anbieter_nr`), und bricht dann ab.
+
+    Einfügen eines neuen Angebots und Löschen sind unkritisch: Ein neues Angebot hat noch keine Reservierungen, und Löschen kann die Regel nicht verletzen. Ein AFTER-Trigger mit Exception ist gleichwertig, weil die Exception die Anweisung zurücknimmt; BEFORE ist der übliche Zeitpunkt für Prüfungen.
+  rubric:
+    - criterion: "a) CHECK sieht nur die eigene Zeile bzw. die Regel betrifft eine andere Tabelle (mit Unterabfrage unvollständig bzw. in PostgreSQL verboten)"
+      points: 1
+    - criterion: "b) Trigger auf reservierung bei INSERT und UPDATE, der anbieter_nr nachliest und bei Gleichheit abbricht (AFTER mit Exception gleichwertig)"
+      points: 1
+    - criterion: "b) Trigger auf angebot bei UPDATE von anbieter_nr, der vorhandene Reservierungen des neuen Anbieters prüft"
+      points: 1
+  space: lines:9
+- id: e01-p014
+  topic: t13
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-sql-injection
+      ref: "Funktionsweise; Gegenmaßnahmen"
+    - id: wp-prepared-statement
+      ref: "Parametrisierte Anweisungen"
+    - id: sqlite-documentation
+      ref: "Prepared Statements (sqlite3_prepare, Parameterbindung)"
+  tags: [sql-injection, prepared-statement, update]
+  type: explain
+  difficulty: 2
+  points: 1
+  minutes: 1
+  prompt: |-
+    In der Vereins-App kann ein Mitglied seine E-Mail-Adresse ändern. Der Code setzt die Eingabe direkt in den SQL-Text ein (Pseudocode, `nr` ist die Nummer des angemeldeten Mitglieds):
+
+    ```
+    sql = "UPDATE mitglied SET email = '" + eingabe + "' WHERE mitglied_nr = " + nr
+    ```
+
+    Mitglied 31 gibt `x@beispiel.de' --` ein. Beschreibe die Wirkung und nenne die Gegenmaßnahme. Den entstehenden SQL-Text musst du nicht aufschreiben. (1 P)
+  solution: |-
+    Beim DBMS kommt an (zur Erläuterung):
+    ```sql
+    UPDATE mitglied SET email = 'x@beispiel.de' --' WHERE mitglied_nr = 31
+    ```
+    Das Apostroph der Eingabe schließt das Literal, `--` macht den Rest der Zeile zum Kommentar. Die `WHERE`-Bedingung fällt weg: **Alle** Mitglieder erhalten diese E-Mail-Adresse.
+
+    Gegenmaßnahme: ein **Prepared Statement** (Parameterbindung), `UPDATE mitglied SET email = ? WHERE mitglied_nr = ?`, beide Werte als Parameter übergeben. Die Eingabe wird dann nie als SQL-Text interpretiert, sondern nur als Wert eingesetzt.
+  rubric:
+    - criterion: "Wirkung: Literal geschlossen, WHERE auskommentiert, alle Mitglieder erhalten die Adresse"
+      points: 0.5
+    - criterion: "Prepared Statement bzw. Parameterbindung mit Platzhaltern"
+      points: 0.5
+  space: lines:6
