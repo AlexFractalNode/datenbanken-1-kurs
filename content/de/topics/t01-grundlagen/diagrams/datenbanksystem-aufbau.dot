@@ -9,8 +9,10 @@ digraph datenbanksystem_aufbau {
     style=dotted;
     app_pacht [shape=box, style=rounded, label="Pachtverwaltung\n(Web-Anwendung)"];
     app_wasser [shape=box, style=rounded, label="Wasserabrechnung\n(Skript)"];
-    app_sql [shape=box, style=rounded, label="SQL-Konsole\ndes Kassenwarts"];
   }
+
+  // mitgelieferter Client: Zugangsweg des DBMS, keine Datenbankanwendung
+  app_sql [shape=box, style="rounded,dashed", label="Abfragewerkzeug (Client)\nmit dem DBMS ausgeliefert,\nz. B. vom Kassenwart genutzt"];
 
   subgraph cluster_dbs {
     label="Datenbanksystem (DBS) = DBMS + Datenbasis";

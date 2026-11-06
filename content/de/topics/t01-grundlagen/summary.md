@@ -19,7 +19,7 @@ sources:
   - id: watt-database-design-2e
     ref: "Kap. 1 Before the Advent of Database Systems; Kap. 2 Fundamental Concepts; Kap. 3 Characteristics and Benefits of a Database; Kap. 4/5 (Schema und Instanz); Kap. 14 Database Users"
   - id: oer-informatik-datenbanken
-    ref: "DBMS (https://oer-informatik.de/dbms): Begriffsklärung Datenbank, Datenbanksystem, DBMS; Aufgaben eines DBMS nach Codd. DB-Konzepte (https://oer-informatik.de/datenbankkonzepte): Mehrbenutzerbetrieb, Katalog, Zugriffskontrolle"
+    ref: "DBMS (https://oer-informatik.de/dbms): Begriffsklärung Datenbank, Datenbanksystem, DBMS; Aufgaben eines DBMS nach Codd; Frontends (mitgelieferte Kommandozeilen-Clients, grafische Clients). DB-Konzepte (https://oer-informatik.de/datenbankkonzepte): Aufgaben eines DBMS nach Codd (1982), Mehrbenutzerbetrieb, Katalog, Zugriffskontrolle"
   - id: wp-data-dictionary
     ref: "Einleitung (Metadatenkatalog), Inhalte (Tabellen, Felder, Schlüssel, Integritätsbedingungen, Trigger, Zugriffsrechte, Indizes), Nutzergruppen (Datendesigner, Anwendungsprogrammierer, Endbenutzer, DBA)"
   - id: wp-schema-informatik
@@ -30,6 +30,8 @@ sources:
     ref: "Einleitung (relevanter Ausschnitt der realen Welt), Grundlegende Komponenten (Typ- vs. Instanzebene)"
   - id: wp-datenmodellierung
     ref: "Einleitung und Verfahren (Ausschnitt der realen Welt, Abgrenzung nach Zweck)"
+  - id: wpen-entity-relationship-model
+    ref: "Semantic model (Intension und Extension als Begriffspaar aus der Logik; Datenbank als Modell zu einem Zeitpunkt)"
   - id: wp-datenbankadministrator
     ref: "Aufgaben des DBA (Datenbankentwurf, Schemata, Rechte, Sicherung, Leistung, Installation); DBA als Rolle"
   - id: wp-datenunabhaengigkeit
@@ -43,9 +45,9 @@ sources:
   - id: wp-data-control-language
     ref: "DCL (GRANT, REVOKE)"
   - id: wp-open-database-connectivity
-    ref: "ODBC als Programmierschnittstelle zum DBMS"
+    ref: "ODBC als Programmierschnittstelle zwischen Anwendung und DBMS"
   - id: wp-java-database-connectivity
-    ref: "JDBC als Programmierschnittstelle zum DBMS"
+    ref: "JDBC als Programmierschnittstelle zwischen Anwendung und DBMS"
   - id: wpen-codds-12-rules
     ref: "Lead (Regel 0 bis 12; Kriterien für relationale DBMS), History (Anlass; unterschiedliche Bewertungen der Erfüllung), Rules, References (Computerworld 1985)"
   - id: wp-edgar-f-codd
@@ -130,7 +132,7 @@ Ein Datenbanksystem besteht aus zwei Teilen: der Software, die verwaltet, und de
 
   Dabei kontrolliert es jeden lesenden und schreibenden Zugriff, auch den gleichzeitigen mehrerer Benutzer.
 - Das **Datenbanksystem** (DBS, *database system*) ist das DBMS zusammen mit der von ihm verwalteten Datenbasis: DBS = DBMS + DB. Manche Darstellungen zählen die **Kommunikationsschnittstellen** (z. B. Netzwerkzugang, Programmierschnittstellen) als dritten Bestandteil hinzu.
-- Eine **Datenbankanwendung** (*database application*) ist ein Programm, das das Datenbanksystem nutzt, z. B. die Web-Oberfläche der Pachtverwaltung. Sie gehört nicht zum Datenbanksystem.
+- Eine **Datenbankanwendung** (*database application*) ist ein Programm, das das Datenbanksystem nutzt, z. B. die Web-Oberfläche der Pachtverwaltung. Sie gehört nicht zum Datenbanksystem. Anders die Abfragewerkzeuge (Clients), die mit dem DBMS ausgeliefert werden, etwa ein Kommandozeilen- oder grafischer Client: Sie sind Zugangswege, die das DBMS selbst bereitstellt. Eigene Programme sind Datenbankanwendungen, mitgelieferte Clients nicht.
 
 Im Sprachgebrauch, auch in Fachtexten, wird „Datenbank“ oft gleichbedeutend mit „Datenbanksystem“ verwendet. Wer genau sein will, unterscheidet: Firebird ist ein DBMS, die Vereinsdaten sind die Datenbank, beides zusammen ist das Datenbanksystem. Diese Trennung hilft, weil sich Fragen wie „Wer prüft die Rechte?“ (das DBMS) oder „Was wird gesichert?“ (die Datenbank) nur so klar beantworten lassen.
 
@@ -173,7 +175,7 @@ Solche Regeln werden später zu Kardinalitäten im ER-Modell (t04) und zu Integr
 - Das **Schema** (*database schema*) beschreibt die Struktur: welche Tabellen es gibt, welche Spalten mit welchen Datentypen, welche Bedingungen gelten. Es legt fest, wie gültige Daten aussehen, ändert sich selten und wird mit DDL definiert. Weil es Daten über Daten enthält, gehört es zu den **Metadaten** und ist im Data Dictionary gespeichert. Man kann es auch als die konkrete Anwendung eines Datenmodells (etwa des relationalen) auf eine bestimmte Miniwelt sehen.
 - Die **Ausprägung** (*instance*, auch Instanz, Datenbankinstanz oder Datenbankzustand) ist die Menge der konkreten Daten zu einem Zeitpunkt. Sie ändert sich ständig durch DML (`INSERT`, `UPDATE`, `DELETE`) und muss stets zum Schema passen. Mit „Ausprägung“ ist dabei der ganze Zustand gemeint, nicht nur einzelne Werte darin.
 
-Ein Begriffspaar aus der Logik benennt die beiden Ebenen: Das Schema bildet die **intensionale Ebene** (*intension*, was gelten soll), die Ausprägung die **extensionale Ebene** (*extension*, was tatsächlich gespeichert ist).
+In der Datenbankliteratur werden die beiden Ebenen auch mit einem Begriffspaar aus der Logik bezeichnet, das dort Inhalt und Umfang eines Begriffs trennt: Das Schema heißt dann **intensionale Ebene** (*intension*, was gelten soll), die Ausprägung **extensionale Ebene** (*extension*, was tatsächlich gespeichert ist).
 
 Beispiel: Schema Parzelle(<u>ParzellenNr</u>, Flaeche_m2, Pacht_EUR)
 
@@ -220,20 +222,20 @@ Auf Edgar F. Codd, den Begründer des relationalen Modells, gehen zwei Listen zu
 
 ### Neun Anforderungen nach Codd
 
-Codd hat Anfang der 1980er-Jahre zusammengefasst, welche Aufgaben ein DBMS übernehmen soll; in der Literatur wird dafür meist ein Zeitschriftenaufsatz von 1982 angegeben. Die Liste wird häufig im Zusammenhang mit relationalen Systemen behandelt, als das, was ein relationales DBMS nach Codd bieten muss. Manche Darstellungen lesen sie allgemeiner als Funktionskatalog für DBMS überhaupt; das ist eine Lesart, keine Festlegung Codds.
+Codd hat zusammengefasst, welche Aufgaben ein DBMS übernehmen soll; als Jahr wird in der Literatur meist 1982 angegeben. Die Gliederung in neun Anforderungen ist in der Lehrliteratur üblich. In der Literatur finden sich zwei Einordnungen: als Anforderungen an relationale DBMS und als allgemeiner Aufgabenkatalog eines DBMS.
 
 Die Namen der Anforderungen schwanken je nach Darstellung. Die Tabelle nennt gängige Alternativen und beschreibt jede Anforderung von ihrer Wirkung her: Was ginge schief, wenn das DBMS sie nicht erfüllte?
 
 | Anforderung (auch genannt) | Ohne sie … | Beispiel Kleingartenverein |
 |---|---|---|
-| **Integration** (Datenintegration) | … legte jede Anwendung ihre eigenen Kopien an. Gefordert ist eine nichtredundante Datenhaltung: Jedes logische Datenelement, etwa eine Anschrift, liegt nur einmal vor. | Vorstand, Kasse und Wasserwart nutzen eine gemeinsame Datenbasis; Kayas Anschrift steht genau einmal darin. |
-| **Operationen** (Sprache) | … gäbe es keinen geordneten Weg, Strukturen festzulegen (DDL), Daten einzufügen, abzufragen, zu ändern und zu löschen (DML) und Rechte zu vergeben (DCL). Dazu gehören verschiedene Zugangswege: eine Programmierschnittstelle für Anwendungen, eine interaktive oder grafische Oberfläche und der Zugriff über das Web. | Tabelle Zahlung mit `CREATE TABLE` anlegen, Pacht per `UPDATE` anpassen; der Kassenwart nutzt ein grafisches Werkzeug, die Pachtverwaltung eine Programmierschnittstelle. |
+| **Integration** (Datenintegration) | … legte jede Anwendung ihre eigenen Kopien an. Gefordert ist, dass jede Angabe genau einen Speicherort hat, auf den alle Anwendungen zugreifen. | Vorstand, Kasse und Wasserwart nutzen eine gemeinsame Datenbasis; Kayas Anschrift steht genau einmal darin. |
+| **Operationen** (Sprache) | … gäbe es keinen geordneten Weg, Strukturen festzulegen (DDL), Daten einzufügen, abzufragen, zu ändern und zu löschen (DML) und Rechte zu vergeben (DCL). Dazu gehören Schnittstellen für unterschiedliche Benutzergruppen, etwa interaktive Clients für Menschen und Programmierschnittstellen für Anwendungen. | Tabelle Zahlung mit `CREATE TABLE` anlegen, Pacht per `UPDATE` anpassen; der Kassenwart arbeitet in einem mitgelieferten Abfragewerkzeug, die Pachtverwaltung greift über eine Programmierschnittstelle zu. |
 | **Katalog** (Data Dictionary) | … könnten weder Programme noch Menschen verlässlich nachsehen, wie die Daten aufgebaut sind. | Nachschlagen, welche Spalten die Tabelle Zahlung hat. |
 | **Benutzersichten** | … müsste jede Gruppe mit dem gesamten Bestand arbeiten, auch mit Teilen, die sie nicht braucht. | Der Wasserwart bekommt Parzellen und Zählerstände angezeigt, die Bankdaten nicht. |
 | **Konsistenzüberwachung** (Integritätssicherung, Konsistenzkontrolle) | … gelangten unsinnige oder widersprüchliche Werte unbemerkt in den Bestand (semantische Integrität), und beschädigte Speicherstrukturen, etwa nach einem Absturz, blieben unentdeckt (physische Integrität). | Ein Zählerstand kleiner als der vorige wird abgewiesen. |
 | **Zugriffskontrolle** (Datenschutz, Datenzugriffskontrolle) | … dürfte jeder, der die Datenbank erreicht, alles lesen und ändern. | Nur der Kassenwart darf Zahlungen ändern. |
-| **Transaktionen** | … bliebe bei einem Abbruch mitten in einem Vorgang ein halber Zustand zurück, und eine bereits bestätigte Änderung könnte bei einem Absturz doch verloren gehen. Gefordert ist beides: ganz oder gar nicht, und nach dem erfolgreichen Abschluss dauerhaft. | Zahlung buchen und offenen Betrag senken geschieht zusammen oder gar nicht; nach dem `COMMIT` übersteht die Buchung auch einen Stromausfall. |
-| **Synchronisation** (Mehrbenutzerfähigkeit) | … überschrieben sich gleichzeitig Arbeitende gegenseitig oder sähen halbfertige Zwischenstände der anderen. Mit Synchronisation arbeitet jede Person so, als wäre sie allein im System (Isolation). | Vorsitzende und Kassenwart ändern zur selben Zeit denselben Pächterdatensatz; beide Änderungen bleiben erhalten. |
+| **Transaktionen** | … könnte ein Vorgang auf halbem Weg stehen bleiben: Die Zahlung wäre gebucht, der offene Betrag aber noch nicht gesenkt. Ebenso wenig wäre sicher, dass eine als erledigt gemeldete Buchung einen Absturz übersteht. | Zahlung buchen und offenen Betrag senken: entweder beides oder keines. Ist die Buchung mit `COMMIT` bestätigt, ist sie auch nach einem Stromausfall noch da. |
+| **Synchronisation** (Mehrbenutzerfähigkeit) | … könnten gleichzeitige Vorgänge einander Änderungen überschreiben oder mit Zwischenständen weiterrechnen, die ein anderer Vorgang später wieder verwirft. Das DBMS hält die Vorgänge so auseinander, dass keiner unfertige Änderungen eines anderen zu sehen bekommt (Isolation). | Vorsitzende und Kassenwart ändern zur selben Zeit denselben Pächterdatensatz; beide Änderungen bleiben erhalten. |
 | **Datensicherung** (Recovery, Wiederherstellung) | … wäre der Bestand nach einem Plattendefekt, einem Systemabsturz oder einem versehentlichen Löschen verloren oder unbrauchbar. | Den Stand vom Vorabend zurückspielen und die seitdem bestätigten Buchungen nachfahren. |
 
 Zwei Paare liegen nah beieinander:
@@ -267,8 +269,8 @@ Ob heutige Produkte alle Regeln vollständig erfüllen, wird in der Literatur un
 |---|---|---|
 | Inhalt | Funktionen, die ein DBMS bereitstellen soll | Eigenschaften, an denen man ein relationales DBMS erkennt |
 | Zweck | Leistungsumfang eines DBMS beschreiben | prüfen, ob ein Produkt die Bezeichnung „relational“ verdient |
-| Einordnung | meist als Codds Anforderungen an (relationale) DBMS dargestellt, teils allgemein auf DBMS übertragen | setzen ausdrücklich das relationale Modell voraus |
-| Überschneidung | Katalog, Konsistenzüberwachung, Operationen | Regel 4 (Katalog), Regel 10 (Integrität), Regel 5 (Datensprache) |
+| Einordnung | in der Literatur teils als Anforderungen an relationale DBMS, teils als allgemeiner Aufgabenkatalog eines DBMS | setzen ausdrücklich das relationale Modell voraus |
+| Überschneidung (u. a.) | Katalog, Konsistenzüberwachung, Operationen, Benutzersichten, Transaktionen | Regel 4 (Katalog), Regel 10 (Integrität), Regel 5 (Datensprache, einschließlich Transaktionsgrenzen), Regel 6 (Sichten ändern) |
 
 Ist allgemein von „Codds Regeln“ die Rede, lohnt sich der Hinweis, welche Liste man meint, denn beide stammen von ihm und überschneiden sich.
 
@@ -287,18 +289,16 @@ Wer mit einem Datenbanksystem zu tun hat, nimmt eine oder mehrere **Rollen** ein
 
 - **Systemanalytiker und Datenbankdesigner** (Datenmodellierer) erheben die Anforderungen, grenzen die Miniwelt ab und entwerfen ER-Modell und Schema (siehe t03, t04). Beispiel: das Vorstandsmitglied, das mit allen Beteiligten klärt, welche Daten der Verein wirklich braucht.
 - **Softwarearchitekten** legen fest, wie die Anwendung aufgebaut ist, etwa welche Schichten es gibt und wie sie an die Datenbank angebunden wird (siehe t13).
-- **Anwendungsentwickler** (Anwendungsprogrammierer, *application programmers*) schreiben die Programme, die auf die Datenbank zugreifen, und formulieren dafür SQL, auch einzelne Ad-hoc-Abfragen. Beispiel: der Kassenwart, der selbst eine SQL-Abfrage für die Summe der offenen Beträge schreibt, oder ein Vereinsmitglied, das die Web-Oberfläche programmiert.
+- **Anwendungsentwickler** (Anwendungsprogrammierer, *application programmers*) schreiben die Programme, die auf die Datenbank zugreifen, und formulieren dafür SQL, auch einzelne Ad-hoc-Abfragen. Beispiel: der Kassenwart, der im mitgelieferten Abfragewerkzeug selbst eine SQL-Abfrage für die Summe der offenen Beträge schreibt, oder ein Vereinsmitglied, das die Web-Oberfläche programmiert.
 
 **Betreiben**
 
-- Der **Datenbankadministrator** (DBA, *database administrator*) sorgt dafür, dass das Datenbanksystem zuverlässig läuft. Zu seinen Aufgaben gehören:
-  - die Systemarchitektur mitbestimmen (z. B. ein zentraler Server, Zugriff über das Netz) und das DBMS installieren und aktualisieren,
-  - am logischen und physischen Datenbankentwurf mitwirken: Tabellen, Indexe und Sichten anlegen und anpassen,
-  - Altbestände übernehmen, etwa die bisherigen Tabellenkalkulationsdateien importieren,
-  - Zugriffsschnittstellen für Anwendungen bereitstellen (z. B. ODBC, JDBC),
-  - Benutzer und ihre Rechte verwalten,
-  - Speicherplatz planen und überwachen, die Leistung beobachten und verbessern, die Datenbank bei Bedarf reorganisieren,
-  - Datensicherungen einrichten und nach einem Fehler oder Systemausfall den Bestand wiederherstellen (Recovery).
+- Der **Datenbankadministrator** (DBA, *database administrator*) sorgt dafür, dass das Datenbanksystem zuverlässig läuft. Seine Aufgaben lassen sich in fünf Bereiche ordnen:
+  - *Aufbau:* DBMS und Client-Software installieren und auf neue Versionen bringen.
+  - *Entwurf:* beim Datenbankentwurf mitarbeiten, das Schema im DBMS umsetzen und später anpassen, Sichten für einzelne Benutzergruppen und Anwendungen einrichten.
+  - *Sicherheit:* Benutzerkonten anlegen und festlegen, wer was lesen und ändern darf.
+  - *Betrieb:* Verfügbarkeit und Antwortzeiten im Blick behalten, Engpässe beheben, z. B. mit einem zusätzlichen Index, und das System laufend warten.
+  - *Notfall:* Datensicherungen einrichten, damit sich der Bestand nach einem Ausfall wiederherstellen lässt (Recovery).
 
 **Außerhalb der einzelnen Datenbank**
 

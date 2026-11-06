@@ -174,12 +174,11 @@
   tags: [benutzerrollen]
   front: "Nenne typische Aufgaben eines Datenbankadministrators (DBA)."
   back: |-
-    - Systemarchitektur mitbestimmen, DBMS installieren und aktualisieren
-    - am logischen und physischen Entwurf mitwirken (Tabellen, Indexe, Sichten)
-    - Altbestände importieren, Schnittstellen wie ODBC/JDBC bereitstellen
-    - Benutzer und Rechte verwalten
-    - Speicherplatz und Leistung überwachen, reorganisieren
-    - Datensicherung und Wiederherstellung nach Ausfällen (Recovery)
+    - Aufbau: DBMS und Clients installieren und aktualisieren
+    - Entwurf: am Entwurf mitarbeiten, Schema umsetzen und anpassen, Sichten einrichten
+    - Sicherheit: Benutzerkonten und Rechte verwalten
+    - Betrieb: Verfügbarkeit und Antwortzeiten überwachen, Engpässe beheben (z. B. Index)
+    - Notfall: Datensicherungen einrichten, Wiederherstellung ermöglichen (Recovery)
 - id: t01-c021
   status: reviewed
   reviews: [fach, aufgaben, leak]
@@ -215,8 +214,8 @@
   tags: [dbms-anforderungen]
   front: "Wie unterscheiden sich die DBMS-Anforderungen Transaktionen und Synchronisation?"
   back: |-
-    - Fehlten **Transaktionen**, könnte ein einzelner Vorgang auf halbem Weg stecken bleiben (Zahlung gebucht, offener Betrag nicht gesenkt). Nach erfolgreichem Abschluss muss das Ergebnis zudem dauerhaft bleiben.
-    - Fehlte **Synchronisation** (Mehrbenutzerfähigkeit), kämen sich gleichzeitig laufende Vorgänge in die Quere, etwa durch eine verlorene Änderung. Mit ihr arbeitet jede Person scheinbar allein (Isolation).
+    - Fehlten **Transaktionen**, könnte ein einzelner Vorgang auf halbem Weg stecken bleiben (Zahlung gebucht, offener Betrag nicht gesenkt), und eine bestätigte Buchung wäre bei einem Absturz nicht sicher.
+    - Fehlte **Synchronisation** (Mehrbenutzerfähigkeit), kämen sich gleichzeitig laufende Vorgänge in die Quere, etwa durch eine verlorene Änderung. Mit ihr sieht kein Vorgang die unfertigen Änderungen eines anderen (Isolation).
 - id: t01-c024
   status: reviewed
   reviews: [fach, aufgaben, leak]
@@ -278,7 +277,7 @@
   status: reviewed
   reviews: [fach, aufgaben, leak]
   tags: [daten-information-wissen]
-  front: "Welche Varianten der Wissenspyramide gibt es?"
+  front: "Nenne zwei verbreitete Varianten der Wissenspyramide."
   back: |-
     - **DIKW** (*data, information, knowledge, wisdom*): Daten → Information → Wissen → Weisheit
     - Variante mit Grundstufe **Zeichen**, ohne Weisheit: Zeichen → Daten → Information → Wissen. Syntax macht Zeichen zu Daten, Bedeutung Daten zu Information, Vernetzung Information zu Wissen.
@@ -289,4 +288,4 @@
   front: "Was umfasst die DBMS-Anforderung Operationen (auch Sprache)?"
   back: |-
     - Sprachmittel zum Definieren (DDL), zum Einfügen, Abfragen, Ändern und Löschen (DML) und zur Rechtevergabe (DCL)
-    - verschiedene Zugangswege: Programmierschnittstelle für Anwendungen (z. B. ODBC, JDBC), interaktive bzw. grafische Oberfläche, Zugriff über das Web
+    - Schnittstellen für unterschiedliche Benutzergruppen, z. B. interaktive Clients (Kommandozeile oder grafisch) für Menschen und Programmierschnittstellen wie ODBC oder JDBC für Anwendungen

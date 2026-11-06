@@ -176,7 +176,7 @@
     c) Beispiel (Musterlösung, andere Regeln bzw. Anforderungen gleichwertig):
     - **Regel 3, systematische Behandlung von NULL:** Fehlende Werte werden einheitlich markiert, unterscheidbar von 0 oder leerem Text. Hat eine Schülerin noch keine Telefonnummer angegeben, steht dort NULL, nicht eine leere Zeichenkette.
     - **Regel 7, mengenorientierte Operationen:** Auch Ändern wirkt auf Mengen von Zeilen. Eine einzige Anweisung erhöht die Gebühr aller Gitarrenkurse um 5 %.
-    - **Integration (Datenintegration):** Alle Anwendungen nutzen einen gemeinsamen Bestand, jedes logische Datenelement liegt nur einmal vor. Stundenplanung, Gebührenabrechnung und Instrumentenverleih lesen die Anschrift einer Schülerin aus derselben Tabelle, statt je eine eigene Adressliste zu führen.
+    - **Integration (Datenintegration):** Alle Anwendungen nutzen einen gemeinsamen Bestand, jede Angabe hat genau einen Speicherort. Stundenplanung, Gebührenabrechnung und Instrumentenverleih lesen die Anschrift einer Schülerin aus derselben Tabelle, statt je eine eigene Adressliste zu führen.
   rubric:
     - criterion: "a) Neun Anforderungen: Inhalt (sinngemäß Funktionen eines DBMS, mind. drei genannt) und Zweck (was ein DBMS leisten soll) beschrieben. Ob die Liste als allgemein für DBMS oder als Anforderung an relationale DBMS dargestellt wird, ist für die Bewertung unerheblich."
       points: 1
