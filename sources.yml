@@ -10,7 +10,7 @@
   license: "PostgreSQL License"
   accessed: "2026-11-05"
   kind: docs
-  topics: [t05, t09, t10, t11, t12, t13]
+  topics: [t05, t08, t09, t10, t11, t12, t13]
   refs:
     - "Kap. 5 Data Definition: https://www.postgresql.org/docs/17/ddl.html"
     - "5.2 Default Values: https://www.postgresql.org/docs/17/ddl-default.html"
@@ -34,7 +34,7 @@
   license: "PostgreSQL License"
   accessed: "2026-11-05"
   kind: docs
-  topics: [t09, t10, t11, t12, t13]
+  topics: [t06, t09, t10, t11, t12, t13]
   refs:
     - "CREATE TABLE: https://www.postgresql.org/docs/17/sql-createtable.html"
     - "CREATE DOMAIN: https://www.postgresql.org/docs/17/sql-createdomain.html"
@@ -59,7 +59,7 @@
   license: "Public Documentation License Version 1.0"
   accessed: "2026-11-05"
   kind: docs
-  topics: [t05, t09, t10, t11, t12, t13]
+  topics: [t05, t08, t09, t10, t11, t12, t13]
   refs:
     - "Kap. 3 Data Types and Subtypes: …#fblangref30-datatypes"
     - "Kap. 4 Common Language Elements (u. a. Domains, Constraints): …#fblangref30-commons"
@@ -101,7 +101,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t09, t10, t11]
+  topics: [t06, t09, t10, t11]
   refs:
     - "Inhaltsverzeichnis (Kapitel Abfragen, Daten manipulieren, Struktur ändern): https://de.wikibooks.org/wiki/Einführung_in_SQL:_Inhaltsverzeichnis"
 
@@ -341,7 +341,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t04, t05, t09]
+  topics: [t04, t05, t06, t09]
   refs: ["Super-, Kandidaten-, Primär-, Fremdschlüssel", "künstlicher Schlüssel/Autowert"]
 
 - id: wp-unified-modeling-language
@@ -386,7 +386,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t05, t09, t11]
+  topics: [t05, t06, t09, t11]
   refs: ["Fremdschlüssel-Bedingung", "referenzielle Aktionen (CASCADE, SET NULL, RESTRICT)"]
 
 - id: wp-datenintegritaet
@@ -416,7 +416,7 @@
   accessed: "2026-11-05"
   kind: wiki
   topics: [t07]
-  refs: ["Definition, volle und transitive Abhängigkeit"]
+  refs: ["Formale Definition (inkl. volle funktionale Abhängigkeit)", "Axiome von Armstrong (Transitivitätsregel)", "Normalisierung mit funktionalen Abhängigkeiten", "Attributhülle"]
 
 - id: wp-denormalisierung
   title: "Denormalisierung (Wikipedia)"
@@ -646,7 +646,7 @@
   title: "Relational Database Design (English Wikibooks)"
   author: Wikibooks contributors
   url: "https://en.wikibooks.org/wiki/Relational_Database_Design"
-  license: "Creative Commons Attribution-ShareAlike (Version im Seitenfooter nicht genannt)"
+  license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
   topics: [t05, t06, t07, t08]
@@ -774,4 +774,32 @@
   accessed: "2026-11-05"
   kind: wiki
   topics: [t08, t10]
-  refs: ["Inner, outer, cross, natural join; semi-join"]
+  refs: ["Cross join", "Inner join (Equi-join, Natural join)", "Outer join (left, right, full)", "Self-join"]
+
+# ---------- Ergänzung (dritter Rechercheschritt: t06 Vererbung, t08 Semi-/Antijoin) ----------
+- id: wp-objektrelationale-abbildung
+  title: "Objektrelationale Abbildung (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Objektrelationale_Abbildung"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t06]
+  refs: ["Abbildung von Vererbungshierarchien (Tabelle pro Vererbungshierarchie, pro Unterklasse, pro konkrete Klasse)", "Prinzip", "Grundlegende Techniken"]
+
+- id: wpen-single-table-inheritance
+  title: "Single Table Inheritance (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Single_Table_Inheritance"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t06]
+  refs: ["Example (Stub-Artikel, kurz)"]
+
+- id: wpen-join-relational-algebra
+  title: "Join (relational algebra) (English Wikipedia; Weiterleitung von Natural join und Antijoin)"
+  url: "https://en.wikipedia.org/wiki/Join_(relational_algebra)"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t08]
+  refs: ["Natural join", "θ-join and equijoin", "Semijoin", "Antijoin (https://en.wikipedia.org/wiki/Join_(relational_algebra)#Antijoin)", "Division"]
