@@ -1,12 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import {
-  STORAGE_UNAVAILABLE,
-  exportProgress,
-  importProgress,
-  isStorageAvailable,
-  listProgressKeys,
-  resetProgress,
-} from '../lib/storage';
+import { progress } from '../lib/progress';
+import { STORAGE_UNAVAILABLE, exportProgress, isStorageAvailable, listProgressKeys } from '../lib/storage';
 
 type UnitState = 'loading' | 'empty' | 'ready' | 'error';
 
@@ -75,7 +69,8 @@ export default function ProgressTransfer() {
       setError('Die Datei konnte nicht gelesen werden.');
       return;
     }
-    const result = importProgress(text);
+    // progress.import validates the known areas before storage.ts replaces the stored state.
+    const result = progress.import(text);
     if (result.ok) {
       setMessage(`${result.count} Einträge importiert.`);
     } else {
@@ -90,7 +85,7 @@ export default function ProgressTransfer() {
   };
 
   const onConfirmReset = () => {
-    const removed = resetProgress();
+    const removed = progress.reset();
     setConfirming(false);
     setError('');
     setMessage(`Fortschritt zurückgesetzt (${removed} Einträge gelöscht).`);

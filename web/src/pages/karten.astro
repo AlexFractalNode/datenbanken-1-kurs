@@ -1,16 +1,25 @@
 ---
-import Placeholder from '../components/Placeholder.astro';
+import Flashcards from '../components/Flashcards';
 import Base from '../layouts/Base.astro';
-import { getOverview } from '../lib/content';
+import { flashcardProps } from '../lib/island-props';
+import { withBase } from '../lib/nav';
 
-const cards = getOverview().reduce((n, o) => n + o.counts.cards, 0);
+const { cards, topics } = await flashcardProps();
 ---
 
-<Base title="Karten" description="Karteikarten mit verteilter Wiederholung." noindex>
+<Base title="Karten" description="Karteikarten mit verteilter Wiederholung (FSRS)." noindex>
   <header class="page-head">
     <h1>Karteikarten</h1>
+    <p class="lead">
+      Lies die Frage, antworte im Kopf oder auf Papier und decke dann auf. Deine Einschätzung bestimmt, wann die Karte
+      wiederkommt: Sichere Karten seltener, schwierige öfter.
+    </p>
   </header>
-  <Placeholder unit="flashcards" heading="Der Kartentrainer folgt" prepared={`${cards} Karten sind bereits vorbereitet.`}>
-    <p>Hier lernst du bald mit verteilter Wiederholung: Karten, die du sicher kannst, kommen seltener, schwierige öfter.</p>
-  </Placeholder>
+  <Flashcards client:load cards={cards} topics={topics} />
+  <noscript>
+    <p class="notice notice--warn">
+      Der Kartentrainer braucht JavaScript. Ohne JavaScript findest du die Inhalte in den
+      <a href={withBase('themen/')}>Zusammenfassungen der Themen</a>.
+    </p>
+  </noscript>
 </Base>

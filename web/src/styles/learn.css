@@ -1,0 +1,175 @@
+/*
+ * Learning modes (cards, quiz, self-graded tasks, exam simulation). Mobile first, colours only via
+ * tokens; text/background pairs are covered by tests/tokens.test.ts.
+ */
+
+/* ---------- Shared trainer frame ---------- */
+
+.trainer {
+  max-width: 46rem;
+  margin-bottom: var(--sp-6);
+}
+
+.trainer__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-4);
+  margin-bottom: var(--sp-4);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.trainer__bar .field {
+  margin: 0;
+}
+
+.trainer__count {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--c-key);
+}
+
+select,
+textarea {
+  font: inherit;
+  color: var(--c-text);
+  background: var(--c-surface);
+  border: 1px solid var(--c-control-border);
+  border-radius: var(--radius);
+}
+
+select {
+  min-height: 2.75rem;
+  max-width: 100%;
+  padding: var(--sp-2) var(--sp-3);
+}
+
+textarea {
+  width: 100%;
+  min-height: 6rem;
+  padding: var(--sp-2) var(--sp-3);
+  line-height: var(--lh-base);
+  resize: vertical;
+}
+
+textarea:disabled,
+select:disabled {
+  background: var(--c-surface-2);
+  color: var(--c-text-muted);
+}
+
+/* ---------- Flashcard: an index card with a rust double rule on top ---------- */
+
+.flashcard {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-sm) var(--radius-sm) var(--radius-lg) var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: var(--sp-4);
+  border-top: 6px double var(--c-key);
+}
+
+@media (min-width: 40rem) {
+  .flashcard {
+    padding: var(--sp-5) var(--sp-6);
+  }
+}
+
+.flashcard__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.flashcard__label {
+  margin: var(--sp-4) 0 var(--sp-1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-muted);
+}
+
+.flashcard__face {
+  font-size: var(--fs-lg);
+}
+
+.flashcard__back {
+  margin-top: var(--sp-4);
+  padding-top: var(--sp-2);
+  border-top: 2px solid var(--c-accent);
+}
+
+.flashcard__back:focus-visible {
+  outline-offset: 4px;
+}
+
+/* ---------- Rating buttons ---------- */
+
+.rating {
+  margin-top: var(--sp-5);
+}
+
+.rating__label {
+  margin: 0 0 var(--sp-2);
+  font-weight: 600;
+}
+
+.rating__buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+
+@media (min-width: 40rem) {
+  .rating__buttons {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.rating__button {
+  flex-direction: column;
+  gap: 0;
+  line-height: var(--lh-tight);
+  padding: var(--sp-2);
+}
+
+.rating__hint {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 400;
+}
+
+.rating__button--again,
+.rating__button--again:hover {
+  color: var(--c-danger);
+  background: var(--c-danger-soft);
+  border-color: var(--c-danger);
+}
+
+.rating__button--hard,
+.rating__button--hard:hover {
+  color: var(--c-warn-text);
+  background: var(--c-warn-soft);
+  border-color: var(--c-warn-text);
+}
+
+.rating__button--easy,
+.rating__button--easy:hover {
+  color: var(--c-ok-text);
+  background: var(--c-ok-soft);
+  border-color: var(--c-ok-text);
+}
+
+.rating__button--again:hover,
+.rating__button--hard:hover,
+.rating__button--easy:hover {
+  box-shadow: inset 0 0 0 1px currentColor;
+}

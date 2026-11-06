@@ -19,7 +19,7 @@ const PAGES: { path: string; unit: string; state: string }[] = [
   { path: 'themen/', unit: 'topic-list', state: 'ready' },
   { path: 'themen/t04/', unit: 'topic-page', state: 'ready' },
   { path: 'themen/t01/', unit: 'topic-page', state: 'empty' },
-  { path: 'karten/', unit: 'flashcards', state: 'empty' },
+  { path: 'karten/', unit: 'flashcards', state: 'ready' },
   { path: 'quiz/', unit: 'quiz', state: 'empty' },
   { path: 'aufgaben/', unit: 'task-list', state: 'ready' },
   { path: 'klausur/', unit: 'exam', state: 'empty' },
