@@ -1,0 +1,443 @@
+- id: t04-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundbegriffe]
+  front: Was ist der Unterschied zwischen einer Entität und einem Entitätstyp?
+  back: |-
+    - **Entität** (*entity*): ein einzelnes, eindeutig unterscheidbares Objekt der Miniwelt, z. B. Bienenvolk Nr. 17.
+    - **Entitätstyp** (*entity type*): die Zusammenfassung aller gleichartigen Entitäten mit denselben Attributen, z. B. `Bienenvolk`. Im Chen-Diagramm ein Rechteck, Name im Singular.
+- id: t04-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, chen]
+  front: Welche Grundsymbole verwendet die Chen-Notation?
+  back: |-
+    - Rechteck: Entitätstyp
+    - Raute: Beziehungstyp
+    - Ellipse: Attribut, Schlüsselattribut unterstrichen
+    - Linien verbinden die Elemente. Die Kardinalität steht an der Linie zwischen Raute und Rechteck, eine Doppellinie zeigt totale Teilnahme.
+- id: t04-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute]
+  front: Was ist ein zusammengesetztes Attribut und wie wird es dargestellt?
+  back: |-
+    Ein Attribut, dessen Wert aus mehreren Teilattributen besteht, z. B. Name = Vorname + Nachname. Gegenstück: einfaches (atomares) Attribut. Darstellung: Ellipse, an der weitere Ellipsen für die Teile hängen.
+    Achtung: Manche Quellen zählen solche Attribute zu den mehrwertigen. Dieser Kurs trennt beide Begriffe.
+- id: t04-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute]
+  front: Was ist ein mehrwertiges Attribut? Nenne ein eigenes Beispiel.
+  back: |-
+    Ein Attribut, das für eine Entität **mehrere Werte derselben Art** haben kann. Gegenstück: einwertiges Attribut. Darstellung: doppelte Ellipse.
+    Beispiel: Eine Kletterhalle speichert zu jeder Kletterroute mehrere Farben der Griffe.
+- id: t04-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute]
+  front: Was ist ein abgeleitetes Attribut und warum wird es gestrichelt gezeichnet?
+  back: |-
+    Ein Attribut, dessen Wert sich aus anderen Daten **berechnen** lässt, z. B. Alter aus Geburtsdatum oder Anzahl Völker aus der Beziehung „betreut“. Gegenstück: gespeichertes Attribut. Die gestrichelte Ellipse zeigt: Der Wert wird nicht gespeichert, sondern berechnet. So entsteht keine Redundanz.
+- id: t04-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellierung]
+  front: Wann modelliert man eine Information als eigenen Entitätstyp statt als Attribut?
+  back: |-
+    Wenn sie
+    - selbst weitere Eigenschaften hat,
+    - an eigenen Beziehungen teilnimmt oder
+    - als einheitliche Auswahlliste für viele Entitäten gepflegt werden soll (verhindert Schreibvarianten und Änderungsanomalien).
+    Sonst bleibt sie ein Attribut.
+- id: t04-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  front: Was ist ein Superschlüssel?
+  back: |-
+    Eine Attributmenge, deren Werte jede Entität (jedes Tupel) **eindeutig** identifizieren. Sie darf überflüssige Attribute enthalten.
+    Beispiel: Ist die Tier-Nr. eindeutig, dann ist auch {Tier-Nr., Name} ein Superschlüssel.
+- id: t04-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  front: Was unterscheidet einen Schlüsselkandidaten von einem Superschlüssel?
+  back: |-
+    Ein Schlüsselkandidat (*candidate key*) ist ein **minimaler** Superschlüssel: Entfernt man irgendein Attribut, ist er nicht mehr eindeutig. Jeder Kandidat ist ein Superschlüssel, aber nicht umgekehrt. Ein Entitätstyp kann mehrere Kandidaten haben.
+- id: t04-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  front: Wie wird aus den Schlüsselkandidaten der Primärschlüssel, und wie heißen die übrigen?
+  back: |-
+    Einer der Kandidaten wird als **Primärschlüssel** (*Primary Key*) ausgewählt, möglichst kurz, immer vorhanden und unveränderlich. Die nicht gewählten Kandidaten heißen **Alternativschlüssel** (*alternate keys*) und bleiben eindeutig. Manche Quellen sagen dazu auch Sekundärschlüssel; andere meinen damit allgemein nicht eindeutige Suchattribute.
+- id: t04-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  front: Was ist ein künstlicher Schlüssel (Surrogatschlüssel), und wann setzt man ihn ein?
+  back: |-
+    Ein zusätzlich eingeführtes Attribut **ohne fachliche Bedeutung**, z. B. eine fortlaufende Nummer. Man setzt ihn ein, wenn kein natürlicher Kandidat kurz, stabil und immer vorhanden ist. Beispiel: Nicht jedes Tier im Tierheim hat einen Chip. Der natürliche Schlüssel bleibt dann als eindeutiges Attribut erhalten.
+- id: t04-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel, ausblick]
+  front: Gehören Fremdschlüssel in ein ER-Diagramm?
+  back: |-
+    Nach gängiger Konvention **grundsätzlich nicht**, solange die Aufgabe es nicht ausdrücklich verlangt. Im ER-Modell drückt der **Beziehungstyp** die Verbindung aus. Fremdschlüssel entstehen erst bei der Überführung, z. B. bei 1:n auf der n-Seite. Ist die Markierung verlangt, kennzeichnet man sie (z. B. „FK“). Ohne Auftrag wäre die Beziehung doppelt modelliert.
+- id: t04-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  front: Wie kennzeichnet man einen zusammengesetzten Schlüssel im Chen-Diagramm?
+  back: |-
+    Alle Attribute, die gemeinsam den Schlüssel bilden, werden **unterstrichen**. Einzelne unterstrichene Attribute bedeuten also nicht automatisch, dass jedes allein eindeutig ist. Eindeutig ist nur die Kombination.
+- id: t04-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [beziehungen]
+  front: Was ist der Unterschied zwischen Beziehung und Beziehungstyp?
+  back: |-
+    - **Beziehung**: eine konkrete Verbindung zwischen Entitäten, z. B. „Trainerin Mia leitet den Kurs Bouldern Einsteiger“.
+    - **Beziehungstyp** (*relationship type*, auch Relationstyp): die Zusammenfassung aller gleichartigen Beziehungen, z. B. `leitet` zwischen `Trainer:in` und `Kurs`. Im Diagramm eine Raute.
+- id: t04-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [beziehungen, attribute]
+  front: Wann gehört ein Attribut an den Beziehungstyp statt an einen Entitätstyp?
+  back: |-
+    Wenn sein Wert ein **Paar (bzw. Tupel) von Partnern** beschreibt und für jeden Partner allein nicht feststeht. Beispiel: Imker:innen besuchen Kurse und legen dort eine Prüfung ab. Das Prüfungsergebnis hängt an der Kombination Imker:in + Kurs. Am Kurs allein (viele Teilnehmende) oder an der Imker:in allein (viele Kurse) wäre es falsch.
+- id: t04-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, chen]
+  front: Wie liest man eine Chen-Kardinalität richtig („look-across“)?
+  back: |-
+    Man hält **eine** Entität auf der einen Seite fest. Die Angabe am **anderen** Ende sagt, wie viele Partner von dort sie höchstens hat.
+    Imker:in —1— betreut —n— Bienenvolk: Ein festes Volk hat höchstens 1 Imker:in (die 1 steht bei Imker:in). Eine feste Imker:in hat bis zu n Völker (das n steht bei Bienenvolk).
+- id: t04-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, chen]
+  front: Welche Information fehlt in der reinen Chen-Notation, und wie kann man sie ergänzen?
+  back: |-
+    Die reine Chen-Notation zeigt nur **Obergrenzen**; ob die Teilnahme Pflicht ist, sieht man nicht. Ergänzungen:
+    - **Doppellinie** für totale Teilnahme (min ≥ 1), einfache Linie für partielle (min = 0),
+    - **MC-Notation** (modifizierte bzw. erweiterte Chen-Notation) mit 1, c, m/n, mc/nc,
+    - oder direkt (min,max).
+- id: t04-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, minmax]
+  front: Was gibt (min,max) an einem Entitätstyp an, und wo steht die Angabe?
+  back: |-
+    An **wie vielen Beziehungen** dieses Typs eine Entität **mindestens und höchstens** teilnimmt. Die Angabe steht beim **eigenen** Entitätstyp (*same-side*). min = 0 bedeutet optional, min ≥ 1 Pflicht. Für „beliebig viele“ steht n, m oder *, z. B. (0,*).
+- id: t04-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung]
+  diagram: kardinalitaet-chen-vs-minmax
+  front: Wie rechnet man eine binäre Chen-Kardinalität in (min,max) um?
+  back: |-
+    Die Chen-Angabe bei **B** wird zum **max** bei **A**, und umgekehrt. Das **min** kommt aus dem Text (muss/genau → 1, kann → 0). Ohne jede Angabe gilt der Kursstandard: Detail-Seite einer 1:n-Beziehung (1,1), alle übrigen Seiten min = 0.
+    Beispiel: Imker:in 1 : n Volk ohne Zusatz → Imker:in (0,*), Volk (1,1). Mit „ein Volk kann ohne Imker:in sein“ → Volk (0,1).
+- id: t04-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung]
+  front: Wie rechnet man (min,max) einer binären Beziehung in Chen um, und was geht dabei verloren?
+  back: |-
+    Das **max** bei A wird zur Chen-Angabe bei **B**. Ein max > 1 wird zu n/m oder bleibt als feste Zahl stehen. Die **Untergrenzen** gehen in der reinen Chen-Notation verloren. Erhalten bleiben sie nur mit Doppellinie oder in der MC-Notation (c, mc).
+- id: t04-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung, mc-notation]
+  front: Welche (min,max)-Angabe bei A entspricht in der MC-Notation den Angaben 1, c, m, mc bei B?
+  back: |-
+    Nur für die **MC-Notation** (modifizierte/erweiterte Chen-Notation):
+    - 1 → (1,1)
+    - c → (0,1)
+    - m (bzw. n) → (1,n)
+    - mc (bzw. nc) → (0,n)
+    Für reine Chen-Angaben ohne Zusatz gilt diese Tabelle nicht. Dort gilt der Kursstandard: 1:1 → (0,1)/(0,1), m:n → (0,*)/(0,*), 1:n → Master (0,*), Detail (1,1).
+- id: t04-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, n-aer]
+  front: Warum ist die Umrechnung Chen ↔ (min,max) bei n-ären Beziehungen kein einfacher Seitentausch?
+  back: |-
+    Chen fragt bei n-ären Beziehungen: „Wie viele X gehören zu einer festen **Kombination** der übrigen Partner?“ (min,max) fragt weiterhin: „An wie vielen Beziehungen nimmt **ein** X teil?“ Das sind verschiedene Größen. Die Werte können zufällig übereinstimmen, lassen sich aber nicht durch Tausch auseinander gewinnen.
+- id: t04-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, alternativen]
+  front: Wie stellen Krähenfuß-Notation und UML Kardinalitäten dar?
+  back: |-
+    - **Krähenfuß** (Martin): Strich = 1, Gabel = viele, Kreis/0 = optional. Keine Raute, Beziehungen ohne eigene Attribute.
+    - **UML**: Multiplizitäten wie 0..1, 1, 1..*, *. Sie stehen wie bei Chen **gegenüber**, mit Unter- und Obergrenze.
+- id: t04-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet]
+  diagram: schwache-entitaet-durchsicht
+  front: Was ist ein schwacher Entitätstyp, und wie wird er in Chen dargestellt?
+  back: |-
+    Ein Entitätstyp, der
+    1. **existenzabhängig** von einem identifizierenden (starken) Entitätstyp ist,
+    2. nur **zusammen mit dessen Schlüssel** identifizierbar ist und
+    3. selbst nur einen **partiellen Schlüssel** hat.
+    Darstellung: doppelter Rahmen, identifizierende Beziehung als doppelte Raute, partieller Schlüssel gestrichelt unterstrichen.
+- id: t04-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet]
+  front: Was ist ein partieller Schlüssel? Nenne ein eigenes Beispiel.
+  back: |-
+    Ein Attribut des schwachen Entitätstyps, das **nur innerhalb eines Besitzers** eindeutig ist (auch schwacher Schlüssel oder Partialschlüssel). Der vollständige Schlüssel ist Besitzerschlüssel + partieller Schlüssel.
+    Beispiel: Route Nr. 3 gibt es an jeder Kletterwand, eindeutig ist erst (Wand-Nr., Routen-Nr.).
+- id: t04-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rollen, rekursion]
+  front: Was ist eine Rolle in einem Beziehungstyp, und wann ist ihre Angabe Pflicht?
+  back: |-
+    Eine Rolle beschreibt, **in welcher Funktion** ein Entitätstyp an der Beziehung teilnimmt. Der Name steht an der Kante. Pflicht ist sie, wenn derselbe Entitätstyp **mehrfach** beteiligt ist, vor allem bei rekursiven Beziehungen. Beispiel: Imker:in ist Pat:in von Imker:in, mit den Rollen Pat:in und Neuimker:in.
+- id: t04-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rekursion]
+  diagram: generalisierung-tierheim
+  front: Was ist eine rekursive Beziehung? Gib Chen und (min,max) für „Tier ist Mutter von Tier“ an.
+  back: |-
+    Ein Beziehungstyp, an dem **derselbe Entitätstyp zweimal** (in zwei Rollen) teilnimmt.
+    - Chen: Rolle Mutter 1, Rolle Jungtier n
+    - (min,max): Mutter (0,n), Jungtier (0,1), da die Mutter oft unbekannt ist
+- id: t04-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [n-aer]
+  front: Wann braucht man eine ternäre Beziehung statt dreier binärer?
+  back: |-
+    Wenn eine Tatsache erst durch die **Kombination aller drei** Partner entsteht, z. B. „Übersetzerin Ana überträgt Roman R ins Polnische, Honorar 3000 €“. Drei binäre Beziehungen speichern nur Paare. Daraus lässt sich nicht zurückgewinnen, welche Dreierkombinationen tatsächlich vorkamen (nicht verlustfrei).
+- id: t04-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  front: Was ist der Unterschied zwischen Generalisierung und Spezialisierung?
+  back: |-
+    - **Generalisierung** (bottom-up): Gemeinsamkeiten mehrerer Entitätstypen werden in einen Obertyp ausgelagert.
+    - **Spezialisierung** (top-down): Von einem Obertyp werden Untertypen mit zusätzlichen Eigenschaften abgeleitet.
+    Das Ergebnis ist dieselbe is-a-Hierarchie. Subtypen erben Schlüssel, Attribute und Beziehungen.
+- id: t04-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  front: Was bedeuten total/partiell und disjunkt/überlappend bei einer Spezialisierung?
+  back: |-
+    - **total** (auch vollständig): Jede Entität des Obertyps gehört zu mindestens einem Subtyp.
+    - **partiell** (auch unvollständig): Entitäten ohne Subtyp sind erlaubt.
+    - **disjunkt**: höchstens ein Subtyp je Entität.
+    - **überlappend**: mehrere Subtypen gleichzeitig möglich.
+    Beide Paare sind unabhängig kombinierbar. Nicht mit totaler/partieller **Teilnahme** an einer Beziehung verwechseln.
+- id: t04-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  front: Welche Beziehung besteht zwischen Subtyp und Obertyp hinsichtlich Menge, Schlüssel und Existenz?
+  back: |-
+    - **Menge:** Die Entitäten des Subtyps sind eine **Teilmenge** der Entitäten des Obertyps.
+    - **Schlüssel:** Der Subtyp **erbt** den Schlüssel, ein eigener wäre redundant.
+    - **Existenz:** Der Subtyp ist **einseitig existenzabhängig** vom Obertyp. Ohne die Tier-Entität gibt es keine Hund-Entität, umgekehrt schon.
+- id: t04-c031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [aggregation]
+  diagram: aggregation-imkerei
+  front: Was bedeutet Aggregation im ER-Modell, und welche zwei Arten unterscheidet man?
+  back: |-
+    Eine **Teil-Ganzes-Beziehung** (*is-part-of*): Komponenten bilden zusammen ein Aggregat, z. B. eine Beute aus Boden, Deckel und Zargen.
+    - **Rollenaggregation:** verschiedenartige Teile je höchstens einmal (Boden, Deckel; 1:c).
+    - **Mengenaggregation:** viele gleichartige Teile (Zargen; 1:nc).
+    Abgrenzung: is-a heißt „ist ein“, is-part-of heißt „ist Teil von“.
+- id: t04-c032
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zeitbezug]
+  front: Warum reicht eine einfache 1:n-Beziehung nicht, um einen Verlauf zu speichern?
+  back: |-
+    Sie speichert nur den **aktuellen** Zustand. Wandert z. B. ein Bienenvolk an einen neuen Standort, wird die Zuordnung überschrieben, und die alte geht verloren. Für einen Verlauf modelliert man die Zuordnung als eigenen Entitätstyp mit `von` und `bis` oder nimmt einen Entitätstyp `Zeitraum` in eine ternäre Beziehung auf.
+- id: t04-c033
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zeitbezug]
+  front: Woran erkennt man in einem historisierten Modell die aktuelle Zuordnung?
+  back: |-
+    Am leeren (bzw. offenen) `bis`-Wert des Gültigkeitszeitraums. Eine zusätzliche direkte Beziehung „aktuell“ wäre **redundant** und könnte dem Verlauf widersprechen.
+- id: t04-c034
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zeitbezug]
+  front: Was ist der Unterschied zwischen Gültigkeitszeit und Transaktionszeit?
+  back: |-
+    - **Gültigkeitszeit** (*valid time*): wann ein Sachverhalt in der **realen Welt** galt, z. B. Volk stand vom 20.4. bis 25.5. am Rapsfeld.
+    - **Transaktionszeit** (*transaction time*): wann der Eintrag in der **Datenbank** gespeichert oder geändert wurde.
+    Beide zusammen: bitemporal.
+- id: t04-c035
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [vorgehen]
+  front: Wie leitet man aus einem Anforderungstext Entitätstypen und Beziehungstypen ab?
+  back: |-
+    - Substantive → Kandidaten für Entitätstypen/Attribute (Nominalextraktion)
+    - Verben zwischen Substantiven → Beziehungstypen
+    - Mengenwörter (genau, mindestens, kann, höchstens) → Kardinalitäten, in **beiden** Richtungen prüfen
+    - Signalwörter für Sonderfälle: „Arten von“, „besteht aus“, „je“, „von … bis“
+- id: t04-c036
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellebene]
+  front: Auf welcher Ebene der Datenmodellierung liegt das ER-Modell, und was enthält es bewusst nicht?
+  back: |-
+    Auf der **konzeptuellen** Ebene. Es beschreibt Objekte, Eigenschaften und Zusammenhänge der Miniwelt unabhängig vom DBMS. Tabellen, Datentypen und Indizes enthält es nicht, Fremdschlüssel nach Konvention ebenfalls nicht. Sie kommen erst im logischen bzw. physischen Entwurf hinzu.
+- id: t04-c037
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung]
+  front: Welche (min,max)-Angaben ergeben reine Chen-Kardinalitäten nach der Standardkonvention des Kurses, wenn sonst nichts bekannt ist?
+  back: |-
+    Obergrenzen vertauscht, Untergrenzen nach Kursstandard (A : B):
+    - 1 : 1 → A (0,1), B (0,1)
+    - 1 : n (A Master, B Detail) → A (0,*), B **(1,1)**
+    - n : 1 (A Detail, B Master) → A **(1,1)**, B (0,*)
+    - m : n → A (0,*), B (0,*)
+    Grund: Ein Detail gehört standardmäßig zu genau einem Master. Optionalität wird ausdrücklich angegeben (Text, c, Doppellinie). Variante anderer Quellen: überall min = 0.
+- id: t04-c038
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, mc-notation]
+  front: Warum ergibt dasselbe Symbol „n“ je nach Notation eine andere Untergrenze?
+  back: |-
+    In der **reinen Chen-Notation** ist „n“ nur eine Obergrenze. Ohne weitere Angabe bekommt die Master-Seite nach Kursstandard (0,*); nur die Detail-Seite gegenüber erhält (1,1). In der **MC-Notation** bedeutet unmarkiertes „n“ bzw. „m“ dagegen „mindestens eins“, also (1,n); für „auch keins“ schreibt man nc/mc. Deshalb immer angeben, welche Notation man liest.
+- id: t04-c039
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [teilnahme, notation]
+  diagram: teilnahme-imkerei
+  front: Was ist die Teilnahmebeschränkung, und wie wird sie in Chen dargestellt?
+  back: |-
+    Sie legt fest, ob jede Entität an einer Beziehung teilnehmen muss:
+    - **total** (Pflicht): Doppellinie zwischen Rechteck und Raute, entspricht min ≥ 1.
+    - **partiell** (optional): einfache Linie, entspricht min = 0.
+    Beispiel: Jedes Bienenvolk muss betreut werden, also Doppellinie bei Bienenvolk.
+- id: t04-c040
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [teilnahme, generalisierung]
+  front: Welche Verwechslungsgefahr besteht bei den Wörtern „total“ und „partiell“?
+  back: |-
+    Sie bezeichnen zwei verschiedene Dinge:
+    - **Teilnahme** an einer Beziehung: Muss jede Entität mitmachen? (Doppellinie, min ≥ 1)
+    - **Spezialisierung**: Muss jede Entität des Obertyps zu einem Subtyp gehören?
+    Immer dazusagen, ob eine Beziehung oder eine is-a-Hierarchie gemeint ist.
+- id: t04-c041
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute]
+  front: Was ist ein optionales Attribut, und was wird später daraus?
+  back: |-
+    Ein Attribut, das bei einzelnen Entitäten **fehlen darf**, z. B. eine Zweit-E-Mail. Ob ein Attribut Pflicht oder optional ist, legt die Anforderungsanalyse fest. In der Tabelle wird ein fehlender Wert als **NULL** gespeichert; Pflichtattribute werden NOT NULL. Ein einheitliches Chen-Symbol gibt es nicht, üblich ist ein Zusatz wie (0,1) oder „opt.“.
+- id: t04-c042
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  front: Was ist ein Nichtschlüsselattribut? Gib ein eigenes Beispiel.
+  back: |-
+    Ein Attribut, das in **keinem** Schlüsselkandidaten vorkommt. Gegenstück: Schlüsselattribut (in mindestens einem Kandidaten enthalten).
+    Beispiel: Ein Konzertsaal mit den Kandidaten {Saal-Nr.} und {Name}: Plätze und Baujahr sind Nichtschlüsselattribute.
+- id: t04-c043
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [beziehungen, schluessel]
+  front: Wodurch wird eine einzelne Beziehung eines Beziehungstyps identifiziert?
+  back: |-
+    Durch die **Schlüssel der beteiligten Entitäten**:
+    - m:n: Kombination aller Partnerschlüssel, z. B. (Imker-Nr., Kurs-Nr.)
+    - 1:n: Schlüssel der n-Seite genügt (Volk-Nr. bei „betreut“)
+    - 1:1: einer der beiden Partnerschlüssel
+    Bei der Überführung wird daraus der Primärschlüssel der Beziehungstabelle.
+- id: t04-c044
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [beziehungen, formal]
+  front: Wie sieht die formale (mengentheoretische) Definition eines Beziehungstyps aus?
+  back: |-
+    Die Beziehungsmenge R ist eine **Teilmenge des kartesischen Produkts** der beteiligten Entitätsmengen: R ⊆ E1 × E2 (× … × En). Jede Beziehung ist ein Tupel (e1, e2, …).
+    Folge: Dasselbe Tupel kommt nur einmal vor, ein Attribut an der Raute kann zwei gleiche Tupel nicht unterscheiden. Wiederholungen (z. B. Rückkehr an denselben Ort) brauchen einen eigenen Entitätstyp für die Zuordnung oder für die Zeit.
+- id: t04-c045
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [existenzabhaengigkeit]
+  front: Was ist Existenzabhängigkeit, und was unterscheidet einseitige von wechselseitiger?
+  back: |-
+    Eine A-Entität kann nur existieren, wenn sie mit mindestens einer B-Entität verbunden ist, also **min ≥ 1** bei A.
+    - **einseitig:** nur A hat min ≥ 1, z. B. Volk (1,1), Imker:in (0,n).
+    - **wechselseitig:** beide Seiten min ≥ 1, z. B. Imker:in (1,n), Volk (1,1). Dann müssen beide gemeinsam angelegt werden.
+- id: t04-c046
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet, existenzabhaengigkeit]
+  front: Ist jeder existenzabhängige Entitätstyp schwach?
+  back: |-
+    **Nein.** Ein schwacher Entitätstyp ist immer existenzabhängig, braucht zusätzlich aber den Besitzerschlüssel zur Identifikation. Ein Bienenvolk muss eine Imker:in haben (existenzabhängig), hat aber mit der Volk-Nr. einen eigenen Schlüssel, also ist es stark.
+- id: t04-c047
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rekursion, minmax]
+  front: Welche Untergrenzen brauchen die Rollen einer hierarchischen rekursiven Beziehung, und warum?
+  back: |-
+    **Beide** Rollen min = 0. Schon eine Rolle mit min ≥ 1 zwingt jede Entität zu einem Partner desselben Typs. Dann gibt es keine Wurzel bzw. kein letztes Glied, nur endlose Ketten oder einen Zyklus, der in einer Hierarchie unsinnig ist. Beispiel: Müsste jedes Tier eine erfasste Mutter haben, gäbe es kein erstes Tier.
+    Ausnahme: Bei symmetrischen Rekursionen ohne Hierarchie (z. B. Doppelpartner:in) sind Zyklen sinnvoll, dort kann min ≥ 1 zulässig sein.
+- id: t04-c048
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [n-aer, grad]
+  front: Was ist der Grad eines Beziehungstyps, und welche Begriffsfalle gibt es?
+  back: |-
+    Der **Grad** (Stelligkeit) ist die Anzahl der beteiligten Entitätstypen: binär = 2, ternär = 3. Eine rekursive Beziehung hat danach Grad 1 (unär); wer die Rollen zählt, kommt auf 2.
+    Falle: Manche Quellen nennen den Grad „Komplexität“, andere meinen mit Grad/Komplexität die Kardinalität (1:n …).
+- id: t04-c049
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [pruefen, notation]
+  front: Welche Strukturregeln muss ein Chen-Diagramm erfüllen?
+  back: |-
+    - Entitätstypen mit eindeutigen Namen; ein Beziehungstyp ist eindeutig über Name + verbundene Entitätstypen (gleicher Name zwischen verschiedenen Partnern erlaubt)
+    - keine zwei gleichnamigen Attribute am selben Element
+    - nie Rechteck–Rechteck oder Raute–Raute direkt verbinden
+    - jede Raute mit mindestens zwei Kanten (bei Rekursion mit Rollen)
+    - jedes Attribut mit genau einer Verbindung
+    - keine isolierten Entitätstypen, keine unbenannten Beziehungen
+- id: t04-c050
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [pruefen, redundanz]
+  front: Wann ist eine Beziehung in einem Zyklus redundant?
+  back: |-
+    Wenn sie sich **vollständig aus den anderen Beziehungen des Zyklus ableiten** lässt und nichts anderes bedeutet. Beispiel: „Imker:in ist tätig an Standort“, wenn das nur heißt, dass dort eines ihrer Völker steht. Nicht redundant ist sie, wenn sie eine eigene Bedeutung hat oder Fälle abdeckt, die der Umweg nicht erfasst.
+- id: t04-c051
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [aggregation, generalisierung]
+  front: Wie unterscheidet man is-a von is-part-of, und lassen sich beide kombinieren?
+  back: |-
+    - **is-a:** Subtyp ⊆ Obertyp, jede Subtyp-Entität *ist* eine Obertyp-Entität (Honigraumzarge ist eine Zarge).
+    - **is-part-of:** Komponente ist *Teil* des Aggregats, keine Teilmenge (Zarge ist Teil einer Beute).
+    Kombinierbar: Komponenten dürfen selbst spezialisiert sein, und Subtypen dürfen eigene Teile haben.
+- id: t04-c052
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, minmax]
+  front: Woher stammt die (min,max)-Notation, und welche Schreibvarianten sind üblich?
+  back: |-
+    Sie geht auf J.-R. Abrial (1974) zurück. Für „beliebig viele“ sind n, m und * gleichwertig; viele schreiben (0,*). Als Trennzeichen kommen Komma, Doppelpunkt oder Semikolon vor: (1,*), (1:*), [1;*].

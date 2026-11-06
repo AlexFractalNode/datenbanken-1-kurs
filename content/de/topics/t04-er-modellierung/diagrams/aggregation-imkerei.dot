@@ -1,0 +1,61 @@
+// Aggregation im Teil-Ganzes-Sinn (is-part-of), kombiniert mit einer is-a-Spezialisierung.
+// Aggregat: Beute (Bienenkasten). Komponenten:
+//   Boden und Deckel  -> Rollenaggregation (verschiedenartige Teile, je höchstens eins: 1:c)
+//   Zarge             -> Mengenaggregation (viele gleichartige Teile: 1:nc)
+// Die Komponente Zarge ist selbst spezialisiert (is-a, Dreieck): disjunkt und total.
+// Kardinalitäten in MC-Notation (look-across) an den Kanten: "1" bei Beute = jedes erfasste
+// Teil gehört zu genau einer Beute; "c" = je Beute kein oder ein Teil; "nc" = je Beute beliebig viele, auch keine.
+graph aggregation_imkerei {
+  rankdir=TB;
+  node [fontsize=11];
+  edge [fontsize=11];
+
+  beute   [shape=box, label="Beute"];
+  b_nr    [shape=ellipse, label=<<u>Beuten-Nr.</u>>];
+  b_mass  [shape=ellipse, label="Rähmchenmaß"];
+
+  teil_boden [shape=diamond, label="is-part-of\n(Boden)"];
+  teil_deckel [shape=diamond, label="is-part-of\n(Deckel)"];
+  teil_zarge [shape=diamond, label="is-part-of\n(Zargen)"];
+
+  boden   [shape=box, label="Boden"];
+  deckel  [shape=box, label="Deckel"];
+  zarge   [shape=box, label="Zarge"];
+
+  bo_nr   [shape=ellipse, label=<<u>Boden-Nr.</u>>];
+  bo_git  [shape=ellipse, label="Gitterboden"];
+  de_nr   [shape=ellipse, label=<<u>Deckel-Nr.</u>>];
+  za_nr   [shape=ellipse, label=<<u>Zargen-Nr.</u>>];
+  za_hoe  [shape=ellipse, label="Höhe"];
+
+  isa     [shape=triangle, label="is-a\n(disjunkt, total)"];
+  brut    [shape=box, label="Brutraumzarge"];
+  honig   [shape=box, label="Honigraumzarge"];
+  br_gitt [shape=ellipse, label="Absperrgitter"];
+  ho_ernte [shape=ellipse, label="letzte Ernte"];
+
+  beute -- b_nr;
+  beute -- b_mass;
+
+  // Rollenaggregation: je Beute höchstens ein Boden bzw. Deckel, jedes Teil in höchstens einer Beute
+  beute -- teil_boden  [label="1"];
+  teil_boden -- boden  [label="c"];
+  beute -- teil_deckel [label="1"];
+  teil_deckel -- deckel [label="c"];
+
+  // Mengenaggregation: eine Beute besteht aus beliebig vielen Zargen
+  beute -- teil_zarge  [label="1"];
+  teil_zarge -- zarge  [label="nc"];
+
+  boden -- bo_nr;
+  boden -- bo_git;
+  deckel -- de_nr;
+  zarge -- za_nr;
+  zarge -- za_hoe;
+
+  zarge -- isa;
+  isa -- brut;
+  isa -- honig;
+  brut -- br_gitt;
+  honig -- ho_ernte;
+}

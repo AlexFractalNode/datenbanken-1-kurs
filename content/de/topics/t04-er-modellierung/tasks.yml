@@ -1,0 +1,622 @@
+- id: t04-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet]
+  type: define-example
+  difficulty: 1
+  points: 7
+  minutes: 7
+  prompt: |-
+    Erkläre die Begriffe **schwacher Entitätstyp**, **identifizierende Beziehung** und **partieller Schlüssel**.
+    Gib dazu ein **eigenes** Beispiel an. Es darf nicht aus den Kursmaterialien stammen (Zusammenfassung, Karteikarten, Quiz, Fehlerliste), also z. B. nicht Durchsicht/Bienenvolk, Route/Kletterwand oder Parzelle/Kleingartenanlage. Skizziere es in Chen-Notation mit Schlüsseln, Kardinalität und Teilnahme.
+  solution: |-
+    - **Schwacher Entitätstyp:** Seine Entitäten sind **existenzabhängig** von einem anderen, starken Entitätstyp (Besitzer). Sie lassen sich nicht allein durch eigene Attribute eindeutig identifizieren, sondern nur zusammen mit dem Schlüssel des Besitzers. Einen eigenen vollständigen Primärschlüssel haben sie nicht.
+    - **Identifizierende Beziehung:** der Beziehungstyp zwischen schwachem Entitätstyp und Besitzer, über den der fehlende Schlüsselteil „geliehen“ wird. Jede schwache Entität hat genau einen Besitzer.
+    - **Partieller Schlüssel:** Attribut(e) des schwachen Entitätstyps, die nur **innerhalb eines Besitzers** eindeutig sind. Vollständiger Schlüssel = Besitzerschlüssel + partieller Schlüssel.
+
+    Beispiel (Musterlösung, andere passende Beispiele gleichwertig): Ein Podcast-Verzeichnis führt Podcasts mit Podcast-ID. Die Folgen werden **je Podcast** ab 1 durchnummeriert; Folge 7 gibt es also bei vielen Podcasts. Ohne ihren Podcast gibt es keine Folge.
+
+    Skizze (Chen):
+    `Podcast` (Rechteck, Schlüssel <u>Podcast-ID</u>, Attribut Titel) —1— ⟨enthält⟩ (doppelte Raute) —n— `Folge` (doppelter Rahmen) mit partiellem Schlüssel Folgen-Nr. (gestrichelt unterstrichen) und den Attributen Titel und Dauer. Die Linie zwischen Folge und ⟨enthält⟩ ist doppelt (totale Teilnahme), (min,max) bei Folge (1,1).
+    Vollständiger Schlüssel einer Folge: (Podcast-ID, Folgen-Nr.).
+  rubric:
+    - criterion: "Schwacher Entitätstyp erklärt: Existenzabhängigkeit (0,5) und Identifikation nur mit dem Schlüssel des Besitzers (0,5)"
+      points: 1
+    - criterion: "Identifizierende Beziehung korrekt erklärt"
+      points: 1
+    - criterion: "Partieller Schlüssel korrekt erklärt (nur innerhalb des Besitzers eindeutig)"
+      points: 1
+    - criterion: "Eigenes, nicht aus den Kursmaterialien stammendes, fachlich passendes Beispiel mit korrekt angegebenem vollständigem Schlüssel"
+      points: 1
+    - criterion: "Skizze: doppelter Rahmen (0,5) und doppelte Raute (0,5)"
+      points: 1
+    - criterion: "Skizze: partieller Schlüssel gestrichelt unterstrichen (0,5) und totale Teilnahme des schwachen Typs als Doppellinie oder (1,1) (0,5)"
+      points: 1
+    - criterion: "Skizze: Kardinalität 1:n richtig platziert (1 beim Besitzer, n beim schwachen Typ)"
+      points: 1
+  space: box:110
+- id: t04-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  type: define-example
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Erkläre die Begriffe **Superschlüssel**, **Schlüsselkandidat**, **Primärschlüssel**, **künstlicher Schlüssel** und **Nichtschlüsselattribut**.
+    Wähle einen **eigenen** Entitätstyp mit mindestens fünf Attributen und gib für jeden Begriff ein konkretes Beispiel daraus an. Begründe die Wahl deines Primärschlüssels.
+  solution: |-
+    - **Superschlüssel:** eine Attributmenge, die jede Entität eindeutig identifiziert. Sie darf überflüssige Attribute enthalten.
+    - **Schlüsselkandidat:** ein **minimaler** Superschlüssel. Entfernt man ein Attribut, ist er nicht mehr eindeutig. Es kann mehrere geben.
+    - **Primärschlüssel:** der aus den Kandidaten ausgewählte Schlüssel, der im Modell zur Identifikation verwendet wird. Die übrigen Kandidaten sind Alternativschlüssel.
+    - **Künstlicher Schlüssel (Surrogatschlüssel):** ein zusätzlich eingeführtes Attribut ohne fachliche Bedeutung, z. B. eine fortlaufende Nummer.
+    - **Nichtschlüsselattribut:** ein Attribut, das in keinem Schlüsselkandidaten vorkommt.
+
+    Beispiel (Musterlösung): Entitätstyp `Spiel` eines Escape-Room-Anbieters mit Spiel-ID, Raum-Nr., Beginn (Datum und Uhrzeit), Teamname, Preis. In einem Raum beginnt zu einem Zeitpunkt höchstens ein Spiel; Teamnamen und Preise wiederholen sich.
+    - Superschlüssel: {Raum-Nr., Beginn, Preis} (eindeutig, aber Preis ist überflüssig)
+    - Schlüsselkandidaten: {Raum-Nr., Beginn} und {Spiel-ID}
+    - Künstlicher Schlüssel: Spiel-ID
+    - Nichtschlüsselattribute: Teamname, Preis
+    - Primärschlüssel: Spiel-ID. Begründung: kurz, einteilig und vor allem stabil, wenn ein Spiel in einen anderen Raum oder auf eine andere Uhrzeit verlegt wird. (Raum-Nr., Beginn) bleibt als Alternativschlüssel eindeutig.
+  rubric:
+    - criterion: "Superschlüssel: Definition (1) und passendes Beispiel (0,5)"
+      points: 1.5
+    - criterion: "Schlüsselkandidat: Definition mit Minimalität (1) und passendes Beispiel (0,5)"
+      points: 1.5
+    - criterion: "Primärschlüssel: als ausgewählter Kandidat erklärt (1) und im Beispiel benannt (0,5)"
+      points: 1.5
+    - criterion: "Künstlicher Schlüssel: Definition ohne fachliche Bedeutung (1) und im Beispiel verwendet (0,5)"
+      points: 1.5
+    - criterion: "Nichtschlüsselattribut: Definition (in keinem Kandidaten enthalten) (0,5) und korrektes Beispiel, kein Attribut eines Alternativschlüssels (0,5)"
+      points: 1
+    - criterion: "Wahl des Primärschlüssels nachvollziehbar begründet (z. B. Stabilität, Kürze)"
+      points: 1
+  space: lines:20
+- id: t04-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-modellierung, generalisierung, rekursion]
+  type: erm-model
+  difficulty: 3
+  points: 18
+  minutes: 18
+  prompt: |-
+    Erstelle zum folgenden Text ein ER-Diagramm in **Chen-Notation** mit allen Attributen und Schlüsseln. Gib an jeder Beziehung die Chen-Kardinalität **und** die (min,max)-Angaben an. Kennzeichne bei der Spezialisierung, ob sie total oder partiell und ob sie disjunkt oder überlappend ist. Gemeint sind hier die Eigenschaften der is-a-Hierarchie, nicht die Teilnahme an einer Beziehung.
+
+    > Die Kletterhalle „Griffig“ erfasst Personen mit Personennummer, Name (Vor- und Nachname) und Geburtsdatum. Das Alter soll angezeigt, aber nicht gespeichert werden. Personen können Mitglieder sein (zusätzlich: Eintrittsdatum, Tarif) und/oder Trainer:innen (zusätzlich: Lizenzstufe). Auch Tagesgäste, die weder Mitglied noch Trainer:in sind, werden als Person erfasst.
+    > Trainer:innen leiten Kurse (Kursnummer, Titel, Schwierigkeitsgrad). Jeder Kurs wird von genau einer Trainer:in geleitet. Eine Trainer:in kann beliebig viele Kurse leiten, auch keinen.
+    > Mitglieder können Kurse buchen, dabei wird das Buchungsdatum festgehalten. Ein Kurs hat höchstens 8 Teilnehmende und darf auch ohne Buchungen angelegt werden.
+    > Ein Mitglied kann von einem anderen Mitglied geworben worden sein (höchstens von einem). Ein Mitglied kann beliebig viele andere werben.
+  solution: |-
+    **Entitätstypen und Attribute**
+    - `Person`: <u>Personennummer</u>, Name (zusammengesetzt aus Vorname, Nachname), Geburtsdatum, Alter (abgeleitet, gestrichelte Ellipse)
+    - `Mitglied` (Subtyp von Person): Eintrittsdatum, Tarif. Kein eigener Schlüssel, erbt Personennummer.
+    - `Trainer:in` (Subtyp von Person): Lizenzstufe. Kein eigener Schlüssel.
+    - `Kurs`: <u>Kursnummer</u>, Titel, Schwierigkeitsgrad
+
+    **Spezialisierung** Person → Mitglied, Trainer:in (is-a, Dreieck oder gleichwertiges Symbol): **überlappend** (eine Person kann beides sein) und **partiell** (Tagesgäste gehören zu keinem Subtyp).
+
+    **Beziehungstypen**
+    | Beziehung | Chen | (min,max) |
+    |---|---|---|
+    | Trainer:in ⟨leitet⟩ Kurs | 1 bei Trainer:in, n bei Kurs | Trainer:in (0,n), Kurs (1,1) |
+    | Mitglied ⟨bucht⟩ Kurs, Attribut Buchungsdatum an der Raute | 8 (bzw. m) bei Mitglied, n bei Kurs | Mitglied (0,n), Kurs (0,8) |
+    | Mitglied ⟨wirbt⟩ Mitglied (rekursiv), Rollen Werber:in / Geworbene:r | 1 an Rolle Werber:in, n an Rolle Geworbene:r | Werber:in (0,n), Geworbene:r (0,1) |
+
+    Hinweise: `bucht` und `wirbt` hängen am Subtyp `Mitglied`, `leitet` am Subtyp `Trainer:in`, nicht an `Person`. Das Buchungsdatum gehört zur Beziehung, weil es erst durch die Kombination Mitglied–Kurs entsteht. Die Obergrenze 8 ist in (min,max) am Kurs sichtbar, in Chen steht sie gegenüber am Mitglied. Bei ⟨wirbt⟩ haben beide Rollen die Untergrenze 0, sonst könnte das erste Mitglied nie angelegt werden.
+  rubric:
+    - criterion: "Person: unterstrichene Personennummer (1), Name als zusammengesetztes Attribut (1), Geburtsdatum (0,5), Alter als abgeleitetes Attribut (0,5)"
+      points: 3
+    - criterion: "Subtypen mit ihren Zusatzattributen Eintrittsdatum, Tarif, Lizenzstufe (je 0,5) und ohne eigenen Schlüssel (0,5); das bloße Wiederholen des geerbten Schlüssels am Subtyp wird nicht abgezogen"
+      points: 2
+    - criterion: "is-a-Symbol verbindet Person korrekt mit beiden Subtypen"
+      points: 1
+    - criterion: "Spezialisierung als überlappend (0,5) und partiell (0,5) gekennzeichnet"
+      points: 1
+    - criterion: "Kurs mit unterstrichener Kursnummer (0,5) sowie Titel und Schwierigkeitsgrad (0,5)"
+      points: 1
+    - criterion: "leitet zwischen Trainer:in (nicht Person) und Kurs (0,5); Chen 1 bei Trainer:in, n bei Kurs (1); (min,max) Trainer:in (0,n), Kurs (1,1) (1). n, m und * sind gleichwertig"
+      points: 2.5
+    - criterion: "bucht zwischen Mitglied (nicht Person) und Kurs (0,5); Buchungsdatum an der Raute (1); Chen 8 bzw. m bei Mitglied, n bei Kurs (1)"
+      points: 2.5
+    - criterion: "bucht mit (min,max) Mitglied (0,n) (0,5) und Kurs (0,8) (0,5)"
+      points: 1
+    - criterion: "wirbt als rekursive Beziehung an Mitglied (1) mit beiden Rollennamen an den Kanten (1)"
+      points: 2
+    - criterion: "wirbt: Chen 1 bei Werber:in, n bei Geworbene:r (1); (min,max) Werber:in (0,n), Geworbene:r (0,1) (1)"
+      points: 2
+  space: box:200
+- id: t04-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-modellierung, attribute]
+  type: erm-model
+  difficulty: 2
+  points: 15
+  minutes: 15
+  prompt: |-
+    Erstelle zum folgenden Text ein ER-Diagramm in **Chen-Notation** mit allen Attributen und Schlüsseln. Gib an jeder Beziehung die Chen-Kardinalität **und** die (min,max)-Angaben an.
+
+    > Der Kammerchor „Vielstimmig“ verwaltet seine Konzerte. Von jeder Sängerin und jedem Sänger werden Mitgliedsnummer, Name, Stimmlage und eine oder mehrere Telefonnummern gespeichert. Jedes Konzert hat eine Konzertnummer, ein Datum und einen Titel. Die Gesamtdauer des Programms soll angezeigt, aber nicht gespeichert werden; sie ergibt sich aus den aufgeführten Werken.
+    > Werke des Repertoires haben eine Werknummer, einen Titel, eine Komponistin bzw. einen Komponisten und eine Dauer in Minuten. Ein Konzert umfasst mindestens ein Werk, dabei wird die Position im Programm festgehalten. Ein Werk kann in vielen Konzerten aufgeführt werden; neu ins Repertoire aufgenommene Werke wurden noch nie aufgeführt.
+    > An einem Konzert wirken mindestens 12 Sänger:innen mit. Eine Sänger:in kann an beliebig vielen Konzerten mitwirken; neue Mitglieder haben noch an keinem teilgenommen.
+    > Jedes Konzert findet in genau einer Spielstätte (Spielstättennummer, Name, Sitzplätze) statt. Spielstätten werden auch erfasst, bevor dort ein Konzert stattfindet. Jedes Konzert wird von genau einer Dirigentin bzw. einem Dirigenten (Personalnummer, Name) geleitet. Dirigent:innen werden erst erfasst, wenn sie ihr erstes Konzert übernehmen.
+  solution: |-
+    **Entitätstypen und Attribute**
+    - `Sänger:in`: <u>Mitgliedsnummer</u>, Name, Stimmlage, Telefon (mehrwertig, doppelte Ellipse)
+    - `Konzert`: <u>Konzertnummer</u>, Datum, Titel, Programmdauer (abgeleitet, gestrichelte Ellipse)
+    - `Werk`: <u>Werknummer</u>, Titel, Komponist:in, Dauer
+    - `Spielstätte`: <u>Spielstättennummer</u>, Name, Sitzplätze
+    - `Dirigent:in`: <u>Personalnummer</u>, Name
+
+    **Beziehungstypen**
+    | Beziehung | Chen | (min,max) |
+    |---|---|---|
+    | Konzert ⟨umfasst⟩ Werk, Attribut Position an der Raute | m bei Konzert, n bei Werk | Konzert (1,n), Werk (0,n) |
+    | Sänger:in ⟨wirkt mit in⟩ Konzert | m bei Sänger:in, n bei Konzert | Sänger:in (0,n), Konzert (12,n) |
+    | Spielstätte ⟨ist Ort von⟩ Konzert | 1 bei Spielstätte, n bei Konzert | Spielstätte (0,n), Konzert (1,1) |
+    | Dirigent:in ⟨dirigiert⟩ Konzert | 1 bei Dirigent:in, n bei Konzert | Dirigent:in (1,n), Konzert (1,1) |
+
+    Hinweise: Die Position gehört zur Beziehung ⟨umfasst⟩, denn dasselbe Werk steht in verschiedenen Konzerten an verschiedenen Stellen. Die Untergrenze 12 steht in (min,max) am Konzert, weil jedes Konzert an mindestens 12 Beziehungen ⟨wirkt mit in⟩ teilnimmt. Dirigent:in hat min 1, weil sie erst mit dem ersten Konzert erfasst wird (wechselseitige Existenzabhängigkeit). Keine Fremdschlüssel im ER-Diagramm. Komponist:in ist ein Attribut, weil nur der Name bekannt ist. Als eigener Entitätstyp mit korrekt angebundener Beziehung wird sie nicht abgezogen.
+  rubric:
+    - criterion: "Fünf Entitätstypen mit je korrekt unterstrichenem Schlüssel (je 0,5)"
+      points: 2.5
+    - criterion: "Übrige Attribute vollständig und am richtigen Typ: Name, Stimmlage; Datum, Titel; Titel, Komponist:in, Dauer; Name, Sitzplätze; Name (je fehlendes oder falsch zugeordnetes Attribut −0,5, mindestens 0)"
+      points: 2
+    - criterion: "Telefon als mehrwertiges (0,5) und Programmdauer als abgeleitetes Attribut (0,5)"
+      points: 1
+    - criterion: "umfasst als m:n (0,5), Position an der Raute (1), (min,max) Konzert (1,n) und Werk (0,n) (1). n, m und * sind gleichwertig"
+      points: 2.5
+    - criterion: "wirkt mit in als m:n (0,5), (min,max) Sänger:in (0,n) (0,5) und Konzert (12,n) (1)"
+      points: 2
+    - criterion: "ist Ort von: Chen 1 bei Spielstätte, n bei Konzert (1); (min,max) Spielstätte (0,n), Konzert (1,1) (1)"
+      points: 2
+    - criterion: "dirigiert: Chen 1 bei Dirigent:in, n bei Konzert (1); (min,max) Dirigent:in (1,n), Konzert (1,1) (1)"
+      points: 2
+    - criterion: "Keine Fremdschlüssel als Attribute und keine überflüssigen oder redundanten Beziehungen"
+      points: 1
+  space: box:180
+- id: t04-p005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-lesen, umrechnung]
+  type: erm-read
+  difficulty: 2
+  points: 11
+  minutes: 11
+  prompt: |-
+    Gegeben ist das folgende ER-Diagramm eines Fotowettbewerbs (Attribute weggelassen). Die ersten drei Beziehungen sind in **reiner Chen-Notation**, die vierte in **(min,max)-Notation** angegeben:
+
+    ```
+    Fotograf:in       —1—    ⟨reicht ein⟩     —n—    Foto
+    Foto              —n—    ⟨bewertet⟩       —m—    Jurymitglied     (Attribut an ⟨bewertet⟩: Punkte)
+    Wettbewerbsjahr   —1—    ⟨kürt⟩           —1—    Foto             (Siegerfoto)
+    Foto              (1,1)  ⟨gehört zu⟩      (0,n)  Kategorie
+    ```
+
+    Zusätzlich ist bekannt: Jedes Foto wird von genau einer Fotograf:in eingereicht, anonyme Einsendungen gibt es nicht. Jede erfasste Fotograf:in hat mindestens ein Foto eingereicht. Fotos, die gegen die Regeln verstoßen, werden von niemandem bewertet; jedes Jurymitglied bewertet mindestens ein Foto. In jedem Wettbewerbsjahr wird genau ein Siegerfoto gekürt. Ein Foto wird höchstens einmal Siegerfoto, die meisten nie.
+
+    a) Formuliere für ⟨reicht ein⟩ und ⟨bewertet⟩ je zwei Sätze, einen pro Leserichtung, mit Unter- und Obergrenze. (2 P.)
+    b) Gib für ⟨reicht ein⟩, ⟨bewertet⟩ und ⟨kürt⟩ die (min,max)-Angaben an beiden Entitätstypen an. (3 P.)
+    c) Rechne ⟨gehört zu⟩ in Chen-Notation um und nenne die Information, die dabei verloren geht. (2 P.)
+    d) Erkläre, warum bei binären Beziehungen die Obergrenzen in Chen und (min,max) „vertauscht“ erscheinen. (1 P.)
+    e) Neue Regel: Ein Foto wird von **höchstens 5** Jurymitgliedern bewertet. An welcher Kante und wie ändert sich die Angabe in Chen und in (min,max)? (2 P.)
+    f) Angenommen, die Zusatzangaben zu ⟨kürt⟩ fehlen. Welche (min,max)-Angaben ergeben sich dann nach der Standardkonvention für reine Chen-Kardinalitäten, und warum? (1 P.)
+  solution: |-
+    a)
+    - ⟨reicht ein⟩: Jedes Foto wird von **genau einer** Fotograf:in eingereicht. Eine Fotograf:in reicht **mindestens ein, beliebig viele** Fotos ein.
+    - ⟨bewertet⟩: Ein Foto wird von **keinem bis beliebig vielen** Jurymitgliedern bewertet. Ein Jurymitglied bewertet **mindestens ein, beliebig viele** Fotos.
+
+    b)
+    - ⟨reicht ein⟩: Fotograf:in (1,n), Foto (1,1)
+    - ⟨bewertet⟩: Foto (0,n), Jurymitglied (1,n)
+    - ⟨kürt⟩: Wettbewerbsjahr (1,1), Foto (0,1)
+
+    c) Das max bei Foto (1) kommt zur Kategorie, das max bei Kategorie (n) kommt zum Foto: `Kategorie —1— ⟨gehört zu⟩ —n— Foto`, also 1:n. Verloren gehen die Untergrenzen: Das Diagramm zeigt nicht mehr, dass jedes Foto zu einer Kategorie gehören **muss** (min 1) und dass eine Kategorie leer sein **darf** (min 0). Hier stimmen beide zufällig mit dem Kursstandard für 1:n überein (Detail (1,1), Master (0,*)). Dürfte ein Foto ohne Kategorie sein, wäre diese Abweichung in reiner Chen-Notation nicht mehr erkennbar.
+
+    d) Chen beantwortet an der Kante bei A die Frage „Wie viele A gehören zu einem B?“ (look-across). (min,max) beantwortet bei A die Frage „An wie vielen Beziehungen nimmt ein A teil?“ Bei einer binären Beziehung gehört zu jeder Beziehung genau ein Partner. „Wie viele B hat ein A“ steht deshalb in (min,max) bei A und in Chen bei B.
+
+    e) Die Obergrenze betrifft die Zahl der Jurymitglieder je Foto.
+    - (min,max): am **Foto**, (0,n) wird zu (0,5).
+    - Chen: an der Kante beim **Jurymitglied**, m wird zu 5.
+
+    f) Wettbewerbsjahr (0,1), Foto (0,1). Die Obergrenzen folgen aus 1:1. Bei 1:1 ist keine Seite als Detail ausgezeichnet, deshalb setzt der Kursstandard ohne Text oder Doppellinie auf beiden Seiten min = 0 an. (Nur bei 1:n erhält die Detail-Seite standardmäßig (1,1).)
+  rubric:
+    - criterion: "a) Vier korrekte Sätze mit Unter- und Obergrenze (je 0,5)"
+      points: 2
+    - criterion: "b) Sechs (min,max)-Angaben korrekt (je 0,5). n, m und * sind gleichwertig"
+      points: 3
+    - criterion: "c) Chen-Umrechnung korrekt (1 bei Kategorie, n bei Foto)"
+      points: 1
+    - criterion: "c) Verlust der Untergrenzen benannt (Pflicht bei Foto 0,5; optional bei Kategorie 0,5)"
+      points: 1
+    - criterion: "d) Unterschied der Fragestellung (look-across vs. Teilnahme am eigenen Typ) erklärt"
+      points: 1
+    - criterion: "e) (min,max) am Foto zu (0,5) geändert"
+      points: 1
+    - criterion: "e) Chen-Angabe beim Jurymitglied zu 5 geändert"
+      points: 1
+    - criterion: "f) (0,1) an beiden Seiten (0,5) mit Begründung über den Kursstandard für 1:1 (keine Detail-Seite, daher min = 0) (0,5)"
+      points: 1
+  space: lines:24
+- id: t04-p006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [n-aer, umrechnung]
+  type: erm-model
+  difficulty: 3
+  points: 11
+  minutes: 11
+  prompt: |-
+    > Bei einem Tanzturnier bewerten Wertungsrichter:innen (Lizenznummer, Name) die Paare (Startnummer, Verein) in mehreren Tänzen (Kürzel, Bezeichnung). Jede Richter:in vergibt je Paar und Tanz **höchstens eine** Punktzahl. Ein Paar wird in jedem Tanz, den es tanzt, von **genau 5** Richter:innen gewertet. Jede eingesetzte Richter:in gibt mindestens eine Wertung ab. Paare, die kurzfristig absagen, bleiben ohne Wertung. Ein Tanz kann im Programm stehen, ohne bereits gewertet worden zu sein.
+
+    a) Modelliere den Sachverhalt in Chen-Notation mit einer **ternären** Beziehung (Schlüssel, Attribute, Chen-Kardinalitäten). Begründe jede Chen-Angabe mit der Frage, die sie beantwortet. (6 P.)
+    b) Gib zusätzlich die (min,max)-Angaben an. Erkläre am Beispiel der Zahl 5, warum sich die (min,max)-Angaben bei dieser ternären Beziehung nicht durch Vertauschen aus den Chen-Angaben ergeben. (3 P.)
+    c) Begründe, warum drei binäre Beziehungen (Richter:in–Paar, Paar–Tanz, Richter:in–Tanz) den Sachverhalt nicht korrekt abbilden. (2 P.)
+  solution: |-
+    a)
+    - `Wertungsrichter:in`: <u>Lizenznummer</u>, Name
+    - `Paar`: <u>Startnummer</u>, Verein
+    - `Tanz`: <u>Kürzel</u>, Bezeichnung
+    - Ternäre Raute ⟨wertet⟩, verbunden mit allen drei Entitätstypen, Attribut **Punkte** an der Raute.
+    - Chen (je feste Kombination der beiden anderen Partner):
+      - bei Wertungsrichter:in **5**: zu einem festen Paar in einem festen Tanz gehören höchstens 5 Richter:innen,
+      - bei Paar **n**: eine feste Richter:in wertet in einem festen Tanz viele Paare,
+      - bei Tanz **p**: eine feste Richter:in wertet ein festes Paar in vielen Tänzen.
+      Also 5:n:p.
+
+    b) (min,max): Wertungsrichter:in (1,n), Paar (0,n), Tanz (0,n).
+    Die 5 zählt Richter:innen **je Kombination** aus Paar und Tanz. (min,max) zählt dagegen, an wie vielen Wertungen **eine** Entität teilnimmt. Ein Paar, das vier Tänze tanzt, steckt in 4 · 5 = 20 Wertungen; die 5 taucht als Obergrenze bei keinem Entitätstyp auf. Eine Richter:in kann ebenfalls viele Wertungen abgeben, also (1,n) statt 5. Ein Vertauschen der Chen-Angaben ergäbe hier keine sinnvolle (min,max)-Angabe.
+
+    c) Die Punkte gehören zur Dreierkombination (Richter:in, Paar, Tanz) und keiner Zweierkombination allein. Aus den drei Paarbeziehungen lässt sich außerdem nicht rekonstruieren, welche Dreierkombinationen tatsächlich vorkamen. Beispiel: Richter:in R hat Paar P gewertet, P hat Tango getanzt und R hat Tango gewertet. Daraus folgt nicht, dass R das Paar P im Tango gewertet hat. Die Zerlegung ist nicht verlustfrei.
+  rubric:
+    - criterion: "a) Drei Entitätstypen mit korrekt unterstrichenem Schlüssel und Attributen"
+      points: 2
+    - criterion: "a) Eine ternäre Raute zu allen drei Entitätstypen, Punkte als Attribut der Raute"
+      points: 2
+    - criterion: "a) Chen-Angaben 5 bei Wertungsrichter:in, n bei Paar, p bei Tanz (je 0,5) und mindestens eine Angabe mit „je feste Kombination der anderen“ begründet (0,5)"
+      points: 2
+    - criterion: "b) (min,max) korrekt: Richter:in (1,n), Paar (0,n), Tanz (0,n) (je 0,5). n, m und * sind gleichwertig"
+      points: 1.5
+    - criterion: "b) Erklärung: 5 zählt je Kombination (0,5), (min,max) zählt Teilnahmen einer Entität (0,5), die 5 erscheint deshalb bei keinem (min,max)-max (0,5)"
+      points: 1.5
+    - criterion: "c) Begründung: Punkte hängen an der Dreierkombination (1), Kombinationen aus Paarbeziehungen nicht rekonstruierbar (1)"
+      points: 2
+  space: box:140
+- id: t04-p007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zeitbezug]
+  type: erm-model
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Im ER-Modell eines Tierheims gilt bisher:
+
+    ```
+    Tier (Tier-Nr., Name)  —n—  ⟨ist untergebracht in⟩  —1—  Gehege (Gehege-Nr., Größe)
+    ```
+
+    Künftig soll nachvollziehbar sein, **wann** welches Tier in welchem Gehege war. Ein Tier kann auch mehrfach in dasselbe Gehege zurückkehren. Jedes Tier wird bei der Aufnahme sofort einem Gehege zugewiesen. Gehege können auch leer stehen.
+
+    a) Erkläre, warum das bisherige Modell dafür nicht ausreicht. (1,5 P.)
+    b) Modelliere die Historie in Chen-Notation mit Schlüsseln, Chen-Kardinalitäten und (min,max)-Angaben. (4,5 P.)
+    c) Woran erkennt man in deinem Modell die aktuelle Unterbringung eines Tiers? (1 P.)
+    d) Nenne eine fachliche Regel zur Historie, die das Diagramm nicht ausdrücken kann. (1 P.)
+  solution: |-
+    a) Die n:1-Beziehung speichert je Tier nur **ein** Gehege, also nur den aktuellen Zustand. Beim Umzug wird die Zuordnung überschrieben, frühere Gehege und die Zeiträume gehen verloren.
+
+    b) Musterlösung (Variante A):
+    - Neuer Entitätstyp `Unterbringung`: <u>Unterbringungs-Nr.</u> (künstlicher Schlüssel), von, bis.
+    - `Tier` —1— ⟨hat⟩ —n— `Unterbringung`: (min,max) Tier (1,n), Unterbringung (1,1)
+    - `Gehege` —1— ⟨beherbergt⟩ —n— `Unterbringung`: (min,max) Gehege (0,n), Unterbringung (1,1)
+    - Die alte direkte Beziehung Tier–Gehege entfällt.
+    Das Paar (Tier-Nr., Gehege-Nr.) reicht nicht als Schlüssel, weil ein Tier mehrfach in dasselbe Gehege zurückkehren kann.
+
+    Gleichwertige Varianten:
+    - **B:** `Unterbringung` als schwacher Entitätstyp von Tier (doppelter Rahmen, identifizierende doppelte Raute ⟨hat⟩) mit partiellem Schlüssel *von*. Die Tier-Nr. erscheint dabei **nicht** als Attribut an Unterbringung, sie kommt über die identifizierende Beziehung hinzu. Kardinalitäten wie in A.
+    - **D:** Zeit als eigener Entitätstyp in einer ternären Beziehung:
+      - `Zeitraum`: <u>Zeitraum-Nr.</u> (künstlicher Schlüssel, weil *bis* bei der aktuellen Unterbringung leer ist), von, bis
+      - ternäre Raute ⟨ist untergebracht in⟩ zwischen `Tier`, `Gehege` und `Zeitraum`; die alte binäre Beziehung entfällt
+      - Chen (je feste Kombination der beiden anderen): **1 bei Gehege** (ein Tier ist in einem Zeitraum in genau einem Gehege), **n bei Tier** (in einem Gehege können im selben Zeitraum mehrere Tiere sein), **m bei Zeitraum** (dasselbe Tier kann in mehreren Zeiträumen im selben Gehege gewesen sein)
+      - (min,max): Tier (1,n) (sofort zugewiesen, später weitere Unterbringungen), Gehege (0,n) (kann leer stehen), Zeitraum (1,n) (ein Zeitraum wird nur erfasst, wenn er verwendet wird, und kann für mehrere Tiere gelten)
+      - Eine Rückkehr ergibt ein neues Tupel (Tier, Gehege, anderer Zeitraum). Identifiziert wird eine Unterbringung durch (Tier-Nr., Zeitraum-Nr.).
+
+    Nicht gleichwertig (**Variante C**): eine m:n-Beziehung ⟨ist untergebracht in⟩ mit von und bis als Attributen an der Raute. In der Mengensicht ist eine Beziehung durch das Paar (Tier, Gehege) bestimmt, ein Attribut kann eine Rückkehr ins selbe Gehege nicht als zweite Beziehung unterscheiden. Nur wenn ausdrücklich als vereinfachende Notationserweiterung vereinbart wird, dass *von* zum Beziehungsschlüssel gehört, gibt es dafür Teilpunkte.
+
+    c) An der Unterbringung, deren **bis leer** ist (offener Gültigkeitszeitraum).
+
+    d) Beispiele: Die Zeiträume eines Tiers dürfen sich nicht überschneiden. *von* muss vor *bis* liegen. Je Tier gibt es höchstens eine Unterbringung mit leerem *bis*.
+  rubric:
+    - criterion: "a) Erklärt, dass nur der aktuelle Zustand gespeichert und beim Wechsel überschrieben wird"
+      points: 1.5
+    - criterion: "b) Zeitbezug mit von und bis über einen eigenen Entitätstyp modelliert: Unterbringung (Variante A/B) oder Zeitraum in ternärer Beziehung (D). Variante C (nur Attribute an einer m:n-Raute) höchstens 0,5, und nur mit ausdrücklich vereinbarter Notationserweiterung"
+      points: 1.5
+    - criterion: "b) Identifikation unterscheidet Rückkehr ins selbe Gehege: künstlicher Schlüssel, schwacher Typ mit partiellem Schlüssel von, oder bei D ein Zeitraum-Entitätstyp mit eigenem Schlüssel als dritter Partner. Nicht ausreichend: nur (Tier, Gehege). Kein Attribut Tier-Nr. an Unterbringung (wäre ein Fremdschlüssel)"
+      points: 1
+    - criterion: "b) Kardinalitäten passend zur gewählten Variante. A/B: Tier–Unterbringung mit Chen 1 bei Tier, n bei Unterbringung (0,5) und (min,max) Tier (1,n), Unterbringung (1,1) (0,5); Gehege–Unterbringung mit Chen 1 bei Gehege, n bei Unterbringung (0,5) und (min,max) Gehege (0,n), Unterbringung (1,1) (0,5). D: Chen 1 bei Gehege (0,5); n bei Tier und m bei Zeitraum (0,5); (min,max) Tier (1,n) (0,5); Gehege (0,n) und Zeitraum (1,n) (0,5). n, m und * sind gleichwertig"
+      points: 2
+    - criterion: "c) Aktuelle Unterbringung über leeres bis erkannt"
+      points: 1
+    - criterion: "d) Eine zutreffende, im Diagramm nicht darstellbare Regel genannt"
+      points: 1
+  space: box:110
+- id: t04-p008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung]
+  type: define-example
+  difficulty: 1
+  points: 9
+  minutes: 9
+  prompt: |-
+    Gib für jeden der Kardinalitätstypen **1:1**, **1:n** und **m:n** ein **eigenes** Beispiel an, das nicht aus den Kursmaterialien stammt.
+    Zeichne jedes Beispiel als kleine Chen-Skizze (Entitätstypen, Raute, Kardinalitäten an den Kanten). Formuliere je Beispiel einen Satz pro Leserichtung mit Unter- und Obergrenze und gib die (min,max)-Angaben an.
+  solution: |-
+    Musterlösung (andere passende Beispiele gleichwertig):
+
+    **1:1:** `Land —1— ⟨hat als Hauptstadt⟩ —1— Stadt`
+    - Jedes Land hat genau eine Hauptstadt. Eine Stadt ist Hauptstadt von höchstens einem Land, die meisten von keinem.
+    - (min,max): Land (1,1), Stadt (0,1)
+
+    **1:n:** `Wetterstation —1— ⟨liefert⟩ —n— Messwert`
+    - Jeder Messwert stammt von genau einer Wetterstation. Eine Station liefert keinen bis beliebig viele Messwerte (neue Stationen noch keinen).
+    - (min,max): Wetterstation (0,n), Messwert (1,1)
+
+    **m:n:** `Wanderer:in —m— ⟨besteigt⟩ —n— Gipfel`
+    - Eine Wanderer:in besteigt keinen bis beliebig viele Gipfel. Ein Gipfel wird von keiner bis beliebig vielen Wanderer:innen bestiegen.
+    - (min,max): Wanderer:in (0,n), Gipfel (0,m)
+  rubric:
+    - criterion: "Je Kardinalitätstyp ein eigenes, fachlich passendes Beispiel, dessen Obergrenzen wirklich 1:1, 1:n bzw. m:n sind (je 1)"
+      points: 3
+    - criterion: "Je Chen-Skizze die Kardinalitäten auf der richtigen Seite (look-across) (je 1)"
+      points: 3
+    - criterion: "Je Beispiel zwei Sätze mit Unter- und Obergrenze (0,5) und dazu passende (min,max)-Angaben auf der eigenen Seite (0,5). n, m und * sind gleichwertig"
+      points: 3
+  space: box:120
+- id: t04-p009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung, rekursion, n-aer]
+  type: define-example
+  difficulty: 2
+  points: 12
+  minutes: 12
+  prompt: |-
+    Erkläre die folgenden Begriffe und gib zu jedem ein **eigenes** Beispiel mit kleiner Chen-Skizze an (nicht aus den Kursmaterialien):
+    a) **Generalisierung/Spezialisierung**: Skizze mit Schlüssel und je einem Zusatzattribut pro Subtyp; gib an, ob dein Beispiel total oder partiell und disjunkt oder überlappend ist (4 P.)
+    b) **rekursive Beziehung**: Skizze mit Rollennamen, Chen-Kardinalitäten und (min,max)-Angaben (4 P.)
+    c) **n-äre (hier ternäre) Beziehung**: Skizze mit einem Attribut an der Raute und Chen-Kardinalitäten; begründe, warum sie nicht in binäre Beziehungen zerlegt werden sollte (4 P.)
+  solution: |-
+    Musterlösung (andere passende Beispiele gleichwertig):
+
+    a) **Generalisierung** fasst gemeinsame Eigenschaften mehrerer Entitätstypen in einem Obertyp zusammen (bottom-up), **Spezialisierung** leitet Subtypen mit Zusatzeigenschaften ab (top-down). Subtypen sind Teilmengen des Obertyps und erben dessen Schlüssel.
+    Beispiel: `Gewässer` (<u>Gewässer-ID</u>, Name) is-a `Fluss` (Länge) und `See` (Fläche). Der Schlüssel steht nur am Obertyp, die Subtypen tragen nur ihre Zusatzattribute. **Disjunkt** (nichts ist zugleich Fluss und See) und **partiell** (Weiher werden nur als Gewässer geführt).
+
+    b) Eine **rekursive Beziehung** verbindet einen Entitätstyp mit sich selbst; die beiden Kanten werden durch Rollen unterschieden.
+    Beispiel: `Gipfel` ⟨ist Nebengipfel von⟩ `Gipfel` mit den Rollen Hauptgipfel (Chen 1) und Nebengipfel (Chen n). (min,max): Hauptgipfel (0,n), Nebengipfel (0,1). Beide Untergrenzen sind 0. Hätte die Rolle Nebengipfel min = 1, müsste jeder Gipfel einem anderen untergeordnet sein, es gäbe keinen obersten Gipfel, nur endlose Ketten oder Zyklen. Hätte die Rolle Hauptgipfel min = 1, bräuchte jeder Gipfel einen Nebengipfel, und es gäbe keinen untersten.
+
+    c) Eine **n-äre Beziehung** verbindet drei oder mehr Entitätstypen über eine Raute; die Tatsache entsteht erst aus der Kombination aller Partner.
+    Beispiel: eine ternäre Raute ⟨bereitet zu⟩ zwischen `Köch:in` (<u>Personal-Nr.</u>), `Gericht` (<u>Gericht-Nr.</u>) und `Veranstaltung` (<u>Veranstaltungs-Nr.</u>), Attribut Portionen an der Raute. Chen je feste Kombination der beiden anderen: n bei Köch:in (ein Gericht für eine Veranstaltung kann von mehreren gekocht werden), m bei Gericht (eine Köch:in kocht für eine Veranstaltung mehrere Gerichte), p bei Veranstaltung (eine Köch:in kocht dasselbe Gericht für mehrere Veranstaltungen). Begründung: Die Portionen gehören zur Dreierkombination. Aus den Paaren Köch:in–Gericht, Gericht–Veranstaltung und Köch:in–Veranstaltung lässt sich nicht ablesen, wer welches Gericht für welche Veranstaltung gekocht hat. Die Zerlegung ist nicht verlustfrei.
+  rubric:
+    - criterion: "a) Begriffe korrekt erklärt inkl. Vererbung bzw. Teilmenge (1), eigenes passendes Beispiel mit is-a-Skizze (1), unterstrichener Schlüssel nur am Obertyp (0,5) und je ein Zusatzattribut an jedem Subtyp (0,5), Eigenschaften total/partiell (0,5) und disjunkt/überlappend (0,5) richtig angegeben"
+      points: 4
+    - criterion: "b) Begriff korrekt erklärt (1), Skizze mit beiden Rollennamen am selben Rechteck (1), Chen-Kardinalität je Rolle korrekt platziert (1), (min,max)-Angaben je Rolle passend (0,5) mit min = 0 an beiden Rollen bei einer hierarchischen Rekursion (0,5); bei einer symmetrischen Rekursion zählt min ≥ 1 nur mit fachlicher Begründung"
+      points: 4
+    - criterion: "c) Begriff korrekt erklärt (1), Skizze mit einer Raute zu drei Entitätstypen und Attribut an der Raute (1), Chen-Angaben an allen drei Kanten mit „je feste Kombination der anderen“ passend zum Beispiel (1), Begründung gegen die Zerlegung (Kombination bzw. nicht verlustfrei) (1)"
+      points: 4
+  space: box:220
+- id: t04-p010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, chen]
+  type: explain
+  difficulty: 1
+  points: 7
+  minutes: 7
+  prompt: |-
+    Ein Chen-Diagramm enthält die folgenden grafischen Elemente. Benenne für jedes, was es darstellt.
+
+    1. Rechteck mit einfachem Rahmen
+    2. Rechteck mit doppeltem Rahmen
+    3. Raute mit einfachem Rahmen
+    4. Raute mit doppeltem Rahmen
+    5. Ellipse mit durchgezogen unterstrichenem Namen
+    6. Ellipse mit gestrichelt unterstrichenem Namen
+    7. Ellipse mit doppeltem Rand
+    8. Ellipse mit gestricheltem Rand
+    9. Ellipse, an der weitere Ellipsen hängen
+    10. Doppellinie zwischen einem Rechteck und einer Raute
+    11. Dreieck mit der Beschriftung „is-a“, verbunden mit einem Rechteck oben und zwei Rechtecken unten
+    12. Zwei beschriftete Kanten von derselben Raute zum selben Rechteck
+
+    Gib zusätzlich an, welche (min,max)-Untergrenze Element 10 für den angeschlossenen Entitätstyp bedeutet. (1 P.)
+  solution: |-
+    1. Entitätstyp (stark)
+    2. schwacher Entitätstyp
+    3. Beziehungstyp
+    4. identifizierende Beziehung (zu einem schwachen Entitätstyp)
+    5. Schlüsselattribut (Teil des Primärschlüssels)
+    6. partieller Schlüssel eines schwachen Entitätstyps
+    7. mehrwertiges Attribut
+    8. abgeleitetes Attribut
+    9. zusammengesetztes Attribut mit Teilattributen
+    10. totale Teilnahme (Pflichtteilnahme) des Entitätstyps an der Beziehung
+    11. Generalisierung/Spezialisierung: Obertyp oben, Subtypen unten
+    12. rekursive Beziehung, die Beschriftungen sind Rollennamen
+
+    Zusatz: Element 10 bedeutet min ≥ 1 (z. B. (1,1) oder (1,n)) für den Entitätstyp an der Doppellinie.
+  rubric:
+    - criterion: "Zwölf Elemente korrekt benannt (je 0,5)"
+      points: 6
+    - criterion: "Zusatz: Doppellinie bedeutet Untergrenze mindestens 1"
+      points: 1
+  space: lines:14
+- id: t04-p011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-modellierung, generalisierung, beispieldaten]
+  type: erm-model
+  difficulty: 3
+  points: 12
+  minutes: 13
+  prompt: |-
+    Die Bergwacht Hochtal führt bisher drei Listen. Die folgenden Auszüge sind repräsentativ. „–“ bedeutet „trifft nicht zu“.
+
+    EINSATZKRAFT
+    | Pers-Nr | Name | Eintritt | Hundename | Hundeprüfung gültig bis | Sanitätsqualifikation |
+    |---|---|---|---|---|---|
+    | 11 | Berger | 2015 | Asta | 03/2027 | – |
+    | 12 | Kofler | 2019 | – | – | Rettungssanitäter:in |
+    | 13 | Huber | 2010 | Bruno | 11/2026 | Notfallsanitäter:in |
+    | 14 | Moser | 2022 | – | – | – |
+
+    EINSATZ
+    | Einsatz-Nr | Datum | Ort | Einsatzleitung (Pers-Nr) |
+    |---|---|---|---|
+    | 501 | 12.01. | Nordkar | 13 |
+    | 502 | 12.01. | Talstation | 12 |
+    | 503 | 03.02. | Nordkar | 13 |
+
+    MITWIRKUNG
+    | Einsatz-Nr | Pers-Nr | Stunden |
+    |---|---|---|
+    | 501 | 11 | 4 |
+    | 501 | 13 | 5 |
+    | 502 | 12 | 2 |
+    | 503 | 11 | 3 |
+    | 503 | 14 | 3 |
+
+    Zusatzangaben: Einsatzkräfte mit Hund sind Hundeführer:innen, Einsatzkräfte mit Sanitätsqualifikation sind Sanitäter:innen. Jeder Einsatz hat genau eine Einsatzleitung, die eine Einsatzkraft ist. An jedem Einsatz wirkt mindestens eine Einsatzkraft mit. Neue Einsatzkräfte haben noch an keinem Einsatz mitgewirkt und noch keinen geleitet. Über Hunde ist nur der Name bekannt.
+
+    a) Leite ein ER-Diagramm in **Chen-Notation** ab: Entitätstypen mit Schlüsseln und Attributen, eine Spezialisierung mit ihren Eigenschaften sowie alle Beziehungen mit Chen-Kardinalität und (min,max)-Angaben. Trage keine Fremdschlüssel ein. (10 P.)
+    b) Belege die beiden Eigenschaften deiner Spezialisierung mit je einer konkreten Zeile aus den Tabellen. (1 P.)
+    c) Begründe, ob der Hund ein Attribut oder ein eigener Entitätstyp ist. (1 P.)
+  solution: |-
+    a)
+    - `Einsatzkraft`: <u>Pers-Nr</u>, Name, Eintritt
+    - Spezialisierung (is-a) in `Hundeführer:in` (Hundename, Hundeprüfung gültig bis) und `Sanitäter:in` (Sanitätsqualifikation), ohne eigene Schlüssel. Eigenschaften: **überlappend** und **partiell** (Eigenschaften der Spezialisierung, nicht der Teilnahme).
+    - `Einsatz`: <u>Einsatz-Nr</u>, Datum, Ort. Die Spalte „Einsatzleitung (Pers-Nr)“ ist ein Fremdschlüssel und wird zur Beziehung, nicht zum Attribut.
+    - `Einsatzkraft` ⟨leitet⟩ `Einsatz`: Chen 1 bei Einsatzkraft, n bei Einsatz; (min,max) Einsatzkraft (0,n), Einsatz (1,1).
+    - `Einsatzkraft` ⟨wirkt mit⟩ `Einsatz` (aus Tabelle MITWIRKUNG): Chen m bei Einsatzkraft, n bei Einsatz, Attribut **Stunden** an der Raute; (min,max) Einsatzkraft (0,n), Einsatz (1,n).
+
+    b) Überlappend: Zeile 13 (Huber) hat Hund **und** Sanitätsqualifikation. Partiell: Zeile 14 (Moser) hat keins von beiden.
+
+    c) Attribut des Subtyps Hundeführer:in, weil vom Hund nur der Name bekannt ist und er an keiner eigenen Beziehung teilnimmt. Ein eigener Entitätstyp `Hund` wäre vertretbar, sobald weitere Hundedaten (z. B. Rasse, Chipnummer) oder Hundewechsel erfasst werden sollen.
+  rubric:
+    - criterion: "a) Einsatzkraft mit unterstrichener Pers-Nr sowie Name und Eintritt"
+      points: 1
+    - criterion: "a) Zwei Subtypen mit den richtigen Zusatzattributen (je 0,5 pro Subtyp) und ohne eigenen Schlüssel (1)"
+      points: 2
+    - criterion: "a) is-a-Symbol verbindet Einsatzkraft mit beiden Subtypen"
+      points: 0.5
+    - criterion: "a) Spezialisierung als überlappend (0,5) und partiell (0,5) gekennzeichnet"
+      points: 1
+    - criterion: "a) Einsatz mit unterstrichener Einsatz-Nr, Datum und Ort; Einsatzleitung nicht als Attribut"
+      points: 1
+    - criterion: "a) leitet als Beziehung: Chen 1 bei Einsatzkraft, n bei Einsatz (1); (min,max) Einsatzkraft (0,n), Einsatz (1,1) (1)"
+      points: 2
+    - criterion: "a) wirkt mit als m:n-Raute (0,5) mit Stunden an der Raute (1); (min,max) Einsatzkraft (0,n), Einsatz (1,n) (1). n, m und * sind gleichwertig"
+      points: 2.5
+    - criterion: "b) Je Eigenschaft eine passende Zeile als Beleg (je 0,5)"
+      points: 1
+    - criterion: "c) Nachvollziehbare Entscheidung mit Begründung (nur Name bekannt bzw. weitere Daten)"
+      points: 1
+  space: box:170
+- id: t04-p012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-modellierung, aggregation, generalisierung]
+  type: erm-model
+  difficulty: 2
+  points: 9
+  minutes: 9
+  prompt: |-
+    > Eine Volkssternwarte erfasst ihre Teleskope mit Inventarnummer und Bezeichnung. Jedes Teleskop ist entweder ein Linsenteleskop (zusätzlich: Objektivdurchmesser) oder ein Spiegelteleskop (zusätzlich: Spiegeldurchmesser, Bauart); andere Arten gibt es nicht.
+    > Ein Teleskop besteht aus genau einer Montierung (Montierungsnummer, Typ, Traglast). Jede Montierung gehört zu höchstens einem Teleskop; Ersatzmontierungen stehen im Lager.
+    > Zu einem Teleskop gehört außerdem ein Satz Okulare (Okularnummer, Brennweite), der auch leer sein kann. Jedes Okular gehört zu höchstens einem Teleskop.
+
+    a) Erstelle ein ER-Diagramm in **Chen-Notation** mit der is-a-Hierarchie und ihren Eigenschaften sowie den Teil-Ganzes-Beziehungen (is-part-of) mit Chen-Kardinalität und (min,max)-Angaben. (6 P.)
+    b) Ordne die beiden Teil-Ganzes-Beziehungen als Rollen- bzw. Mengenaggregation ein und begründe. (2 P.)
+    c) Warum wäre „Okular is-a Teleskop“ falsch? (1 P.)
+  solution: |-
+    a)
+    - `Teleskop`: <u>Inventarnummer</u>, Bezeichnung
+    - is-a (disjunkt, total) zu `Linsenteleskop` (Objektivdurchmesser) und `Spiegelteleskop` (Spiegeldurchmesser, Bauart), ohne eigene Schlüssel.
+    - `Montierung`: <u>Montierungsnummer</u>, Typ, Traglast
+    - `Okular`: <u>Okularnummer</u>, Brennweite
+    - Teleskop ⟨is-part-of: Montierung⟩ Montierung: Chen 1 bei Teleskop, 1 bei Montierung (1:1); (min,max) Teleskop (1,1), Montierung (0,1).
+    - Teleskop ⟨is-part-of: Okulare⟩ Okular: Chen 1 bei Teleskop, n bei Okular; (min,max) Teleskop (0,n), Okular (0,1).
+    Ein Lösungsdiagramm liegt in `diagrams/t04-p012.dot`.
+
+    b) Die Montierung ist eine **Rollenaggregation**: eine Komponente mit eigener Rolle, je Teleskop genau eine. Die Okulare sind eine **Mengenaggregation**: beliebig viele gleichartige Teile eines Ganzen.
+
+    c) is-a würde bedeuten, dass jedes Okular selbst ein Teleskop ist (Teilmenge) und Inventarnummer, Bezeichnung und die Subtypen erbt. Ein Okular ist aber nur ein **Teil** eines Teleskops.
+  rubric:
+    - criterion: "a) Teleskop mit Schlüssel (0,5); beide Subtypen mit Zusatzattributen und ohne eigenen Schlüssel (1)"
+      points: 1.5
+    - criterion: "a) is-a als disjunkt (0,5) und total (0,5) gekennzeichnet"
+      points: 1
+    - criterion: "a) Montierung und Okular mit Schlüssel und Attributen (je 0,5)"
+      points: 1
+    - criterion: "a) Teil-Ganzes Teleskop–Montierung: Chen 1:1 (0,5); (min,max) Teleskop (1,1), Montierung (0,1) (1)"
+      points: 1.5
+    - criterion: "a) Teil-Ganzes Teleskop–Okular: Chen 1 bei Teleskop, n bei Okular (0,5); (min,max) Teleskop (0,n), Okular (0,1) (0,5). n, m und * sind gleichwertig"
+      points: 1
+    - criterion: "b) Montierung als Rollenaggregation (1) und Okulare als Mengenaggregation (1), jeweils begründet"
+      points: 2
+    - criterion: "c) Teil ist keine Teilmenge bzw. erbt nicht die Eigenschaften des Ganzen"
+      points: 1
+  space: box:150
+- id: t04-p013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-lesen, fehler-finden, redundanz]
+  type: erm-read
+  difficulty: 2
+  points: 8
+  minutes: 9
+  prompt: |-
+    Für einen Gemeinschaftsgarten gilt: Jede Gärtner:in gehört zu genau einer Gruppe. Jedes Beet wird von genau einer Gruppe bewirtschaftet; zuständig für ein Beet sind genau die Mitglieder dieser Gruppe. Auf einem Beet wachsen mehrere Sorten, für jede Pflanzung wird das Pflanzdatum festgehalten. Gärtner:innen tauschen untereinander Saatgut. Gruppen verwalten Gartengeräte.
+
+    Ein Entwurf in Chen-Notation enthält (Attribute von Gerät weggelassen):
+
+    ```
+    [Gärtner:in]  Ellipsen: Mitglieds-Nr. (unterstrichen), Name, Gruppen-Nr.
+    [Gärtner:in] —n— <gehört zu> —1— [Gruppe]
+    [Gruppe]      Ellipsen: Gruppen-Nr. (unterstrichen), Name
+    [Gruppe] —1— <hat> —n— [Beet]
+    [Beet] —n— <hat> —1— [Gruppe]          (zweite Raute, Attribut an der Raute: seit)
+    [Beet]        Ellipsen: Beet-Nr. (unterstrichen), Fläche
+    [Gärtner:in] —m— <ist zuständig für> —n— [Beet]
+    [Beet] ———————— [Sorte]                (direkte Linie, keine Raute)
+    [Sorte]       Ellipsen: Sorten-Nr. (unterstrichen), Bezeichnung
+    Ellipse Pflanzdatum: verbunden mit [Beet] und mit [Sorte]
+    <tauscht Saatgut>: genau eine Kante zu [Gärtner:in], ohne Beschriftung
+    [Gruppe] —1— <hat> —n— [Gerät]
+    ```
+
+    a) Finde sechs Modellierungsfehler. Begründe jeden kurz und gib die Korrektur an. Was nur eine Stilempfehlung ist, zählt nicht als Fehler. (6 P.)
+    b) Unter welcher Bedingung wäre eine Beziehung zwischen Gärtner:in und Beet **nicht** redundant? Nenne ein Beispiel. (2 P.)
+  solution: |-
+    a)
+    1. **Gruppen-Nr. an Gärtner:in:** ein Fremdschlüssel ohne Auftrag; die Beziehung ⟨gehört zu⟩ drückt das schon aus. → Attribut entfernen.
+    2. **⟨ist zuständig für⟩ ist redundant:** Laut Text sind genau die Gruppenmitglieder zuständig. Das folgt aus ⟨gehört zu⟩ und ⟨hat⟩ (Zyklus). → Beziehung entfernen.
+    3. **Beet und Sorte direkt verbunden:** Zwei Entitätstypen dürfen nicht direkt verbunden werden. → Raute ⟨ist bepflanzt mit⟩ einfügen (m:n, denn eine Sorte wächst auch auf mehreren Beeten).
+    4. **Pflanzdatum hat zwei Verbindungen:** Ein Attribut hat genau eine Verbindung, und das Datum gehört zur Kombination Beet–Sorte. → an die neue Raute ⟨ist bepflanzt mit⟩ hängen.
+    5. **⟨tauscht Saatgut⟩ hat nur eine Kante:** Ein Beziehungstyp braucht mindestens zwei Kanten. → rekursive Beziehung mit zwei Kanten zu Gärtner:in und Rollennamen (z. B. gibt ab / erhält), m:n.
+    6. **Zwei Rauten ⟨hat⟩ zwischen denselben Entitätstypen Gruppe und Beet:** Ein Beziehungstyp ist über Name plus verbundene Entitätstypen eindeutig. Zwei gleichnamige Rauten zwischen denselben Partnern verletzen das und modellieren denselben Sachverhalt doppelt. → zweite Raute entfernen, das Attribut seit an die verbleibende Raute hängen (am besten umbenannt in ⟨bewirtschaftet⟩).
+
+    Kein Fehler: ⟨hat⟩ zwischen Gruppe und Gerät. Gleichnamige Rauten zwischen verschiedenen Entitätstypen sind erlaubt; ein sprechender Name wie ⟨verwaltet⟩ ist nur eine Empfehlung. Wer das als Fehler nennt, bekommt dafür keinen Punkt, aber auch keinen Abzug.
+
+    b) Nicht redundant ist eine Beziehung Gärtner:in–Beet, wenn sie etwas **anderes** bedeutet als die Gruppenzugehörigkeit oder Fälle erfasst, die der Umweg nicht abdeckt. Beispiel: ⟨hat Gießdienst für⟩, wenn je Woche einzelne Personen (auch aus anderen Gruppen) für bestimmte Beete eingeteilt werden.
+  rubric:
+    - criterion: "a) Sechs Fehler erkannt und begründet (je 0,5); die gleichnamige Raute zwischen Gruppe und Gerät zählt nicht als Fehler"
+      points: 3
+    - criterion: "a) Zu jedem Fehler eine passende Korrektur (je 0,5)"
+      points: 3
+    - criterion: "b) Bedingung genannt: eigene Bedeutung bzw. nicht ableitbare Fälle (1) und passendes Beispiel (1)"
+      points: 2
+  space: lines:18

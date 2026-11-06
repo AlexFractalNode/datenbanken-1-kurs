@@ -1,0 +1,31 @@
+// Schwacher Entitätstyp (doppelter Rahmen) mit identifizierender Beziehung
+// (doppelte Raute, doppelte Linie zum schwachen Entitätstyp).
+// Der partielle Schlüssel "Datum" ist nur zusammen mit der Volk-Nr. eindeutig.
+// Lehrbuch-Variante: partieller Schlüssel gestrichelt unterstrichen;
+// hier unterstrichen mit Zusatz "(partiell)", da Graphviz keine gestrichelte Unterstreichung kennt.
+graph schwache_entitaet_durchsicht {
+  rankdir=LR;
+  node [fontsize=11];
+  edge [fontsize=11];
+
+  volk       [shape=box, label="Bienenvolk"];
+  hat        [shape=diamond, peripheries=2, label="wird geprüft in"];
+  durchsicht [shape=box, peripheries=2, label="Durchsicht"];
+
+  v_nr    [shape=ellipse, label=<<u>Volk-Nr.</u>>];
+  v_rasse [shape=ellipse, label="Bienenrasse"];
+
+  d_datum  [shape=ellipse, label=<<u>Datum</u> (partiell)>];
+  d_befund [shape=ellipse, label="Befund"];
+  d_waben  [shape=ellipse, label="Anzahl Brutwaben"];
+
+  volk -- hat       [label="1"];
+  hat -- durchsicht [label="n", color="black:invis:black"];
+
+  volk -- v_nr;
+  volk -- v_rasse;
+
+  durchsicht -- d_datum;
+  durchsicht -- d_befund;
+  durchsicht -- d_waben;
+}

@@ -1,0 +1,19 @@
+// Teilnahmebeschränkung in Chen-Notation:
+// Doppellinie = totale Teilnahme (jede Entität nimmt an mindestens einer Beziehung teil, min >= 1),
+// einfache Linie = partielle Teilnahme (min = 0).
+// Fachlich: Jedes Bienenvolk muss von einer Imker:in betreut werden; eine Imker:in darf ohne Volk sein.
+// Chen-Kardinalität (look-across) zusätzlich an den Kanten; darunter die entsprechende (min,max)-Angabe.
+graph teilnahme_imkerei {
+  rankdir=LR;
+  node [fontsize=11];
+  edge [fontsize=11];
+
+  imker   [shape=box, label="Imker:in"];
+  betreut [shape=diamond, label="betreut"];
+  volk    [shape=box, label="Bienenvolk"];
+
+  // partielle Teilnahme: einfache Linie
+  imker -- betreut [label="1\n(min,max): (0,n)"];
+  // totale Teilnahme: Doppellinie
+  betreut -- volk  [label="n\n(min,max): (1,1)", color="black:invis:black"];
+}

@@ -1,0 +1,56 @@
+// Lösungsdiagramm zu t04-p012 (Volkssternwarte):
+// is-a-Hierarchie (Dreieck, disjunkt und total) kombiniert mit zwei Teil-Ganzes-Beziehungen (is-part-of).
+// Montierung = Rollenaggregation (je Teleskop genau eine), Okulare = Mengenaggregation (beliebig viele).
+// Kantenlabels: Chen-Kardinalität (look-across), darunter (min,max) des Entitätstyps an dieser Kante.
+graph t04_p012 {
+  rankdir=TB;
+  node [fontsize=11];
+  edge [fontsize=11];
+
+  teleskop [shape=box, label="Teleskop"];
+  t_inv    [shape=ellipse, label=<<u>Inventarnummer</u>>];
+  t_bez    [shape=ellipse, label="Bezeichnung"];
+
+  isa      [shape=triangle, label="is-a\n(disjunkt, total)"];
+  linse    [shape=box, label="Linsenteleskop"];
+  spiegel  [shape=box, label="Spiegelteleskop"];
+  l_obj    [shape=ellipse, label="Objektivdurchmesser"];
+  s_dm     [shape=ellipse, label="Spiegeldurchmesser"];
+  s_bau    [shape=ellipse, label="Bauart"];
+
+  teil_mont [shape=diamond, label="is-part-of\n(Montierung)"];
+  teil_oku  [shape=diamond, label="is-part-of\n(Okulare)"];
+
+  montierung [shape=box, label="Montierung"];
+  m_nr       [shape=ellipse, label=<<u>Montierungsnummer</u>>];
+  m_typ      [shape=ellipse, label="Typ"];
+  m_last     [shape=ellipse, label="Traglast"];
+
+  okular   [shape=box, label="Okular"];
+  o_nr     [shape=ellipse, label=<<u>Okularnummer</u>>];
+  o_bw     [shape=ellipse, label="Brennweite"];
+
+  teleskop -- t_inv;
+  teleskop -- t_bez;
+
+  teleskop -- isa;
+  isa -- linse;
+  isa -- spiegel;
+  linse -- l_obj;
+  spiegel -- s_dm;
+  spiegel -- s_bau;
+
+  // Teleskop (1,1) – Montierung (0,1); Chen 1:1
+  teleskop -- teil_mont   [label="1\n(1,1)", color="black:invis:black"];
+  teil_mont -- montierung [label="1\n(0,1)"];
+
+  // Teleskop (0,n) – Okular (0,1); Chen 1 bei Teleskop, n bei Okular
+  teleskop -- teil_oku [label="1\n(0,n)"];
+  teil_oku -- okular   [label="n\n(0,1)"];
+
+  montierung -- m_nr;
+  montierung -- m_typ;
+  montierung -- m_last;
+  okular -- o_nr;
+  okular -- o_bw;
+}

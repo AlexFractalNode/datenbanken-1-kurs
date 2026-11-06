@@ -1,0 +1,44 @@
+// Chen-Notation: Grundmodell Imkerei mit allen Attributarten
+// Rechteck = Entitätstyp, Raute = Beziehungstyp, Ellipse = Attribut,
+// unterstrichen = Schlüsselattribut, doppelte Ellipse = mehrwertig,
+// gestrichelte Ellipse = abgeleitet, Ellipse mit Unter-Ellipsen = zusammengesetzt
+graph imkerei_grundmodell {
+  rankdir=LR;
+  node [fontsize=11];
+  edge [fontsize=11];
+
+  imker   [shape=box, label="Imker:in"];
+  volk    [shape=box, label="Bienenvolk"];
+  betreut [shape=diamond, label="betreut"];
+
+  i_nr       [shape=ellipse, label=<<u>Imker-Nr.</u>>];
+  i_name     [shape=ellipse, label="Name"];
+  i_vorname  [shape=ellipse, label="Vorname"];
+  i_nachname [shape=ellipse, label="Nachname"];
+  i_tel      [shape=ellipse, peripheries=2, label="Telefon"];
+  i_geb      [shape=ellipse, label="Geburtsdatum"];
+  i_alter    [shape=ellipse, style=dashed, label="Alter"];
+
+  v_nr      [shape=ellipse, label=<<u>Volk-Nr.</u>>];
+  v_rasse   [shape=ellipse, label="Bienenrasse"];
+  v_koenig  [shape=ellipse, label="Jahrgang Königin"];
+
+  b_seit    [shape=ellipse, label="betreut seit"];
+
+  imker -- betreut [label="1"];
+  betreut -- volk  [label="n"];
+
+  imker -- i_nr;
+  imker -- i_name;
+  i_name -- i_vorname;
+  i_name -- i_nachname;
+  imker -- i_tel;
+  imker -- i_geb;
+  imker -- i_alter;
+
+  volk -- v_nr;
+  volk -- v_rasse;
+  volk -- v_koenig;
+
+  betreut -- b_seit;
+}

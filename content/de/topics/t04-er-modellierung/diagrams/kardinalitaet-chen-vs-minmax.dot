@@ -1,0 +1,32 @@
+// Dieselbe Beziehung zweimal: oben Chen-Notation, unten (min,max)-Notation.
+// Fachlich: Eine Imker:in betreut beliebig viele Völker (auch keins),
+// jedes Volk wird von genau einer Imker:in betreut.
+// Chen: Zahl steht gegenüber (look-across). (min,max): Angabe steht beim eigenen Entitätstyp.
+// Die unmarkierte Chen-1:n-Beziehung entspricht nach der Standardkonvention des Kurses
+// genau diesen (min,max)-Angaben: Master (0,*), Detail (1,1). Die Prämisse steht sichtbar im Graph-Label.
+graph kardinalitaet_chen_vs_minmax {
+  rankdir=LR;
+  node [fontsize=11];
+  edge [fontsize=11];
+  label="Reine Chen-Angabe 1:n, gelesen nach der Kurs-Standardkonvention: Master (0,*), Detail (1,1)";
+  labelloc=b;
+  fontsize=11;
+
+  subgraph cluster_chen {
+    label="Chen-Notation (1:n)";
+    imker_c   [shape=box, label="Imker:in"];
+    betreut_c [shape=diamond, label="betreut"];
+    volk_c    [shape=box, label="Bienenvolk"];
+    imker_c -- betreut_c [label="1"];
+    betreut_c -- volk_c  [label="n"];
+  }
+
+  subgraph cluster_minmax {
+    label="(min,max)-Notation";
+    imker_m   [shape=box, label="Imker:in"];
+    betreut_m [shape=diamond, label="betreut"];
+    volk_m    [shape=box, label="Bienenvolk"];
+    imker_m -- betreut_m [label="(0,*)"];
+    betreut_m -- volk_m  [label="(1,1)"];
+  }
+}

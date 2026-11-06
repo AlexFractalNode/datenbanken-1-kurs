@@ -1,0 +1,35 @@
+// Generalisierung/Spezialisierung (is-a, hier als Dreieck) und rekursive Beziehung mit Rollen.
+// Spezialisierung: disjunkt (kein Tier ist Hund und Katze zugleich),
+// partiell (Kaninchen, Vögel usw. gehören zu keinem Subtyp).
+// Rekursive Beziehung: Rollen "Mutter" und "Jungtier" an den Kanten, Chen-Kardinalität dahinter.
+graph generalisierung_tierheim {
+  rankdir=TB;
+  node [fontsize=11];
+  edge [fontsize=11];
+
+  tier  [shape=box, label="Tier"];
+  isa   [shape=triangle, label="is-a\n(disjunkt, partiell)"];
+  hund  [shape=box, label="Hund"];
+  katze [shape=box, label="Katze"];
+
+  mutter_von [shape=diamond, label="ist Mutter von"];
+
+  t_nr    [shape=ellipse, label=<<u>Tier-Nr.</u>>];
+  t_name  [shape=ellipse, label="Name"];
+  t_aufn  [shape=ellipse, label="Aufnahmedatum"];
+  h_lein  [shape=ellipse, label="leinenführig"];
+  k_frei  [shape=ellipse, label="Freigänger"];
+
+  tier -- isa;
+  isa -- hund;
+  isa -- katze;
+
+  tier -- mutter_von [label="Mutter\n1"];
+  mutter_von -- tier [label="Jungtier\nn"];
+
+  tier -- t_nr;
+  tier -- t_name;
+  tier -- t_aufn;
+  hund -- h_lein;
+  katze -- k_frei;
+}

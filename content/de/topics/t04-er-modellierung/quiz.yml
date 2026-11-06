@@ -1,0 +1,604 @@
+- id: t04-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, chen]
+  type: single
+  question: |-
+    Gegeben ist in reiner Chen-Notation: `Imker:in —1— betreut —n— Bienenvolk`. Welche Aussage ist richtig?
+  options:
+    - text: "Ein Bienenvolk wird von höchstens einer Imker:in betreut, eine Imker:in kann viele Völker betreuen."
+      correct: true
+      explain: "Chen liest man gegenüber: Die 1 bei Imker:in gilt für ein Volk, das n bei Bienenvolk gilt für eine Imker:in."
+    - text: "Eine Imker:in betreut genau ein Bienenvolk, ein Volk kann von vielen Imker:innen betreut werden."
+      correct: false
+      explain: "Das ist die typische Verwechslung: Die Zahl wird hier dem eigenen Typ zugeordnet statt dem gegenüberliegenden."
+    - text: "Jede Imker:in muss mindestens ein Volk betreuen."
+      correct: false
+      explain: "Die Chen-Angabe selbst enthält keine Untergrenze. Nach Kursstandard bekommt die Master-Seite einer 1:n-Beziehung ohne weitere Angaben (0,*), eine Pflicht für die Imker:in folgt also nicht."
+    - text: "Ein Bienenvolk darf ohne Imker:in sein, denn eine 1 in reiner Chen-Notation ist nur eine Obergrenze."
+      correct: false
+      explain: "Die 1 ist tatsächlich nur eine Obergrenze. Nach Kursstandard gehört die Detail-Seite einer 1:n-Beziehung ohne weitere Angaben aber zu genau einem Master: Bienenvolk (1,1). Dass ein Volk ohne Imker:in sein darf, müsste ausdrücklich angegeben sein (Text oder MC-Symbol c)."
+- id: t04-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung]
+  type: single
+  question: |-
+    Chen: `Kletterwand —1— hat —n— Route`. Zusätzlich gilt: Jede Route befindet sich an genau einer Wand, eine Wand kann (noch) ohne Routen sein. Welche (min,max)-Angaben sind korrekt?
+  options:
+    - text: "Kletterwand (0,n), Route (1,1)"
+      correct: true
+      explain: "Eine Wand nimmt an 0 bis n hat-Beziehungen teil, eine Route an genau einer. Das max bei Wand (n) ist die Chen-Angabe bei Route, das max bei Route (1) die Chen-Angabe bei Wand."
+    - text: "Kletterwand (1,1), Route (0,n)"
+      correct: false
+      explain: "Hier wurden die Chen-Angaben ohne Tausch übernommen. (min,max) steht aber beim eigenen Typ."
+    - text: "Kletterwand (1,n), Route (1,1)"
+      correct: false
+      explain: "Die Obergrenzen stimmen, aber eine Wand darf laut Text ohne Routen sein, also min = 0."
+    - text: "Kletterwand (0,1), Route (0,n)"
+      correct: false
+      explain: "Vertauscht und mit falschen Untergrenzen: Jede Route hat genau eine Wand."
+- id: t04-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung]
+  type: single
+  question: |-
+    In einer Gärtnerei gilt in (min,max)-Notation: `Pflanze (1,1) — steht in — (1,n) Gewächshaus`. Wie lautet die Beziehung in Chen-Notation?
+  options:
+    - text: "Gewächshaus 1 : n Pflanze (die 1 steht bei Gewächshaus, das n bei Pflanze)"
+      correct: true
+      explain: "Das max bei Pflanze (1) wandert zum Gewächshaus, das max bei Gewächshaus (n) wandert zur Pflanze."
+    - text: "Pflanze 1 : n Gewächshaus (die 1 steht bei Pflanze, das n bei Gewächshaus)"
+      correct: false
+      explain: "Die Obergrenzen wurden auf ihrer Seite belassen. Bei Chen müssen sie auf die Gegenseite."
+    - text: "Pflanze n : m Gewächshaus"
+      correct: false
+      explain: "Eine Pflanze steht in höchstens einem Gewächshaus (max 1), also ist es keine m:n-Beziehung."
+    - text: "Pflanze 1 : 1 Gewächshaus, weil beide Untergrenzen 1 sind"
+      correct: false
+      explain: "Für die Chen-Kardinalität zählen die Obergrenzen, nicht die Untergrenzen."
+- id: t04-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  type: multi
+  question: |-
+    Entitätstyp `Route` mit den Attributen Routen-ID, Wand-Nr., Routen-Nr., Name, Schwierigkeit. Eindeutig sind: Routen-ID allein und die Kombination (Wand-Nr., Routen-Nr.). Namen können sich wiederholen, auch an derselben Wand. Welche Attributmengen sind **Superschlüssel**?
+  options:
+    - text: "{Routen-ID}"
+      correct: true
+      explain: "Routen-ID ist eindeutig, also Superschlüssel (und sogar minimal). Wegen dieser eigenen ID ist Route hier ein starker Entitätstyp. Ohne sie wäre Route ein schwacher Typ mit partiellem Schlüssel Routen-Nr."
+    - text: "{Routen-ID, Name}"
+      correct: true
+      explain: "Enthält einen eindeutigen Teil. Ein Superschlüssel darf überflüssige Attribute enthalten."
+    - text: "{Wand-Nr., Routen-Nr., Schwierigkeit}"
+      correct: true
+      explain: "Enthält die eindeutige Kombination (Wand-Nr., Routen-Nr.), also Superschlüssel, aber nicht minimal."
+    - text: "{Wand-Nr., Name}"
+      correct: false
+      explain: "Namen können sich an derselben Wand wiederholen, die Kombination ist also nicht eindeutig."
+- id: t04-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  type: single
+  question: |-
+    Entitätstyp `Route` mit den Attributen Routen-ID, Wand-Nr., Routen-Nr., Name, Schwierigkeit. Eindeutig sind Routen-ID allein und die Kombination (Wand-Nr., Routen-Nr.), aber weder Wand-Nr. noch Routen-Nr. allein. Namen und Schwierigkeiten können sich wiederholen. Welche Attributmenge ist ein **Schlüsselkandidat**?
+  options:
+    - text: "{Wand-Nr., Routen-Nr.}"
+      correct: true
+      explain: "Eindeutig und minimal: Weder Wand-Nr. noch Routen-Nr. allein ist eindeutig."
+    - text: "{Routen-ID, Wand-Nr.}"
+      correct: false
+      explain: "Eindeutig, aber nicht minimal, denn Routen-ID allein genügt schon."
+    - text: "{Routen-Nr.}"
+      correct: false
+      explain: "Routen-Nummern wiederholen sich an verschiedenen Wänden, also nicht eindeutig."
+    - text: "{Name, Schwierigkeit}"
+      correct: false
+      explain: "Nicht eindeutig, denn zwei Routen können gleich heißen und gleich schwer sein."
+- id: t04-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel, ausblick]
+  type: truefalse
+  question: |-
+    „Auch ohne ausdrücklichen Auftrag trägt man im ER-Diagramm bei einer 1:n-Beziehung den Fremdschlüssel als Attribut am Entitätstyp der n-Seite ein.“
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Nach gängiger Konvention gehören Fremdschlüssel ins Relationenmodell. Im ER-Modell drückt der Beziehungstyp die Verbindung aus. Ohne Auftrag wäre sie doppelt modelliert."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig: Ohne Auftrag entsteht der Fremdschlüssel erst bei der Überführung auf der n-Seite. Nur wenn eine Aufgabe es verlangt, markiert man ihn im ERD (z. B. „FK“)."
+- id: t04-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute]
+  type: single
+  question: |-
+    Bei einer Imker:in soll „Anzahl betreuter Völker“ angezeigt werden. Wie modellierst du dieses Attribut am besten?
+  options:
+    - text: "Als abgeleitetes Attribut (gestrichelte Ellipse)"
+      correct: true
+      explain: "Der Wert lässt sich aus der Beziehung „betreut“ zählen. Gespeichert wäre er redundant und könnte veralten."
+    - text: "Als mehrwertiges Attribut (doppelte Ellipse)"
+      correct: false
+      explain: "Die Anzahl ist ein einzelner Wert, nicht mehrere Werte derselben Art."
+    - text: "Als zusammengesetztes Attribut"
+      correct: false
+      explain: "Eine Anzahl besteht nicht aus Teilattributen."
+    - text: "Als Schlüsselattribut"
+      correct: false
+      explain: "Viele Imker:innen können gleich viele Völker betreuen, die Anzahl ist also nicht eindeutig."
+- id: t04-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet]
+  type: single
+  question: |-
+    Welcher Entitätstyp ist typischerweise **schwach**?
+  options:
+    - text: "Parzelle einer Kleingartenanlage, nummeriert ab 1 innerhalb jeder Anlage"
+      correct: true
+      explain: "Eine Parzelle gibt es nur innerhalb einer Anlage (existenzabhängig). Parzelle 12 gibt es in jeder Anlage, eindeutig wird sie erst mit der Nummer der Anlage. Beide Merkmale des schwachen Typs sind erfüllt."
+    - text: "Kleingartenanlage mit eindeutiger Vereinsregister-Nummer"
+      correct: false
+      explain: "Die Anlage hat einen eigenen vollständigen Schlüssel und hängt von keinem anderen Typ ab, sie ist stark."
+    - text: "Pächter:in mit eindeutiger Mitgliedsnummer"
+      correct: false
+      explain: "Eigener eindeutiger Schlüssel, also kein schwacher Entitätstyp."
+    - text: "Gartengerät mit Inventarnummer, das von vielen Pächter:innen ausgeliehen wird"
+      correct: false
+      explain: "Viele Beziehungen machen einen Typ nicht schwach. Das Gerät existiert unabhängig von jeder Ausleihe und hat mit der Inventarnummer einen eigenen Schlüssel. Es fehlen also Existenzabhängigkeit und geliehene Identifikation."
+- id: t04-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet, notation]
+  type: multi
+  question: |-
+    Welche Symbole gehören in Chen-Notation zur Darstellung eines schwachen Entitätstyps?
+  options:
+    - text: "Doppelter Rahmen um den schwachen Entitätstyp"
+      correct: true
+      explain: "Standardsymbol für den schwachen Entitätstyp."
+    - text: "Doppelte Raute für die identifizierende Beziehung"
+      correct: true
+      explain: "Die identifizierende Beziehung wird doppelt gezeichnet."
+    - text: "Gestrichelt unterstrichener partieller Schlüssel"
+      correct: true
+      explain: "So kennzeichnen Lehrbücher den nur innerhalb des Besitzers eindeutigen Teilschlüssel."
+    - text: "Gestrichelte Ellipse für den Schlüssel"
+      correct: false
+      explain: "Die gestrichelte Ellipse steht für ein abgeleitetes Attribut, nicht für einen Schlüssel."
+- id: t04-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  type: single
+  question: |-
+    Ein Feuerwehrverein erfasst alle Mitglieder. Ein Mitglied kann Atemschutzgeräteträger:in, Maschinist:in oder beides sein. Fördermitglieder haben keine dieser Funktionen, werden aber auch als Mitglied gespeichert. Welche Eigenschaften hat die Spezialisierung von `Mitglied` in `Atemschutzgeräteträger:in` und `Maschinist:in`?
+  options:
+    - text: "überlappend und partiell"
+      correct: true
+      explain: "Beides zugleich ist möglich (überlappend), und es gibt Mitglieder ohne Subtyp (partiell). Hier ist total/partiell der Spezialisierung gemeint, nicht die Teilnahme an einer Beziehung."
+    - text: "disjunkt und total"
+      correct: false
+      explain: "Disjunkt würde „beides“ verbieten, total würde Fördermitglieder ohne Subtyp verbieten."
+    - text: "überlappend und total"
+      correct: false
+      explain: "Total passt nicht, weil Fördermitglieder zu keinem Subtyp gehören."
+    - text: "disjunkt und partiell"
+      correct: false
+      explain: "Disjunkt passt nicht, weil ein Mitglied beide Funktionen zugleich haben darf."
+- id: t04-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  type: truefalse
+  question: |-
+    „Jeder Subtyp einer Spezialisierung braucht einen eigenen Primärschlüssel, der sich vom Schlüssel des Obertyps unterscheidet.“
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Die Subtyp-Entitäten sind eine Teilmenge der Obertyp-Entitäten. Eine Katze ist dieselbe Entität wie das Tier, das sie ist, deshalb erbt der Subtyp den Schlüssel."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig: Der Schlüssel wird vererbt. Der Subtyp ist zudem einseitig existenzabhängig vom Obertyp, ein eigener Schlüssel ist nicht nötig."
+- id: t04-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rekursion, minmax]
+  type: single
+  question: |-
+    Eine Gärtnerei erfasst, welche Pflanze aus welcher Mutterpflanze als Ableger gezogen wurde: rekursive Beziehung `Pflanze stammt ab von Pflanze` mit den Rollen Mutterpflanze und Ableger. Jede Pflanze stammt von höchstens einer Mutterpflanze, gekaufte Pflanzen von keiner. Eine Mutterpflanze kann beliebig viele Ableger haben. Welche (min,max)-Angabe gehört an die Rolle **Ableger**?
+  options:
+    - text: "(0,1)"
+      correct: true
+      explain: "Eine Pflanze nimmt in der Rolle Ableger an höchstens einer Beziehung teil, gekaufte Pflanzen an keiner."
+    - text: "(0,n)"
+      correct: false
+      explain: "Das ist die Angabe für die Rolle Mutterpflanze."
+    - text: "(1,1)"
+      correct: false
+      explain: "Dann müsste jede Pflanze eine erfasste Mutterpflanze haben. Es gäbe keine erste Pflanze, nur endlose Ketten oder Zyklen. Dass die Rolle Mutterpflanze schon min = 0 hat, ändert daran nichts: Bei hierarchischen Rekursionen brauchen beide Rollen min = 0."
+    - text: "(1,n)"
+      correct: false
+      explain: "Weder Pflicht noch mehrfach: Keine Pflanze stammt von mehreren Mutterpflanzen."
+- id: t04-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [n-aer]
+  type: single
+  question: |-
+    Ein Verlag beauftragt Übersetzer:innen, Bücher in verschiedene Zielsprachen zu übertragen. Für jeden Auftrag wird ein Honorar vereinbart. Warum ist eine ternäre Beziehung `übersetzt` (Übersetzer:in, Buch, Sprache, Attribut Honorar) besser als drei binäre Beziehungen?
+  options:
+    - text: "Nur die ternäre Beziehung hält fest, wer welches Buch in welche Sprache übersetzt hat und mit welchem Honorar."
+      correct: true
+      explain: "Das Honorar hängt an der Dreierkombination. Aus drei Paar-Beziehungen lässt sich die Kombination nicht zurückgewinnen, die Zerlegung ist nicht verlustfrei."
+    - text: "Ternäre Beziehungen brauchen weniger Platz im Diagramm."
+      correct: false
+      explain: "Platz ist kein fachliches Kriterium. Es geht um Ausdrucksstärke."
+    - text: "Binäre Beziehungen dürfen keine Attribute haben."
+      correct: false
+      explain: "Auch binäre Beziehungen können Attribute haben. Das Problem ist, dass das Honorar zu keiner Zweierkombination allein gehört."
+    - text: "In Chen-Notation sind nur ternäre Beziehungen erlaubt, wenn mehr als zwei Entitätstypen vorkommen."
+      correct: false
+      explain: "Chen erlaubt beides. Die Wahl richtet sich nach der Bedeutung der Tatsache."
+- id: t04-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zeitbezug]
+  type: single
+  question: |-
+    Ein Sportverband modelliert bisher `Spieler:in —n— spielt für —1— Verein`. Künftig soll nachvollziehbar sein, wann jemand für welchen Verein gespielt hat, auch wenn jemand zu einem früheren Verein zurückwechselt. Welche Änderung ist fachlich richtig?
+  options:
+    - text: "Eigener Entitätstyp Vereinszugehörigkeit mit von und bis, je eine Beziehung zu Spieler:in und zu Verein"
+      correct: true
+      explain: "Jede Zugehörigkeit ist ein eigener Datensatz mit Gültigkeitszeitraum, auch bei Rückkehr zum selben Verein."
+    - text: "Attribut Eintrittsdatum an Spieler:in ergänzen"
+      correct: false
+      explain: "Speichert nur ein Datum für den aktuellen Verein. Frühere Vereine gehen weiter verloren."
+    - text: "Beziehung auf m:n ändern, sonst nichts"
+      correct: false
+      explain: "Ohne Zeitangaben weiß man nicht, wann jemand wo spielte. Und weil dasselbe Paar (Spieler:in, Verein) nur einmal vorkommt, ist eine Rückkehr nicht darstellbar."
+    - text: "Zusätzlich zur alten Beziehung ein mehrwertiges Attribut frühere Vereine an Spieler:in"
+      correct: false
+      explain: "Ohne Zeiträume und ohne Bezug zum Entitätstyp Verein. Außerdem entsteht Redundanz zur aktuellen Beziehung."
+- id: t04-q015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zeitbezug]
+  type: multi
+  question: |-
+    Welche Aussagen zu Gültigkeitszeit und Transaktionszeit sind richtig?
+  options:
+    - text: "Die Gültigkeitszeit beschreibt, wann ein Sachverhalt in der realen Welt galt."
+      correct: true
+      explain: "Valid time bezieht sich auf die Miniwelt."
+    - text: "Die Transaktionszeit beschreibt, wann ein Eintrag in der Datenbank gespeichert oder geändert wurde."
+      correct: true
+      explain: "Transaction time bezieht sich auf die Datenbank, nicht auf die reale Welt."
+    - text: "Gültigkeitszeit und Transaktionszeit sind immer identisch."
+      correct: false
+      explain: "Eine Umstallung vom Montag kann erst am Mittwoch erfasst werden, dann liegen beide Zeiten auseinander."
+    - text: "Daten mit beiden Zeitarten heißen bitemporal."
+      correct: true
+      explain: "So bezeichnet man Daten, bei denen Gültigkeits- und Transaktionszeit geführt werden."
+- id: t04-q016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [aggregation]
+  type: single
+  question: |-
+    Welcher Sachverhalt ist eine **Aggregation** im Sinne einer Teil-Ganzes-Beziehung (is-part-of)?
+  options:
+    - text: "Ein Akkordeon besteht aus einem Balg, einem Diskantteil und einem Bassteil."
+      correct: true
+      explain: "Balg, Diskant- und Bassteil sind Komponenten des Aggregats Akkordeon. Weil es verschiedenartige Teile je einmal sind, ist es eine Rollenaggregation."
+    - text: "Ein Knopfakkordeon ist ein Akkordeon."
+      correct: false
+      explain: "Das ist eine is-a-Beziehung (Spezialisierung): Jedes Knopfakkordeon ist selbst ein Akkordeon, kein Teil davon."
+    - text: "Eine Musikerin spielt ein Akkordeon."
+      correct: false
+      explain: "Das ist eine gewöhnliche Beziehung zwischen zwei eigenständigen Entitätstypen, kein Teil-Ganzes."
+    - text: "Ein Akkordeon hat mehrere Farben."
+      correct: false
+      explain: "Das ist ein mehrwertiges Attribut."
+- id: t04-q017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung]
+  type: single
+  question: |-
+    Eine Volkssternwarte vergibt Beobachtungstermine. (min,max): `Gast (0,n) — reserviert — (0,6) Beobachtungstermin`. Welche Chen-Angaben gehören an die Kanten?
+  options:
+    - text: "Bei Gast 6 (bzw. allgemein m), bei Beobachtungstermin n"
+      correct: true
+      explain: "Das max von Beobachtungstermin (6) gehört gegenüber zu Gast, das max von Gast (n) gegenüber zu Beobachtungstermin."
+    - text: "Bei Gast n, bei Beobachtungstermin 6"
+      correct: false
+      explain: "Die Obergrenzen wurden nicht getauscht."
+    - text: "Bei Gast 0, bei Beobachtungstermin 0"
+      correct: false
+      explain: "Chen gibt Obergrenzen an, die Untergrenzen gehen bei der Umrechnung verloren."
+    - text: "Bei Gast 1, bei Beobachtungstermin n, weil ein Termin von einem Gast reserviert wird"
+      correct: false
+      explain: "Ein Termin kann von bis zu 6 Gästen reserviert werden. Es ist eine m:n-Beziehung."
+- id: t04-q018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, alternativen]
+  type: truefalse
+  question: |-
+    „UML-Multiplizitäten werden wie die (min,max)-Notation beim eigenen Entitätstyp (Klasse) notiert.“
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "UML notiert wie Chen gegenüber (look-across). Die Angabe am Ende bei Klasse B sagt, wie viele B zu einem A gehören."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig: UML-Multiplizitäten haben zwar Unter- und Obergrenze, stehen aber auf der Gegenseite."
+- id: t04-q019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, alternativen]
+  type: single
+  question: |-
+    Welche Aussage zur Krähenfuß-Notation (Martin-Notation) ist richtig?
+  options:
+    - text: "Eine Gabel am Linienende steht für viele, ein Kreis bzw. eine 0 für optional."
+      correct: true
+      explain: "Strich = 1, Gabel = viele, Kreis/0 = optional."
+    - text: "Beziehungstypen werden als Raute mit eigenen Attributen gezeichnet."
+      correct: false
+      explain: "Krähenfuß kennt keine Raute. Beziehungen sind Linien ohne eigene Attribute."
+    - text: "Schwache Entitätstypen werden mit doppeltem Rahmen dargestellt."
+      correct: false
+      explain: "Der doppelte Rahmen gehört zur Chen-Notation. In der Grundform der Martin-Notation gibt es dafür kein eigenes Symbol. Verbreitete Varianten unterscheiden aber identifizierende von nicht identifizierenden Beziehungen über die Linienart."
+    - text: "Attribute werden als Ellipsen um das Rechteck gezeichnet."
+      correct: false
+      explain: "In der Krähenfuß-Notation stehen Attribute als Liste im Rechteck."
+- id: t04-q020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung, konvention]
+  type: single
+  question: |-
+    Gegeben ist nur die reine Chen-Kardinalität `Verein —1— meldet —n— Mannschaft`, ohne Text, ohne Doppellinie, ohne MC-Symbole. Welche (min,max)-Angaben ergeben sich nach der Standardkonvention des Kurses?
+  options:
+    - text: "Verein (0,*), Mannschaft (1,1)"
+      correct: true
+      explain: "Obergrenzen getauscht (n bzw. * zum Verein, 1 zur Mannschaft). Nach Kursstandard gehört die Detail-Seite (Mannschaft) zu genau einem Master, also (1,1). Der Master (Verein) bekommt min = 0."
+    - text: "Verein (0,*), Mannschaft (0,1)"
+      correct: false
+      explain: "Das ist die Lesart „überall min = 0“, die manche Quellen verwenden. Im Kurs ist sie nicht Standard: Eine Mannschaft ohne Verein müsste ausdrücklich erlaubt sein."
+    - text: "Verein (1,*), Mannschaft (1,1)"
+      correct: false
+      explain: "So würde man die Symbole in der MC-Notation lesen (n = mindestens eins). Für die Master-Seite einer reinen Chen-Angabe gilt nach Kursstandard min = 0."
+    - text: "Verein (0,1), Mannschaft (0,*)"
+      correct: false
+      explain: "Die Obergrenzen wurden nicht getauscht. (min,max) steht beim eigenen Typ."
+- id: t04-q021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, umrechnung, mc-notation]
+  type: single
+  question: |-
+    In **MC-Notation** ist gegeben: `Landkreis —1— umfasst —m— Gemeinde`. Welche (min,max)-Angaben entsprechen dem?
+  options:
+    - text: "Landkreis (1,n), Gemeinde (1,1)"
+      correct: true
+      explain: "In MC heißt m „mindestens eins“: Jeder Landkreis umfasst mindestens eine Gemeinde, also (1,n) beim Landkreis. Die 1 bedeutet genau eins: Jede Gemeinde liegt in genau einem Landkreis, also (1,1)."
+    - text: "Landkreis (0,*), Gemeinde (0,1)"
+      correct: false
+      explain: "Das wäre die Lesart „überall min = 0“ mancher Quellen für reine Chen-Angaben. Hier ist ausdrücklich die MC-Notation gegeben, deren Symbole Untergrenzen tragen."
+    - text: "Landkreis (1,1), Gemeinde (1,*)"
+      correct: false
+      explain: "Die Angaben wurden nicht auf die Gegenseite getauscht."
+    - text: "Landkreis (0,*), Gemeinde (1,1)"
+      correct: false
+      explain: "So läse man eine reine Chen-Angabe 1:n nach Kursstandard. In der MC-Notation bedeutet ein unmarkiertes m aber mindestens eins; für „auch keine Gemeinde“ müsste mc stehen."
+- id: t04-q022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [teilnahme, notation]
+  type: truefalse
+  question: |-
+    „Eine Doppellinie zwischen dem Rechteck `Hütte` und der Raute `liegt in` bedeutet: Jede Hütte steht mit mindestens einem Gebirge in der Beziehung `liegt in`.“
+  options:
+    - text: "Wahr"
+      correct: true
+      explain: "Die Doppellinie zeigt totale Teilnahme: Jede Entität des Typs nimmt an mindestens einer Beziehung teil, also min ≥ 1."
+    - text: "Falsch"
+      correct: false
+      explain: "Doch: Die Doppellinie ist genau das Symbol der totalen Teilnahme. Eine einfache Linie stünde für partielle Teilnahme (min = 0)."
+- id: t04-q023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [teilnahme, generalisierung]
+  type: multi
+  question: |-
+    In einem Modell steht: „Die Spezialisierung von `Gerät` in `Messgerät` und `Werkzeug` ist total.“ und „Die Teilnahme von `Gerät` an `ist ausgegeben an` ist partiell.“ Welche Aussagen sind richtig?
+  options:
+    - text: "Jedes Gerät ist ein Messgerät oder ein Werkzeug (oder beides)."
+      correct: true
+      explain: "Total bei einer Spezialisierung heißt: Jede Entität des Obertyps gehört zu mindestens einem Subtyp."
+    - text: "Es darf Geräte geben, die an niemanden ausgegeben sind."
+      correct: true
+      explain: "Partielle Teilnahme an einer Beziehung heißt min = 0."
+    - text: "Beide Aussagen widersprechen sich, weil ein Modell nicht zugleich total und partiell sein kann."
+      correct: false
+      explain: "Die Wörter beziehen sich auf zwei verschiedene Konstrukte: einmal auf die is-a-Hierarchie, einmal auf eine Beziehung. Kein Widerspruch."
+    - text: "„Spezialisierung total“ bedeutet, dass jedes Gerät an mindestens einer Beziehung teilnimmt."
+      correct: false
+      explain: "Das wäre totale Teilnahme. Bei der Spezialisierung geht es um die Zugehörigkeit zu Subtypen."
+- id: t04-q024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [beziehungen, schluessel]
+  type: single
+  question: |-
+    `Schüler:in` (Schlüssel Schüler-Nr.) und `AG` (Schlüssel AG-Nr.) sind über `belegt` (m:n) verbunden, Attribut an der Beziehung: Halbjahresnote. Welche Attributmenge identifiziert eine einzelne `belegt`-Beziehung?
+  options:
+    - text: "(Schüler-Nr., AG-Nr.)"
+      correct: true
+      explain: "Bei m:n bestimmen erst die Schlüssel beider Partner eine Beziehung eindeutig."
+    - text: "Schüler-Nr. allein"
+      correct: false
+      explain: "Eine Schüler:in kann mehrere AGs belegen, die Schüler-Nr. kommt also in mehreren Beziehungen vor."
+    - text: "AG-Nr. allein"
+      correct: false
+      explain: "Eine AG hat viele Teilnehmende, die AG-Nr. ist in der Beziehung nicht eindeutig."
+    - text: "(AG-Nr., Halbjahresnote)"
+      correct: false
+      explain: "Mehrere Schüler:innen können in derselben AG dieselbe Note haben. Zudem ist die Note ein beschreibendes Attribut, kein Teil des Identifikationsschlüssels."
+- id: t04-q025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  type: multi
+  question: |-
+    Entitätstyp `Wanderhütte` mit Hütten-Nr., Name, Höhe, Bettenzahl, Alpenvereinssektion. Eindeutig sind die Hütten-Nr. und auch der Name; die übrigen Attribute wiederholen sich. Welche Attribute sind **Nichtschlüsselattribute**?
+  options:
+    - text: "Höhe"
+      correct: true
+      explain: "Kommt in keinem Schlüsselkandidaten vor."
+    - text: "Bettenzahl"
+      correct: true
+      explain: "Kommt in keinem Schlüsselkandidaten vor."
+    - text: "Alpenvereinssektion"
+      correct: true
+      explain: "Kommt in keinem Schlüsselkandidaten vor."
+    - text: "Name"
+      correct: false
+      explain: "Name ist selbst ein Schlüsselkandidat (Alternativschlüssel), also ein Schlüsselattribut, auch wenn er nicht Primärschlüssel ist."
+- id: t04-q026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [existenzabhaengigkeit]
+  type: single
+  question: |-
+    (min,max): `Haus (0,n) — hat — (1,1) Wasserzähler`. Welche Aussage beschreibt die Existenzabhängigkeit richtig?
+  options:
+    - text: "Einseitig: Ein Wasserzähler existiert nur zusammen mit einem Haus, ein Haus auch ohne Zähler."
+      correct: true
+      explain: "Nur der Wasserzähler hat min ≥ 1, das Haus hat min = 0."
+    - text: "Wechselseitig: Beide können nur gemeinsam existieren."
+      correct: false
+      explain: "Dafür müsste auch das Haus min ≥ 1 haben."
+    - text: "Einseitig: Ein Haus existiert nur zusammen mit einem Wasserzähler."
+      correct: false
+      explain: "Die Abhängigkeit wurde umgedreht. Maßgeblich ist das min beim eigenen Typ, und das Haus hat 0."
+    - text: "Keine Existenzabhängigkeit, weil die Obergrenze beim Haus n ist."
+      correct: false
+      explain: "Existenzabhängigkeit hängt an der Untergrenze, nicht an der Obergrenze."
+- id: t04-q027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet, existenzabhaengigkeit]
+  type: truefalse
+  question: |-
+    „Ein Wasserzähler mit eigener, weltweit eindeutiger Zählernummer, der immer genau einem Haus zugeordnet sein muss, ist ein schwacher Entitätstyp.“
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Er ist zwar existenzabhängig, identifiziert sich aber über die Zählernummer selbst. Es fehlt die geliehene Identifikation, also ist er ein starker Typ."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig: Existenzabhängigkeit allein macht einen Typ nicht schwach, solange er einen eigenen vollständigen Schlüssel hat."
+- id: t04-q028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [pruefen, redundanz]
+  type: single
+  question: |-
+    Ein ERD enthält `Lehrkraft —1— leitet —n— Klasse`, `Klasse —1— hat —n— Schüler:in` und zusätzlich `Lehrkraft —1— ist Klassenleitung von —n— Schüler:in`. Die letzte Beziehung soll nur ausdrücken, wer die Klasse der Schüler:in leitet. Wie ist sie zu bewerten?
+  options:
+    - text: "Redundant, weil sie sich über Klasse vollständig ableiten lässt; sie sollte entfallen."
+      correct: true
+      explain: "Mit der gemeinten Bedeutung folgt sie aus dem Zyklus. Gespeichert müsste sie bei jedem Klassenwechsel mitgepflegt werden und könnte widersprechen."
+    - text: "Notwendig, weil man sonst nicht weiß, wer eine Schüler:in betreut."
+      correct: false
+      explain: "Das weiß man über den Weg Schüler:in, Klasse, Lehrkraft."
+    - text: "Erlaubt, weil Zyklen in ER-Diagrammen grundsätzlich verboten sind und diese Beziehung einen Zyklus auflöst."
+      correct: false
+      explain: "Zyklen sind nicht grundsätzlich verboten. Problematisch ist nur eine Beziehung, die nichts Neues ausdrückt. Hier erzeugt sie den Zyklus erst."
+    - text: "Sie wäre nur dann redundant, wenn sie eine andere Kardinalität hätte."
+      correct: false
+      explain: "Redundanz hängt an der Bedeutung, nicht an der Kardinalität. Hätte sie eine eigene Bedeutung (z. B. Mentor:in), wäre sie nicht redundant."
+- id: t04-q029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [pruefen, notation]
+  type: multi
+  question: |-
+    Welche der folgenden Diagrammdetails verstoßen gegen die Strukturregeln eines Chen-Diagramms?
+  options:
+    - text: "Die Rechtecke `Hütte` und `Gebirge` sind direkt mit einer Linie verbunden."
+      correct: true
+      explain: "Gleichartige Elemente dürfen nicht direkt verbunden werden, dazwischen gehört eine Raute."
+    - text: "Die Ellipse `Höhe` ist mit `Hütte` und mit `Gebirge` verbunden."
+      correct: true
+      explain: "Ein Attribut hat genau eine Verbindung. Brauchen beide Typen eine Höhe, bekommt jeder eine eigene Ellipse."
+    - text: "Die Raute `liegt neben` hat nur eine einzige Kante zu `Hütte`, ohne Rollennamen."
+      correct: true
+      explain: "Ein Beziehungstyp braucht mindestens zwei Kanten. Bei Rekursion führen zwei beschriftete Kanten zum selben Rechteck."
+    - text: "`Hütte` und `Gebirge` haben beide ein Attribut `Name`."
+      correct: false
+      explain: "Gleiche Attributnamen an verschiedenen Typen sind erlaubt; verboten sind nur zwei gleichnamige Attribute am selben Element. Eindeutig sein müssen die Namen der Entitätstypen und ein Beziehungstyp über Name plus verbundene Entitätstypen."
+- id: t04-q030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute]
+  type: truefalse
+  question: |-
+    „Ein optionales Attribut wird in der Chen-Notation mit einer doppelten Ellipse gezeichnet.“
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Die doppelte Ellipse steht für ein mehrwertiges Attribut. Für optionale Attribute gibt es kein einheitliches Chen-Symbol, üblich ist ein Zusatz wie (0,1) oder „opt.“."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig: Optional (darf fehlen, später NULL) und mehrwertig (mehrere Werte) sind verschiedene Eigenschaften."
+- id: t04-q031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [aggregation, generalisierung]
+  type: multi
+  question: |-
+    Ein Orchester erfasst Instrumente. Welche Sachverhalte sind als **is-a** (Spezialisierung) zu modellieren?
+  options:
+    - text: "Eine Geige ist ein Streichinstrument."
+      correct: true
+      explain: "Jede Geige ist zugleich ein Streichinstrument; die Geigen sind eine Teilmenge der Streichinstrumente."
+    - text: "Ein Streichinstrument ist ein Instrument."
+      correct: true
+      explain: "Ebenfalls Teilmengenbeziehung; is-a-Hierarchien dürfen mehrstufig sein."
+    - text: "Ein Griffbrett ist ein Bestandteil einer Geige."
+      correct: false
+      explain: "Das Griffbrett ist eine Komponente der Geige und selbst keine Geige, also is-part-of statt is-a."
+    - text: "Ein Schlagzeug besteht aus mehreren Trommeln."
+      correct: false
+      explain: "Viele gleichartige Teile eines Ganzen: Mengenaggregation (is-part-of), keine Spezialisierung."
+- id: t04-q032
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grad, n-aer]
+  type: single
+  question: |-
+    Welche Aussage zum **Grad** eines Beziehungstyps ist richtig?
+  options:
+    - text: "Er gibt an, wie viele Entitätstypen an dem Beziehungstyp beteiligt sind."
+      correct: true
+      explain: "Binär = 2, ternär = 3. Eine rekursive Beziehung hat nach dieser Zählung Grad 1, zählt man die Rollen, kommt man auf 2."
+    - text: "Er ist dasselbe wie die Kardinalität, z. B. 1:n."
+      correct: false
+      explain: "Die Kardinalität beschreibt Obergrenzen je Partner. Manche Quellen nennen sie „Grad“ oder „Komplexität“, darauf muss man achten. Gemeint ist aber etwas anderes als die Zahl der Partner."
+    - text: "Er gibt die Zahl der Attribute an der Raute an."
+      correct: false
+      explain: "Die Zahl der Beziehungsattribute spielt für den Grad keine Rolle."
+    - text: "Ein Beziehungstyp mit Grad 3 lässt sich immer verlustfrei in drei binäre zerlegen."
+      correct: false
+      explain: "Gerade nicht: Die Dreierkombinationen gehen bei der Zerlegung im Allgemeinen verloren."
