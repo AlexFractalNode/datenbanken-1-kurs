@@ -288,9 +288,9 @@ INSERT INTO vertretung (lehrkraft_id, vertreter_id, von, bis, grund) VALUES (8, 
 INSERT INTO vertretung (lehrkraft_id, vertreter_id, von, bis, grund) VALUES (5, 2, DATE '2024-09-15', DATE '2024-09-21', 'Fortbildung'); -- 6
 
 -- zahlung (bezahlt_am NULL = offen)
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (11, 1, NULL, 49.60, DATE '2024-10-15', DATE '2024-10-23', 'Ueberweisung'); -- 1
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (11, 1, NULL, 49.60, DATE '2024-10-19', DATE '2024-10-27', 'Ueberweisung'); -- 1
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (11, 1, NULL, 49.60, DATE '2024-11-15', DATE '2024-11-13', 'Ueberweisung'); -- 2
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (16, 1, NULL, 49.60, DATE '2024-09-15', DATE '2024-09-30', 'Ueberweisung'); -- 3
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (16, 1, NULL, 49.60, DATE '2024-10-06', DATE '2024-10-21', 'Ueberweisung'); -- 3
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (16, 1, NULL, 49.60, DATE '2024-10-15', DATE '2024-10-02', 'Ueberweisung'); -- 4
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (16, 1, NULL, 49.60, DATE '2024-11-15', DATE '2024-11-16', 'Ueberweisung'); -- 5
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (25, 1, NULL, 62.00, DATE '2024-09-15', DATE '2024-09-14', 'Ueberweisung'); -- 6
@@ -299,17 +299,17 @@ INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, beza
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (26, 1, NULL, 62.00, DATE '2024-09-15', DATE '2024-09-22', 'Ueberweisung'); -- 9
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (26, 1, NULL, 62.00, DATE '2024-10-15', DATE '2024-10-01', 'Lastschrift'); -- 10
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (26, 1, NULL, 62.00, DATE '2024-11-15', DATE '2024-11-10', 'Ueberweisung'); -- 11
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (14, 2, NULL, 78.00, DATE '2024-09-15', DATE '2024-09-12', 'Ueberweisung'); -- 12
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (14, 2, NULL, 78.00, DATE '2024-09-28', DATE '2024-09-25', 'Ueberweisung'); -- 12
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (14, 2, NULL, 78.00, DATE '2024-10-15', DATE '2024-10-02', 'Ueberweisung'); -- 13
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (14, 2, NULL, 78.00, DATE '2024-11-15', NULL, NULL); -- 14
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (25, 2, NULL, 78.00, DATE '2024-10-15', DATE '2024-10-16', 'Bar'); -- 15
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (25, 2, NULL, 78.00, DATE '2024-11-15', NULL, NULL); -- 16
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (15, 3, NULL, 58.00, DATE '2024-10-15', DATE '2024-10-04', 'Ueberweisung'); -- 17
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (15, 3, NULL, 58.00, DATE '2024-10-16', DATE '2024-10-09', 'Ueberweisung'); -- 17
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (15, 3, NULL, 58.00, DATE '2024-11-15', DATE '2024-12-04', 'Ueberweisung'); -- 18
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (16, 3, NULL, 46.40, DATE '2024-09-15', DATE '2024-10-01', 'Lastschrift'); -- 19
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (16, 3, NULL, 46.40, DATE '2024-10-15', DATE '2024-11-02', 'Bar'); -- 20
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (16, 3, NULL, 46.40, DATE '2024-11-15', NULL, NULL); -- 21
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (18, 3, NULL, 58.00, DATE '2024-09-15', DATE '2024-09-03', 'Bar'); -- 22
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (18, 3, NULL, 58.00, DATE '2024-09-28', DATE '2024-09-21', 'Bar'); -- 22
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (18, 3, NULL, 58.00, DATE '2024-10-15', DATE '2024-11-03', 'Lastschrift'); -- 23
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (18, 3, NULL, 58.00, DATE '2024-11-15', DATE '2024-11-02', 'Ueberweisung'); -- 24
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (19, 3, NULL, 52.20, DATE '2024-09-15', DATE '2024-09-26', 'Lastschrift'); -- 25
@@ -318,10 +318,10 @@ INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, beza
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (22, 3, NULL, 58.00, DATE '2024-09-15', DATE '2024-09-10', 'Ueberweisung'); -- 28
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (22, 3, NULL, 58.00, DATE '2024-10-15', DATE '2024-10-21', 'Lastschrift'); -- 29
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (22, 3, NULL, 58.00, DATE '2024-11-15', DATE '2024-12-04', 'Lastschrift'); -- 30
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (9, 4, NULL, 45.00, DATE '2024-09-15', DATE '2024-09-28', 'Ueberweisung'); -- 31
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (9, 4, NULL, 45.00, DATE '2024-10-04', DATE '2024-10-17', 'Ueberweisung'); -- 31
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (9, 4, NULL, 45.00, DATE '2024-10-15', DATE '2024-10-08', 'Bar'); -- 32
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (9, 4, NULL, 45.00, DATE '2024-11-15', DATE '2024-11-14', 'Lastschrift'); -- 33
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (12, 4, NULL, 45.00, DATE '2024-09-15', DATE '2024-09-15', 'Lastschrift'); -- 34
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (12, 4, NULL, 45.00, DATE '2024-09-20', DATE '2024-09-20', 'Lastschrift'); -- 34
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (12, 4, NULL, 45.00, DATE '2024-10-15', DATE '2024-10-30', 'Lastschrift'); -- 35
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (12, 4, NULL, 45.00, DATE '2024-11-15', DATE '2024-11-07', 'Lastschrift'); -- 36
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (31, 4, NULL, 36.00, DATE '2024-09-15', DATE '2024-09-17', 'Lastschrift'); -- 37
@@ -334,10 +334,10 @@ INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, beza
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (5, 5, NULL, 55.00, DATE '2024-09-15', DATE '2024-09-28', 'Bar'); -- 44
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (5, 5, NULL, 55.00, DATE '2024-10-15', DATE '2024-10-19', 'Bar'); -- 45
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (5, 5, NULL, 55.00, DATE '2024-11-15', NULL, NULL); -- 46
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (22, 5, NULL, 55.00, DATE '2024-09-15', DATE '2024-10-03', 'Ueberweisung'); -- 47
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (22, 5, NULL, 55.00, DATE '2024-09-26', DATE '2024-10-14', 'Ueberweisung'); -- 47
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (22, 5, NULL, 55.00, DATE '2024-10-15', DATE '2024-10-31', 'Ueberweisung'); -- 48
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (22, 5, NULL, 55.00, DATE '2024-11-15', DATE '2024-11-23', 'Bar'); -- 49
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (27, 5, NULL, 55.00, DATE '2024-09-15', DATE '2024-09-18', 'Bar'); -- 50
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (27, 5, NULL, 55.00, DATE '2024-09-16', DATE '2024-09-19', 'Bar'); -- 50
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (27, 5, NULL, 55.00, DATE '2024-10-15', DATE '2024-10-28', 'Bar'); -- 51
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (27, 5, NULL, 55.00, DATE '2024-11-15', DATE '2024-11-02', 'Bar'); -- 52
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (16, 6, NULL, 51.20, DATE '2024-09-15', DATE '2024-09-18', 'Ueberweisung'); -- 53
@@ -349,13 +349,13 @@ INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, beza
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (32, 6, NULL, 64.00, DATE '2024-09-15', DATE '2024-09-22', 'Ueberweisung'); -- 59
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (32, 6, NULL, 64.00, DATE '2024-10-15', DATE '2024-10-21', 'Bar'); -- 60
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (32, 6, NULL, 64.00, DATE '2024-11-15', DATE '2024-11-04', 'Ueberweisung'); -- 61
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (17, 7, NULL, 59.40, DATE '2024-09-15', DATE '2024-09-04', 'Bar'); -- 62
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (17, 7, NULL, 59.40, DATE '2024-09-19', DATE '2024-09-12', 'Bar'); -- 62
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (17, 7, NULL, 59.40, DATE '2024-10-15', DATE '2024-10-29', 'Bar'); -- 63
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (17, 7, NULL, 59.40, DATE '2024-11-15', DATE '2024-11-29', 'Lastschrift'); -- 64
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (23, 7, NULL, 66.00, DATE '2024-09-15', DATE '2024-10-03', 'Ueberweisung'); -- 65
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (23, 7, NULL, 66.00, DATE '2024-10-15', DATE '2024-10-08', 'Lastschrift'); -- 66
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (23, 7, NULL, 66.00, DATE '2024-11-15', DATE '2024-12-02', 'Bar'); -- 67
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (28, 7, NULL, 66.00, DATE '2024-09-15', DATE '2024-09-03', 'Ueberweisung'); -- 68
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (28, 7, NULL, 66.00, DATE '2024-09-15', DATE '2024-09-06', 'Ueberweisung'); -- 68
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (28, 7, NULL, 66.00, DATE '2024-10-15', DATE '2024-10-04', 'Ueberweisung'); -- 69
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (28, 7, NULL, 66.00, DATE '2024-11-15', NULL, NULL); -- 70
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (30, 7, NULL, 66.00, DATE '2024-10-15', DATE '2024-10-09', 'Lastschrift'); -- 71
@@ -366,7 +366,7 @@ INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, beza
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (24, 8, NULL, 50.00, DATE '2024-09-15', DATE '2024-09-23', 'Ueberweisung'); -- 76
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (24, 8, NULL, 50.00, DATE '2024-10-15', DATE '2024-10-03', 'Lastschrift'); -- 77
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (24, 8, NULL, 50.00, DATE '2024-11-15', NULL, NULL); -- 78
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (29, 8, NULL, 45.00, DATE '2024-09-15', DATE '2024-09-21', 'Bar'); -- 79
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (29, 8, NULL, 45.00, DATE '2024-09-25', DATE '2024-10-01', 'Bar'); -- 79
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (29, 8, NULL, 45.00, DATE '2024-10-15', DATE '2024-10-26', 'Bar'); -- 80
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (29, 8, NULL, 45.00, DATE '2024-11-15', DATE '2024-11-19', 'Ueberweisung'); -- 81
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (30, 8, NULL, 50.00, DATE '2024-09-15', DATE '2024-09-21', 'Ueberweisung'); -- 82
@@ -378,7 +378,7 @@ INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, beza
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (10, 9, NULL, 40.00, DATE '2024-09-15', DATE '2024-09-22', 'Ueberweisung'); -- 88
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (10, 9, NULL, 40.00, DATE '2024-10-15', DATE '2024-10-08', 'Bar'); -- 89
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (10, 9, NULL, 40.00, DATE '2024-11-15', DATE '2024-11-23', 'Lastschrift'); -- 90
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (13, 9, NULL, 32.00, DATE '2024-09-15', DATE '2024-09-10', 'Ueberweisung'); -- 91
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (13, 9, NULL, 32.00, DATE '2024-09-18', DATE '2024-09-13', 'Ueberweisung'); -- 91
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (13, 9, NULL, 32.00, DATE '2024-10-15', DATE '2024-10-17', 'Ueberweisung'); -- 92
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (13, 9, NULL, 32.00, DATE '2024-11-15', NULL, NULL); -- 93
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (15, 9, NULL, 40.00, DATE '2024-09-15', DATE '2024-09-05', 'Ueberweisung'); -- 94
@@ -393,33 +393,33 @@ INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, beza
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (25, 9, NULL, 40.00, DATE '2024-09-15', DATE '2024-09-19', 'Ueberweisung'); -- 103
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (25, 9, NULL, 40.00, DATE '2024-10-15', DATE '2024-10-06', 'Bar'); -- 104
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (25, 9, NULL, 40.00, DATE '2024-11-15', DATE '2024-11-25', 'Lastschrift'); -- 105
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (33, 9, NULL, 40.00, DATE '2024-09-15', DATE '2024-09-03', 'Lastschrift'); -- 106
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (33, 9, NULL, 40.00, DATE '2024-10-06', DATE '2024-09-29', 'Lastschrift'); -- 106
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (33, 9, NULL, 40.00, DATE '2024-10-15', DATE '2024-10-13', 'Lastschrift'); -- 107
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (33, 9, NULL, 40.00, DATE '2024-11-15', DATE '2024-12-03', 'Ueberweisung'); -- 108
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (38, 9, NULL, 40.00, DATE '2024-09-15', DATE '2024-09-29', 'Ueberweisung'); -- 109
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (38, 9, NULL, 40.00, DATE '2024-09-30', DATE '2024-10-14', 'Ueberweisung'); -- 109
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (38, 9, NULL, 40.00, DATE '2024-10-15', DATE '2024-10-22', 'Bar'); -- 110
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (38, 9, NULL, 40.00, DATE '2024-11-15', NULL, NULL); -- 111
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (9, 10, NULL, 25.00, DATE '2024-09-15', DATE '2024-09-03', 'Ueberweisung'); -- 112
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (9, 10, NULL, 25.00, DATE '2024-10-04', DATE '2024-09-27', 'Ueberweisung'); -- 112
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (9, 10, NULL, 25.00, DATE '2024-10-15', DATE '2024-10-29', 'Bar'); -- 113
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (9, 10, NULL, 25.00, DATE '2024-11-15', DATE '2024-11-11', 'Lastschrift'); -- 114
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (11, 10, NULL, 20.00, DATE '2024-09-15', DATE '2024-09-19', 'Lastschrift'); -- 115
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (11, 10, NULL, 20.00, DATE '2024-10-02', DATE '2024-10-06', 'Lastschrift'); -- 115
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (11, 10, NULL, 20.00, DATE '2024-10-15', DATE '2024-10-22', 'Bar'); -- 116
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (11, 10, NULL, 20.00, DATE '2024-11-15', DATE '2024-11-22', 'Ueberweisung'); -- 117
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (34, 10, NULL, 20.00, DATE '2024-10-15', DATE '2024-10-25', 'Lastschrift'); -- 118
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (34, 10, NULL, 20.00, DATE '2024-10-18', DATE '2024-10-28', 'Lastschrift'); -- 118
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (34, 10, NULL, 20.00, DATE '2024-11-15', NULL, NULL); -- 119
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (36, 10, NULL, 25.00, DATE '2024-09-15', DATE '2024-09-10', 'Lastschrift'); -- 120
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (36, 10, NULL, 25.00, DATE '2024-10-15', DATE '2024-10-10', 'Lastschrift'); -- 121
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (36, 10, NULL, 25.00, DATE '2024-11-15', NULL, NULL); -- 122
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (37, 10, NULL, 25.00, DATE '2024-09-15', DATE '2024-09-26', 'Ueberweisung'); -- 123
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (37, 10, NULL, 25.00, DATE '2024-10-01', DATE '2024-10-12', 'Ueberweisung'); -- 123
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (37, 10, NULL, 25.00, DATE '2024-10-15', DATE '2024-10-06', 'Lastschrift'); -- 124
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (37, 10, NULL, 25.00, DATE '2024-11-15', DATE '2024-11-22', 'Ueberweisung'); -- 125
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (38, 10, NULL, 25.00, DATE '2024-09-15', DATE '2024-10-04', 'Ueberweisung'); -- 126
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (38, 10, NULL, 25.00, DATE '2024-09-19', DATE '2024-10-08', 'Ueberweisung'); -- 126
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (38, 10, NULL, 25.00, DATE '2024-10-15', DATE '2024-10-28', 'Bar'); -- 127
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (38, 10, NULL, 25.00, DATE '2024-11-15', DATE '2024-11-24', 'Lastschrift'); -- 128
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (18, 11, NULL, 20.00, DATE '2024-09-15', DATE '2024-09-14', 'Lastschrift'); -- 129
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (18, 11, NULL, 20.00, DATE '2024-10-15', DATE '2024-11-01', 'Ueberweisung'); -- 130
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (18, 11, NULL, 20.00, DATE '2024-11-15', NULL, NULL); -- 131
-INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (21, 11, NULL, 18.00, DATE '2024-09-15', DATE '2024-09-05', 'Lastschrift'); -- 132
+INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (21, 11, NULL, 18.00, DATE '2024-10-02', DATE '2024-09-25', 'Lastschrift'); -- 132
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (21, 11, NULL, 18.00, DATE '2024-10-15', DATE '2024-10-07', 'Bar'); -- 133
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (21, 11, NULL, 18.00, DATE '2024-11-15', DATE '2024-12-04', 'Ueberweisung'); -- 134
 INSERT INTO zahlung (schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart) VALUES (22, 11, NULL, 20.00, DATE '2024-10-15', DATE '2024-10-09', 'Bar'); -- 135

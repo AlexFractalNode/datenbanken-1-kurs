@@ -132,12 +132,16 @@ UNIQUE (`kurs_id`, `datum`, `uhrzeit`).
 
 | Spalte | Typ | Bedingungen |
 | --- | --- | --- |
-| `vertretung_id` | `INTEGER` | PK, Identity (dasselbe Paar kann mehrfach vorkommen) |
+| `vertretung_id` | `INTEGER` | PK, Identity |
 | `lehrkraft_id` | `INTEGER` | NOT NULL, FK → `lehrkraft` ON DELETE CASCADE (die vertretene Lehrkraft) |
 | `vertreter_id` | `INTEGER` | NOT NULL, FK → `lehrkraft` ON DELETE CASCADE, ≠ `lehrkraft_id` |
 | `von` | `DATE` | NOT NULL |
 | `bis` | `DATE` | NOT NULL, ≥ `von` |
 | `grund` | `VARCHAR(40)` | optional |
+
+UNIQUE (`lehrkraft_id`, `vertreter_id`, `von`).
+
+Dasselbe Paar kann sich mehrfach vertreten, in verschiedenen Zeiträumen. Das Paar allein ist deshalb kein Schlüssel. Der natürliche Schlüssel besteht aus (`lehrkraft_id`, `vertreter_id`, `von`) und ist als UNIQUE-Constraint abgesichert. Als Primärschlüssel dient trotzdem die Surrogat-ID `vertretung_id`. So bleibt die Tabelle bei der Konvention `<tabelle>_id`, Verweise und `UPDATE`/`DELETE` in Aufgaben brauchen nur eine Spalte, und eine Korrektur von `von` ändert keinen Schlüssel.
 
 ### `zahlung`
 
@@ -180,5 +184,10 @@ Fälle, auf die sich Aufgaben verlassen können:
 - Die Vertretungen bilden eine Kette (Lehrkraft 1 wird von 2 vertreten, 2 von 3).
 - Termine: acht Wochen ab 2. September 2024, ein fester Wochentag je Kurs.
 - Telefonnummern beginnen mit `000` (keine echte Vorwahl), E-Mail-Adressen enden auf `@example.org`.
+- Die Daten sind zeitlich stimmig, und `tests/test_db_load.py` prüft das:
+  - Niemand meldet sich zu einem Kurs an oder leiht ein Instrument aus, bevor er oder sie in die Schule eingetreten ist.
+  - Kursgebühren werden frühestens mit der Anmeldung fällig und bezahlt, nach einer Abmeldung wird nichts mehr fällig.
+  - Leihgebühren entstehen frühestens mit der Ausgabe.
+  - Termine liegen innerhalb der Kurslaufzeit.
 
 Neu erzeugen: `python db/musikschule/generate.py --seed 42` (schreibt `seed.sql`). Andere Seeds ergeben andere Daten; die Aufgaben beziehen sich auf Seed 42.

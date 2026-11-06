@@ -197,11 +197,12 @@ def build(seed: int) -> str:
     s.comment("schueler (Subtyp von person); person 5 ist zugleich Lehrkraft")
     schueler = []
     ermaessigt = {}
+    eintritt = {}
     for pid, geb in [persons[4]] + persons[N_LEHRKRAEFTE:N_LEHRKRAEFTE + N_SCHUELER]:
         young = geb is not None and geb.year >= 2007
         erm = young and rng.random() < 0.3
-        s.insert("schueler", ["person_id", "eintritt", "ermaessigt"],
-                 [pid, rand_date(rng, d("2019-01-01"), d("2024-09-01")), erm], identity=False)
+        eintritt[pid] = rand_date(rng, d("2019-01-01"), d("2024-09-01"))
+        s.insert("schueler", ["person_id", "eintritt", "ermaessigt"], [pid, eintritt[pid], erm], identity=False)
         schueler.append(pid)
         ermaessigt[pid] = erm
 
@@ -232,7 +233,9 @@ def build(seed: int) -> str:
                 break
             if len(k["teilnehmer"]) >= k["max"]:
                 continue
-            angemeldet = rand_date(rng, k["start"] - dt.timedelta(days=30), k["start"] + dt.timedelta(days=40))
+            # never before the student joined the school
+            frueh = max(k["start"] - dt.timedelta(days=30), eintritt[pid])
+            angemeldet = rand_date(rng, frueh, k["start"] + dt.timedelta(days=40))
             abgemeldet = None
             if rng.random() < 0.12:
                 abgemeldet = angemeldet + dt.timedelta(days=rng.randint(30, 90))
@@ -272,7 +275,7 @@ def build(seed: int) -> str:
             if inv not in inventar_used:
                 inventar_used.add(inv)
                 break
-        ausgabe = rand_date(rng, d("2024-08-15"), d("2025-01-15"))
+        ausgabe = rand_date(rng, max(d("2024-08-15"), eintritt[pid]), d("2025-01-15"))
         rueckgabe = None if i % 3 == 0 else ausgabe + dt.timedelta(days=rng.randint(21, 150))
         aid = s.insert("ausleihe", ["instrument_id", "schueler_id", "inventar_nr", "ausgabe", "rueckgabe"],
                        [instrument_id[name], pid, inv, ausgabe, rueckgabe])
@@ -292,13 +295,14 @@ def build(seed: int) -> str:
     for pid, k, angemeldet, abgemeldet, rabatt in belegungen:
         betrag = money(k["gebuehr"] * (100 - rabatt) / 100)
         for monat in MONATE:
-            if abgemeldet and abgemeldet < monat:
-                break
             if angemeldet >= (monat + dt.timedelta(days=31)).replace(day=1):
                 continue  # registered after this month
-            faellig = monat + dt.timedelta(days=14)
+            # due on the 15th, but never before the registration
+            faellig = max(monat + dt.timedelta(days=14), angemeldet + dt.timedelta(days=7))
+            if abgemeldet and abgemeldet < faellig:
+                break
             unpaid = rng.random() < (0.35 if monat == MONATE[-1] else 0.05)
-            bezahlt = None if unpaid else faellig + dt.timedelta(days=rng.randint(-14, 20))
+            bezahlt = None if unpaid else max(faellig + dt.timedelta(days=rng.randint(-14, 20)), angemeldet)
             art = None if unpaid else rng.choice(ZAHLUNGSARTEN)
             s.insert("zahlung", zahlung_cols, [pid, k["id"], None, betrag, faellig, bezahlt, art])
     for aid, pid, name, ausgabe in ausleihen:

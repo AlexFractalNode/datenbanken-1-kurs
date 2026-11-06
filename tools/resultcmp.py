@@ -6,12 +6,19 @@ objects vs. ISO strings. `normalize` maps every value to a small canonical
 set (None, bool, int, float, str) so results of both engines, and stored
 snapshots, can be compared with `equal`.
 
-Rules (the playground re-implements exactly these):
+Rules (the playground re-implements exactly these, see db/DIALECT-NOTES.md):
 - None stays None (NULL).
-- bool stays bool.
-- Numbers are rounded to FIXED_SCALE decimal places (half-even). An integral
-  result becomes int, anything else float. Non-finite floats are kept as is.
-- Strings lose trailing blanks (CHAR padding).
+- bool stays bool and never equals a number: rows are compared on
+  (is_bool, value) pairs, so TRUE != 1 and FALSE != 0 (JS: strict equality).
+- int stays int (exact). Other numbers are compared by value, independent of
+  their scale (2.50 == 2.5, 3.00 == 3); only binary float noise is removed by
+  rounding to SIGNIFICANT_DIGITS significant digits (half-even; JS:
+  Number(x.toPrecision(12))). An integral result becomes int, anything else
+  float. Non-finite floats are kept as is.
+- Strings lose trailing blanks (CHAR padding) unless trim=False. The runners
+  know the column types and trim only CHAR columns themselves, so
+  sqltest.py compares with trim=False; trim=True is the fallback for
+  untyped sources and also strips blanks of VARCHAR values.
 - date -> "YYYY-MM-DD"; datetime -> "YYYY-MM-DD HH:MM:SS[.f]"; time ->
   "HH:MM:SS[.f]". Fractional seconds without trailing zeros, which matches
   PostgreSQL's text output. Aware datetimes are converted to UTC first and
@@ -24,11 +31,11 @@ import datetime
 import math
 from collections import Counter
 from collections.abc import Mapping, Sequence
-from decimal import ROUND_HALF_EVEN, Decimal, InvalidOperation
+from decimal import ROUND_HALF_EVEN, Context, Decimal
 from typing import Any
 
-FIXED_SCALE = 6
-_QUANT = Decimal(1).scaleb(-FIXED_SCALE)
+SIGNIFICANT_DIGITS = 12
+_CTX = Context(prec=SIGNIFICANT_DIGITS, rounding=ROUND_HALF_EVEN)
 
 
 def _number(value: int | float | Decimal) -> int | float:
@@ -39,10 +46,7 @@ def _number(value: int | float | Decimal) -> int | float:
     dec = value if isinstance(value, Decimal) else Decimal(repr(value))
     if not dec.is_finite():
         return float(dec)
-    try:
-        q = dec.quantize(_QUANT, rounding=ROUND_HALF_EVEN)
-    except InvalidOperation:  # too many digits for the context; keep magnitude
-        return float(dec)
+    q = _CTX.plus(dec)  # round to SIGNIFICANT_DIGITS significant digits
     if q == q.to_integral_value():
         return int(q)
     return float(q)
@@ -58,13 +62,13 @@ def _time(t: datetime.time) -> str:
     return f"{t.hour:02d}:{t.minute:02d}:{t.second:02d}{_frac(t.microsecond)}"
 
 
-def normalize_value(value: Any) -> Any:
+def normalize_value(value: Any, trim: bool = True) -> Any:
     if value is None or isinstance(value, bool):
         return value
     if isinstance(value, (int, float, Decimal)):
         return _number(value)
     if isinstance(value, str):
-        return value.rstrip(" ")
+        return value.rstrip(" ") if trim else value
     if isinstance(value, datetime.datetime):
         if value.tzinfo is not None:
             value = value.astimezone(datetime.timezone.utc).replace(tzinfo=None)
@@ -78,14 +82,14 @@ def normalize_value(value: Any) -> Any:
     return str(value)
 
 
-def normalize(rows: list[list], cols: list[str]) -> list[tuple]:
+def normalize(rows: list[list], cols: list[str], trim: bool = True) -> list[tuple]:
     """Normalise every value; raises ValueError if a row does not match cols."""
     width = len(cols)
     out: list[tuple] = []
     for i, row in enumerate(rows):
         if len(row) != width:
             raise ValueError(f"row {i} has {len(row)} values, expected {width}")
-        out.append(tuple(normalize_value(v) for v in row))
+        out.append(tuple(normalize_value(v, trim) for v in row))
     return out
 
 
@@ -97,7 +101,12 @@ def _unpack(result: Mapping | Sequence) -> tuple[list[str], list]:
     raise TypeError(f"expected a result mapping with cols/rows, got {type(result).__name__}")
 
 
-def equal(a: Mapping, b: Mapping, ordered: bool) -> bool:
+def _tagged(row: tuple) -> tuple:
+    # bool is a subclass of int in Python (True == 1, same hash): tag it
+    return tuple((isinstance(v, bool), v) for v in row)
+
+
+def equal(a: Mapping, b: Mapping, ordered: bool, trim: bool = True) -> bool:
     """Compare two results `{"cols": [...], "rows": [[...]]}`.
 
     Column names are ignored (engines differ in case and in names of
@@ -109,8 +118,8 @@ def equal(a: Mapping, b: Mapping, ordered: bool) -> bool:
     if len(cols_a) != len(cols_b):
         return False
     try:
-        na = normalize(rows_a, cols_a)
-        nb = normalize(rows_b, cols_b)
+        na = [_tagged(r) for r in normalize(rows_a, cols_a, trim)]
+        nb = [_tagged(r) for r in normalize(rows_b, cols_b, trim)]
     except ValueError:
         return False
     if ordered:

@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+import resultcmp
 import sqltest
 
 REPO = Path(__file__).resolve().parent.parent
@@ -53,10 +54,66 @@ PROPERTIES = {
 # Required minimum per property.
 PROPERTY_MIN = {"leiter_in_eigener_abteilung": 5}
 
+# Realism: each query counts violations and must return 0.
+VIOLATIONS = {
+    "musikschule": {
+        "belegung_vor_eintritt": (
+            "SELECT COUNT(*) FROM belegung b JOIN schueler s ON s.person_id = b.schueler_id"
+            " WHERE b.angemeldet_am < s.eintritt"
+        ),
+        "zahlung_vor_anmeldung": (
+            "SELECT COUNT(*) FROM zahlung z JOIN belegung b ON b.schueler_id = z.schueler_id AND b.kurs_id = z.kurs_id"
+            " WHERE z.faellig_am < b.angemeldet_am OR z.bezahlt_am < b.angemeldet_am"
+        ),
+        "zahlung_ohne_belegung": (
+            "SELECT COUNT(*) FROM zahlung z WHERE z.kurs_id IS NOT NULL AND NOT EXISTS"
+            " (SELECT 1 FROM belegung b WHERE b.schueler_id = z.schueler_id AND b.kurs_id = z.kurs_id)"
+        ),
+        "zahlung_nach_abmeldung": (
+            "SELECT COUNT(*) FROM zahlung z JOIN belegung b ON b.schueler_id = z.schueler_id AND b.kurs_id = z.kurs_id"
+            " WHERE b.abgemeldet_am IS NOT NULL AND z.faellig_am > b.abgemeldet_am"
+        ),
+        "ausleihe_vor_eintritt": (
+            "SELECT COUNT(*) FROM ausleihe a JOIN schueler s ON s.person_id = a.schueler_id WHERE a.ausgabe < s.eintritt"
+        ),
+        "leihzahlung_vor_ausgabe": (
+            "SELECT COUNT(*) FROM zahlung z JOIN ausleihe a ON a.ausleihe_id = z.ausleihe_id"
+            " WHERE z.faellig_am < a.ausgabe OR z.bezahlt_am < a.ausgabe OR z.schueler_id <> a.schueler_id"
+        ),
+        "kurs_vor_einstellung": (
+            "SELECT COUNT(*) FROM kurs k JOIN lehrkraft l ON l.person_id = k.lehrkraft_id WHERE k.startdatum < l.eingestellt_am"
+        ),
+        "termin_ausserhalb_kurs": (
+            "SELECT COUNT(*) FROM termin t JOIN kurs k ON k.kurs_id = t.kurs_id"
+            " WHERE t.datum < k.startdatum OR t.datum > k.enddatum"
+        ),
+    },
+    "firma": {
+        "mitarbeit_nach_projektende_eingetreten": (
+            "SELECT COUNT(*) FROM mitarbeit x JOIN mitarbeiter m ON m.mitarbeiter_id = x.mitarbeiter_id"
+            " JOIN projekt p ON p.projekt_id = x.projekt_id WHERE p.enddatum IS NOT NULL AND m.eintritt > p.enddatum"
+        ),
+        "eintritt_vor_geschaeftsfuehrung": (
+            "SELECT COUNT(*) FROM mitarbeiter m"
+            " WHERE m.eintritt < (SELECT g.eintritt FROM mitarbeiter g WHERE g.vorgesetzter_id IS NULL)"
+        ),
+    },
+}
+
+# Primary key per table, for content comparison between the engines.
+PRIMARY_KEYS = {
+    "person": "person_id", "lehrkraft": "person_id", "schueler": "person_id", "instrument": "instrument_id",
+    "kurs": "kurs_id", "raum": "raum_id", "belegung": "schueler_id, kurs_id", "termin": "termin_id",
+    "ausleihe": "ausleihe_id", "vertretung": "vertretung_id", "zahlung": "zahlung_id",
+    "abteilung": "abteilung_id", "mitarbeiter": "mitarbeiter_id", "projekt": "projekt_id",
+    "mitarbeit": "mitarbeiter_id, projekt_id",
+}
+
 
 def _batch(db, engine):
     jobs = [{"id": f"rows:{t}", "kind": "query", "sql": f"SELECT COUNT(*) FROM {t}"} for t in TABLES[db]]
     jobs += [{"id": f"prop:{k}", "kind": "query", "sql": q} for k, q in PROPERTIES[db].items()]
+    jobs += [{"id": f"bad:{k}", "kind": "query", "sql": q} for k, q in VIOLATIONS[db].items()]
     return {"setup": sqltest.setup_scripts(DB_DIR, db, engine), "jobs": jobs}
 
 
@@ -75,6 +132,18 @@ def _assert_counts(db, counts):
         assert counts[f"rows:{table}"] >= MIN_ROWS.get(table, 5), f"{db}.{table} has too few rows"
     for prop in PROPERTIES[db]:
         assert counts[f"prop:{prop}"] >= PROPERTY_MIN.get(prop, 1), f"{db}: property {prop} not met"
+    for bad in VIOLATIONS[db]:
+        assert counts[f"bad:{bad}"] == 0, f"{db}: {counts[f'bad:{bad}']} rows violate {bad}"
+
+
+def _contents(db, engine):
+    jobs = [
+        {"id": t, "kind": "query", "sql": f"SELECT * FROM {t} ORDER BY {PRIMARY_KEYS[t]}"} for t in TABLES[db]
+    ]
+    out = sqltest.run_engine(engine, {"setup": sqltest.setup_scripts(DB_DIR, db, engine), "jobs": jobs})
+    for table, res in out["results"].items():
+        assert res["error"] is None, f"{db}/{engine} {table}: {res['error']}"
+    return out["results"]
 
 
 @pytest.mark.parametrize("db", sorted(TABLES))
@@ -137,3 +206,8 @@ def test_db_loads_in_firebird_like_pglite(db):
     fb = _counts(db, "fb")
     _assert_counts(db, fb)
     assert fb == _counts(db, "pg")
+    fb_rows, pg_rows = _contents(db, "fb"), _contents(db, "pg")
+    for table in TABLES[db]:
+        a, b = fb_rows[table], pg_rows[table]
+        assert [c.lower() for c in a["cols"]] == b["cols"], table
+        assert resultcmp.equal(a, b, ordered=True, trim=False), f"{db}.{table} differs between fb and pg"

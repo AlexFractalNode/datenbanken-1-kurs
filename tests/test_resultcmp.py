@@ -79,3 +79,31 @@ def test_normalize_is_idempotent():
     rows = [[Decimal("2.50"), "a  ", datetime.date(2024, 1, 2), True, None, 7]]
     once = normalize(rows, list("abcdef"))
     assert normalize([list(r) for r in once], list("abcdef")) == once
+
+
+def test_bool_is_not_a_number():
+    assert normalize([[True, False]], ["a", "b"]) == [(True, False)]
+    assert not equal(res(["a"], [[True]]), res(["a"], [[1]]), ordered=True)
+    assert not equal(res(["a"], [[False]]), res(["a"], [[0]]), ordered=False)
+    # multiset comparison must not merge True and 1 either
+    assert not equal(res(["a"], [[True], [1]]), res(["a"], [[1], [1]]), ordered=False)
+    assert equal(res(["a"], [[True], [1]]), res(["a"], [[1], [True]]), ordered=False)
+
+
+def test_numbers_compare_exactly_not_at_fixed_scale():
+    # trailing zeros do not matter, real digits do, however small
+    assert equal(res(["x"], [[Decimal("1.0000000")]]), res(["x"], [[1]]), ordered=True)
+    assert not equal(res(["x"], [[Decimal("1.0000001")]]), res(["x"], [[1]]), ordered=True)
+    assert not equal(res(["x"], [[Decimal("1E-9")]]), res(["x"], [[Decimal("2E-9")]]), ordered=True)
+    # Firebird keeps the scale of AVG over NUMERIC(8,2), PostgreSQL does not
+    assert not equal(res(["x"], [[Decimal("39.68")]]), res(["x"], [[39.6875]]), ordered=True)
+    # binary float noise (beyond 12 significant digits) is removed
+    assert normalize([[0.1 + 0.2]], ["x"]) == [(0.3,)]
+    assert normalize([[2 / 3]], ["x"]) == [(0.666666666667,)]
+
+
+def test_trim_can_be_disabled_for_typed_sources():
+    # runners trim CHAR columns themselves; VARCHAR values keep their blanks
+    assert normalize([["ab  "]], ["v"], trim=False) == [("ab  ",)]
+    assert not equal(res(["v"], [["ab "]]), res(["v"], [["ab"]]), ordered=True, trim=False)
+    assert equal(res(["v"], [["ab "]]), res(["v"], [["ab"]]), ordered=True)

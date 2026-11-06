@@ -110,6 +110,7 @@ CREATE TABLE vertretung (
     von           DATE NOT NULL,
     bis           DATE NOT NULL,
     grund         VARCHAR(40),
+    UNIQUE (lehrkraft_id, vertreter_id, von),
     CHECK (vertreter_id <> lehrkraft_id),
     CHECK (bis >= von)
 );

@@ -74,7 +74,7 @@ Ladereihenfolge: `schema.sql` (bzw. `schema.pg.sql`), danach `seed.sql`. Untersc
 | `abteilung` | 6 |
 | `mitarbeiter` | 29 |
 | `projekt` | 8 |
-| `mitarbeit` | 41 |
+| `mitarbeit` | 46 |
 
 Fälle, auf die sich Aufgaben verlassen können:
 
@@ -85,5 +85,6 @@ Fälle, auf die sich Aufgaben verlassen können:
 - Projekt 8 hat noch keine Mitarbeit; ein Projekt hat kein Budget; mehrere Projekte laufen noch (`enddatum` NULL).
 - Mehrere Mitarbeitende arbeiten in keinem Projekt; `provision` ist nur im Vertrieb gesetzt; manche Mitarbeit hat keine Rolle.
 - E-Mail-Adressen enden auf `@firma.example`.
+- Die Daten sind zeitlich stimmig, und `tests/test_db_load.py` prüft das: An einem abgeschlossenen Projekt arbeiten nur Mitarbeitende, die vor dessen Ende eingetreten sind. Niemand ist vor der Geschäftsführung (2008) eingetreten.
 
 Neu erzeugen: `python db/firma/generate.py --seed 42` (schreibt `seed.sql`). Andere Seeds ergeben andere Daten; die Aufgaben beziehen sich auf Seed 42.

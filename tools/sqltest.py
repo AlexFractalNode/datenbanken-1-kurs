@@ -4,6 +4,7 @@
 Usage:
     sqltest.py [--engines fb,pg] [--topic tNN] [--write-snapshots DIR]
                [--content DIR] [--db-dir DIR] [--fb-via auto|local|compose]
+               [--timeout SECONDS] [--job-timeout SECONDS]
 
 Tasks come from <content>/tNN-*/sql-tasks.yml (default content/de/topics).
 Each file is a YAML list of tasks (a mapping with a `tasks` list is accepted
@@ -11,9 +12,14 @@ too). Used fields: id, db, kind (query|ddl|dml), solution (Firebird),
 solution_pg, engines (default [fb, pg]), ordered (default false), check.
 
 Per database and engine the runner builds the database once (schema +
-seed) and runs all tasks in one batch; ddl/dml tasks are rolled back. A
-task passes when it runs without error on every selected engine it lists
-and, if both engines ran, the normalised results are equal (resultcmp).
+seed) and runs all tasks in one batch. Every task sees the same database:
+changes are rolled back and identity generators/sequences are reset after
+each task, so results do not depend on task order or --topic. ddl/dml
+tasks need a `check` query. A task that runs longer than --job-timeout
+seconds fails with "timeout"; the others still run. A task passes when it
+runs without error on every selected engine it lists and, if both engines
+ran, the normalised results are equal (resultcmp, trim=False: the runners
+trim CHAR columns themselves).
 With --write-snapshots the results (PostgreSQL side if available) are
 written as DIR/<topic>.json, `{"id": {"cols", "rows", "ordered"}}`, but
 only when every task passed.
@@ -38,6 +44,7 @@ import shutil
 import subprocess
 import sys
 import time
+import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -55,8 +62,9 @@ COMPOSE_FILE = REPO / "docker-compose.test.yml"
 ENGINES = ("fb", "pg")
 KINDS = {"query", "ddl", "dml"}
 TIMEOUT = 900  # seconds per engine batch
-# Statements that would end the runner's per-job transaction.
-FORBIDDEN_START = {"COMMIT", "BEGIN", "END", "START", "SET TRANSACTION"}
+JOB_TIMEOUT = 30.0  # seconds per task
+# Statements that would end or escape the runner's per-job transaction.
+FORBIDDEN_START = {"COMMIT", "BEGIN", "END", "ABORT", "START TRANSACTION", "SET TRANSACTION", "PREPARE TRANSACTION"}
 
 
 class TaskError(Exception):
@@ -96,8 +104,10 @@ def _forbidden_statement(sql: str) -> str | None:
             continue
         if words[0] == "ROLLBACK" and not (len(words) > 1 and words[1] == "TO"):
             return "ROLLBACK"
-        if words[0] in FORBIDDEN_START or " ".join(words[:2]) in FORBIDDEN_START:
-            return " ".join(words[:2]) if words[0] in ("SET", "START") else words[0]
+        if words[0] in FORBIDDEN_START:
+            return words[0]
+        if " ".join(words[:2]) in FORBIDDEN_START:
+            return " ".join(words[:2])
     return None
 
 
@@ -124,6 +134,9 @@ def _task_from(raw: Any, topic: str, source: str) -> Task:
     for key in ("solution_pg", "check"):
         if raw.get(key) is not None and not isinstance(raw[key], str):
             raise TaskError(f"{where}: '{key}' must be a string")
+    if kind in ("ddl", "dml") and not (raw.get("check") or "").strip():
+        # without a check query a ddl/dml task could only ever "pass trivially"
+        raise TaskError(f"{where}: kind {kind} needs a 'check' query")
     task = Task(
         id=tid,
         topic=topic,
@@ -219,13 +232,17 @@ def fb_via(choice: str = "auto") -> str:
     return "local" if _local_fb_client() else "compose"
 
 
-def fb_command(via: str) -> list[str]:
+def fb_command(via: str) -> tuple[list[str], list[str] | None]:
+    """Runner command and, in compose mode, the command that removes its container."""
     if via == "local":
-        return [sys.executable, str(TOOLS / "fb_runner.py")]
+        return [sys.executable, str(TOOLS / "fb_runner.py")], None
     compose = shlex.split(os.environ.get("SQLTEST_COMPOSE", "docker compose"))
     if not compose or shutil.which(compose[0]) is None:
         raise EngineError(f"compose command {compose!r} not found; install Docker or use --fb-via local")
-    return [*compose, "-f", str(COMPOSE_FILE), "run", "--rm", "-T", "fbrunner"]
+    # A killed `compose run` client leaves its container behind; a known name lets us remove it.
+    name = f"sqltest-fbrunner-{uuid.uuid4().hex[:12]}"
+    cmd = [*compose, "-f", str(COMPOSE_FILE), "run", "--rm", "-T", "--name", name, "fbrunner"]
+    return cmd, [compose[0], "rm", "-f", name]
 
 
 def pg_command() -> list[str]:
@@ -237,24 +254,34 @@ def pg_command() -> list[str]:
     return [node, str(TOOLS / "pglite-runner.mjs")]
 
 
-def _run(cmd: list[str], payload: bytes | None, timeout: int) -> subprocess.CompletedProcess:
+def _run(
+    cmd: list[str], payload: bytes | None, timeout: float, cleanup: list[str] | None = None
+) -> subprocess.CompletedProcess:
     try:
         return subprocess.run(cmd, input=payload, capture_output=True, timeout=timeout, cwd=REPO)
     except FileNotFoundError as exc:
         raise EngineError(f"cannot start {cmd[0]}: {exc}") from exc
     except subprocess.TimeoutExpired as exc:
-        raise EngineError(f"{' '.join(cmd[:3])} timed out after {timeout}s") from exc
+        removed = ""
+        if cleanup:
+            try:
+                rm = subprocess.run(cleanup, capture_output=True, timeout=60, cwd=REPO)
+                removed = f"; container removed ({' '.join(cleanup)} -> exit {rm.returncode})"
+            except (OSError, subprocess.TimeoutExpired) as rm_exc:
+                removed = f"; removing the container failed: {rm_exc}"
+        raise EngineError(f"{' '.join(cmd[:3])} timed out after {timeout}s{removed}") from exc
 
 
-def run_engine(engine: str, batch: dict, via: str = "auto", timeout: int = TIMEOUT) -> dict:
+def run_engine(engine: str, batch: dict, via: str = "auto", timeout: float = TIMEOUT) -> dict:
     """Send one batch to a runner and return its parsed output."""
+    cleanup = None
     if engine == "pg":
         cmd = pg_command()
     elif engine == "fb":
-        cmd = fb_command(fb_via(via))
+        cmd, cleanup = fb_command(fb_via(via))
     else:
         raise EngineError(f"unknown engine {engine!r}")
-    proc = _run(cmd, json.dumps(batch).encode("utf-8"), timeout)
+    proc = _run(cmd, json.dumps(batch).encode("utf-8"), timeout, cleanup)
     stderr = proc.stderr.decode("utf-8", "replace").strip()
     if proc.returncode != 0:
         raise EngineError(f"{engine} runner exited with {proc.returncode}: {stderr[-2000:]}")
@@ -271,8 +298,8 @@ def run_engine(engine: str, batch: dict, via: str = "auto", timeout: int = TIMEO
 def fb_available(via: str = "auto") -> tuple[bool, str]:
     """Whether a Firebird server can be reached with the selected runner mode."""
     try:
-        cmd = fb_command(fb_via(via))
-        proc = _run([*cmd, "--ping"], None, 600)
+        cmd, cleanup = fb_command(fb_via(via))
+        proc = _run([*cmd, "--ping"], None, 600, cleanup)
     except EngineError as exc:
         return False, str(exc)
     if proc.returncode != 0:
@@ -285,7 +312,7 @@ def fb_available(via: str = "auto") -> tuple[bool, str]:
 
 def _short(result: dict, limit: int = 5) -> str:
     try:
-        rows = resultcmp.normalize(result["rows"], result["cols"])
+        rows = resultcmp.normalize(result["rows"], result["cols"], trim=False)
     except ValueError as exc:
         return f"<invalid result: {exc}>"
     more = f" ... ({len(rows)} rows)" if len(rows) > limit else ""
@@ -305,7 +332,7 @@ def _check_result(task: Task, engine: str, result: dict | None) -> str | None:
 
 
 def _snapshot(result: dict, ordered: bool) -> dict:
-    rows = resultcmp.normalize(result["rows"], result["cols"])
+    rows = resultcmp.normalize(result["rows"], result["cols"], trim=False)
     return {"cols": list(result["cols"]), "rows": [list(r) for r in rows], "ordered": ordered}
 
 
@@ -335,6 +362,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--db-dir", type=Path, default=DEFAULT_DB_DIR)
     ap.add_argument("--fb-via", choices=("auto", "local", "compose"), default="auto")
     ap.add_argument("--timeout", type=int, default=TIMEOUT, help="seconds per engine batch")
+    ap.add_argument("--job-timeout", type=float, default=JOB_TIMEOUT, help="seconds per task")
     args = ap.parse_args(argv)
     started = time.monotonic()
 
@@ -365,6 +393,7 @@ def main(argv: list[str] | None = None) -> int:
                         {"id": t.id, "sql": t.sql_for(engine), "kind": t.kind, "check": t.check}
                         for t in selected
                     ],
+                    "job_timeout_ms": max(1, int(args.job_timeout * 1000)),
                 }
                 t0 = time.monotonic()
                 out = run_engine(engine, batch, via=args.fb_via, timeout=args.timeout)
@@ -394,7 +423,7 @@ def main(argv: list[str] | None = None) -> int:
                     problems.append(msg)
         if not problems and len(ran) == 2:
             fb, pg = results[("fb", task.id)], results[("pg", task.id)]
-            if not resultcmp.equal(fb, pg, ordered=task.ordered):
+            if not resultcmp.equal(fb, pg, ordered=task.ordered, trim=False):
                 order = "ordered" if task.ordered else "unordered"
                 problems.append(f"fb and pg results differ ({order})\n    fb: {_short(fb)}\n    pg: {_short(pg)}")
         if problems:

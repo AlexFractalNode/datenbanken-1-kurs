@@ -120,6 +120,7 @@ def build(seed: int) -> str:
     lines.append("\n-- mitarbeiter (vorgesetzter_id rekursiv, NULL = Geschaeftsfuehrung)")
     ids: list[int] = []
     abteilung_of: list[int | None] = []
+    eintritt_of: list[dt.date] = []
     cols = ["vorname", "nachname", "email", "eintritt", "gehalt", "provision", "abteilung_id", "vorgesetzter_id"]
     for (vor, nach), (abt, boss, stufe) in zip(names, plan):
         local = (vor + "." + nach).lower()
@@ -134,6 +135,7 @@ def build(seed: int) -> str:
                                            abt, ids[boss] if boss is not None else None])
         ids.append(mid)
         abteilung_of.append(abt)
+        eintritt_of.append(eintritt)
 
     lines.append("\n-- Leitung der Abteilungen (1:1)")
     for abt, idx in sorted(leitung.items()):
@@ -145,14 +147,16 @@ def build(seed: int) -> str:
         pid = insert("projekt", ["titel", "abteilung_id", "startdatum", "enddatum", "budget", "beschreibung"],
                      [titel, abt, d(start), d(ende) if ende else None, Decimal(budget) if budget else None,
                       BESCHREIBUNG.get(titel)])
-        projekte.append((pid, abt, besetzt))
+        projekte.append((pid, abt, besetzt, d(ende) if ende else None))
 
     lines.append("\n-- mitarbeit (m:n mitarbeiter-projekt mit Stunden)")
-    for pid, abt, besetzt in projekte:
+    for pid, abt, besetzt, ende in projekte:
         if not besetzt:
             continue
-        own = [i for i, a in enumerate(abteilung_of) if a == abt and i != 0]
-        others = [i for i, a in enumerate(abteilung_of) if a != abt and i != 0]
+        # only people who joined the company before the project ended
+        eligible = [i for i in range(1, len(abteilung_of)) if ende is None or eintritt_of[i] <= ende]
+        own = [i for i in eligible if abteilung_of[i] == abt]
+        others = [i for i in eligible if abteilung_of[i] != abt]
         team = rng.sample(own, min(len(own), rng.randint(2, 4))) + rng.sample(others, rng.randint(2, 4))
         team.sort()
         own_team = [i for i in team if abteilung_of[i] == abt]

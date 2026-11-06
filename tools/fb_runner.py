@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Batch SQL runner on Firebird 3 (firebird-driver), same protocol as pglite-runner.mjs.
 
-stdin:  {"setup": ["<sql script>", ...], "jobs": [{"id", "sql", "kind", "check"}]}
+stdin:  {"setup": ["<sql script>", ...], "jobs": [{"id", "sql", "kind", "check"}],
+         "job_timeout_ms": 30000}
 stdout: {"results": {"<id>": {"cols": [...], "rows": [[...]], "error": null | "<msg>"}}}
 
 Usage:
@@ -11,9 +12,20 @@ Usage:
 Every batch gets a fresh scratch database on the server, which is dropped
 afterwards. Scripts are split into statements (isql style, including
 SET TERM). In the setup every DDL statement is committed on its own.
-Every job runs in its own transaction that is rolled back. kind "query"
-returns the result of its last statement; kind "ddl"/"dml" returns the
-result of `check` (empty without one).
+
+Every query/dml job runs in its own transaction that is rolled back.
+Generators of identity columns are not transactional, so after every job
+they are reset to their values right after the setup (ALTER TABLE ...
+RESTART WITH): every job sees the same database, independent of job order.
+Every ddl job runs on its own copy (fresh scratch database + setup), because
+Firebird 3 cannot use objects created in a still open transaction. kind
+"query" returns the result of its last statement; kind "ddl"/"dml" returns
+the result of `check` (empty without one).
+
+A job that runs longer than job_timeout_ms is cancelled with
+fb_cancel_operation and reported as "timeout: ..."; the batch continues.
+CHAR(n) values lose their trailing blanks, VARCHAR and text BLOB values are
+returned unchanged.
 
 Connection settings come from the environment: FB_HOST (localhost),
 FB_PORT (3050), FB_USER (SYSDBA), FB_PASSWORD (masterkey, the throwaway
@@ -28,15 +40,20 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
+import threading
 import uuid
 from typing import Any
 
 import resultcmp
 
 KINDS = {"query", "ddl", "dml"}
+DEFAULT_TIMEOUT_MS = 30000
 # Setup statements after which the runner commits, so later statements see the objects.
 DDL_KEYWORDS = {"CREATE", "ALTER", "DROP", "RECREATE", "COMMENT", "DECLARE", "GRANT", "REVOKE", "SET"}
+_DOLLAR_TAG = re.compile(r"\$(?:[A-Za-z_][A-Za-z0-9_]*)?\$")
+_IDENT_CHARS = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_$")
 
 
 class InputError(Exception):
@@ -53,10 +70,12 @@ def _set_term(pending: str) -> str | None:
 def split_sql(script: str) -> list[str]:
     """Split an isql-style script into statements.
 
-    Honours '...' strings (with '' escapes), "..." identifiers, -- and /* */
-    comments and `SET TERM <new> <old>` directives (for PSQL bodies). The
-    terminator is not part of the returned statements; empty statements and
-    SET TERM directives are dropped. Comments are removed.
+    Honours '...' strings (with '' escapes), "..." identifiers, PostgreSQL
+    dollar quoting ($$...$$, $tag$...$tag$; not inside identifiers such as
+    RDB$DATABASE), -- and /* */ comments and `SET TERM <new> <old>`
+    directives (for PSQL bodies). The terminator is not part of the returned
+    statements; empty statements and SET TERM directives are dropped.
+    Comments are removed.
     """
     statements: list[str] = []
     term = ";"
@@ -76,6 +95,14 @@ def split_sql(script: str) -> list[str]:
             buf.append(script[i : j + 1])
             i = j + 1
             continue
+        if ch == "$" and (i == 0 or script[i - 1] not in _IDENT_CHARS):
+            m = _DOLLAR_TAG.match(script, i)
+            if m:
+                end = script.find(m.group(0), m.end())
+                stop = n if end == -1 else end + len(m.group(0))
+                buf.append(script[i:stop])
+                i = stop
+                continue
         if script.startswith("--", i):
             j = script.find("\n", i)
             i = n if j == -1 else j
@@ -108,15 +135,18 @@ def _first_word(stmt: str) -> str:
     return parts[0].upper() if parts else ""
 
 
-def validate_batch(batch: Any) -> tuple[list[str], list[dict]]:
+def validate_batch(batch: Any) -> tuple[list[str], list[dict], int]:
     if not isinstance(batch, dict):
         raise InputError("input must be a JSON object")
     setup = batch.get("setup", [])
     jobs = batch.get("jobs", [])
+    timeout_ms = batch.get("job_timeout_ms", DEFAULT_TIMEOUT_MS)
     if not isinstance(setup, list) or not all(isinstance(s, str) for s in setup):
         raise InputError('"setup" must be a list of SQL strings')
     if not isinstance(jobs, list):
         raise InputError('"jobs" must be a list')
+    if isinstance(timeout_ms, bool) or not isinstance(timeout_ms, (int, float)) or timeout_ms <= 0:
+        raise InputError('"job_timeout_ms" must be a positive number')
     seen: set[str] = set()
     for job in jobs:
         if not isinstance(job, dict):
@@ -133,7 +163,7 @@ def validate_batch(batch: Any) -> tuple[list[str], list[dict]]:
             raise InputError(f"job {jid}: unknown kind {job.get('kind')!r}")
         if job.get("check") is not None and not isinstance(job["check"], str):
             raise InputError(f'job {jid}: "check" must be a string or null')
-    return setup, jobs
+    return setup, jobs, int(timeout_ms)
 
 
 def _settings() -> dict[str, str]:
@@ -166,10 +196,25 @@ def create_scratch_db(settings: dict[str, str]):
     return driver.create_database(dsn, user=settings["user"], password=settings["password"])
 
 
-def _value(value: Any) -> Any:
+def _char_columns(cur) -> list[bool] | None:
+    """Which result columns are CHAR(n); None if the driver does not tell."""
+    try:
+        from firebird.driver.types import SQLDataType
+
+        # firebird-driver has no public API for the SQL type of a result column
+        return [m.datatype == SQLDataType.TEXT for m in cur._stmt._out_desc]
+    except Exception:
+        return None
+
+
+def _value(value: Any, is_char: bool | None) -> Any:
     if hasattr(value, "read"):  # BlobReader for large blobs
         value = value.read()
-    return resultcmp.normalize_value(value)
+    if is_char is None:  # column type unknown: trim every string (resultcmp fallback)
+        return resultcmp.normalize_value(value)
+    if is_char and isinstance(value, str):
+        value = value.rstrip(" ")
+    return resultcmp.normalize_value(value, trim=False)
 
 
 def _commit(con) -> None:
@@ -195,6 +240,43 @@ def _cleanup(con) -> None:
         pass
 
 
+def _error(exc: Exception) -> dict:
+    return {"cols": [], "rows": [], "error": " ".join(str(exc).split())}
+
+
+class Deadline:
+    """Cancel the running statement of `con` once timeout_ms have passed."""
+
+    def __init__(self, con, timeout_ms: int) -> None:
+        self.con = con
+        self.timeout_ms = timeout_ms
+        self.fired = False
+        self.timer = threading.Timer(timeout_ms / 1000, self._fire)
+        self.timer.daemon = True
+
+    def _fire(self) -> None:
+        self.fired = True
+        try:
+            from firebird.driver.types import CancelType
+
+            # Connection has no public cancel method in firebird-driver 2.1
+            self.con._att.cancel_operation(CancelType.RAISE)
+        except Exception:
+            pass
+
+    def __enter__(self) -> "Deadline":
+        self.timer.start()
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.timer.cancel()
+
+    def error(self, exc: Exception) -> dict:
+        if self.fired:
+            return {"cols": [], "rows": [], "error": f"timeout: job exceeded {self.timeout_ms} ms"}
+        return _error(exc)
+
+
 def _run_statements(con, statements: list[str]) -> dict:
     """Execute statements on the connection's main transaction; return the last result set."""
     result: dict = {"cols": [], "rows": [], "error": None}
@@ -204,7 +286,8 @@ def _run_statements(con, statements: list[str]) -> dict:
             cur.execute(stmt)
             if cur.description:
                 cols = [d[0] for d in cur.description]
-                rows = [[_value(v) for v in row] for row in cur.fetchall()]
+                chars = _char_columns(cur) or [None] * len(cols)
+                rows = [[_value(v, c) for v, c in zip(row, chars)] for row in cur.fetchall()]
                 result = {"cols": cols, "rows": rows, "error": None}
     finally:
         cur.close()
@@ -228,11 +311,49 @@ def run_setup(con, scripts: list[str]) -> None:
     _commit(con)
 
 
-def _error(exc: Exception) -> dict:
-    return {"cols": [], "rows": [], "error": " ".join(str(exc).split())}
+_IDENTITY_SQL = (
+    "SELECT TRIM(RDB$RELATION_NAME), TRIM(RDB$FIELD_NAME), TRIM(RDB$GENERATOR_NAME)"
+    " FROM RDB$RELATION_FIELDS WHERE RDB$GENERATOR_NAME IS NOT NULL ORDER BY 1, 2"
+)
 
 
-def run_ddl_isolated(settings: dict[str, str], setup: list[str], job: dict) -> dict:
+def _quote(name: str) -> str:
+    return '"' + name.replace('"', '""') + '"'
+
+
+def identity_state(con) -> list[tuple[str, str, int]]:
+    """(table, column, current generator value) for every identity column."""
+    cur = con.cursor()
+    try:
+        cur.execute(_IDENTITY_SQL)
+        columns = cur.fetchall()
+        values: tuple = ()
+        if columns:
+            gens = ", ".join(f"GEN_ID({_quote(g)}, 0)" for _, _, g in columns)
+            cur.execute(f"SELECT {gens} FROM RDB$DATABASE")
+            values = cur.fetchone()
+    finally:
+        cur.close()
+        _rollback(con)
+    return [(t, c, v) for (t, c, _), v in zip(columns, values)]
+
+
+def restore_identities(con, baseline: list[tuple[str, str, int]]) -> None:
+    """Reset generators a job has moved. In Firebird 3, RESTART WITH v makes v + 1 the next value."""
+    if not baseline:
+        return
+    current = {(t, c): v for t, c, v in identity_state(con)}
+    cur = con.cursor()
+    try:
+        for table, column, value in baseline:
+            if current.get((table, column), value) != value:
+                cur.execute(f"ALTER TABLE {_quote(table)} ALTER COLUMN {_quote(column)} RESTART WITH {int(value)}")
+                _commit(con)
+    finally:
+        cur.close()
+
+
+def run_ddl_isolated(settings: dict[str, str], setup: list[str], job: dict, timeout_ms: int) -> dict:
     """Run a ddl job on its own scratch database.
 
     Firebird 3 rolls DDL back correctly, but objects created or altered in a
@@ -245,28 +366,36 @@ def run_ddl_isolated(settings: dict[str, str], setup: list[str], job: dict) -> d
         return _error(exc)
     try:
         run_setup(con, setup)
-        _execute_committing_ddl(con, split_sql(job["sql"]))
-        check = job.get("check")
-        if not check or not check.strip():
-            return {"cols": [], "rows": [], "error": None}
-        return _run_statements(con, split_sql(check))
     except Exception as exc:
+        _cleanup(con)
         return _error(exc)
+    deadline = Deadline(con, timeout_ms)
+    try:
+        with deadline:
+            _execute_committing_ddl(con, split_sql(job["sql"]))
+            check = job.get("check")
+            if not check or not check.strip():
+                return {"cols": [], "rows": [], "error": None}
+            return _run_statements(con, split_sql(check))
+    except Exception as exc:
+        return deadline.error(exc)
     finally:
         _cleanup(con)
 
 
-def run_job(con, job: dict) -> dict:
+def run_job(con, job: dict, timeout_ms: int = DEFAULT_TIMEOUT_MS) -> dict:
+    deadline = Deadline(con, timeout_ms)
     try:
-        if job["kind"] == "query":
-            return _run_statements(con, split_sql(job["sql"]))
-        _run_statements(con, split_sql(job["sql"]))
-        check = job.get("check")
-        if not check or not check.strip():
-            return {"cols": [], "rows": [], "error": None}
-        return _run_statements(con, split_sql(check))
+        with deadline:
+            if job["kind"] == "query":
+                return _run_statements(con, split_sql(job["sql"]))
+            _run_statements(con, split_sql(job["sql"]))
+            check = job.get("check")
+            if not check or not check.strip():
+                return {"cols": [], "rows": [], "error": None}
+            return _run_statements(con, split_sql(check))
     except Exception as exc:  # driver errors carry the Firebird message
-        return _error(exc)
+        return deadline.error(exc)
     finally:
         # A failing rollback leaves the shared database in an unknown state:
         # let it propagate and abort the batch instead of hiding it.
@@ -274,23 +403,26 @@ def run_job(con, job: dict) -> dict:
 
 
 def run_batch(batch: Any, settings: dict[str, str] | None = None) -> dict:
-    setup, jobs = validate_batch(batch)
+    setup, jobs, timeout_ms = validate_batch(batch)
     settings = settings or _settings()
     con = create_scratch_db(settings)
     try:
         results: dict[str, dict] = {}
         setup_error = None
+        baseline: list[tuple[str, str, int]] = []
         try:
             run_setup(con, setup)
+            baseline = identity_state(con)
         except Exception as exc:
             setup_error = "setup failed: " + " ".join(str(exc).split())
         for job in jobs:
             if setup_error:
                 results[job["id"]] = {"cols": [], "rows": [], "error": setup_error}
+            elif job["kind"] == "ddl":
+                results[job["id"]] = run_ddl_isolated(settings, setup, job, timeout_ms)
             else:
-                results[job["id"]] = (
-                    run_ddl_isolated(settings, setup, job) if job["kind"] == "ddl" else run_job(con, job)
-                )
+                results[job["id"]] = run_job(con, job, timeout_ms)
+                restore_identities(con, baseline)
         out: dict = {"results": results}
         if setup_error:
             out["setup_error"] = setup_error

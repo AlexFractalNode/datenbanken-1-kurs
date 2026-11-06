@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -85,7 +86,7 @@ def test_transaction_control_rejected(tmp_path):
     d = tmp_path / "t01-x"
     d.mkdir()
     (d / "sql-tasks.yml").write_text(
-        "- id: t01-s001\n  db: demo\n  kind: dml\n  solution: DELETE FROM artikel; COMMIT\n", encoding="utf-8"
+        "- id: t01-s001\n  db: demo\n  kind: dml\n  solution: DELETE FROM artikel; COMMIT\n  check: SELECT 1\n", encoding="utf-8"
     )
     with pytest.raises(sqltest.TaskError, match="COMMIT"):
         sqltest.load_tasks(tmp_path)
@@ -198,3 +199,205 @@ def test_fb_ddl_runs_isolated():
     assert res["c"] == {"cols": ["LAGER"], "rows": [[3]], "error": None}
     assert res["d"]["rows"] == [[0]]
     assert res["e"]["rows"] == [["AAA"]]  # CHAR(6) padding already trimmed
+
+
+# --- review round 1 -------------------------------------------------------------
+
+
+def _write_tasks(root, topic_dir, body):
+    d = root / topic_dir
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "sql-tasks.yml").write_text(body, encoding="utf-8")
+
+
+def test_split_sql_dollar_quoting_and_rdb_identifiers():
+    script = (
+        "CREATE FUNCTION f() RETURNS int AS $body$ SELECT 1; $body$ LANGUAGE sql;"
+        " SELECT $$a;b$$; SELECT 1 FROM RDB$DATABASE;"
+    )
+    assert split_sql(script) == [
+        "CREATE FUNCTION f() RETURNS int AS $body$ SELECT 1; $body$ LANGUAGE sql",
+        "SELECT $$a;b$$",
+        "SELECT 1 FROM RDB$DATABASE",
+    ]
+    assert split_sql("SELECT GEN_ID(RDB$1, 0) FROM RDB$DATABASE; SELECT 2") == [
+        "SELECT GEN_ID(RDB$1, 0) FROM RDB$DATABASE",
+        "SELECT 2",
+    ]
+
+
+@pytest.mark.parametrize("stmt", ["ABORT", "PREPARE TRANSACTION 'x'", "COMMIT PREPARED 'x'", "ROLLBACK", "END"])
+def test_more_transaction_control_rejected(tmp_path, stmt):
+    _write_tasks(tmp_path, "t01-x", f'- id: t01-s001\n  db: demo\n  kind: dml\n  solution: "DELETE FROM artikel; {stmt}"\n  check: SELECT 1\n')
+    with pytest.raises(sqltest.TaskError, match="transaction control"):
+        sqltest.load_tasks(tmp_path)
+
+
+def test_savepoint_is_allowed(tmp_path):
+    _write_tasks(tmp_path, "t01-x", "- id: t01-s001\n  db: demo\n  kind: dml\n  solution: SAVEPOINT a; DELETE FROM artikel; ROLLBACK TO SAVEPOINT a\n  check: SELECT 1\n")
+    assert len(sqltest.load_tasks(tmp_path)) == 1
+
+
+@pytest.mark.parametrize("kind", ["dml", "ddl"])
+def test_check_required_for_dml_and_ddl(tmp_path, kind):
+    _write_tasks(tmp_path, "t01-x", f"- id: t01-s001\n  db: demo\n  kind: {kind}\n  solution: DELETE FROM artikel\n")
+    with pytest.raises(sqltest.TaskError, match="check"):
+        sqltest.load_tasks(tmp_path)
+
+
+def _insert(code):
+    return (
+        "INSERT INTO artikel (kuerzel, bezeichnung, preis, angelegt)"
+        f" VALUES ('{code}', 'Platzhalter', 1.00, DATE '2024-05-01')"
+    )
+
+
+def _id_of(code):
+    return f"SELECT artikel_id FROM artikel WHERE kuerzel = '{code}'"
+
+
+INSERT_JOBS = [
+    {"id": "x", "kind": "dml", "sql": _insert("XXX"), "check": _id_of("XXX")},
+    {"id": "y", "kind": "dml", "sql": _insert("YYY"), "check": _id_of("YYY")},
+    {"id": "z", "kind": "ddl", "sql": "ALTER TABLE artikel ADD lager INTEGER; " + _insert("ZZZ"), "check": _id_of("ZZZ")},
+    {"id": "q", "kind": "query", "sql": "SELECT COUNT(*) FROM artikel"},
+]
+
+
+def _identity_independent(engine):
+    setup = sqltest.setup_scripts(DB_DIR, "demo", engine)
+    for jobs in (INSERT_JOBS, INSERT_JOBS[::-1]):
+        res = sqltest.run_engine(engine, {"setup": setup, "jobs": jobs})["results"]
+        rows = {k: v["rows"] for k, v in res.items()}
+        assert rows == {"x": [[5]], "y": [[5]], "z": [[5]], "q": [[4]]}, (engine, res)
+
+
+def test_identity_does_not_drift_between_jobs_pg():
+    _identity_independent("pg")
+
+
+@pytest.mark.firebird
+def test_identity_does_not_drift_between_jobs_fb():
+    fb_or_skip()
+    _identity_independent("fb")
+
+
+T02_TASK = """- id: t02-s001
+  db: demo
+  kind: dml
+  solution: INSERT INTO artikel (kuerzel, bezeichnung, preis, angelegt) VALUES ('FFF', 'Platzhalter Zeta', 3.00, DATE '2024-06-01')
+  check: SELECT artikel_id, kuerzel FROM artikel WHERE kuerzel = 'FFF'
+"""
+
+
+def _snapshot_with_and_without_topic(tmp_path, engines):
+    content = tmp_path / "content"
+    shutil.copytree(CONTENT, content)
+    _write_tasks(content, "t02-demo", T02_TASK)
+    full, single = tmp_path / "full", tmp_path / "single"
+    base = ["--engines", engines, "--content", str(content), "--db-dir", str(DB_DIR)]
+    assert sqltest.main([*base, "--write-snapshots", str(full)]) == 0
+    assert sqltest.main([*base, "--topic", "t02", "--write-snapshots", str(single)]) == 0
+    text = (full / "t02.json").read_text(encoding="utf-8")
+    assert text == (single / "t02.json").read_text(encoding="utf-8")
+    assert json.loads(text)["t02-s001"]["rows"] == [[5, "FFF"]]
+
+
+def test_snapshot_independent_of_topic_filter_pg(tmp_path):
+    _snapshot_with_and_without_topic(tmp_path, "pg")
+
+
+@pytest.mark.firebird
+def test_snapshot_independent_of_topic_filter_fb(tmp_path):
+    fb_or_skip()
+    _snapshot_with_and_without_topic(tmp_path, "fb,pg")
+
+
+SLOW = {
+    "pg": "WITH RECURSIVE r(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM r WHERE n < 100000000) SELECT COUNT(*) FROM r",
+    "fb": "SELECT COUNT(*) FROM RDB$FIELDS a, RDB$FIELDS b, RDB$FIELDS c, RDB$FIELDS d",
+}
+
+
+def _timeout(engine):
+    batch = {
+        "setup": sqltest.setup_scripts(DB_DIR, "demo", engine),
+        "job_timeout_ms": 1500,
+        "jobs": [
+            {"id": "fast1", "kind": "query", "sql": "SELECT COUNT(*) FROM artikel"},
+            {"id": "slow", "kind": "query", "sql": SLOW[engine]},
+            {"id": "fast2", "kind": "dml", "sql": "DELETE FROM artikel WHERE artikel_id = 1", "check": "SELECT COUNT(*) FROM artikel"},
+            {"id": "fast3", "kind": "dml", "sql": _insert("TTT"), "check": _id_of("TTT")},
+        ],
+    }
+    res = sqltest.run_engine(engine, batch, timeout=120)["results"]
+    assert res["fast1"]["rows"] == [[4]]
+    assert "timeout" in res["slow"]["error"]
+    assert res["fast2"]["error"] is None and res["fast2"]["rows"] == [[3]]
+    assert res["fast3"]["rows"] == [[5]]
+
+
+def test_job_timeout_pg():
+    _timeout("pg")
+
+
+@pytest.mark.firebird
+def test_job_timeout_fb():
+    fb_or_skip()
+    _timeout("fb")
+
+
+def test_slow_task_reported_by_name(tmp_path, capsys):
+    _write_tasks(
+        tmp_path,
+        "t01-x",
+        "- id: t01-s001\n  db: demo\n  kind: query\n  engines: [pg]\n"
+        f'  solution: "{SLOW["pg"]}"\n'
+        "- id: t01-s002\n  db: demo\n  kind: query\n  engines: [pg]\n  solution: SELECT COUNT(*) FROM artikel\n",
+    )
+    rc = sqltest.main(["--engines", "pg", "--content", str(tmp_path), "--db-dir", str(DB_DIR), "--job-timeout", "1.5"])
+    out = capsys.readouterr().out
+    assert rc == 1
+    assert "FAIL t01-s001: pg: timeout" in out and "PASS t01-s002" in out
+
+
+def _typed_values(engine):
+    setup = ["CREATE TABLE tv (c CHAR(5), v VARCHAR(5)); INSERT INTO tv VALUES ('ab', 'cd  ');"]
+    jobs = [{"id": "t", "kind": "query", "sql": "SELECT c, v FROM tv"}]
+    return sqltest.run_engine(engine, {"setup": setup, "jobs": jobs})["results"]["t"]["rows"]
+
+
+def test_char_trimmed_varchar_kept_pg():
+    assert _typed_values("pg") == [["ab", "cd  "]]
+
+
+@pytest.mark.firebird
+def test_char_trimmed_varchar_kept_fb():
+    fb_or_skip()
+    assert _typed_values("fb") == [["ab", "cd  "]]
+
+
+def test_pg_bigint_and_bytea_serialised():
+    jobs = [{"id": "t", "kind": "query", "sql": "SELECT 9007199254740993::int8, 5::int8, '\\x01ff'::bytea"}]
+    res = sqltest.run_engine("pg", {"setup": [], "jobs": jobs})["results"]["t"]
+    assert res["error"] is None
+    assert res["rows"] == [["9007199254740993", 5, "01ff"]]
+
+
+def test_compose_container_removed_on_timeout(monkeypatch):
+    calls = []
+
+    def fake_run(cmd, **kwargs):
+        calls.append(cmd)
+        if len(calls) == 1:
+            raise subprocess.TimeoutExpired(cmd, kwargs.get("timeout"))
+        return subprocess.CompletedProcess(cmd, 0, b"", b"")
+
+    monkeypatch.setattr(sqltest.subprocess, "run", fake_run)
+    monkeypatch.setattr(sqltest.shutil, "which", lambda name: name)
+    monkeypatch.setenv("SQLTEST_COMPOSE", "docker compose")
+    with pytest.raises(sqltest.EngineError, match="timed out"):
+        sqltest.run_engine("fb", {"setup": [], "jobs": []}, via="compose", timeout=1)
+    name = calls[0][calls[0].index("--name") + 1]
+    assert name.startswith("sqltest-fbrunner-")
+    assert calls[1] == ["docker", "rm", "-f", name]
