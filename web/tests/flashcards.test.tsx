@@ -309,6 +309,19 @@ describe('Flashcards: daily limit for new cards', () => {
     expect(readIntroducedToday()).toEqual(['t04-c001']);
   });
 
+  it('without writable storage the daily count lives in memory, so switching the topic keeps the limit (G3)', async () => {
+    vi.stubGlobal('localStorage', quotaStorage({ [NEW_CARDS_KEY]: '1' }));
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    expect(el.dataset.verifyCount).toBe('1');
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Gut/ }));
+    expect(el.dataset.verifyState).toBe('empty');
+    fireEvent.change(screen.getByLabelText('Thema'), { target: { value: 't06' } });
+    expect(el.dataset.verifyState).toBe('empty');
+    expect(container.textContent).toContain('Tageslimit');
+  });
+
   it('ignores a corrupt daily record', async () => {
     localStorage.setItem(NEW_TODAY_KEY, 'not json');
     const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);

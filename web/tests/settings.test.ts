@@ -6,6 +6,8 @@ import {
   MAX_NEW_CARDS_PER_DAY,
   NEW_CARDS_KEY,
   NEW_TODAY_KEY,
+  clearIntroducedToday,
+  clearSettingsMemory,
   newCardAllowance,
   parseNewCardLimit,
   readIntroducedToday,
@@ -17,6 +19,7 @@ import {
 beforeEach(() => {
   vi.unstubAllGlobals();
   localStorage.clear();
+  clearSettingsMemory();
 });
 
 describe('new card limit', () => {
@@ -49,7 +52,7 @@ describe('new card limit', () => {
     expect(parseNewCardLimit(String(MAX_NEW_CARDS_PER_DAY + 1))).toBeNull();
   });
 
-  it('rejects invalid values on write and reports a failed write', () => {
+  it('rejects invalid values on write and reports a failed write, but keeps the value in memory (G3)', () => {
     expect(writeNewCardLimit(-1).ok).toBe(false);
     expect(writeNewCardLimit(1.5).ok).toBe(false);
     vi.stubGlobal('localStorage', {
@@ -59,15 +62,35 @@ describe('new card limit', () => {
       },
       removeItem: () => undefined,
     });
-    expect(writeNewCardLimit(10).ok).toBe(false);
-    expect(readNewCardLimit()).toBe(20);
+    expect(writeNewCardLimit(10)).toEqual({ ok: false, value: 10 });
+    expect(readNewCardLimit()).toBe(10);
   });
 
-  it('works without any storage', () => {
+  it('works without any storage, on an in-memory copy (G3)', () => {
     vi.stubGlobal('localStorage', undefined);
     expect(readNewCardLimit()).toBe(20);
     expect(writeNewCardLimit(5).ok).toBe(false);
-    expect(readIntroducedToday(new Date(2026, 10, 6))).toEqual([]);
+    expect(readNewCardLimit()).toBe(5);
+    const day = new Date(2026, 10, 6);
+    expect(readIntroducedToday(day)).toEqual([]);
+    expect(recordIntroduced('t04-c001', day)).toBe(false);
+    expect(recordIntroduced('t04-c002', day)).toBe(false);
+    expect(readIntroducedToday(day)).toEqual(['t04-c001', 't04-c002']);
+    // the memory follows the calendar day, too
+    expect(readIntroducedToday(new Date(2026, 10, 7))).toEqual([]);
+    // a progress reset clears the daily count in memory as well
+    clearIntroducedToday();
+    expect(readIntroducedToday(day)).toEqual([]);
+  });
+
+  it('a later successful write replaces the in-memory copy', () => {
+    vi.stubGlobal('localStorage', undefined);
+    writeNewCardLimit(5);
+    vi.unstubAllGlobals();
+    expect(writeNewCardLimit(30).ok).toBe(true);
+    expect(readNewCardLimit()).toBe(30);
+    localStorage.setItem(NEW_CARDS_KEY, '40');
+    expect(readNewCardLimit()).toBe(40);
   });
 });
 

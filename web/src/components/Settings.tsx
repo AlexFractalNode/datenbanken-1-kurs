@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { MAX_NEW_CARDS_PER_DAY, parseNewCardLimit, readNewCardLimit, writeNewCardLimit } from '../lib/settings';
+import { DEFAULT_NEW_CARDS_PER_DAY, MAX_NEW_CARDS_PER_DAY, parseNewCardLimit, readNewCardLimit, writeNewCardLimit } from '../lib/settings';
 import ProgressTransfer from './ProgressTransfer';
 import ThemeSwitch from './ThemeSwitch';
 
@@ -37,7 +37,10 @@ export default function Settings() {
       setError('');
       setMessage(parsed === 0 ? 'Limit gespeichert: Es werden keine neuen Karten angeboten.' : `Limit gespeichert: ${parsed} neue Karten pro Tag.`);
     } else {
-      setError('Das Limit wurde nicht gespeichert (Speicher nicht verfügbar). Es gilt nur, bis du die Seite verlässt.');
+      setError(
+        `Das Limit wurde nicht gespeichert (Speicher nicht verfügbar). ${parsed} neue Karten pro Tag gelten nur, solange diese Seite geöffnet ist; ` +
+          `andere Seiten wie der Kartentrainer verwenden weiter das zuletzt gespeicherte Limit (sonst den Standard von ${DEFAULT_NEW_CARDS_PER_DAY}).`,
+      );
     }
   };
 

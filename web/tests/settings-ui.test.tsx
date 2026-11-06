@@ -3,7 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Settings from '../src/components/Settings';
 import { progress } from '../src/lib/progress';
-import { NEW_CARDS_KEY } from '../src/lib/settings';
+import { clearSettingsMemory, NEW_CARDS_KEY, readNewCardLimit } from '../src/lib/settings';
 import { PROGRESS_PREFIX } from '../src/lib/storage';
 
 function unit(container: Element, name: string): HTMLElement {
@@ -16,6 +16,7 @@ beforeEach(() => {
   vi.unstubAllGlobals();
   localStorage.clear();
   progress.reset();
+  clearSettingsMemory();
 });
 afterEach(() => {
   cleanup();
@@ -77,6 +78,12 @@ describe('Settings', () => {
     fireEvent.input(input, { target: { value: '5' } });
     fireEvent.click(screen.getByRole('button', { name: 'Limit übernehmen' }));
     await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('nicht gespeichert'));
+    // G3: the value is kept in memory, and the message says honestly how far that reaches
+    expect(readNewCardLimit()).toBe(5);
+    const text = screen.getByRole('alert').textContent ?? '';
+    expect(text).toMatch(/solange diese Seite geöffnet ist/);
+    expect(text).toMatch(/andere Seiten/i);
+    expect(text).not.toMatch(/bis du die Seite verlässt/);
   });
 
   it('works without storage', async () => {
