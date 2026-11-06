@@ -100,7 +100,7 @@ test('playground: a task is checked against the generated snapshot (needs web/sr
   const editor = page.getByRole('textbox', { name: 'SQL-Anweisung' });
   await editor.click();
   await page.keyboard.insertText(task.solution_pg ?? task.solution);
-  if (isMobile) await page.getByRole('button', { name: /^Ausführen/ }).click();
+  if (isMobile) { const b = page.getByRole('button', { name: /^Ausführen/ }); await b.focus(); await page.keyboard.press('Enter'); } // focus+Enter: a pointer click races CodeMirror's scroll-to-cursor on mobile
   else await page.keyboard.press('Control+Enter');
   const result = page.locator('[data-verify-unit="sql-result"]');
   await expect(result).toHaveAttribute('data-verify-verdict', 'correct', { timeout: 30_000 });

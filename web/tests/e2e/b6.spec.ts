@@ -33,7 +33,7 @@ test.describe('smoke: key pages', () => {
     await expect(page.locator('.sql-editor')).toHaveAttribute('data-editor', 'cm', { timeout: 60_000 });
     await page.getByRole('textbox', { name: 'SQL-Anweisung' }).click();
     await page.keyboard.type('SELECT 1 AS eins');
-    if (isMobile) await page.getByRole('button', { name: /^Ausführen/ }).click();
+    if (isMobile) { const b = page.getByRole('button', { name: /^Ausführen/ }); await b.focus(); await page.keyboard.press('Enter'); } // focus+Enter: a pointer click races CodeMirror's scroll-to-cursor on mobile
     else await page.keyboard.press('Control+Enter');
     const result = page.locator('[data-verify-unit="sql-result"]');
     await expect(result).toHaveAttribute('data-verify-state', 'ready', { timeout: 30_000 });

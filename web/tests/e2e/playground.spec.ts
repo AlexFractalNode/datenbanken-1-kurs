@@ -31,7 +31,7 @@ const result = (page: Page) => page.locator('[data-verify-unit="sql-result"]');
 
 /** Ctrl+Enter runs the statement. CodeMirror handles Enter on Android specially, so mobile emulation uses the button. */
 async function execute(page: Page, isMobile: boolean) {
-  if (isMobile) await page.getByRole('button', { name: /^Ausführen/ }).click();
+  if (isMobile) { const b = page.getByRole('button', { name: /^Ausführen/ }); await b.focus(); await page.keyboard.press('Enter'); } // focus+Enter: a pointer click races CodeMirror's scroll-to-cursor on mobile
   else await page.keyboard.press('Control+Enter');
 }
 
@@ -79,7 +79,7 @@ test.describe('sql playground', () => {
     await editor.click();
     await page.keyboard.press('Control+A');
     await page.keyboard.type('SELECT FIRST 3 * FROM kurs');
-    await run.click();
+    await run.focus(); await page.keyboard.press('Enter');
     // the statement failed, not the playground: only the result unit reports the error
     await expect(result(page)).toHaveAttribute('data-verify-state', 'error');
     await expect(result(page)).toHaveAttribute('data-verify-error', /syntax error/i);
@@ -103,7 +103,7 @@ test.describe('sql playground', () => {
     await page.keyboard.press('Control+A');
     await page.keyboard.type('WITH RECURSIVE r(n) AS (SELECT 1 UNION ALL SELECT n + 1 FROM r) SELECT n FROM r WHERE n < 0');
     const started = Date.now();
-    await run.click();
+    await run.focus(); await page.keyboard.press('Enter');
     // the running note is painted while the worker is busy
     const note = page.locator('.pg-running').getByText('Abfrage läuft');
     await expect(note).toBeVisible({ timeout: 3_000 });
@@ -162,7 +162,7 @@ test.describe('sql playground', () => {
     const editor = page.getByRole('textbox', { name: 'SQL-Anweisung' });
     await editor.click();
     await page.keyboard.type('SELECT bezeichnung FROM abteilung ORDER BY bezeichnung DESC LIMIT 3');
-    await page.getByRole('button', { name: /^Ausführen/ }).click();
+    { const b = page.getByRole('button', { name: /^Ausführen/ }); await b.focus(); await page.keyboard.press('Enter'); } // focus+Enter: a pointer click races CodeMirror's scroll-to-cursor on mobile
     await expect(result(page)).toHaveAttribute('data-verify-verdict', 'wrong');
     await expect(page.getByRole('status')).toContainText('Noch nicht richtig');
 
@@ -192,7 +192,7 @@ test.describe('sql playground', () => {
     await page.getByRole('textbox', { name: /Vorhersage/ }).fill('Eine Zeile mit 1');
     await page.getByRole('button', { name: 'Vorhersage festhalten' }).click();
     await expect(run).toBeEnabled();
-    await run.click();
+    await run.focus(); await page.keyboard.press('Enter');
     await expect(result(page)).toHaveAttribute('data-verify-state', 'ready');
     await expect(result(page)).toContainText('Eine Zeile mit 1');
   });
