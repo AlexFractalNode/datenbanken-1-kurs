@@ -4,7 +4,7 @@ import { NAV, activeNavPath, withBase } from '../src/lib/nav';
 const BASE = '/datenbanken-1-kurs/';
 
 describe('navigation', () => {
-  it('contains the eleven sections in the agreed order', () => {
+  it('contains the thirteen sections in the agreed order', () => {
     expect(NAV.map((n) => n.label)).toEqual([
       'Dashboard',
       'Themen',
@@ -14,8 +14,10 @@ describe('navigation', () => {
       'Klausur',
       'Playground',
       'Glossar',
-      'Downloads',
+      'Cheatsheet',
+      'Spickzettel',
       'Lernplan',
+      'Downloads',
       'Einstellungen',
     ]);
   });
@@ -31,5 +33,7 @@ describe('navigation', () => {
     expect(activeNavPath('/datenbanken-1-kurs/themen/t04/', BASE)).toBe('themen/');
     expect(activeNavPath('/datenbanken-1-kurs/glossar', BASE)).toBe('glossar/');
     expect(activeNavPath('/datenbanken-1-kurs/quiz/index.html', BASE)).toBe('quiz/');
+    expect(activeNavPath('/datenbanken-1-kurs/cheatsheet/', BASE)).toBe('cheatsheet/');
+    expect(activeNavPath('/datenbanken-1-kurs/spickzettel/', BASE)).toBe('spickzettel/');
   });
 });

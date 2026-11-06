@@ -334,4 +334,17 @@ describe('Playground: "Ohne Rechner" mode', () => {
     fireEvent.click(toggle);
     expect(runButton().disabled).toBe(false);
   });
+  it('says that the query is running and how to cancel it, and removes the note afterwards', async () => {
+    const { container } = await mount();
+    type(sqlField(), 'SELECT pg_sleep(1.2), 1 AS x');
+    fireEvent.click(runButton());
+    const note = await screen.findByText(/Abfrage läuft/);
+    expect(note.closest('[aria-live="polite"]')).toBeTruthy();
+    expect(note.closest('[aria-live="polite"]')!.textContent).toMatch(/Seite neu, um abzubrechen/);
+    expect(unit(container, 'sql-result').dataset.verifyState).toBe('loading');
+    expect(runButton().disabled).toBe(true);
+    await waitFor(() => expect(unit(container, 'sql-result').dataset.verifyState).toBe('ready'), READY);
+    expect(screen.queryByText(/Abfrage läuft/)).toBeNull();
+    expect(runButton().disabled).toBe(false);
+  });
 });

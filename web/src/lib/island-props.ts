@@ -11,6 +11,7 @@ import type { FlashcardItem } from '../components/Flashcards';
 import type { QuizQuestion } from '../components/Quiz';
 import type { TaskCardData } from '../components/TaskCard';
 import { contentRoot, getDiagram, getExams, getTopic, getTopics, type ExamTask, type Task } from './content';
+import type { DashboardTopic } from './dashboard';
 import { diagramFigureHtml, renderDot } from './diagram';
 import { DIFFICULTY_LABEL, TASK_TYPE_LABEL } from './labels';
 import { renderInlineWithDiagrams, renderMarkdownWithDiagrams } from './markdown';
@@ -100,4 +101,18 @@ export async function examProps(root: string = contentRoot()): Promise<ExamData[
     exams.push({ id: exam.id, title: exam.title, minutes: exam.minutes, tasks });
   }
   return exams;
+}
+
+/** Ids per topic for the dashboard; topics without content stay in the list with empty arrays. */
+export function dashboardTopics(root: string = contentRoot()): DashboardTopic[] {
+  return getTopics(root).map((topic) => {
+    const bundle = getTopic(topic.id, root);
+    return {
+      id: topic.id,
+      title: topic.title,
+      cardIds: bundle.cards.map((c) => c.id),
+      quizIds: bundle.quiz.map((q) => q.id),
+      tasks: bundle.tasks.map((t) => ({ id: t.id, points: t.points })),
+    };
+  });
 }

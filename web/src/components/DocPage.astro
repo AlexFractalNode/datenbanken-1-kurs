@@ -1,0 +1,46 @@
+---
+/**
+ * Course document from `content/de/<slug>.md` (cheatsheet, spickzettel, lernplan) as a page body.
+ * The Markdown goes through the sanitising pipeline (raw HTML escaped, unsafe links dropped).
+ * Without the file the page shows an empty state instead of failing.
+ */
+import { getDoc, type DocSlug } from '../lib/content';
+import { renderMarkdown } from '../lib/markdown';
+import { withBase } from '../lib/nav';
+import { STATUS_CLASS, STATUS_LABEL } from '../lib/labels';
+
+interface Props {
+  slug: DocSlug;
+  /** Verification unit name. */
+  unit: string;
+  /** Heading shown if the document is missing. */
+  fallbackTitle: string;
+  /** Short note below the heading (what this page is for). */
+  lead: string;
+}
+
+const { slug, unit, fallbackTitle, lead } = Astro.props;
+const doc = getDoc(slug);
+const html = doc ? renderMarkdown(doc.body, 2) : '';
+const sections = doc ? (html.match(/<h2[ >]/g) ?? []).length : 0;
+---
+
+<header class="page-head">
+  <h1>{doc?.heading ?? fallbackTitle}</h1>
+  <p class="lead">{lead}</p>
+  {doc && <p class="meta"><span class={STATUS_CLASS[doc.status]}>{STATUS_LABEL[doc.status]}</span></p>}
+</header>
+
+{
+  doc ? (
+    <article class="prose doc" data-verify-unit={unit} data-verify-state="ready" data-verify-count={sections} set:html={html} />
+  ) : (
+    <section class="empty-state" data-verify-unit={unit} data-verify-state="empty" data-verify-count="0" aria-labelledby={`${unit}-missing`}>
+      <h2 id={`${unit}-missing`}>Dieses Dokument ist noch nicht veröffentlicht</h2>
+      <p>
+        Bis dahin helfen dir die <a href={withBase('themen/')}>Zusammenfassungen der Themen</a> und das{' '}
+        <a href={withBase('glossar/')}>Glossar</a>.
+      </p>
+    </section>
+  )
+}

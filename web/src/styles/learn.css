@@ -481,3 +481,141 @@ select:disabled {
   margin-top: 0;
   font-size: var(--fs-2xl);
 }
+
+/* ---------- Dashboard: "Dein Stand" ---------- */
+
+.dash__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: var(--sp-3);
+  margin: 0 0 var(--sp-4);
+}
+
+.dash__stats > div {
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-left: 4px solid var(--c-key);
+  border-radius: var(--radius);
+  padding: var(--sp-3) var(--sp-4);
+}
+
+.dash__stats dt {
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.dash__stats dd {
+  margin: 0;
+}
+
+.dash__stats strong {
+  display: block;
+  font-family: var(--font-serif);
+  font-size: var(--fs-xl);
+  line-height: 1.15;
+}
+
+.dash__stats dd span {
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}
+
+.dash__topics {
+  list-style: none;
+  margin: 0 0 var(--sp-4);
+  padding: 0;
+  border-top: 2px solid var(--c-text);
+}
+
+.dash__topic {
+  padding: var(--sp-3) var(--sp-1);
+  border-bottom: 1px solid var(--c-line);
+}
+
+.dash__title {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-base);
+}
+
+.dash__facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--sp-2) var(--sp-4);
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+
+.dash__facts dt {
+  color: var(--c-text-muted);
+}
+
+.dash__facts dd {
+  margin: 0;
+}
+
+.dash__facts progress {
+  display: block;
+  width: 100%;
+  max-width: 14rem;
+  height: 0.6rem;
+  margin-bottom: var(--sp-1);
+  appearance: none;
+  border: 1px solid var(--c-control-border);
+  border-radius: 999px;
+  background: var(--c-surface-2);
+  overflow: hidden;
+}
+
+.dash__facts progress::-webkit-progress-bar {
+  background: var(--c-surface-2);
+}
+
+.dash__facts progress::-webkit-progress-value {
+  background: var(--c-accent);
+}
+
+.dash__facts progress::-moz-progress-bar {
+  background: var(--c-accent);
+}
+
+/* ---------- Glossary filter ---------- */
+
+.glossary-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-3);
+}
+
+.glossary-filter .field {
+  margin: 0;
+  min-width: min(100%, 16rem);
+}
+
+.glossary-filter input[type='search'] {
+  width: 100%;
+  min-height: 2.75rem;
+  font: inherit;
+  color: var(--c-text);
+  background: var(--c-surface);
+  border: 1px solid var(--c-control-border);
+  border-radius: var(--radius);
+  padding: var(--sp-2) var(--sp-3);
+}
+
+.glossary dt,
+.glossary dd {
+  scroll-margin-top: var(--sp-4);
+}
+
+.glossary dt:target {
+  background: var(--c-key-soft);
+  outline: 2px solid var(--c-focus);
+  outline-offset: 2px;
+}
+
+.glossary__topics {
+  color: var(--c-text-muted);
+  font-size: var(--fs-sm);
+}

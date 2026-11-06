@@ -1,4 +1,5 @@
 ---
+import DocPage from '../components/DocPage.astro';
 import Base from '../layouts/Base.astro';
 import { getExams, getOverview } from '../lib/content';
 import { withBase } from '../lib/nav';
@@ -20,14 +21,16 @@ const phases = PHASES.map((p) => ({
 })).filter((p) => p.topics.length > 0);
 ---
 
-<Base title="Lernplan" description="Vorschlag für eine sinnvolle Reihenfolge beim Lernen.">
-  <header class="page-head">
-    <h1>Lernplan</h1>
-    <p class="lead">
-      Ein Vorschlag in vier Phasen. Jede Phase baut auf der vorherigen auf; plane pro Thema eine Lerneinheit plus Wiederholung
-      mit den Karten.
-    </p>
-  </header>
+<Base title="Lernplan" description="Zwölf-Wochen-Plan und Reihenfolge der Themen für die Klausurvorbereitung.">
+  <DocPage
+    slug="lernplan"
+    unit="lernplan"
+    fallbackTitle="Lernplan"
+    lead="Ein Vorschlag, wie du die Themen über mehrere Wochen verteilst. Plane pro Thema eine Lerneinheit plus Wiederholung mit den Karten."
+  />
+
+  <h2 id="phasen-heading">Reihenfolge nach Themen</h2>
+  <p>Dieselben Themen in vier Phasen. Jede Phase baut auf der vorherigen auf.</p>
 
   <ol class="plan" data-verify-unit="study-plan" data-verify-state={phases.length ? 'ready' : 'empty'} data-verify-count={overview.length}>
     {

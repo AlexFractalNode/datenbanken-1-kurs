@@ -15,8 +15,10 @@ export const NAV: readonly NavItem[] = [
   { path: 'klausur/', label: 'Klausur' },
   { path: 'playground/', label: 'Playground' },
   { path: 'glossar/', label: 'Glossar' },
-  { path: 'downloads/', label: 'Downloads' },
+  { path: 'cheatsheet/', label: 'Cheatsheet' },
+  { path: 'spickzettel/', label: 'Spickzettel' },
   { path: 'lernplan/', label: 'Lernplan' },
+  { path: 'downloads/', label: 'Downloads' },
   { path: 'einstellungen/', label: 'Einstellungen' },
 ];
 

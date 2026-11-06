@@ -17,6 +17,7 @@
  * copy for the current tab. Data with an unknown version marker (e.g. from a newer app) is never
  * overwritten; the app then works on an empty in-memory store and says so.
  */
+import { clearIntroducedToday } from './settings';
 import {
   PROGRESS_FORMAT,
   PROGRESS_PREFIX,
@@ -360,6 +361,7 @@ export function updateProgress(change: (p: ProgressV1) => void | ProgressV1): Up
 export function resetAll(): number {
   memory = null;
   unsaved = false;
+  clearIntroducedToday();
   const hadVersion = readItem(VERSION_KEY) !== null;
   const removed = resetStorage();
   return hadVersion && readItem(VERSION_KEY) === null ? removed - 1 : removed;

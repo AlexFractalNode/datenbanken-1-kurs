@@ -6,11 +6,14 @@ import { getExams } from '../../lib/content';
 import { examProps } from '../../lib/island-props';
 import { withBase } from '../../lib/nav';
 
+/** Canonical pages use the exam id (`e01`); the file name (`exam-01`) redirects to it. */
 export function getStaticPaths() {
-  return getExams().map((exam) => ({ params: { id: exam.id } }));
+  return getExams().flatMap((exam) => [{ params: { id: exam.id } }, { params: { id: exam.slug } }]);
 }
 
 const { id } = Astro.params;
+const slugged = getExams().find((e) => e.slug === id);
+if (slugged) return Astro.redirect(withBase(`klausur/${slugged.id}/`));
 const exam = (await examProps()).find((e) => e.id === id);
 if (!exam) throw new Error(`Unknown exam ${id}`);
 ---

@@ -56,11 +56,11 @@ for (const { path, unit, state, timeout } of PAGES) {
   });
 }
 
-test('navigation has eleven base-prefixed entries and marks the current page', async ({ page, isMobile }) => {
+test('navigation has thirteen base-prefixed entries and marks the current page', async ({ page, isMobile }) => {
   await page.goto('themen/t04/');
   if (isMobile) await page.getByRole('button', { name: 'Menü' }).click();
   const links = page.getByRole('navigation', { name: 'Hauptnavigation' }).getByRole('link');
-  await expect(links).toHaveCount(11);
+  await expect(links).toHaveCount(13);
   for (const href of await links.evaluateAll((els) => els.map((e) => e.getAttribute('href')))) {
     expect(href).toMatch(/^\/datenbanken-1-kurs\//);
   }

@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { RECOVERED_NOTICE, SAVE_FAILED_NOTICE, progress, recordActivity, storageNotice, type FsrsCard } from '../lib/progress';
+import { withBase } from '../lib/nav';
 import { GRADES, GRADE_LABEL, formatInterval, isDue, loadSrs, type Grade, type Srs } from '../lib/srs';
+import { newCardAllowance, readIntroducedToday, readNewCardLimit, recordIntroduced } from '../lib/settings';
 import { topicFromUrl, writeTopicToUrl, type TopicOption } from '../lib/topic-filter';
 
 /** One card with Markdown already rendered (and sanitised) at build time by `renderMarkdown`. */
@@ -30,12 +32,16 @@ export const SCHEDULER_ERROR = 'Der Kartentrainer konnte nicht geladen werden. B
 
 const dateFormat = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
 
-/** Due cards of the filter: known cards (oldest due first) before new ones (content order). */
-function buildQueue(cards: FlashcardItem[], stored: Record<string, FsrsCard>, now: Date): string[] {
+/**
+ * Due cards of the filter: known cards (oldest due first) before new ones (content order). New cards
+ * are capped by the daily limit; `held` is how many new cards the limit keeps back for later.
+ */
+function buildQueue(cards: FlashcardItem[], stored: Record<string, FsrsCard>, now: Date): { queue: string[]; held: number } {
   const due = cards.filter((c) => isDue(stored[c.id], now));
   const reviews = due.filter((c) => stored[c.id]).sort((a, b) => Date.parse(stored[a.id].dueAt) - Date.parse(stored[b.id].dueAt));
   const fresh = due.filter((c) => !stored[c.id]);
-  return [...reviews, ...fresh].map((c) => c.id);
+  const allowed = fresh.slice(0, newCardAllowance(readNewCardLimit(), readIntroducedToday(now).length));
+  return { queue: [...reviews, ...allowed].map((c) => c.id), held: fresh.length - allowed.length };
 }
 
 export default function Flashcards({ cards, topics, initialTopic, loadScheduler = loadSrs }: Props) {
@@ -44,6 +50,8 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
   const [stored, setStored] = useState<Record<string, FsrsCard>>({});
   const [topic, setTopic] = useState('');
   const [queue, setQueue] = useState<string[]>([]);
+  /** New cards that the daily limit keeps back. */
+  const [held, setHeld] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [saveFailed, setSaveFailed] = useState(false);
@@ -68,7 +76,9 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
     setRecovered(loaded.recovered.length > 0);
     setStored(loaded.progress.cards);
     setTopic(start);
-    setQueue(buildQueue(cards.filter((c) => !start || c.topic === start), loaded.progress.cards, new Date()));
+    const built = buildQueue(cards.filter((c) => !start || c.topic === start), loaded.progress.cards, new Date());
+    setQueue(built.queue);
+    setHeld(built.held);
     loadScheduler().then(
       (s) => active && setSrs(s),
       () => active && setError(SCHEDULER_ERROR),
@@ -103,7 +113,9 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
     setTopic(next);
     setRevealed(false);
     setMessage('');
-    setQueue(buildQueue(cards.filter((c) => !next || c.topic === next), stored, new Date()));
+    const built = buildQueue(cards.filter((c) => !next || c.topic === next), stored, new Date());
+    setQueue(built.queue);
+    setHeld(built.held);
     writeTopicToUrl(next);
   };
 
@@ -116,6 +128,8 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
     if (!srs || !current) return;
     const now = new Date();
     const next = srs.review(current.id, stored[current.id], grade, now);
+    // A card without stored state is new: it counts against today's limit from its first rating on.
+    if (!stored[current.id]) recordIntroduced(current.id, now);
     const saved = progress.update((p) => {
       p.cards[current.id] = next;
       recordActivity(p, now);
@@ -243,10 +257,22 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
                 Keine Karten fällig
               </h2>
               <p>Alle fälligen Karten dieser Auswahl sind wiederholt.</p>
+              {held > 0 && (
+                <p>
+                  Das Tageslimit für neue Karten ist erreicht, {held === 1 ? 'eine neue Karte wartet' : `${held} neue Karten warten`} bis
+                  morgen. Das Limit änderst du in den <a href={withBase('einstellungen/')}>Einstellungen</a>.
+                </p>
+              )}
               {nextDue && <p class="meta">Nächste Karte fällig: {dateFormat.format(nextDue)}</p>}
             </>
           )}
         </div>
+      )}
+
+      {state === 'ready' && held > 0 && (
+        <p class="meta">
+          Tageslimit: {held === 1 ? 'eine weitere neue Karte folgt' : `${held} weitere neue Karten folgen`} an einem anderen Tag.
+        </p>
       )}
 
       <p role="status" class="status-line">

@@ -25,11 +25,33 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
-          cache-dependency-path: web/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      # Snapshots for the playground auto-check (PostgreSQL side only; this job has no Firebird).
+      - name: Generate SQL snapshots for the playground (PostgreSQL)
+        run: |
+          npm ci
+          uv run tools/sqltest.py --engines pg --write-snapshots web/src/data/sql-expected
+
+      # PDFs and Anki decks built by the reused ci.yml (artifact "dist" = dist/pdf + dist/anki).
+      # The downloads page publishes the files it finds in ./dist; without them it shows a note.
+      - name: Download PDFs and Anki decks of the checks job
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
+        with:
+          name: dist
+          path: dist
 
       - name: Build site
         working-directory: web

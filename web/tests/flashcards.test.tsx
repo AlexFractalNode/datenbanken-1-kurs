@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/pr
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Flashcards, { type FlashcardItem } from '../src/components/Flashcards';
 import { progress } from '../src/lib/progress';
+import { NEW_CARDS_KEY, NEW_TODAY_KEY, readIntroducedToday } from '../src/lib/settings';
 import { formatInterval, isDue } from '../src/lib/srs';
 
 const CARDS: FlashcardItem[] = [
@@ -249,5 +250,68 @@ describe('srs helpers', () => {
     expect(formatInterval(4.8 * 86_400_000)).toBe('5 Tage');
     expect(formatInterval(60 * 86_400_000)).toBe('2 Mon.');
     expect(formatInterval(400 * 86_400_000)).toBe('1,1 J.');
+  });
+});
+
+describe('Flashcards: daily limit for new cards', () => {
+  it('offers at most the configured number of new cards', async () => {
+    localStorage.setItem(NEW_CARDS_KEY, '2');
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    expect(el.dataset.verifyCount).toBe('2');
+    expect(screen.getByText('2 fällig')).toBeTruthy();
+  });
+
+  it('a limit of 0 stops new cards and says why', async () => {
+    localStorage.setItem(NEW_CARDS_KEY, '0');
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    expect(el.dataset.verifyState).toBe('empty');
+    expect(screen.getByRole('heading', { name: 'Keine Karten fällig' })).toBeTruthy();
+    expect(container.textContent).toContain('Tageslimit');
+  });
+
+  it('counts a rated new card against the limit of today, also after a reload', async () => {
+    localStorage.setItem(NEW_CARDS_KEY, '2');
+    const first = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    await ready(first.container);
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Gut/ }));
+    expect(readIntroducedToday()).toEqual(['t04-c001']);
+    first.unmount();
+    const second = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(second.container);
+    // c001 is scheduled for later, one new card is still allowed today (limit 2, 1 used)
+    expect(el.dataset.verifyCount).toBe('1');
+  });
+
+  it('does not limit reviews of known cards', async () => {
+    localStorage.setItem(NEW_CARDS_KEY, '0');
+    const past = new Date(Date.now() - 86_400_000).toISOString();
+    progress.update((p) => {
+      for (const id of ['t04-c001', 't04-c002', 't06-c001']) {
+        p.cards[id] = { ...FULL_CARD, dueAt: past, lastReviewAt: past, cardId: id };
+      }
+    });
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    expect((await ready(container)).dataset.verifyCount).toBe('3');
+  });
+
+  it('keeps a card rated "Nochmal" in the round although it used the limit', async () => {
+    localStorage.setItem(NEW_CARDS_KEY, '1');
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    expect(el.dataset.verifyCount).toBe('1');
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Nochmal/ }));
+    expect(el.dataset.verifyState).toBe('ready');
+    expect(el.dataset.verifyCount).toBe('1');
+    expect(readIntroducedToday()).toEqual(['t04-c001']);
+  });
+
+  it('ignores a corrupt daily record', async () => {
+    localStorage.setItem(NEW_TODAY_KEY, 'not json');
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    expect((await ready(container)).dataset.verifyCount).toBe('3');
   });
 });

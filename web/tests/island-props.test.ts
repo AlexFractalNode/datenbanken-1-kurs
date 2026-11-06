@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { examProps, flashcardProps, quizProps, taskCardData } from '../src/lib/island-props';
+import { dashboardTopics, examProps, flashcardProps, quizProps, taskCardData } from '../src/lib/island-props';
 import { getTopic } from '../src/lib/content';
 
 const ROOT = 'tests/fixtures/content_ok';
@@ -106,5 +106,20 @@ describe('diagrams in tasks, exams and quiz (same rewrite as on the topic pages)
   it('fails the build for a reference to a missing diagram', async () => {
     const task = { ...getTopic('t04', ROOT).tasks[0], prompt: '![Fehlt](diagrams/gibt-es-nicht.dot)' };
     await expect(taskCardData(task, 't04', ROOT)).rejects.toThrow();
+  });
+});
+
+describe('dashboardTopics', () => {
+  it('lists card, quiz and task ids per topic', () => {
+    const t04 = dashboardTopics(ROOT).find((t) => t.id === 't04')!;
+    expect(t04.cardIds).toEqual(['t04-c001', 't04-c002', 't04-c003']);
+    expect(t04.quizIds).toEqual(['t04-q001', 't04-q002']);
+    expect(t04.tasks.map((t) => t.id)).toContain('t04-p001');
+    expect(t04.tasks.every((t) => t.points > 0)).toBe(true);
+  });
+
+  it('keeps topics without content, so the dashboard lists every topic', () => {
+    const t01 = dashboardTopics(ROOT).find((t) => t.id === 't01')!;
+    expect(t01).toEqual({ id: 't01', title: expect.any(String), cardIds: [], quizIds: [], tasks: [] });
   });
 });

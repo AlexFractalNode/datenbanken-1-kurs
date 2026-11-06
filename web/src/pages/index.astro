@@ -1,6 +1,8 @@
 ---
+import Dashboard from '../components/Dashboard';
 import Base from '../layouts/Base.astro';
 import { getExams, getOverview } from '../lib/content';
+import { dashboardTopics } from '../lib/island-props';
 import { STATUS_CLASS, STATUS_LABEL } from '../lib/labels';
 import { withBase } from '../lib/nav';
 
@@ -41,12 +43,7 @@ const state = overview.length === 0 ? 'empty' : 'ready';
 
     <section class="panel" aria-labelledby="progress-heading">
       <h2 id="progress-heading">Dein Stand</h2>
-      <div data-verify-unit="dashboard-progress" data-verify-state="empty" data-verify-count="0">
-        <p>
-          Noch kein Lernfortschritt gespeichert. Fällige Karten, Fortschritt pro Thema und deine Lernserie erscheinen
-          hier, sobald du mit Karten und Quiz übst.
-        </p>
-      </div>
+      <Dashboard client:load topics={dashboardTopics()} />
       <p class="meta">
         Inhaltsstand: {withContent} von {overview.length} Themen haben eine Zusammenfassung ({coverage} %).
       </p>

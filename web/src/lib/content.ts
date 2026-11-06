@@ -488,6 +488,43 @@ function loadGlossary(root: string): GlossaryEntry[] {
 }
 
 // ---------------------------------------------------------------------------
+// Course documents (cheatsheet, spickzettel, lernplan)
+// ---------------------------------------------------------------------------
+
+export const DOC_SLUGS = ['cheatsheet', 'spickzettel', 'lernplan'] as const;
+export type DocSlug = (typeof DOC_SLUGS)[number];
+
+const docFrontmatterSchema = z.looseObject({ title: z.string(), lang: z.string(), status });
+
+export interface Doc {
+  slug: DocSlug;
+  /** Frontmatter title (long form, e.g. with paper size). */
+  title: string;
+  lang: string;
+  status: Status;
+  /** Text of the first level-1 heading (page h1), or the title if the body has none. */
+  heading: string;
+  /** Markdown body without that heading. */
+  body: string;
+}
+
+function loadDoc(slug: DocSlug, root: string): Doc | null {
+  const path = join(root, LANG, `${slug}.md`);
+  if (!isFile(path)) return null;
+  const { data, body } = splitFrontmatter(readFileSync(path, 'utf8'), path);
+  const fm = parseWith(docFrontmatterSchema, data, path);
+  const h1 = /^\s*#[ \t]+([^\n]*?)[ \t#]*(?:\r?\n|$)/.exec(body);
+  return {
+    slug,
+    title: fm.title,
+    lang: fm.lang,
+    status: fm.status,
+    heading: h1 && h1[1].trim() !== '' ? h1[1].trim() : fm.title,
+    body: (h1 ? body.slice(h1[0].length) : body).trim(),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Public, cached accessors
 // ---------------------------------------------------------------------------
 
@@ -532,4 +569,9 @@ export function getExams(root: string = contentRoot()): Exam[] {
 
 export function getGlossary(root: string = contentRoot()): GlossaryEntry[] {
   return cached(root, 'glossary', () => loadGlossary(root));
+}
+
+/** A course document (`de/<slug>.md`), or null if the file does not exist. Invalid files fail the build. */
+export function getDoc(slug: DocSlug, root: string = contentRoot()): Doc | null {
+  return cached(root, `doc:${slug}`, () => loadDoc(slug, root));
 }

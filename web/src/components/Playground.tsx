@@ -498,6 +498,14 @@ export default function Playground({ tasks, databases, topics, codeMirror = true
             Datenbank zurücksetzen
           </button>
         </div>
+        <div aria-live="polite" class="pg-running">
+          {running && (
+            <p class="notice notice--info">
+              <strong>Abfrage läuft …</strong> Die Datenbank arbeitet im Browser und blockiert die Seite, bis sie fertig ist. Hängt sie,
+              lade die Seite neu, um abzubrechen; nicht gespeicherter Text im Editor geht dabei verloren.
+            </p>
+          )}
+        </div>
         <p class="meta" id={RUN_HELP_ID}>
           {blocked ?? 'Bereit.'} Das Zurücksetzen betrifft das freie Üben; Aufgaben starten ohnehin immer vom Ausgangszustand.
         </p>

@@ -1,57 +1,78 @@
 ---
 import Base from '../layouts/Base.astro';
-import { getExams, getFurtherReading, getSources } from '../lib/content';
-import { REPO_URL } from '../lib/nav';
+import { getFurtherReading, getSources } from '../lib/content';
+import { listDownloads, type DownloadGroup, type DownloadItem } from '../lib/downloads';
+import { REPO_URL, withBase } from '../lib/nav';
 
-const releaseBase = `${REPO_URL}/releases/latest/download`;
-const exams = getExams();
+const downloads = listDownloads();
+const available = downloads.filter((d) => d.available);
+const state = available.length > 0 ? 'ready' : 'empty';
 
-const downloads = [
-  {
-    title: 'Anki-Kartenstapel',
-    file: 'db1-de.apkg',
-    text: 'Alle Lernkarten als Anki-Deck, ein Unterdeck pro Thema. Lässt sich mit dem Fortschritt in Anki weiterlernen.',
-  },
-  ...exams.flatMap((exam) => [
-    { title: exam.title, file: `${exam.slug}.pdf`, text: `Zum Ausdrucken, ${exam.minutes} Minuten Bearbeitungszeit.` },
-    { title: `${exam.title} – Lösung`, file: `${exam.slug}-loesung.pdf`, text: 'Musterlösung mit Bewertungsraster zur Selbstkontrolle.' },
-  ]),
-  { title: 'Cheatsheet', file: 'cheatsheet.pdf', text: 'Die wichtigsten Begriffe, Notationen und SQL-Bausteine auf zwei A4-Seiten.' },
+const GROUPS: { id: DownloadGroup; title: string; compact: boolean }[] = [
+  { id: 'anki', title: 'Anki', compact: false },
+  { id: 'exam', title: 'Probeklausuren', compact: false },
+  { id: 'material', title: 'Lernmaterial', compact: false },
+  { id: 'anki-topic', title: 'Anki-Decks pro Thema', compact: true },
+  { id: 'sheets', title: 'Aufgabenblätter pro Thema', compact: true },
 ];
+const grouped = GROUPS.map((g) => ({ ...g, items: downloads.filter((d) => d.group === g.id) })).filter((g) => g.items.length > 0);
 
 const furtherReading = getFurtherReading();
 const usedSources = Object.values(getSources())
   .filter((s) => s.kind !== 'further-reading')
   .sort((a, b) => a.title.localeCompare(b.title, 'de'));
+
+const href = (d: DownloadItem) => withBase(`downloads/${d.file}`);
 ---
 
 <Base title="Downloads" description="Anki-Deck, Probeklausuren und Cheatsheet zum Herunterladen.">
   <header class="page-head">
     <h1>Downloads</h1>
-    <p class="lead">Material zum Offline-Lernen. Die Dateien gehören zur jeweils neuesten Version des Kurses.</p>
+    <p class="lead">Material zum Offline-Lernen: Anki-Decks, Probeklausuren mit Lösung, Cheatsheet und Aufgabenblätter.</p>
   </header>
 
-  <section aria-labelledby="files-heading" data-verify-unit="downloads" data-verify-state="ready" data-verify-count={downloads.length}>
-    <h2 id="files-heading" class="visually-hidden">Dateien</h2>
-    <ul class="download-list">
-      {
-        downloads.map((d) => (
-          <li class="card">
-            <h3>{d.title}</h3>
-            <p>{d.text}</p>
-            <p>
-              <a class="button button--ghost" href={`${releaseBase}/${d.file}`} download>
-                {d.file} herunterladen
-              </a>
-            </p>
-          </li>
-        ))
-      }
-    </ul>
+  <div data-verify-unit="downloads" data-verify-state={state} data-verify-count={available.length}>
+    {
+      state === 'empty' && (
+        <div class="notice notice--info" role="note">
+          <p>
+            In diesem Build liegen noch keine fertigen Dateien bei. Sie entstehen beim Veröffentlichen eines Releases und stehen dann
+            hier und unter <a href={`${REPO_URL}/releases`}>Releases auf GitHub</a> bereit.
+          </p>
+        </div>
+      )
+    }
+    {
+      grouped.map((g) => (
+        <section aria-labelledby={`dl-${g.id}`} class="download-group">
+          <h2 id={`dl-${g.id}`}>{g.title}</h2>
+          <ul class={g.compact ? 'download-list download-list--compact' : 'download-list'}>
+            {g.items.map((d) => (
+              <li class="card" data-file={d.file} data-available={d.available ? 'true' : 'false'}>
+                <h3>{d.title}</h3>
+                <p>{d.text}</p>
+                {d.available ? (
+                  <p>
+                    <a class="button button--ghost" href={href(d)} download>
+                      {d.file} herunterladen
+                    </a>
+                  </p>
+                ) : (
+                  <p class="meta">
+                    <span class="badge">noch nicht verfügbar</span> Diese Datei liegt in diesem Build nicht bei. Du findest sie
+                    bei den <a href={`${REPO_URL}/releases`}>Releases auf GitHub</a>, sobald ein Release veröffentlicht ist.
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
     <p class="meta">
       Alle Versionen und Änderungen: <a href={`${REPO_URL}/releases`}>Releases auf GitHub</a>.
     </p>
-  </section>
+  </div>
 
   {
     usedSources.length > 0 && (

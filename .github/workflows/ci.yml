@@ -84,6 +84,12 @@ jobs:
       - name: Install root Node dependencies (PGlite runner)
         run: npm ci
 
+      # The playground compares results with snapshots of the PostgreSQL side. They are generated, not
+      # committed (web/src/data/sql-expected is git-ignored) and must exist before the web build.
+      # The Firebird side is cross-checked by the sqltest step of check.py below.
+      - name: Generate SQL snapshots for the playground (PostgreSQL)
+        run: uv run tools/sqltest.py --engines pg --write-snapshots web/src/data/sql-expected
+
       - name: Run all checks
         run: uv run tools/check.py --ci
 
@@ -98,8 +104,6 @@ jobs:
           if-no-files-found: ignore
 
   smoke:
-    # Prepared in A14, enabled by B6 (remove `if: false`).
-    if: false
     needs: checks
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -126,6 +130,15 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       # playwright.config.ts builds the site and serves it with `astro preview` itself.
-      - name: Playwright smoke tests
+      # Default content root: the web test fixture (states that need content are deterministic).
+      - name: Playwright smoke tests (fixture content)
         working-directory: web
+        run: npm run test:e2e
+
+      # The same pages with the real course content (exam-01, exam-02, topic pages, glossary, documents).
+      - name: Playwright smoke tests (real content)
+        working-directory: web
+        env:
+          E2E_REAL: "1"
+          CONTENT_ROOT: ../content
         run: npm run test:e2e

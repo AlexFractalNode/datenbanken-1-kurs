@@ -1,71 +1,26 @@
 ---
+import Glossary from '../components/Glossary';
 import Base from '../layouts/Base.astro';
-import { getGlossary, type GlossaryEntry } from '../lib/content';
+import { getGlossary, getTopics } from '../lib/content';
+import { buildGlossaryItems } from '../lib/glossary';
+import { withBase } from '../lib/nav';
 
-const entries = getGlossary();
-
-/** Group by first letter; umlauts sort with their base letter (Ä → A). */
-function letterOf(term: string): string {
-  const first = term.trim().charAt(0).toLocaleUpperCase('de');
-  const base = first.normalize('NFD').replace(/[̀-ͯ]/g, '');
-  return /[A-Z]/.test(base) ? base : '#';
-}
-
-const groups = new Map<string, GlossaryEntry[]>();
-for (const entry of entries) {
-  const letter = letterOf(entry.de);
-  groups.set(letter, [...(groups.get(letter) ?? []), entry]);
-}
-const letters = [...groups.keys()].sort((a, b) => a.localeCompare(b, 'de'));
+const topics = getTopics();
+const items = buildGlossaryItems(
+  getGlossary(),
+  new Set(topics.map((t) => t.id)),
+  (id) => withBase(`themen/${id}/`),
+);
 ---
 
 <Base title="Glossar" description="Fachbegriffe der Datenbanken mit deutscher und englischer Bezeichnung.">
   <header class="page-head">
     <h1>Glossar</h1>
-    <p class="lead">Fachbegriffe kurz erklärt – mit der englischen Bezeichnung, die dir in Dokumentationen begegnet.</p>
+    <p class="lead">
+      Fachbegriffe kurz erklärt – mit der englischen Bezeichnung, die dir in Dokumentationen begegnet. Jeder Eintrag hat einen
+      eigenen Anker, Verweise wie „siehe …“ sind Links.
+    </p>
   </header>
 
-  <div data-verify-unit="glossary" data-verify-state={entries.length ? 'ready' : 'empty'} data-verify-count={entries.length}>
-    {
-      entries.length === 0 ? (
-        <section class="empty-state" aria-labelledby="no-glossary">
-          <h2 id="no-glossary">Das Glossar wird gerade aufgebaut</h2>
-          <p>Hier erscheinen bald die wichtigsten Begriffe aller Themen.</p>
-        </section>
-      ) : (
-        <>
-          <nav aria-label="Buchstaben">
-            <ul class="letter-nav">
-              {letters.map((l) => (
-                <li>
-                  <a href={`#buchstabe-${l === '#' ? 'sonstige' : l.toLowerCase()}`}>{l}</a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-          {letters.map((l) => (
-            <section class="glossary-group" aria-labelledby={`buchstabe-${l === '#' ? 'sonstige' : l.toLowerCase()}`}>
-              <h2 id={`buchstabe-${l === '#' ? 'sonstige' : l.toLowerCase()}`}>{l}</h2>
-              <dl class="glossary">
-                {groups.get(l)!.map((g) => (
-                  <>
-                    <dt id={g.id}>
-                      {g.de}
-                      {g.en.toLocaleLowerCase('de') !== g.de.toLocaleLowerCase('de') && (
-                        <span class="en" lang="en">
-                          {g.en}
-                        </span>
-                      )}
-                      {g.keep_english && <span class="badge">Fachbegriff bleibt englisch</span>}
-                    </dt>
-                    <dd>{g.def_de}</dd>
-                  </>
-                ))}
-              </dl>
-            </section>
-          ))}
-        </>
-      )
-    }
-  </div>
+  <Glossary client:load items={items} topics={topics.map((t) => ({ id: t.id, title: t.title }))} />
 </Base>
