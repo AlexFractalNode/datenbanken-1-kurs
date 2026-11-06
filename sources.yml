@@ -591,6 +591,16 @@
   topics: [t13]
   refs: ["Parametrisierte Anweisungen"]
 
+- id: pep-249
+  title: "PEP 249 – Python Database API Specification v2.0"
+  author: Marc-André Lemburg
+  url: "https://peps.python.org/pep-0249/"
+  license: "Public Domain (laut Copyright-Abschnitt des PEP)"
+  accessed: "2026-11-06"
+  kind: docs
+  topics: [t13]
+  refs: ["Connection Objects (close, commit, rollback, cursor), Cursor Objects (execute, fetchone, fetchall), Module Interface (paramstyle: qmark, numeric, named, format, pyformat)"]
+
 # ---------- Primärliteratur / weiterführend (nur Verweis, keine topics) ----------
 - id: codd-1970-relational-model
   title: "A Relational Model of Data for Large Shared Data Banks"
