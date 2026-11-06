@@ -1,0 +1,274 @@
+- id: t05-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grad, kardinalitaet]
+  type: single
+  question: |-
+    Die Tabelle `raum` hat die Spalten `raum_id`, `bezeichnung`, `etage`, `plaetze` und `hat_klavier` und enthält derzeit 6 Zeilen. Welche Angabe ist richtig?
+  options:
+    - text: "Grad 5, Kardinalität 6"
+      correct: true
+      explain: "Der Grad zählt die Attribute (Spalten), die Kardinalität die Tupel (Zeilen)."
+    - text: "Grad 6, Kardinalität 5"
+      correct: false
+      explain: "Hier sind die Begriffe vertauscht. Grad = Spalten, Kardinalität = Zeilen."
+    - text: "Grad 5, Kardinalität 1:n"
+      correct: false
+      explain: "1:n ist eine Kardinalität eines Beziehungstyps im ER-Modell. Die Kardinalität einer Relation ist eine Anzahl von Tupeln."
+    - text: "Grad 30, Kardinalität 6"
+      correct: false
+      explain: "30 wäre die Zahl der Zellen (5 · 6). Der Grad zählt nur die Attribute."
+- id: t05-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [eigenschaften, relation]
+  type: multi
+  question: |-
+    Welche Aussagen gelten für eine Relation im (reinen) relationalen Modell?
+  options:
+    - text: "Sie enthält keine zwei gleichen Tupel."
+      correct: true
+      explain: "Eine Relation ist eine Menge von Tupeln. In einer Menge kommt jedes Element höchstens einmal vor."
+    - text: "Die Reihenfolge der Tupel trägt keine Information."
+      correct: true
+      explain: "Mengen sind ungeordnet. Ein Tupel wird über seine Werte (Schlüssel) gefunden, nicht über seine Position."
+    - text: "Jeder Attributwert ist atomar und stammt aus der Domäne des Attributs."
+      correct: true
+      explain: "Eine Zelle enthält genau einen unteilbaren Wert, keine Liste. Das entspricht der 1. Normalform."
+    - text: "Das erste Tupel einer Relation ist ihr Primärschlüssel."
+      correct: false
+      explain: "Ein Primärschlüssel ist eine Attributmenge, kein Tupel. Ein „erstes Tupel“ gibt es ohne Ordnung gar nicht."
+    - text: "Zwei Attribute einer Relation dürfen denselben Namen haben, solange sie an verschiedenen Positionen stehen."
+      correct: false
+      explain: "Attribute werden über ihren Namen angesprochen. Die Namen müssen deshalb innerhalb einer Relation eindeutig sein."
+- id: t05-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-integritaet, operationen]
+  type: single
+  question: |-
+    Die Tabelle `kurs` enthält den Fremdschlüssel `raum_id → raum`. Welche Operation kann die referenzielle Integrität zwischen diesen beiden Tabellen **nicht** verletzen?
+  options:
+    - text: "Einen Kurs löschen (`DELETE FROM kurs …`)."
+      correct: true
+      explain: "Wird eine verweisende Zeile gelöscht, verschwindet nur ein Verweis. Es entsteht kein Verweis ins Leere."
+    - text: "Einen Kurs mit einer `raum_id` einfügen, die es in `raum` nicht gibt."
+      correct: false
+      explain: "Das ist der typische Verstoß: ein Fremdschlüsselwert ohne passendes Tupel in der Elterntabelle."
+    - text: "Einen Raum löschen, auf den noch Kurse verweisen."
+      correct: false
+      explain: "Danach zeigten die Kurse auf einen nicht mehr vorhandenen Raum. Das DBMS lehnt ab oder führt eine referenzielle Aktion aus."
+    - text: "Die `raum_id` eines Raums ändern, auf den Kurse verweisen."
+      correct: false
+      explain: "Die alten Verweise zeigten danach ins Leere. Ist keine ON-UPDATE-Aktion angegeben, gilt NO ACTION, und die Änderung wird abgewiesen. CASCADE, SET NULL oder SET DEFAULT würden die Kindzeilen stattdessen anpassen."
+- id: t05-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [benutzerdefinierte-integritaet, einordnung]
+  type: single
+  question: |-
+    Regel: „Ein Kurs darf nicht vor seinem Startdatum enden“ (`enddatum >= startdatum` in derselben Zeile). Zu welcher Integritätsart gehört sie?
+  options:
+    - text: "benutzerdefinierte Integrität"
+      correct: true
+      explain: "Die Regel verknüpft zwei Attribute nach fachlicher Logik. Sie folgt weder aus einem Schlüssel noch aus der Domäne eines einzelnen Attributs. Deklarativ als CHECK lösbar."
+    - text: "Domänenintegrität"
+      correct: false
+      explain: "Die Domäne beschränkt die Werte eines einzelnen Attributs. Jedes Datum ist für sich zulässig, erst der Vergleich zweier Spalten macht die Regel aus."
+    - text: "Entitätsintegrität"
+      correct: false
+      explain: "Die Entitätsintegrität betrifft nur den Primärschlüssel (eindeutig, nicht NULL)."
+    - text: "referenzielle Integrität"
+      correct: false
+      explain: "Hier wird nicht auf eine andere Zeile oder Tabelle verwiesen."
+- id: t05-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [domaenenintegritaet, einordnung]
+  type: single
+  question: |-
+    Die Spalte `etage` hat den Datentyp `SMALLINT`. Fachlich gibt es nur die Etagen −1 (Keller) bis 3. Was beschreibt diese Einschränkung, und wie setzt man sie deklarativ um?
+  options:
+    - text: "Domänenintegrität, z. B. mit `CHECK (etage BETWEEN -1 AND 3)`."
+      correct: true
+      explain: "Die Domäne ist hier enger als der Datentyp. Ein CHECK auf eine Spalte oder eine DOMAIN mit CHECK (VALUE …) setzt sie durch."
+    - text: "Entitätsintegrität, z. B. mit `PRIMARY KEY (etage)`."
+      correct: false
+      explain: "Ein Primärschlüssel würde verlangen, dass jede Etage nur einmal vorkommt. Das hat mit dem erlaubten Wertebereich nichts zu tun."
+    - text: "Referenzielle Integrität, z. B. mit `FOREIGN KEY (etage) REFERENCES raum (raum_id)`."
+      correct: false
+      explain: "Ein Fremdschlüssel auf Raumnummern ergibt fachlich keinen Sinn. Eine eigene Tabelle mit erlaubten Etagen ginge zwar, ist hier aber unnötig aufwendig."
+    - text: "Gar nicht, dafür braucht man einen Trigger."
+      correct: false
+      explain: "Die Regel betrifft nur einen Wert einer Zeile. Das kann ein CHECK-Constraint deklarativ prüfen."
+- id: t05-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, verweisziel]
+  type: truefalse
+  question: |-
+    „In Firebird 3 kann `FOREIGN KEY … REFERENCES` nur auf die Primärschlüsselspalte(n) der Zieltabelle zeigen.“
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Firebird 3 erlaubt als Ziel auch eine Spalte bzw. Spaltenkombination mit UNIQUE-Constraint. Der Primärschlüssel wird nur dann genommen, wenn nach REFERENCES keine Spalte steht."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig. Firebird 3, PostgreSQL und SQLite erlauben als Ziel den Primärschlüssel oder eine UNIQUE-Spaltenkombination. Auf der Ebene des Modells ist die Definition „Fremdschlüssel verweist auf den Primärschlüssel“ trotzdem vollständig richtig. Sie beschreibt den Normalfall, SQL lässt nur mehr zu."
+- id: t05-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [check, "null"]
+  type: single
+  question: |-
+    Die Spalte `instrument.leihgebuehr` hat die Domäne `d_betrag` (`NUMERIC(8,2) CHECK (VALUE >= 0)`) und kein `NOT NULL`. Ein Instrument wird mit `leihgebuehr = NULL` eingefügt. Was passiert?
+  options:
+    - text: "Die Zeile wird eingefügt."
+      correct: true
+      explain: "NULL >= 0 ergibt UNKNOWN. Ein CHECK, auch der einer Domäne, gilt bei TRUE oder UNKNOWN als erfüllt. Nur FALSE wird abgewiesen."
+    - text: "Die Zeile wird abgewiesen, weil NULL nicht größer oder gleich 0 ist."
+      correct: false
+      explain: "NULL ist weder größer noch kleiner als 0, der Vergleich ist UNKNOWN. Das reicht für einen CHECK."
+    - text: "Die Zeile wird eingefügt, `leihgebuehr` wird dabei automatisch auf 0 gesetzt."
+      correct: false
+      explain: "Ein CHECK ändert keine Werte. Er prüft nur. Einen Ersatzwert liefert allenfalls ein DEFAULT, und auch der nur, wenn die Spalte weggelassen wird."
+    - text: "Die Zeile wird abgewiesen, weil die Entitätsintegrität verletzt ist."
+      correct: false
+      explain: "leihgebuehr gehört nicht zum Primärschlüssel. Die Entitätsintegrität betrifft nur PK-Attribute."
+- id: t05-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [deklarativ, prozedural, trigger]
+  type: multi
+  question: |-
+    Welche dieser Regeln lassen sich **deklarativ** (mit `NOT NULL`, `UNIQUE`, `CHECK` oder `FOREIGN KEY`) durchsetzen, ohne Trigger?
+  options:
+    - text: "Eine Lehrkraft kann sich nicht selbst vertreten (`vertreter_id <> lehrkraft_id` in derselben Zeile)."
+      correct: true
+      explain: "Vergleich zweier Spalten derselben Zeile: ein CHECK-Constraint genügt."
+    - text: "Jeder Kurs verweist auf eine existierende Lehrkraft."
+      correct: true
+      explain: "Das ist genau die referenzielle Integrität, gesichert durch einen FOREIGN KEY (mit NOT NULL, falls Pflicht)."
+    - text: "Für einen Kurs gibt es höchstens so viele aktive Belegungen, wie `max_teilnehmer` angibt."
+      correct: false
+      explain: "Dafür muss man Zeilen zählen und mit einer anderen Tabelle vergleichen. PostgreSQL erlaubt keine Unterabfrage im CHECK. Firebird 3 erlaubt sie zwar, prüft sie aber nur, wenn sich die eigene Zeile ändert, etwa nicht beim Senken von max_teilnehmer. Zuverlässig geht das nur per Trigger (oder Prüfung in der Anwendung)."
+    - text: "Der Stundensatz einer Lehrkraft darf bei einer Änderung nicht sinken."
+      correct: false
+      explain: "Die Regel vergleicht den alten mit dem neuen Wert. Ein Constraint sieht nur den neuen Zustand. Ein BEFORE-UPDATE-Trigger kann OLD und NEW vergleichen."
+    - text: "Keine zwei Räume haben dieselbe Bezeichnung."
+      correct: true
+      explain: "UNIQUE auf bezeichnung. Die Eindeutigkeit über alle Zeilen prüft das DBMS hier selbst."
+- id: t05-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [entitaetsintegritaet, zusammengesetzter-schluessel]
+  type: single
+  question: |-
+    Die Tabelle `belegung` hat den Primärschlüssel `(schueler_id, kurs_id)`. Es wird versucht, eine Belegung mit `schueler_id = NULL` und `kurs_id = 8` einzufügen. Welche Integritätsbedingung ist verletzt?
+  options:
+    - text: "Entitätsintegrität"
+      correct: true
+      explain: "Kein Teil eines Primärschlüssels darf NULL sein, auch nicht bei einem zusammengesetzten Schlüssel."
+    - text: "Referenzielle Integrität"
+      correct: false
+      explain: "Ein NULL im Fremdschlüssel verletzt die referenzielle Integrität nicht, denn NULL wird nicht geprüft. Verletzt ist die Regel für den Primärschlüssel."
+    - text: "Keine, weil `kurs_id` allein schon einen Wert hat."
+      correct: false
+      explain: "Der Schlüssel besteht aus beiden Spalten. Jede einzelne muss einen Wert haben."
+    - text: "Domänenintegrität, weil NULL keine Zahl ist."
+      correct: false
+      explain: "Bei einer NULL-fähigen Nicht-Schlüsselspalte wäre NULL zulässig. Das Problem ist hier, dass die Spalte zum Primärschlüssel gehört."
+- id: t05-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, "null"]
+  type: single
+  question: |-
+    `zahlung.ausleihe_id` ist ein Fremdschlüssel auf `ausleihe` und darf NULL sein (z. B. bei einer Kursgebühr). Eine Zahlung wird mit `ausleihe_id = NULL` eingefügt. Was gilt für diese Spalte?
+  options:
+    - text: "Die Zeile wird eingefügt, eine passende Ausleihe wird nicht gesucht."
+      correct: true
+      explain: "Ein NULL-Fremdschlüssel bedeutet „kein Verweis“. Die referenzielle Integrität verlangt nur für Werte ungleich NULL ein Gegenstück."
+    - text: "Die Zeile wird abgewiesen, weil es in `ausleihe` keine Zeile mit `ausleihe_id = NULL` gibt."
+      correct: false
+      explain: "NULL heißt „kein Verweis“ und wird per Definition der referenziellen Integrität nicht geprüft. Eine Elternzeile mit NULL-Schlüssel gibt es ohnehin nicht."
+    - text: "Das DBMS setzt `ausleihe_id` auf die zuletzt angelegte Ausleihe."
+      correct: false
+      explain: "Ein Fremdschlüssel ergänzt keine Werte, er prüft nur."
+    - text: "Die Zeile wird eingefügt, verletzt aber die Entitätsintegrität."
+      correct: false
+      explain: "ausleihe_id ist in zahlung kein Teil des Primärschlüssels. Die Entitätsintegrität ist nicht betroffen."
+- id: t05-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktion, no-action]
+  type: single
+  question: |-
+    `kurs.lehrkraft_id` ist ein Fremdschlüssel auf `lehrkraft`, ohne `ON DELETE`-Klausel angelegt (Firebird 3). Eine Lehrkraft, die noch drei Kurse leitet, soll gelöscht werden. Was passiert?
+  options:
+    - text: "Das `DELETE` wird abgewiesen."
+      correct: true
+      explain: "Ohne Angabe gilt NO ACTION: Solange Kindzeilen auf die Lehrkraft verweisen, darf sie nicht gelöscht werden."
+    - text: "Die drei Kurse werden mitgelöscht."
+      correct: false
+      explain: "Das wäre ON DELETE CASCADE. Es muss ausdrücklich angegeben werden."
+    - text: "In den drei Kursen wird `lehrkraft_id` auf NULL gesetzt."
+      correct: false
+      explain: "Das wäre ON DELETE SET NULL, und es scheiterte zusätzlich, wenn lehrkraft_id NOT NULL ist."
+    - text: "Die Lehrkraft wird gelöscht, die Kurse behalten ihre alte `lehrkraft_id`."
+      correct: false
+      explain: "Damit entstünden Verweise ins Leere. Genau das verhindert der Fremdschlüssel."
+- id: t05-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anwendung, deklarativ]
+  type: truefalse
+  question: |-
+    „Wenn das Anwendungsprogramm vor jedem Speichern prüft, dass `rabatt_prozent` zwischen 0 und 50 liegt, ist ein `CHECK`-Constraint in der Datenbank überflüssig.“
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Die Prüfung im Programm schützt nur Änderungen über dieses Programm. Importe, andere Anwendungen oder direkte SQL-Befehle umgehen sie."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig. Ein CHECK im Schema wirkt bei jeder Änderung, egal woher sie kommt. Eine zusätzliche Prüfung in der Anwendung ist für freundliche Fehlermeldungen sinnvoll, ersetzt den Constraint aber nicht."
+- id: t05-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, datentyp]
+  type: single
+  question: |-
+    In `lehrkraft` ist `person_id INTEGER` der Primärschlüssel. Eine neue Tabelle soll `lehrkraft_id VARCHAR(10)` als Fremdschlüssel auf `lehrkraft (person_id)` erhalten. Wie ist das zu bewerten?
+  options:
+    - text: "Fehlerhaft: Fremdschlüssel und referenzierter Schlüssel müssen dieselbe Domäne bzw. einen kompatiblen Datentyp haben."
+      correct: true
+      explain: "Die Werte des Fremdschlüssels müssen aus der Wertemenge des referenzierten Schlüssels stammen können. Text und Ganzzahl passen nicht zusammen, und viele DBMS lehnen das ab."
+    - text: "Fehlerhaft, weil der Fremdschlüssel nicht `lehrkraft_id` heißen darf, wenn die Zielspalte `person_id` heißt."
+      correct: false
+      explain: "Der Name ist frei wählbar. Oft benennt man den FK nach der Rolle, z. B. lehrkraft_id oder vertreter_id."
+    - text: "In Ordnung, weil Zahlen sich als Text speichern lassen."
+      correct: false
+      explain: "Dann wären auch Werte wie 'abc' zulässig, die nie zu einem INTEGER-Schlüssel passen. Außerdem vergleichen sich '07' und 7 nicht wie gewünscht."
+    - text: "In Ordnung, solange die Spalte `NOT NULL` ist."
+      correct: false
+      explain: "NOT NULL regelt nur die Pflicht, nicht die Typgleichheit."
+- id: t05-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [relation, formal]
+  type: single
+  question: |-
+    Für eine Relation `r` über den Attributen A₁, …, Aₙ mit den Domänen D₁, …, Dₙ gilt formal …
+  options:
+    - text: "r ⊆ D₁ × D₂ × … × Dₙ"
+      correct: true
+      explain: "Eine Relation ist eine Teilmenge des kartesischen Produkts der Domänen. Gespeichert ist nur eine Auswahl der denkbaren Kombinationen."
+    - text: "r = D₁ × D₂ × … × Dₙ"
+      correct: false
+      explain: "Dann enthielte die Relation jede denkbare Wertkombination. Eine Tabelle mit allen möglichen Räumen wäre sinnlos."
+    - text: "r ⊆ D₁ ∪ D₂ ∪ … ∪ Dₙ"
+      correct: false
+      explain: "Die Vereinigung enthält einzelne Werte, keine Tupel. Ein Tupel braucht je Attribut einen Wert."
+    - text: "r ist eine geordnete Liste von Tupeln aus D₁ × … × Dₙ."
+      correct: false
+      explain: "Eine Relation ist eine Menge, also ohne Reihenfolge und ohne Duplikate."

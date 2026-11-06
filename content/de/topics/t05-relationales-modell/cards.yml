@@ -1,0 +1,242 @@
+- id: t05-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [relation, grundbegriffe]
+  front: "Was ist eine Relation formal, und was entspricht ihr in der Tabellensicht?"
+  back: |-
+    Formal: eine Teilmenge des kartesischen Produkts der Domänen ihrer Attribute, r ⊆ D₁ × D₂ × … × Dₙ, also eine **Menge** von Tupeln mit festem Aufbau.
+    Tabellensicht: eine Tabelle. Gespeichert ist nur die kleine Auswahl der denkbaren Wertkombinationen, die die Miniwelt gerade beschreibt.
+- id: t05-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [tupel, attribut, grundbegriffe]
+  front: "Was ist ein Tupel, und was ist ein Attribut?"
+  back: |-
+    - **Tupel** (*tuple*): ein Element der Relation, also eine Zeile bzw. ein Datensatz, mit genau einem Wert je Attribut.
+    - **Attribut** (*attribute*): eine benannte Eigenschaft mit zugehöriger Domäne, in der Tabellensicht eine Spalte.
+    Beispiel `raum`: Das Attribut `plaetze` ist eine Spalte, (2, 'Studio A', 1, 4, TRUE) ist ein Tupel.
+- id: t05-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [domaene, grundbegriffe]
+  front: "Was ist eine Domäne (Wertebereich), und wie unterscheidet sie sich vom Datentyp?"
+  back: |-
+    Die Menge der zulässigen, atomaren Werte eines Attributs.
+    Der Datentyp ist nur die technische Grundlage. Die Domäne kann enger sein: `plaetze` hat den Typ `SMALLINT`, fachlich sind aber nur Werte > 0 erlaubt. In SQL bildet man Domänen über Typ + `CHECK` oder `CREATE DOMAIN` nach.
+- id: t05-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grad, kardinalitaet]
+  front: "Was geben Grad und Kardinalität einer Relation an, und wann ändern sie sich?"
+  back: |-
+    - **Grad** (Stelligkeit, *degree*/*arity*): Anzahl der Attribute. Ändert sich nur bei einer Schemaänderung (`ALTER TABLE`).
+    - **Kardinalität** (*cardinality*): Anzahl der Tupel. Ändert sich mit jedem `INSERT` oder `DELETE`, das tatsächlich Zeilen einfügt bzw. löscht.
+- id: t05-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [kardinalitaet, verwechslung]
+  front: "Was ist der Unterschied zwischen der Kardinalität einer Relation und der Kardinalität eines Beziehungstyps?"
+  back: |-
+    - Relation: Anzahl der Tupel, eine Zahl wie 13.
+    - Beziehungstyp im ER-Modell (t04): Anzahl der Partner je Entität, z. B. 1:n oder (0,n).
+    Gleiches Wort, verschiedene Begriffe. In Antworten immer dazusagen, welcher gemeint ist.
+- id: t05-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [relationenschema, auspraegung]
+  front: "Was unterscheidet Relationenschema, Ausprägung und Datenbankschema?"
+  back: |-
+    - **Relationenschema** (*relation schema*): Name + Attribute mit Domänen (und Integritätsbedingungen), z. B. raum(<u>raum_id</u>, bezeichnung, etage, plaetze, hat_klavier). Bleibt meist lange stabil.
+    - **Ausprägung** (Zustand, Instanz): die Menge der Tupel, die gerade gespeichert ist. Ändert sich laufend.
+    - **Datenbankschema**: Menge aller Relationenschemata, Relationennamen darin eindeutig. Die relationale Datenbank ist die Menge der zugehörigen Relationen.
+- id: t05-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [eigenschaften, relation]
+  front: "Welche Eigenschaften hat eine Relation im relationalen Modell?"
+  back: |-
+    - keine doppelten Tupel (Menge)
+    - keine Reihenfolge der Tupel
+    - keine Reihenfolge der Attribute (Zugriff über eindeutige Attributnamen)
+    - atomare Attributwerte, alle Werte einer Spalte aus derselben Domäne (1NF, t07)
+- id: t05-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [eigenschaften, schluessel]
+  front: "Warum hat jede Relation mindestens einen Schlüsselkandidaten?"
+  back: |-
+    Weil eine Relation eine Menge ist und keine zwei Tupel gleich sein dürfen. Spätestens die Menge **aller** Attribute ist deshalb ein Superschlüssel. Aus ihm entsteht durch Weglassen überflüssiger Attribute ein minimaler, also ein Schlüsselkandidat (Begriffe: t04, t07).
+- id: t05-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql, eigenschaften]
+  front: "Worin weichen SQL-Tabellen von Relationen im relationalen Modell ab?"
+  back: |-
+    - Doppelte Zeilen sind möglich, wenn kein `PRIMARY KEY`/`UNIQUE` sie verhindert (Multimenge, t08).
+    - Spalten haben eine feste Reihenfolge (`SELECT *`, `INSERT` ohne Spaltenliste).
+    - Die Zeilenreihenfolge ist ohne `ORDER BY` nicht festgelegt.
+    - `NULL` markiert fehlende Werte und gehört zu keiner Domäne (t10).
+- id: t05-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [integritaet, grundbegriffe]
+  front: "Was ist eine Integritätsbedingung, und wann ist eine Datenbank konsistent?"
+  back: |-
+    Eine **Integritätsbedingung** (*integrity constraint*) ist eine Regel, die jeder zulässige Datenbankzustand erfüllen muss. Sie gehört zum Schema.
+    **Konsistent** ist ein Zustand, wenn alle Bedingungen erfüllt sind. Das DBMS weist jede Änderung ab, die eine Bedingung verletzen würde.
+- id: t05-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [integritaet, ueberblick]
+  front: "Welche vier Integritätsarten unterscheidet dieser Kurs, und mit welchem Mittel sichert man sie typischerweise?"
+  back: |-
+    - Entitätsintegrität: `PRIMARY KEY`
+    - referenzielle Integrität: `FOREIGN KEY`
+    - Domänenintegrität: Datentyp, `NOT NULL`, `CHECK` auf eine Spalte, `CREATE DOMAIN`
+    - benutzerdefinierte Integrität: `CHECK` über mehrere Spalten, sonst Trigger
+    In manchen Darstellungen heißen die Arten auch Primärschlüssel-, Fremdschlüssel- und Attributbedingung (Domäne auch: Wertebereichsintegrität), die vierte Art auch intrarelationale Integrität. Die Abgrenzung ist dort nicht immer gleich.
+- id: t05-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [entitaetsintegritaet]
+  front: "Was verlangt die Entitätsintegrität? Nenne ein Beispiel für eine Verletzung."
+  back: |-
+    Jede Relation hat einen Primärschlüssel, seine Werte sind eindeutig, und **kein** Attribut des Primärschlüssels ist NULL.
+    Verletzung: In belegung(<u>schueler_id, kurs_id</u>, …) wird (17, NULL) eingefügt. Das Tupel ließe sich nicht eindeutig identifizieren.
+    Variante: Manche Quellen zählen nur das NULL-Verbot dazu, die Eindeutigkeit dann zur Schlüsselbedingung.
+- id: t05-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [entitaetsintegritaet, unique, "null"]
+  front: "Gilt die Entitätsintegrität auch für UNIQUE-Spalten, und wann ist eine UNIQUE-Spalte ein Alternativschlüssel?"
+  back: |-
+    Die Entitätsintegrität betrifft nur den Primärschlüssel.
+    - Alternativschlüssel (nicht gewählter Schlüsselkandidat) = eindeutig **und** nie NULL, in SQL `UNIQUE` + `NOT NULL`, z. B. `raum.bezeichnung`. Die Minimalität prüft das DBMS nicht, sie ist Entwurfsaufgabe.
+    - `UNIQUE` ohne `NOT NULL` (z. B. `person.email`) ist nur eine Eindeutigkeitsbedingung. Einspaltig erlauben Firebird und PostgreSQL mehrere NULL. Mehrspaltig mit Teil-NULL lässt Firebird 3 `(1, NULL)` nur einmal zu, PostgreSQL beliebig oft.
+- id: t05-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-integritaet]
+  front: "Was verlangt die referenzielle Integrität?"
+  back: |-
+    Jeder Fremdschlüsselwert, der nicht NULL ist, kommt als Schlüsselwert in der referenzierten Relation vor. Es gibt keine Verweise ins Leere (*dangling references*).
+    Beispiel: `kurs.lehrkraft_id = 4` ist nur zulässig, wenn es in `lehrkraft` ein Tupel mit `person_id = 4` gibt.
+- id: t05-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-integritaet, operationen]
+  front: "Welche vier Operationen können die referenzielle Integrität verletzen, und welche zwei nicht?"
+  back: |-
+    Gefährlich:
+    - `INSERT` in die Kindtabelle
+    - `UPDATE` des Fremdschlüssels in der Kindtabelle
+    - `DELETE` in der Elterntabelle
+    - `UPDATE` des referenzierten Schlüssels in der Elterntabelle
+    Harmlos: `INSERT` in die Elterntabelle, `DELETE` in der Kindtabelle.
+- id: t05-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [domaenenintegritaet]
+  front: "Was verlangt die Domänenintegrität? Nenne zwei Mittel und ein Beispiel."
+  back: |-
+    Jeder Attributwert liegt in der Domäne seines Attributs.
+    Mittel: Datentyp und Länge, `NOT NULL`, `CHECK` auf eine Spalte, `CREATE DOMAIN`.
+    Beispiel: `CREATE DOMAIN d_betrag AS NUMERIC(8,2) CHECK (VALUE >= 0);` verbietet negative Gebühren in allen Spalten dieser Domäne.
+    Ein `DEFAULT` füllt nur fehlende Werte und sichert nichts ab. Manche Darstellungen zählen ihn trotzdem zu den Mitteln.
+- id: t05-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [check, "null"]
+  front: "Wann gilt ein CHECK-Constraint als erfüllt, und was folgt daraus für NULL?"
+  back: |-
+    Wenn die Bedingung TRUE **oder UNKNOWN** ergibt. Nur FALSE wird abgewiesen.
+    Folge: `CHECK (plaetze > 0)` lässt `plaetze = NULL` durch. Für ein Pflichtfeld braucht man zusätzlich `NOT NULL`.
+- id: t05-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [benutzerdefinierte-integritaet]
+  front: "Was ist benutzerdefinierte Integrität? Nenne zwei Beispiele unterschiedlicher Reichweite."
+  back: |-
+    Fachliche Regeln (Geschäftsregeln) der Miniwelt, die nicht schon aus Schlüsseln oder Domänen folgen. Auch: Geschäftsregeln, *enterprise constraints*. Den Begriff „semantische Integrität“ verwenden Quellen uneinheitlich (benutzerdefiniert, Domäne oder Oberbegriff). Dieser Kurs nutzt ihn nur als Oberbegriff.
+    - eine Zeile: `enddatum >= startdatum` → `CHECK`
+    - mehrere Zeilen/Tabellen: höchstens `max_teilnehmer` aktive Belegungen je Kurs → Trigger
+- id: t05-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [deklarativ, prozedural]
+  front: "Was unterscheidet deklarative von prozeduraler Integritätssicherung?"
+  back: |-
+    - **Deklarativ:** Die Bedingung steht im Schema (`PRIMARY KEY`, `UNIQUE`, `NOT NULL`, `FOREIGN KEY`, `CHECK`, `DOMAIN`). Man beschreibt, **was** gelten soll, das DBMS prüft automatisch.
+    - **Prozedural:** Ein Programm legt fest, **wie** geprüft wird (Trigger, Stored Procedure). Mächtiger, aber aufwendiger und fehleranfälliger.
+    Faustregel: deklarativ, wo möglich.
+    Variante: Manche Darstellungen nennen gerade die Regeln „prozedural“, die alten und neuen Zustand vergleichen (dynamische bzw. Übergangsbedingungen).
+- id: t05-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, prozedural]
+  front: "Für welche Regeln reicht ein CHECK-Constraint nicht, sodass man einen Trigger braucht?"
+  back: |-
+    - Regeln über **mehrere Zeilen** derselben Tabelle (Kapazität, Überschneidung von Zeiträumen)
+    - Regeln über **mehrere Tabellen**, die kein Fremdschlüssel abdeckt (Termin innerhalb der Kurslaufzeit)
+    - Regeln über **Änderungen**, die alten und neuen Wert vergleichen (Stundensatz darf nicht sinken)
+    PostgreSQL verbietet Unterabfragen im CHECK. Firebird 3 erlaubt sie, prüft aber nur bei Änderung der eigenen Zeile, also nicht zuverlässig. `CREATE ASSERTION` (SQL-Standard) setzt keines der beiden um.
+- id: t05-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anwendung, prozedural]
+  front: "Warum ist eine Integritätsprüfung nur im Anwendungsprogramm die schwächste Lösung?"
+  back: |-
+    Sie gilt nur für dieses eine Programm. Andere Programme, Importe oder direkte SQL-Zugriffe umgehen sie. Jede Anwendung müsste die Regel erneut und fehlerfrei umsetzen. Constraints und Trigger im DBMS wirken dagegen bei jeder Änderung, egal woher sie kommt.
+- id: t05-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, verweisziel]
+  front: "Worauf darf ein Fremdschlüssel verweisen?"
+  back: |-
+    - Modell: auf den Primärschlüssel (Normalfall) bzw. einen Schlüsselkandidaten der referenzierten Relation, einer anderen oder derselben.
+    - SQL: auf `PRIMARY KEY` oder eine `UNIQUE`-Spalte(nkombination). Ohne Spaltenangabe nach `REFERENCES` der Primärschlüssel.
+    Die Definition „nur Primärschlüssel“ ist als Modell-Lesart vollständig richtig.
+- id: t05-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, datentyp]
+  front: "Welche Anforderungen gelten für Datentyp und Spaltenanzahl eines Fremdschlüssels?"
+  back: |-
+    - Gleiche Domäne bzw. kompatibler Datentyp wie die referenzierte Spalte, z. B. beide `INTEGER`.
+    - Bei zusammengesetzten Schlüsseln gleich viele Spalten, paarweise passend.
+    - Der Name darf abweichen: `kurs.lehrkraft_id → lehrkraft.person_id`.
+- id: t05-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, "null"]
+  front: "Darf ein Fremdschlüssel NULL sein, und darf derselbe FK-Wert mehrfach vorkommen?"
+  back: |-
+    - **NULL:** ja, wenn die Spalte nicht `NOT NULL` ist. NULL heißt „kein Verweis“ und wird nicht geprüft. So bildet man optionale Beziehungen ab (`kurs.raum_id`).
+    - **Mehrfach:** ja. Viele Kurse können dieselbe `lehrkraft_id` haben (n-Seite). Nur mit zusätzlichem `UNIQUE` wird daraus 1:1 (t06).
+- id: t05-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktion]
+  front: "Welche referenziellen Aktionen gibt es für ON DELETE / ON UPDATE in Firebird 3?"
+  back: |-
+    - `NO ACTION` (Voreinstellung): ablehnen, solange Verweise bestehen
+    - `CASCADE`: Kindzeilen mitlöschen bzw. neuen Wert nachziehen
+    - `SET NULL`: FK auf NULL setzen (Spalte muss NULL erlauben)
+    - `SET DEFAULT`: FK auf den Default setzen
+    `RESTRICT` kennen PostgreSQL und SQLite zusätzlich, Firebird 3 nicht. Details: t09.
+- id: t05-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktion, kaskade]
+  front: "Was passiert, wenn in einer Kette referenzieller Aktionen ein Schritt scheitert?"
+  back: |-
+    Die **ganze** Anweisung wird zurückgenommen.
+    Beispiel: `lehrkraft → person` hat `ON DELETE CASCADE`, `kurs.lehrkraft_id → lehrkraft` hat `NO ACTION`. Wird eine Person gelöscht, die noch einen Kurs leitet, scheitert das `DELETE`. Auch Person und Lehrkraft-Zeile bleiben erhalten.
+- id: t05-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [statisch, dynamisch]
+  front: "Was unterscheiden manche Lehrbücher als statische und dynamische Integritätsbedingungen?"
+  back: |-
+    - **Statisch** (Zustandsbedingung): Jeder einzelne Zustand muss sie erfüllen, z. B. `enddatum >= startdatum`, aber auch PK-, FK- und Domänenbedingungen.
+    - **Dynamisch** (Übergangsbedingung): betrifft den Übergang alt → neu, z. B. „Stundensatz darf nicht sinken“. Nur während der Änderung prüfbar, in SQL per Trigger mit `OLD`/`NEW`.

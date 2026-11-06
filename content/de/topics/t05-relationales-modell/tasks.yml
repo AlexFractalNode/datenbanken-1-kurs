@@ -1,0 +1,369 @@
+- id: t05-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [relation, tupel, attribut, domaene, grad, kardinalitaet]
+  type: define-example
+  difficulty: 1
+  points: 6
+  minutes: 6
+  prompt: |-
+    Erkläre die Begriffe **Relation**, **Tupel**, **Attribut**, **Domäne**, **Grad** und **Kardinalität** (einer Relation).
+    Zeichne dazu eine **eigene** kleine Tabelle mit mindestens drei Spalten und drei Zeilen. Markiere darin ein Tupel und ein Attribut und gib Grad und Kardinalität deiner Tabelle an. Gib für mindestens eine Spalte eine Domäne an, die enger ist als der bloße Datentyp.
+  solution: |-
+    - **Relation:** Menge gleich aufgebauter Tupel, formal eine Teilmenge des kartesischen Produkts der Domänen ihrer Attribute (r ⊆ D₁ × … × Dₙ). In der Tabellensicht: die Tabelle.
+    - **Tupel:** ein Element der Relation, also eine Zeile mit genau einem Wert je Attribut.
+    - **Attribut:** benannte Eigenschaft mit zugehöriger Domäne, in der Tabellensicht eine Spalte.
+    - **Domäne:** Menge der zulässigen atomaren Werte eines Attributs.
+    - **Grad:** Anzahl der Attribute.
+    - **Kardinalität:** Anzahl der Tupel (nicht zu verwechseln mit 1:n im ER-Modell).
+
+    Beispiel (Musterlösung, andere Beispiele gleichwertig): Startliste eines Stadtlaufs.
+
+    | startnr | name | jahrgang | strecke_km |
+    |---|---|---|---|
+    | 101 | Mira Holt | 1998 | 10 |
+    | 102 | Jonas Feld | 2004 | 5 |
+    | 103 | Ela Brenner | 1987 | 21 |
+
+    - Tupel (markiert): (102, 'Jonas Feld', 2004, 5). Attribut (markiert): `jahrgang`.
+    - Domäne: dom(strecke_km) = {5, 10, 21}. Der Datentyp `SMALLINT` allein würde auch 7 oder −3 erlauben.
+    - Grad = 4, Kardinalität = 3.
+  rubric:
+    - criterion: "Relation korrekt erklärt (Menge von Tupeln bzw. Teilmenge des kartesischen Produkts, Tabellensicht)"
+      points: 1
+    - criterion: "Tupel korrekt erklärt und in der eigenen Tabelle markiert (0,25 Erklärung, 0,25 Markierung)"
+      points: 0.5
+    - criterion: "Attribut korrekt erklärt und in der eigenen Tabelle markiert (0,25 Erklärung, 0,25 Markierung)"
+      points: 0.5
+    - criterion: "Domäne korrekt erklärt"
+      points: 1
+    - criterion: "Eigene Domäne angegeben, die enger ist als der Datentyp"
+      points: 1
+    - criterion: "Grad korrekt erklärt (0,5) und für die eigene Tabelle richtig angegeben (0,5)"
+      points: 1
+    - criterion: "Kardinalität korrekt erklärt (0,5) und für die eigene Tabelle richtig angegeben (0,5)"
+      points: 1
+  space: lines:16
+- id: t05-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [integritaet, entitaetsintegritaet, referenzielle-integritaet, domaenenintegritaet, benutzerdefinierte-integritaet]
+  type: define-example
+  difficulty: 2
+  points: 8
+  minutes: 9
+  prompt: |-
+    Erkläre die vier Integritätsarten **Entitätsintegrität**, **referenzielle Integrität**, **Domänenintegrität** und **benutzerdefinierte Integrität**.
+    Gib zu jeder Art ein **eigenes** Beispiel aus einem selbst gewählten Szenario an: eine Regel und eine konkrete Änderung, die sie verletzen würde. Nenne jeweils das SQL-Mittel, mit dem die Datenbank die Regel durchsetzt.
+    Das Szenario genügt als Stichwortskizze (Relationen in Kurzschreibweise).
+  solution: |-
+    Musterlösung am Beispiel einer Theater-AG (andere Szenarien gleichwertig):
+    stueck(<u>stueck_nr</u>, titel, premiere, letzte_vorstellung), rolle(<u>stueck_nr → stueck, rollen_nr</u>, rollenname, darsteller_nr → mitglied), mitglied(<u>mitglied_nr</u>, name, jahrgangsstufe).
+
+    - **Entitätsintegrität:** Jede Relation hat einen Primärschlüssel, dessen Werte eindeutig und in keinem Teil NULL sind. Regel: Jede Rolle ist über (stueck_nr, rollen_nr) identifiziert. Verletzung: eine Rolle mit (stueck_nr = 3, rollen_nr = NULL) einfügen. Mittel: `PRIMARY KEY`.
+    - **Referenzielle Integrität:** Jeder Fremdschlüsselwert ungleich NULL kommt als Schlüssel in der referenzierten Relation vor. Regel: `darsteller_nr` verweist auf ein vorhandenes Mitglied. Verletzung: eine Rolle mit `darsteller_nr = 99` eintragen, obwohl es Mitglied 99 nicht gibt, oder Mitglied 12 löschen, das noch eine Rolle spielt. Mittel: `FOREIGN KEY … REFERENCES`.
+    - **Domänenintegrität:** Jeder Wert stammt aus der Domäne seines Attributs. Regel: `jahrgangsstufe` liegt zwischen 5 und 13. Verletzung: `jahrgangsstufe = 17`. Mittel: passender Datentyp, ggf. `NOT NULL`, dazu `CHECK (jahrgangsstufe BETWEEN 5 AND 13)` oder eine `DOMAIN`. Ein `DEFAULT` sichert die Regel **nicht** ab, denn er füllt nur weggelassene Werte auf und lässt 17 trotzdem zu.
+    - **Benutzerdefinierte Integrität:** fachliche Regel, die nicht aus Schlüsseln oder einer einzelnen Domäne folgt, sondern z. B. mehrere Attribute verknüpft. Regel: `letzte_vorstellung >= premiere`. Verletzung: Premiere 12.05., letzte Vorstellung 02.05. Mittel: `CHECK` über beide Spalten. (Ebenfalls richtig: eine mehrzeilige Regel wie „ein Mitglied spielt in höchstens zwei Stücken gleichzeitig“ mit Hinweis auf einen Trigger.)
+  rubric:
+    - criterion: "Entitätsintegrität: Erklärung (PK eindeutig, kein PK-Teil NULL) 0,5; eigene Regel 0,5; konkrete verletzende Änderung 0,5"
+      points: 1.5
+    - criterion: "Referenzielle Integrität: Erklärung (FK-Wert ≠ NULL hat Gegenstück) 0,5; eigene Regel 0,5; konkrete verletzende Änderung 0,5"
+      points: 1.5
+    - criterion: "Domänenintegrität: Erklärung (Wert aus der Domäne des Attributs) 0,5; eigene Regel 0,5; konkrete verletzende Änderung 0,5"
+      points: 1.5
+    - criterion: "Benutzerdefinierte Integrität: Erklärung mit Abgrenzung zur Domänenintegrität 0,5; eigene Regel 0,5; konkrete verletzende Änderung 0,5"
+      points: 1.5
+    - criterion: "Je Art ein passendes SQL-Mittel (je 0,5): PRIMARY KEY; FOREIGN KEY; Datentyp, NOT NULL, CHECK oder DOMAIN; CHECK bzw. Trigger. DEFAULT allein gibt bei der Domänenintegrität 0 P., zusätzlich zu CHECK/DOMAIN genannt kein Abzug"
+      points: 2
+  space: lines:24
+- id: t05-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [integritaet, verletzung, referenzielle-aktion, kaskade]
+  type: explain
+  difficulty: 2
+  points: 9
+  minutes: 10
+  prompt: |-
+    Gegeben ist eine **vereinfachte Fassung** der Musikschul-Datenbank (Firebird 3). Sie weicht bewusst von `db/musikschule` ab: Es gibt nur die gezeigten Tabellen und Spalten, `raum.plaetze` hat hier **kein** `NOT NULL`, und außer den gezeigten Tabellen verweist keine Tabelle auf `person`, `lehrkraft`, `raum` oder `kurs`.
+
+    - person(<u>person_id</u>, vorname, nachname)
+    - lehrkraft(<u>person_id → person</u>, stundensatz), Fremdschlüssel mit `ON DELETE CASCADE`
+    - raum(<u>raum_id</u>, bezeichnung, plaetze) mit `bezeichnung NOT NULL UNIQUE` und `CHECK (plaetze > 0)`
+    - kurs(<u>kurs_id</u>, titel, lehrkraft_id → lehrkraft, raum_id → raum, startdatum, enddatum)
+      - `lehrkraft_id NOT NULL`, Fremdschlüssel ohne `ON DELETE`-Klausel
+      - `raum_id` NULL-fähig, `ON DELETE SET NULL`
+      - `startdatum NOT NULL`, `enddatum` NULL-fähig, `CHECK (enddatum >= startdatum)`
+    - belegung(<u>schueler_id, kurs_id → kurs</u>, angemeldet_am), Fremdschlüssel auf `kurs` mit `ON DELETE CASCADE` (`schueler_id` hier ohne Fremdschlüssel)
+
+    Aktueller Inhalt:
+    - Räume 1 bis 6 existieren, Raum 2 heißt „Studio A“.
+    - Lehrkräfte haben die `person_id`-Werte 1 bis 8, weitere Lehrkräfte gibt es nicht.
+    - Kurs 5 hat `lehrkraft_id = 3`, `raum_id = 2` und zwei Belegungen. Außer Kurs 5 liegt kein Kurs in Raum 2.
+    - Kurs 7 hat `lehrkraft_id = 3` und `raum_id = 4`.
+    - Kurse mit `kurs_id` 20 und 21 gibt es noch nicht.
+
+    Die Änderungen werden nacheinander ausgeführt. Gib für jede an, ob das DBMS sie **ausführt** oder **abweist**. Nenne bei Abweisung die verletzte Integritätsart bzw. Bedingung, bei Ausführung etwaige Folgeänderungen.
+
+    a) `INSERT INTO kurs (kurs_id, titel, lehrkraft_id, raum_id, startdatum) VALUES (20, 'Cajon', 12, 2, DATE '2025-03-01')`
+    b) `INSERT INTO kurs (kurs_id, titel, lehrkraft_id, raum_id, startdatum) VALUES (21, 'Chor', 4, NULL, DATE '2025-03-01')`
+    c) `UPDATE raum SET bezeichnung = 'Studio A' WHERE raum_id = 3`
+    d) `DELETE FROM raum WHERE raum_id = 2`
+    e) `INSERT INTO lehrkraft (person_id, stundensatz) VALUES (NULL, 38.50)`
+    f) `UPDATE kurs SET enddatum = DATE '2024-01-01' WHERE kurs_id = 21`
+    g) `DELETE FROM kurs WHERE kurs_id = 5`
+    h) `UPDATE raum SET plaetze = NULL WHERE raum_id = 4`
+    i) `DELETE FROM person WHERE person_id = 3`
+  solution: |-
+    a) **Abgewiesen**, referenzielle Integrität: Eine Lehrkraft 12 gibt es nicht.
+    b) **Ausgeführt.** Lehrkraft 4 existiert, `raum_id = NULL` ist ein erlaubter „kein Verweis“ und wird nicht geprüft. `enddatum` ist NULL, der CHECK ergibt UNKNOWN und gilt damit als erfüllt.
+    c) **Abgewiesen:** Die Eindeutigkeit des Alternativschlüssels `bezeichnung` (`NOT NULL UNIQUE`) ist verletzt, denn Raum 2 heißt schon so. Diese Bedingung ordnen Quellen unterschiedlich ein (eigene Art, Domänen- oder benutzerdefinierte Integrität). Die Antwort „UNIQUE-/Eindeutigkeitsbedingung verletzt“ genügt. Die Entitätsintegrität betrifft nur den Primärschlüssel.
+    d) **Ausgeführt**, referenzielle Aktion `SET NULL`: Kurs 5 erhält `raum_id = NULL`. Weitere Folgen gibt es in dieser Fassung nicht.
+    e) **Abgewiesen**, Entitätsintegrität: `person_id` ist der Primärschlüssel von `lehrkraft` und darf nicht NULL sein. Dass die Spalte zugleich Fremdschlüssel ist, ändert daran nichts.
+    f) **Abgewiesen**, benutzerdefinierte Integrität: `CHECK (enddatum >= startdatum)` ergibt FALSE (Start 01.03.2025).
+    g) **Ausgeführt**, referenzielle Aktion `CASCADE`: Die zwei Belegungen von Kurs 5 werden mitgelöscht.
+    h) **Ausgeführt.** `CHECK (plaetze > 0)` ergibt bei NULL UNKNOWN und gilt als erfüllt. Fachlich ist das vermutlich unerwünscht, es fehlt ein `NOT NULL`.
+    i) **Abgewiesen**, referenzielle Integrität in einer Kaskade: `ON DELETE CASCADE` würde die Lehrkraft 3 mitlöschen, doch Kurs 7 verweist noch auf sie, und `kurs.lehrkraft_id` hat `NO ACTION`. Weil ein Schritt der Kette scheitert, wird die **ganze** Anweisung zurückgenommen. Auch Person 3 bleibt erhalten.
+  rubric:
+    - criterion: "a) abgewiesen, referenzielle Integrität"
+      points: 1
+    - criterion: "b) ausgeführt; eine der beiden Begründungen (NULL-FK wird nicht geprüft oder CHECK bei NULL erfüllt) genügt"
+      points: 1
+    - criterion: "c) abgewiesen wegen UNIQUE auf bezeichnung (Zuordnung zu einer Integritätsart nicht verlangt)"
+      points: 1
+    - criterion: "d) ausgeführt, Folge SET NULL in kurs.raum_id genannt"
+      points: 1
+    - criterion: "e) abgewiesen, Entitätsintegrität (NULL im PK)"
+      points: 1
+    - criterion: "f) abgewiesen, CHECK-Verletzung (benutzerdefinierte Integrität). Folgefehler: Wurde b) als abgewiesen gewertet und f) folgerichtig als „ausgeführt, keine Zeile betroffen“ beantwortet, gibt es den vollen Punkt"
+      points: 1
+    - criterion: "g) ausgeführt, Folge CASCADE auf belegung genannt"
+      points: 1
+    - criterion: "h) ausgeführt, weil CHECK bei UNKNOWN erfüllt ist"
+      points: 1
+    - criterion: "i) abgewiesen (0,5), Begründung: Kaskade scheitert an NO ACTION von kurs, ganze Anweisung wird zurückgenommen (0,5)"
+      points: 1
+  space: lines:18
+- id: t05-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [deklarativ, prozedural, check, trigger, dynamisch]
+  type: explain
+  difficulty: 3
+  points: 9
+  minutes: 10
+  prompt: |-
+    Für eine Musikschul-Datenbank gelten folgende Geschäftsregeln. Die beteiligten Tabellen (Auszug):
+
+    - kurs(<u>kurs_id</u>, titel, startdatum, enddatum, …)
+    - termin(<u>termin_id</u>, kurs_id → kurs, datum, uhrzeit, …)
+    - instrument(<u>instrument_id</u>, bezeichnung, leihgebuehr), `leihgebuehr` NULL = nicht ausleihbar
+    - ausleihe(<u>ausleihe_id</u>, instrument_id → instrument, schueler_id → schueler, ausgabe, rueckgabe)
+    - belegung(<u>schueler_id → schueler, kurs_id → kurs</u>, angemeldet_am, abgemeldet_am, …)
+    - zahlung(<u>zahlung_id</u>, …, betrag, faellig_am, bezahlt_am, zahlungsart), `bezahlt_am` NULL = offen
+
+    Angenommen, die Tabellen haben noch **keine** dieser Bedingungen.
+
+    Regeln:
+    1. Eine Abmeldung liegt nicht vor der Anmeldung.
+    2. Ist eine Zahlung bezahlt, ist auch eine Zahlungsart eingetragen.
+    3. Ein Unterrichtstermin liegt innerhalb der Laufzeit seines Kurses.
+    4. Ausgeliehen werden nur Instrumente, die eine Leihgebühr haben.
+    5. Ein eingetragenes Bezahldatum wird nie wieder auf NULL zurückgesetzt.
+
+    a) Entscheide für jede Regel, ob sie **deklarativ** durchsetzbar ist. Wenn ja, schreibe den Constraint in Firebird-3-Syntax (`ALTER TABLE … ADD CONSTRAINT …`). Wenn nein, begründe, warum ein Constraint nicht reicht.
+    b) Für Regel 3 ist ein Trigger `BEFORE INSERT ON termin` geplant. Nenne zwei weitere Änderungen, bei denen die Regel verletzt werden kann, die dieser Trigger aber nicht abfängt.
+    c) Nenne einen Grund, warum man deklarative Lösungen vorzieht, wo sie möglich sind.
+  solution: |-
+    a)
+    1. Deklarativ:
+       `ALTER TABLE belegung ADD CONSTRAINT ck_belegung_abmeldung CHECK (abgemeldet_am >= angemeldet_am);`
+       (Offene Belegungen mit `abgemeldet_am` NULL ergeben UNKNOWN und bestehen.)
+    2. Deklarativ:
+       `ALTER TABLE zahlung ADD CONSTRAINT ck_zahlung_art CHECK (bezahlt_am IS NULL OR zahlungsart IS NOT NULL);`
+    3. **Nicht (zuverlässig) deklarativ:** Die Regel vergleicht `termin.datum` mit `startdatum`/`enddatum` einer **anderen** Tabelle. Ein Fremdschlüssel prüft nur die Existenz des Kurses.
+       - PostgreSQL erlaubt keine Unterabfrage im CHECK.
+       - Firebird 3 nimmt einen CHECK mit Unterabfrage auf `kurs` zwar an, wertet ihn aber nur aus, wenn sich die eigene `termin`-Zeile ändert. Wird die Kurslaufzeit in `kurs` geändert, bleibt ein verletzender Termin unbemerkt stehen.
+       - Lösung: Trigger.
+    4. **Nicht (zuverlässig) deklarativ:** Die Bedingung hängt vom Wert `leihgebuehr` in `instrument` ab, also von einer anderen Tabelle. Ein FK sichert nur, dass das Instrument existiert.
+       - Für Firebird 3 gilt dasselbe wie bei Regel 3: Ein CHECK mit Unterabfrage auf `instrument` wird nur bei Änderungen an der `ausleihe`-Zeile geprüft. Setzt jemand später `leihgebuehr` auf NULL, bemerkt ihn das DBMS nicht.
+       - Lösung: Trigger auf `ausleihe`, dazu einer auf `instrument` für das spätere Setzen auf NULL.
+    5. **Nicht deklarativ:** Die Regel vergleicht den alten mit dem neuen Wert (dynamische Bedingung). Ein Constraint prüft nur den neuen Zustand, und NULL ist für offene Zahlungen erlaubt. Lösung: `BEFORE UPDATE`-Trigger auf `zahlung`, der `OLD.bezahlt_am IS NOT NULL AND NEW.bezahlt_am IS NULL` abweist.
+
+    b) Zwei von:
+    - `UPDATE termin SET datum = …`: Ein Termin wird außerhalb der Laufzeit verschoben.
+    - `UPDATE termin SET kurs_id = …`: Ein Termin wird einem Kurs mit anderer Laufzeit zugeordnet.
+    - `UPDATE kurs SET startdatum = …` bzw. `enddatum = …`: Die Laufzeit wird verkürzt, vorhandene Termine liegen dann außerhalb.
+
+    c) Zum Beispiel: Das DBMS prüft deklarative Constraints bei jeder betroffenen Änderung selbst. Man kann keinen auslösenden Fall vergessen (siehe b). Außerdem sind sie kürzer und im Schema sichtbar.
+  rubric:
+    - criterion: "Regel 1 als CHECK korrekt formuliert"
+      points: 1
+    - criterion: "Regel 2 als CHECK korrekt formuliert (bezahlt ⇒ Zahlungsart gesetzt)"
+      points: 1
+    - criterion: "Regel 3: als nicht (zuverlässig) deklarativ eingeordnet (0,5); Begründung tabellenübergreifender Vergleich (1). Trigger-Lösung voll gültig. FB3-CHECK mit Unterabfrage: volle Punkte nur mit dem Vorbehalt, dass Änderungen in kurs nicht geprüft werden, und der Einstufung als nicht zuverlässig. Ohne diesen Vorbehalt 0 P. für die Einordnung und höchstens 0,5 P. für die Begründung, wenn der tabellenübergreifende Vergleich erkannt ist"
+      points: 1.5
+    - criterion: "Regel 4: als nicht (zuverlässig) deklarativ eingeordnet (0,5); Begründung Abhängigkeit von einem Wert in einer anderen Tabelle (1). Trigger-Lösung voll gültig. FB3-CHECK mit Unterabfrage wie bei Regel 3: volle Punkte nur mit dem Vorbehalt, dass Änderungen in instrument nicht geprüft werden. Sonst 0 P. Einordnung, höchstens 0,5 P. Begründung"
+      points: 1.5
+    - criterion: "Regel 5: als nicht deklarativ eingeordnet (0,5); Begründung Vergleich alt/neu (1)"
+      points: 1.5
+    - criterion: "b) zwei zutreffende, nicht abgefangene Änderungen genannt (je 0,5)"
+      points: 1
+    - criterion: "c) stichhaltiger Grund"
+      points: 1.5
+  space: lines:24
+- id: t05-p005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, "null", datentyp, referenzielle-aktion]
+  type: define-example
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Erkläre den Begriff **Fremdschlüssel** (*Foreign Key*) und nenne **fünf** seiner Eigenschaften.
+    Verwende ein **eigenes** Beispiel mit zwei Relationen in Kurzschreibweise (PK unterstrichen, FK mit Pfeil). Begründe für dein Beispiel, ob der Fremdschlüssel `NOT NULL` sein soll und welche referenzielle Aktion bei `ON DELETE` passt.
+  solution: |-
+    **Fremdschlüssel:** Attribut bzw. Attributkombination einer Relation, deren Werte auf einen Schlüssel einer (anderen oder derselben) Relation verweisen. Er bildet Beziehungen ab und wird vom DBMS über die referenzielle Integrität geprüft.
+
+    Eigenschaften (fünf davon genügen):
+    - **Verweisziel:** der Primärschlüssel der referenzierten Relation, allgemeiner ein Schlüsselkandidat. In SQL `PRIMARY KEY` oder `UNIQUE`, ohne Spaltenangabe der PK.
+    - **Datentyp:** dieselbe Domäne bzw. ein kompatibler Typ wie die referenzierte Spalte. Der Name darf abweichen.
+    - **NULL:** erlaubt, wenn nicht `NOT NULL` deklariert. NULL heißt „kein Verweis“ und wird nicht geprüft (optionale Beziehung).
+    - **Nicht eindeutig:** Derselbe Wert darf mehrfach vorkommen (n-Seite). Mit `UNIQUE` wird die Beziehung 1:1.
+    - **Zusammengesetzt möglich:** gleich viele, paarweise passende Spalten wie der referenzierte Schlüssel.
+    - **Teil des PK möglich**, dann nie NULL.
+    - **Selbstreferenz und mehrere FKs:** Er kann auf die eigene Relation zeigen, und mehrere FKs können dieselbe Relation referenzieren.
+    - **Referenzielle Aktionen:** `ON DELETE`/`ON UPDATE` mit `NO ACTION` (Voreinstellung), `CASCADE`, `SET NULL`, `SET DEFAULT`.
+
+    Beispiel (Musterlösung): Ruderverein.
+    - beitragsklasse(<u>klasse_kz</u>, bezeichnung, jahresbeitrag)
+    - mitglied(<u>mitglied_nr</u>, name, eintritt, klasse_kz → beitragsklasse)
+
+    `klasse_kz` hat in beiden Relationen den Typ `CHAR(2)` (z. B. 'JU', 'ER', 'FA'). Er ist `NOT NULL`, weil jedes Mitglied genau einer Beitragsklasse angehört, sonst ließe sich kein Beitrag berechnen. Bei `ON DELETE` passt die Voreinstellung `NO ACTION`: Eine Klasse, der noch Mitglieder angehören, darf nicht verschwinden. `CASCADE` würde dabei Mitglieder löschen. `SET NULL` widerspräche dem `NOT NULL`. Erst werden die Mitglieder umgestuft, dann wird die Klasse gelöscht.
+  rubric:
+    - criterion: "Fremdschlüssel korrekt definiert (Verweis auf Schlüssel einer anderen oder derselben Relation)"
+      points: 1
+    - criterion: "Fünf zutreffende Eigenschaften, je 1 P. Gleichwertig zählen: Verweisziel (Primärschlüssel genügt für den vollen Punkt, Schlüsselkandidat/UNIQUE ebenfalls richtig), gleiche Domäne/Typ, NULL-fähig mit Bedeutung, nicht eindeutig, zusammengesetzt möglich, Teil des PK möglich, Selbstreferenz bzw. mehrere FKs auf dieselbe Relation, referenzielle Aktionen"
+      points: 5
+    - criterion: "Eigenes Beispiel korrekt in Kurzschreibweise notiert"
+      points: 1
+    - criterion: "NOT NULL (0,5) und ON DELETE-Aktion (0,5) für das Beispiel stimmig begründet"
+      points: 1
+  space: lines:20
+- id: t05-p006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, entitaetsintegritaet, check, fehlersuche]
+  type: explain
+  difficulty: 3
+  points: 8
+  minutes: 9
+  prompt: |-
+    In einer Musikschul-Datenbank existieren bereits `instrument(instrument_id INTEGER, …)` mit Primärschlüssel `instrument_id` und `schueler(person_id INTEGER, …)` mit Primärschlüssel `person_id`. Fachlich gilt:
+    - `ausleihe_id` identifiziert eine Ausleihe eindeutig.
+    - Jede Ausleihe gehört zu genau einem Instrument und genau einer Schülerin bzw. einem Schüler.
+    - Die Rückgabe darf frühestens am Ausgabetag erfolgen.
+
+    Jemand legt die Ausleihen so an:
+
+    ```sql
+    CREATE TABLE ausleihe (
+      ausleihe_id   INTEGER     NOT NULL,
+      instrument_id VARCHAR(10) NOT NULL,
+      schueler_id   INTEGER,
+      inventar_nr   CHAR(8)     NOT NULL,
+      ausgabe       DATE        NOT NULL,
+      rueckgabe     DATE,
+      CONSTRAINT pk_ausleihe PRIMARY KEY (ausleihe_id, schueler_id),
+      CONSTRAINT fk_ausleihe_instrument FOREIGN KEY (instrument_id)
+        REFERENCES instrument (instrument_id),
+      CONSTRAINT fk_ausleihe_schueler FOREIGN KEY (schueler_id)
+        REFERENCES schueler (person_id) ON DELETE SET NULL,
+      CONSTRAINT ck_ausleihe_rueckgabe
+        CHECK (rueckgabe > ausgabe OR rueckgabe IS NULL)
+    );
+    ```
+
+    a) Finde vier Fehler. Ordne jeden einer Integritätsart oder Fremdschlüssel-Eigenschaft zu und gib die Korrektur an.
+    b) Ist der Teil `OR rueckgabe IS NULL` im CHECK nötig? Begründe.
+  solution: |-
+    a) Fünf unterscheidbare Fehler (vier genügen):
+    1. **Typ:** `instrument_id VARCHAR(10)` passt nicht zum referenzierten `INTEGER` (Fremdschlüssel braucht gleiche Domäne bzw. kompatiblen Typ). Korrektur: `instrument_id INTEGER NOT NULL`.
+    2. **Primärschlüssel:** `(ausleihe_id, schueler_id)` ist kein minimaler Schlüsselkandidat, denn `ausleihe_id` allein ist schon eindeutig. Außerdem enthält er die NULL-fähige Spalte `schueler_id` (Entitätsintegrität; Firebird verlangt `NOT NULL` für PK-Spalten). Korrektur: `PRIMARY KEY (ausleihe_id)`.
+    3. **Pflichtbeziehung:** Jede Ausleihe gehört zu genau einer Person, `schueler_id` muss also `NOT NULL` sein, auch wenn die Spalte nicht mehr zum PK gehört. Korrektur: `schueler_id INTEGER NOT NULL`.
+    4. **Referenzielle Aktion:** `ON DELETE SET NULL` widerspricht der Pflichtbeziehung. Mit `NOT NULL` würde jedes Löschen einer Schülerin mit Ausleihen scheitern, ohne `NOT NULL` entstünden Ausleihen ohne Person. Korrektur: Klausel weglassen (`NO ACTION`), damit Personen mit Ausleihen nicht gelöscht werden.
+    5. **Fachliche Regel:** `rueckgabe > ausgabe` verbietet die Rückgabe am Ausgabetag, erlaubt ist `>=` (benutzerdefinierte Integrität). Korrektur: `CHECK (rueckgabe >= ausgabe)`.
+
+    b) Nicht nötig. Ist `rueckgabe` NULL, ergibt `rueckgabe >= ausgabe` UNKNOWN, und ein CHECK gilt bei UNKNOWN als erfüllt. Der Zusatz schadet nicht, macht die Absicht aber nur ausdrücklich.
+  rubric:
+    - criterion: "a) Fehler gefunden (je 0,5, höchstens vier). Getrennt zählen: Fehler 2 nur mit PK-Bezug (Minimalität oder NULL im PK); Fehler 3 nur mit fachlichem Pflichtbezug (genau eine Person je Ausleihe); Fehler 4 nur, wenn die Aktion SET NULL benannt wird. Nennt eine Antwort für 2 und 3 nur „schueler_id braucht NOT NULL“ ohne einen der beiden Bezüge, zählt das als ein Fehler"
+      points: 2
+    - criterion: "a) gefundene Fehler einer passenden Integritätsart bzw. FK-Eigenschaft zugeordnet (je 0,5, höchstens vier)"
+      points: 2
+    - criterion: "a) gefundene Fehler korrekt korrigiert (je 0,5, höchstens vier)"
+      points: 2
+    - criterion: "b) richtig: nicht nötig (0,5), Begründung über UNKNOWN beim CHECK (1,5)"
+      points: 2
+  space: lines:20
+- id: t05-p007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [integritaet, auspraegung, verletzung]
+  type: explain
+  difficulty: 1
+  points: 6
+  minutes: 6
+  prompt: |-
+    Die folgenden Daten stammen aus einem Import in Tabellen, die noch **keine** Constraints haben. Danach sollen diese Bedingungen gelten:
+    - raum(<u>raum_id</u>, bezeichnung, plaetze): `bezeichnung NOT NULL UNIQUE`, `plaetze NOT NULL`, `CHECK (plaetze > 0)`
+    - kurs(<u>kurs_id</u>, titel, raum_id → raum, startdatum, enddatum): `raum_id` NULL-fähig, `CHECK (enddatum >= startdatum)`
+
+    `raum`:
+
+    | raum_id | bezeichnung | plaetze |
+    |---|---|---|
+    | 1 | Saal | 30 |
+    | 2 | Studio A | 4 |
+    | 2 | Studio B | 6 |
+    | 3 | Probenraum | 0 |
+    | NULL | Keller | 12 |
+
+    `kurs`:
+
+    | kurs_id | titel | raum_id | startdatum | enddatum |
+    |---|---|---|---|---|
+    | 10 | Gitarre 1 | 1 | 2025-02-01 | 2025-06-30 |
+    | 11 | Chor | NULL | 2025-02-01 | NULL |
+    | 12 | Cello | 9 | 2025-03-01 | 2025-07-31 |
+    | 13 | Theorie | 1 | 2025-04-01 | 2025-03-15 |
+
+    Gib für jede Zeile an, ob sie eine der Bedingungen verletzt, und wenn ja, welche Integritätsart betroffen ist. Begründe bei `kurs` 11 kurz, warum die Zeile zulässig ist.
+  solution: |-
+    `raum`:
+    - Zeile 1 (Saal): zulässig.
+    - Zeilen 2 und 3 (beide `raum_id = 2`): **Entitätsintegrität** verletzt, der Primärschlüsselwert ist doppelt. Einzeln wäre jede der beiden Zeilen zulässig.
+    - Zeile 4 (Probenraum, 0 Plätze): **Domänenintegrität** verletzt, `plaetze > 0` ergibt FALSE.
+    - Zeile 5 (Keller): **Entitätsintegrität** verletzt, der Primärschlüssel ist NULL.
+
+    `kurs`:
+    - Kurs 10: zulässig.
+    - Kurs 11: zulässig. `raum_id = NULL` heißt „kein Verweis“ und wird nicht geprüft. `enddatum = NULL` lässt den CHECK UNKNOWN ergeben, und das gilt als erfüllt.
+    - Kurs 12: **referenzielle Integrität** verletzt, Raum 9 gibt es nicht.
+    - Kurs 13: **benutzerdefinierte Integrität** verletzt, das Enddatum liegt vor dem Startdatum.
+  rubric:
+    - criterion: "Doppelter Primärschlüssel 2: als Verletzung erkannt (0,5), Entitätsintegrität (0,5)"
+      points: 1
+    - criterion: "NULL im Primärschlüssel (Keller): als Verletzung erkannt (0,5), Entitätsintegrität (0,5)"
+      points: 1
+    - criterion: "Probenraum mit 0 Plätzen: als Verletzung erkannt (0,5), Domänenintegrität (0,5)"
+      points: 1
+    - criterion: "Kurs 12: als Verletzung erkannt (0,5), referenzielle Integrität (0,5)"
+      points: 1
+    - criterion: "Kurs 13: als Verletzung erkannt (0,5), benutzerdefinierte Integrität (0,5)"
+      points: 1
+    - criterion: "Kurs 11 als zulässig erkannt mit Begründung über NULL-FK oder CHECK bei UNKNOWN (eine genügt)"
+      points: 0.5
+    - criterion: "Keine zulässige Zeile (Saal, Kurs 10, Kurs 11) als verletzt gemeldet; bei einer oder mehr Fehlmeldungen 0 P."
+      points: 0.5
+  space: lines:14
