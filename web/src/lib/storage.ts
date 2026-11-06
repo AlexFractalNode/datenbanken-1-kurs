@@ -35,6 +35,21 @@ function storage(): Storage | null {
   }
 }
 
+/**
+ * True if localStorage exists and can be read. A full quota (several projects share the
+ * `*.github.io` origin) still allows reading, so reading is checked separately from writing.
+ */
+export function isStorageReadable(): boolean {
+  const s = storage();
+  if (!s) return false;
+  try {
+    s.getItem('db1:probe');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** True if localStorage exists and accepts a write. */
 export function isStorageAvailable(): boolean {
   const s = storage();

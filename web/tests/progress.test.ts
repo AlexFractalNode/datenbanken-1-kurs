@@ -27,17 +27,47 @@ function throwingStorage(): Storage {
   } as unknown as Storage;
 }
 
+/** A complete FSRS-7 card as stored by ts-fsrs 6 (dates serialised). */
 const sampleCard = {
   dueAt: '2026-11-06T10:00:00.000Z',
   lastReviewAt: '2026-11-05T10:00:00.000Z',
   stability: 3.9,
+  stabilityFast: 3.1,
   difficulty: 3.5,
   state: 2,
+  scheduleStatus: 'review',
+  cardId: 't04-c001',
   reps: 1,
   lapses: 0,
   scheduledDays: 1,
   learningStep: 0,
 };
+
+/** Storage that can be read but rejects every write (full quota, shared github.io origin). */
+function quotaStorage(initial: Record<string, string>): Storage {
+  const data = new Map(Object.entries(initial));
+  return {
+    getItem: (k: string) => (data.has(k) ? data.get(k)! : null),
+    setItem: () => {
+      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+    },
+    removeItem: (k: string) => {
+      data.delete(k);
+    },
+    clear: () => data.clear(),
+    key: (i: number) => [...data.keys()][i] ?? null,
+    get length() {
+      return data.size;
+    },
+  } as unknown as Storage;
+}
+
+/** Storage entries of `p` in the db1:progress:<area> layout. */
+function entries(p: ProgressV1): Record<string, string> {
+  const out: Record<string, string> = { [VERSION_KEY]: '1' };
+  for (const area of AREAS) out[PROGRESS_KEYS[area]] = JSON.stringify(p[area]);
+  return out;
+}
 
 function sample(): ProgressV1 {
   return {
@@ -104,7 +134,8 @@ describe('progress store', () => {
     const updated = progress.update((p) => {
       p.quiz['t04-q002'] = { correct: 0, seen: 1 };
     });
-    expect(updated.quiz['t04-q002']).toEqual({ correct: 0, seen: 1 });
+    expect(updated.persisted).toBe(false);
+    expect(updated.progress.quiz['t04-q002']).toEqual({ correct: 0, seen: 1 });
     expect(progress.load().quiz['t04-q002']).toEqual({ correct: 0, seen: 1 });
   });
 
@@ -134,12 +165,111 @@ describe('progress store', () => {
     expect(result.recovered.sort()).toEqual(['cards', 'tasks']);
   });
 
-  it('resets everything with a flag when the version marker is unknown', () => {
-    progress.save(sample());
-    localStorage.setItem(VERSION_KEY, 'banana');
+  it('leaves data with an unknown version marker untouched and works in memory', () => {
+    for (const [key, value] of Object.entries(entries(sample()))) localStorage.setItem(key, value);
+    localStorage.setItem(VERSION_KEY, '2');
+    const before = { ...localStorage };
+    expect(before[PROGRESS_KEYS.cards]).toBe(JSON.stringify(sample().cards));
     const result = progress.loadDetailed();
     expect(result.progress).toEqual(emptyProgress());
-    expect(result.recovered).toEqual([...AREAS]);
+    expect(result.unknownVersion).toBe(true);
+    expect(result.writable).toBe(false);
+    expect(result.recovered).toEqual([]);
+    // nothing is written: neither on load nor on later saves
+    const saved = progress.update((p) => {
+      p.tasks.x = { score: 1, max: 1 };
+    });
+    expect(saved.persisted).toBe(false);
+    expect({ ...localStorage }).toEqual(before);
+    expect(progress.load().tasks.x).toEqual({ score: 1, max: 1 });
+    expect(progress.loadDetailed().unknownVersion).toBe(true);
+  });
+
+  it('reads stored progress when the quota is full and reports it as not writable', () => {
+    vi.stubGlobal('localStorage', quotaStorage(entries(sample())));
+    const result = progress.loadDetailed();
+    expect(result.progress).toEqual(sample());
+    expect(result.writable).toBe(false);
+    expect(result.available).toBe(false);
+  });
+
+  it('keeps working in memory on the data read when writes fail', () => {
+    vi.stubGlobal('localStorage', quotaStorage(entries(sample())));
+    const result = progress.update((p) => {
+      p.tasks['t04-p002'] = { score: 1, max: 2 };
+    });
+    expect(result.persisted).toBe(false);
+    const loaded = progress.load();
+    expect(loaded.tasks).toEqual({ ...sample().tasks, 't04-p002': { score: 1, max: 2 } });
+    expect(loaded.cards).toEqual(sample().cards);
+  });
+
+  it('update() reports a successful save', () => {
+    const result = progress.update((p) => {
+      p.tasks.a = { score: 1, max: 2 };
+    });
+    expect(result).toEqual({ progress: expect.objectContaining({ tasks: { a: { score: 1, max: 2 } } }), persisted: true });
+  });
+
+  it('drops cards that lack FSRS-7 fields ts-fsrs needs', () => {
+    localStorage.setItem(VERSION_KEY, '1');
+    const { stabilityFast: _s, ...noFast } = sampleCard;
+    const { scheduleStatus: _st, ...noStatus } = sampleCard;
+    const { cardId: _c, ...noId } = sampleCard;
+    const { scheduledDays: _d, ...noDays } = sampleCard;
+    localStorage.setItem(
+      'db1:progress:cards',
+      JSON.stringify({
+        ok: sampleCard,
+        noFast,
+        noStatus,
+        noId,
+        noDays,
+        badState: { ...sampleCard, state: 7 },
+        badStatus: { ...sampleCard, scheduleStatus: 'bogus' },
+        badStep: { ...sampleCard, learningStep: 1.5 },
+        badReps: { ...sampleCard, reps: 1.5 },
+      }),
+    );
+    const result = progress.loadDetailed();
+    expect(Object.keys(result.progress.cards)).toEqual(['ok']);
+    expect(result.recovered).toEqual(['cards']);
+  });
+
+  it('accepts a card without the optional learningStep', () => {
+    const { learningStep: _l, ...card } = sampleCard;
+    localStorage.setItem(VERSION_KEY, '1');
+    localStorage.setItem('db1:progress:cards', JSON.stringify({ a: card }));
+    expect(progress.loadDetailed().recovered).toEqual([]);
+  });
+
+  it('deduplicates ticked rubric indices of an exam attempt', () => {
+    const p = sample();
+    p.exams.e01.checked = { 'e01-p001': [1, 0, 1, 0] };
+    localStorage.setItem(VERSION_KEY, '1');
+    localStorage.setItem('db1:progress:exams', JSON.stringify(p.exams));
+    expect(progress.load().exams.e01.checked['e01-p001']).toEqual([0, 1]);
+  });
+
+  it('filters prototype keys such as __proto__ out of an area', () => {
+    localStorage.setItem(VERSION_KEY, '1');
+    localStorage.setItem('db1:progress:tasks', '{"__proto__":{"score":1,"max":1},"constructor":{"score":1,"max":1},"a":{"score":1,"max":2}}');
+    const result = progress.loadDetailed();
+    expect(Object.getPrototypeOf(result.progress.tasks)).toBe(Object.prototype);
+    expect(Object.keys(result.progress.tasks)).toEqual(['a']);
+    expect(Object.hasOwn(result.progress.tasks, '__proto__')).toBe(false);
+    expect(result.recovered).toEqual(['tasks']);
+    expect(progress.migrate(JSON.parse('{"tasks":{"__proto__":{"score":1,"max":1}}}')).tasks).toEqual({});
+  });
+
+  it('exports a repaired, re-importable state even if the repair cannot be written', () => {
+    const broken = { ...entries(sample()), 'db1:progress:quiz': '{kaputt' };
+    vi.stubGlobal('localStorage', quotaStorage(broken));
+    const json = progress.export();
+    vi.unstubAllGlobals();
+    progress.reset();
+    expect(progress.import(json)).toEqual({ ok: true, count: AREAS.length });
+    expect(progress.load()).toEqual({ ...sample(), quiz: {} });
   });
 
   it('test_version_migration_from_v0 (only cards, no version marker)', () => {
@@ -185,7 +315,8 @@ describe('progress store', () => {
     expect(progress.load()).toEqual(emptyProgress());
     expect(localStorage.getItem(THEME_KEY)).toBe('dark');
 
-    expect(progress.import(json)).toEqual({ ok: true, count: AREAS.length + 1 });
+    // the version marker is not counted as an entry
+    expect(progress.import(json)).toEqual({ ok: true, count: AREAS.length });
     expect(progress.load()).toEqual(sample());
   });
 

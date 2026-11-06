@@ -68,6 +68,9 @@ beforeEach(() => {
 });
 afterEach(() => {
   cleanup();
+  // Preact 11 runs effect cleanups of unmounted components after paint; let them finish here,
+  // so a late write of this test cannot leak into the next one.
+  vi.runOnlyPendingTimers();
   vi.useRealTimers();
   vi.unstubAllGlobals();
   progress.reset();
@@ -120,11 +123,110 @@ describe('ExamRunner', () => {
     expect(formatClock(90 * MIN - (Date.now() - START.getTime()))).toBe('59:45');
   });
 
-  it('stores notes while writing', () => {
+  it('stores notes while writing (debounced by 300 ms)', () => {
     render(<ExamRunner exam={EXAM} />);
     start();
-    fireEvent.input(screen.getByRole('textbox', { name: /Notizen zu Aufgabe e01-p001/ }), { target: { value: 'Buch, Leser' } });
+    const notes = screen.getByRole('textbox', { name: /Notizen zu Aufgabe e01-p001/ }) as HTMLTextAreaElement;
+    const stored = () => localStorage.getItem('db1:progress:exams');
+    const afterStart = stored();
+    fireEvent.input(notes, { target: { value: 'Buch' } });
+    advance(200);
+    fireEvent.input(notes, { target: { value: 'Buch, Leser' } });
+    expect(notes.value).toBe('Buch, Leser');
+    // nothing written while typing; the pause restarts with every keystroke
+    advance(299);
+    expect(stored()).toBe(afterStart);
+    advance(1);
     expect(progress.load().exams.e01.answers['e01-p001']).toBe('Buch, Leser');
+  });
+
+  it('handing in right after typing keeps the latest notes', () => {
+    render(<ExamRunner exam={EXAM} />);
+    start();
+    fireEvent.input(screen.getByRole('textbox', { name: /Notizen zu Aufgabe e01-p001/ }), { target: { value: 'Entwurf' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Abgeben' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, jetzt abgeben' }));
+    advance(1000);
+    const attempt = progress.load().exams.e01;
+    expect(attempt.status).toBe('grading');
+    expect(attempt.answers['e01-p001']).toBe('Entwurf');
+  });
+
+  it('pending notes are written when the page is left', () => {
+    const view = render(<ExamRunner exam={EXAM} />);
+    start();
+    fireEvent.input(screen.getByRole('textbox', { name: /Notizen zu Aufgabe e01-p002/ }), { target: { value: 'R1, R2' } });
+    window.dispatchEvent(new Event('pagehide'));
+    expect(progress.load().exams.e01.answers['e01-p002']).toBe('R1, R2');
+    fireEvent.input(screen.getByRole('textbox', { name: /Notizen zu Aufgabe e01-p002/ }), { target: { value: 'R1, R2, R3' } });
+    view.unmount();
+    // Preact 11 runs effect cleanups after paint
+    vi.runOnlyPendingTimers();
+    expect(progress.load().exams.e01.answers['e01-p002']).toBe('R1, R2, R3');
+  });
+
+  it('caps the remaining time at the exam length if startedAt lies in the future', () => {
+    progress.update((p) => {
+      p.exams.e01 = { status: 'running', startedAt: new Date(START.getTime() + 60 * MIN).toISOString(), minutes: 90, answers: {}, checked: {} };
+    });
+    render(<ExamRunner exam={EXAM} />);
+    expect(timer()).toBe('90:00');
+    advance(MIN);
+    expect(timer()).toBe('90:00');
+  });
+
+  it('ignores duplicate and out-of-range ticks', () => {
+    progress.update((p) => {
+      p.exams.e01 = {
+        status: 'grading',
+        startedAt: new Date(START.getTime() - 100 * MIN).toISOString(),
+        minutes: 90,
+        answers: {},
+        checked: { 'e01-p001': [0, 0, 0, 7], 'e01-p002': [3] },
+        endedAt: new Date(START.getTime() - 10 * MIN).toISOString(),
+      };
+    });
+    const { container } = render(<ExamRunner exam={EXAM} />);
+    expect(container.querySelector('[data-exam-total]')!.textContent).toBe('2 von 9 Punkten (22 %)');
+  });
+
+  it('returns the focus to the trigger when a confirmation is dismissed', () => {
+    render(<ExamRunner exam={EXAM} />);
+    start();
+    const submit = screen.getByRole('button', { name: 'Abgeben' });
+    submit.focus();
+    fireEvent.click(submit);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Ja, jetzt abgeben' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter schreiben' }));
+    expect(document.activeElement).toBe(submit);
+
+    const cancel = screen.getByRole('button', { name: 'Versuch abbrechen' });
+    fireEvent.click(cancel);
+    fireEvent.click(screen.getByRole('button', { name: 'Zurück' }));
+    expect(document.activeElement).toBe(cancel);
+
+    advance(90 * MIN);
+    const cancelGrading = screen.getByRole('button', { name: 'Versuch abbrechen' });
+    fireEvent.click(cancelGrading);
+    fireEvent.click(screen.getByRole('button', { name: 'Zurück' }));
+    expect(document.activeElement).toBe(cancelGrading);
+  });
+
+  it('warns when the attempt cannot be saved', () => {
+    render(<ExamRunner exam={EXAM} />);
+    expect(screen.queryByRole('alert')).toBeNull();
+    localStorage.setItem('db1:progress:version', '2');
+    start();
+    expect(screen.getByRole('alert').textContent).toMatch(/Speichern fehlgeschlagen/);
+  });
+
+  it('only promises a surviving timer if progress can be stored', () => {
+    const { container, unmount } = render(<ExamRunner exam={EXAM} />);
+    expect(container.textContent).toMatch(/Seite schließt oder neu lädst/);
+    unmount();
+    vi.stubGlobal('localStorage', undefined);
+    const view = render(<ExamRunner exam={EXAM} />);
+    expect(view.container.textContent).not.toMatch(/Seite schließt oder neu lädst/);
   });
 
   it('expiry locks the inputs and switches to self-assessment', () => {

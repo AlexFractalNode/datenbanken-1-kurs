@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { progress } from '../lib/progress';
-import { STORAGE_UNAVAILABLE, exportProgress, isStorageAvailable, listProgressKeys } from '../lib/storage';
+import { VERSION_KEY, progress } from '../lib/progress';
+import { STORAGE_UNAVAILABLE, isStorageAvailable, isStorageReadable, listProgressKeys } from '../lib/storage';
+
+/** Stored progress areas; the version marker is bookkeeping, not an area. */
+const countAreas = (keys: string[]) => keys.filter((key) => key !== VERSION_KEY).length;
 
 type UnitState = 'loading' | 'empty' | 'ready' | 'error';
 
@@ -23,34 +26,49 @@ function downloadJson(filename: string, content: string): boolean {
 
 export default function ProgressTransfer() {
   const [mounted, setMounted] = useState(false);
+  /** Storage accepts writes (import needs that). */
   const [available, setAvailable] = useState(true);
+  /** Storage can be read (export and reset still work with a full quota). */
+  const [readable, setReadable] = useState(true);
   const [count, setCount] = useState(0);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [confirming, setConfirming] = useState(false);
   const confirmRef = useRef<HTMLButtonElement>(null);
   const resetRef = useRef<HTMLButtonElement>(null);
+  /** Set when the confirmation closes, so the focus returns to the reset button (not on page load). */
+  const returnFocus = useRef(false);
 
-  const refresh = () => setCount(listProgressKeys().length);
+  const refresh = () => setCount(countAreas(listProgressKeys()));
 
   useEffect(() => {
     setAvailable(isStorageAvailable());
+    setReadable(isStorageReadable());
     refresh();
     setMounted(true);
   }, []);
 
   useEffect(() => {
     if (confirming) confirmRef.current?.focus();
+    else if (returnFocus.current) resetRef.current?.focus();
+    returnFocus.current = false;
   }, [confirming]);
 
   const state: UnitState = !mounted ? 'loading' : !available ? 'error' : count === 0 ? 'empty' : 'ready';
 
   const onExport = () => {
     setError('');
-    const data = exportProgress();
-    const day = data.exportedAt.slice(0, 10);
-    if (downloadJson(`db1-fortschritt-${day}.json`, JSON.stringify(data, null, 2))) {
-      setMessage(`${Object.keys(data.data).length} Einträge exportiert.`);
+    const now = new Date();
+    // progress.export migrates and repairs first, so the file can always be imported again.
+    const json = progress.export(now);
+    let entries = 0;
+    try {
+      entries = countAreas(Object.keys((JSON.parse(json) as { data: Record<string, string> }).data));
+    } catch {
+      // progress.export always returns valid JSON; the count is only informative.
+    }
+    if (downloadJson(`db1-fortschritt-${now.toISOString().slice(0, 10)}.json`, json)) {
+      setMessage(`${entries} Bereiche exportiert.`);
     } else {
       setError('Export fehlgeschlagen: Der Browser erlaubt keinen Download.');
     }
@@ -72,7 +90,7 @@ export default function ProgressTransfer() {
     // progress.import validates the known areas before storage.ts replaces the stored state.
     const result = progress.import(text);
     if (result.ok) {
-      setMessage(`${result.count} Einträge importiert.`);
+      setMessage(`${result.count} Bereiche importiert.`);
     } else {
       setError(`Import fehlgeschlagen: ${result.error}`);
     }
@@ -86,19 +104,22 @@ export default function ProgressTransfer() {
 
   const onConfirmReset = () => {
     const removed = progress.reset();
+    returnFocus.current = true;
     setConfirming(false);
     setError('');
-    setMessage(`Fortschritt zurückgesetzt (${removed} Einträge gelöscht).`);
+    setMessage(`Fortschritt zurückgesetzt (${removed} Bereiche gelöscht).`);
     refresh();
-    resetRef.current?.focus();
   };
 
   const onCancelReset = () => {
+    returnFocus.current = true;
     setConfirming(false);
-    resetRef.current?.focus();
   };
 
   const disabled = !mounted || !available;
+  // Export also covers the in-memory state; reset only needs storage that can be accessed.
+  const exportDisabled = !mounted;
+  const resetDisabled = !mounted || !readable;
 
   return (
     <section
@@ -114,14 +135,14 @@ export default function ProgressTransfer() {
         Dein Lernstand liegt nur in diesem Browser. Sichere ihn als Datei, um ihn auf ein anderes Gerät zu übertragen.
       </p>
       {mounted && !available && <p class="notice notice--warn">{STORAGE_UNAVAILABLE}</p>}
-      {mounted && available && (
+      {mounted && readable && (
         <p class="meta">
           Gespeicherte Bereiche: <strong>{count}</strong>
         </p>
       )}
 
       <div class="button-row">
-        <button type="button" class="button" onClick={onExport} disabled={disabled}>
+        <button type="button" class="button" onClick={onExport} disabled={exportDisabled}>
           Fortschritt exportieren
         </button>
       </div>
@@ -134,7 +155,7 @@ export default function ProgressTransfer() {
 
       <div class="button-row">
         {!confirming ? (
-          <button ref={resetRef} type="button" class="button button--danger" onClick={() => setConfirming(true)} disabled={disabled}>
+          <button ref={resetRef} type="button" class="button button--danger" onClick={() => setConfirming(true)} disabled={resetDisabled}>
             Fortschritt zurücksetzen
           </button>
         ) : (

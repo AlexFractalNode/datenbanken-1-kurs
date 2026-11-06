@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { RECOVERED_NOTICE, progress, recordActivity, type FsrsCard } from '../lib/progress';
+import { RECOVERED_NOTICE, SAVE_FAILED_NOTICE, progress, recordActivity, storageNotice, type FsrsCard } from '../lib/progress';
 import { GRADES, GRADE_LABEL, formatInterval, isDue, loadSrs, type Grade, type Srs } from '../lib/srs';
-import { STORAGE_UNAVAILABLE } from '../lib/storage';
 import { topicFromUrl, writeTopicToUrl, type TopicOption } from '../lib/topic-filter';
 
 /** One card with Markdown already rendered (and sanitised) at build time by `renderMarkdown`. */
@@ -46,12 +45,14 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
   const [topic, setTopic] = useState('');
   const [queue, setQueue] = useState<string[]>([]);
   const [revealed, setRevealed] = useState(false);
-  const [available, setAvailable] = useState(true);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
   const [recovered, setRecovered] = useState(false);
   const [message, setMessage] = useState('');
   const revealRef = useRef<HTMLButtonElement>(null);
   const backRef = useRef<HTMLDivElement>(null);
-  const focusNext = useRef<'reveal' | 'back' | null>(null);
+  const emptyRef = useRef<HTMLHeadingElement>(null);
+  const focusNext = useRef<'reveal' | 'back' | 'empty' | null>(null);
 
   const knownTopics = useMemo(() => new Set(topics.map((t) => t.id)), [topics]);
   const titleOf = useMemo(() => new Map(topics.map((t) => [t.id, t.title])), [topics]);
@@ -63,7 +64,7 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
     const wanted = initialTopic ?? topicFromUrl();
     const start = knownTopics.has(wanted) ? wanted : '';
     const loaded = progress.loadDetailed();
-    setAvailable(loaded.available);
+    setNotice(storageNotice(loaded));
     setRecovered(loaded.recovered.length > 0);
     setStored(loaded.progress.cards);
     setTopic(start);
@@ -81,6 +82,7 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
   useEffect(() => {
     if (focusNext.current === 'reveal') revealRef.current?.focus();
     if (focusNext.current === 'back') backRef.current?.focus();
+    if (focusNext.current === 'empty') emptyRef.current?.focus();
     focusNext.current = null;
   });
 
@@ -118,16 +120,22 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
       p.cards[current.id] = next;
       recordActivity(p, now);
     });
-    setStored(saved.cards);
+    setStored(saved.progress.cards);
+    // The general notice already says that nothing is stored; otherwise warn about this failed write.
+    setSaveFailed(!saved.persisted && notice === null);
     const rest = queue.slice(1);
-    setQueue(grade === 'again' ? [...rest, current.id] : rest);
+    const nextQueue = grade === 'again' ? [...rest, current.id] : rest;
+    setQueue(nextQueue);
     setRevealed(false);
+    const interval = formatInterval(Date.parse(next.dueAt) - now.getTime());
     setMessage(
       grade === 'again'
         ? 'Die Karte kommt in dieser Runde noch einmal.'
-        : `Gespeichert – nächste Wiederholung in ${formatInterval(Date.parse(next.dueAt) - now.getTime())}.`,
+        : saved.persisted
+          ? `Gespeichert – nächste Wiederholung in ${interval}.`
+          : `Bewertet, aber nicht gespeichert – nächste Wiederholung in ${interval}, nur in diesem Tab.`,
     );
-    focusNext.current = 'reveal';
+    focusNext.current = nextQueue.length === 0 ? 'empty' : 'reveal';
   };
 
   const nextDue = useMemo(() => {
@@ -164,8 +172,13 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
         </p>
       </div>
 
-      {!available && <p class="notice notice--warn">{STORAGE_UNAVAILABLE}</p>}
+      {notice && <p class="notice notice--warn">{notice}</p>}
       {recovered && <p class="notice notice--warn">{RECOVERED_NOTICE}</p>}
+      {saveFailed && (
+        <p role="alert" class="notice notice--warn">
+          {SAVE_FAILED_NOTICE}
+        </p>
+      )}
       {error && (
         <p role="alert" class="notice notice--error">
           {error}
@@ -190,7 +203,7 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
             </div>
           ) : (
             <>
-              <div class="flashcard__back" ref={backRef} tabIndex={-1} aria-labelledby="fc-back-label">
+              <div class="flashcard__back" role="group" ref={backRef} tabIndex={-1} aria-labelledby="fc-back-label">
                 <h2 id="fc-back-label" class="flashcard__label">
                   Antwort
                 </h2>
@@ -219,12 +232,16 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
         <div class="empty-state">
           {inFilter.length === 0 ? (
             <>
-              <h2>Keine Karten vorhanden</h2>
+              <h2 ref={emptyRef} tabIndex={-1}>
+                Keine Karten vorhanden
+              </h2>
               <p>Zu dieser Auswahl gibt es noch keine Karteikarten.</p>
             </>
           ) : (
             <>
-              <h2>Keine Karten fällig</h2>
+              <h2 ref={emptyRef} tabIndex={-1}>
+                Keine Karten fällig
+              </h2>
               <p>Alle fälligen Karten dieser Auswahl sind wiederholt.</p>
               {nextDue && <p class="meta">Nächste Karte fällig: {dateFormat.format(nextDue)}</p>}
             </>

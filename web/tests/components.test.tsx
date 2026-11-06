@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/pr
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import ProgressTransfer from '../src/components/ProgressTransfer';
 import ThemeSwitch from '../src/components/ThemeSwitch';
+import { progress } from '../src/lib/progress';
 import { PROGRESS_PREFIX, THEME_KEY } from '../src/lib/storage';
 
 function unit(container: Element, name: string): HTMLElement {
@@ -109,6 +110,87 @@ describe('ProgressTransfer', () => {
     fireEvent.change(input, { target: { files: [file] } });
     await waitFor(() => expect(unit(container, 'progress-transfer').dataset.verifyCount).toBe('1'));
     expect(screen.getByRole('status').textContent).toContain('importiert');
+  });
+
+  it('does not count the version marker as a stored area', async () => {
+    localStorage.setItem(`${PROGRESS_PREFIX}version`, '1');
+    localStorage.setItem(`${PROGRESS_PREFIX}cards`, '{}');
+    const { container } = render(<ProgressTransfer />);
+    const el = unit(container, 'progress-transfer');
+    await waitFor(() => expect(el.dataset.verifyState).toBe('ready'));
+    expect(el.dataset.verifyCount).toBe('1');
+    expect(container.textContent).toMatch(/Gespeicherte Bereiche: 1/);
+  });
+
+  it('is empty if only the version marker is stored', async () => {
+    localStorage.setItem(`${PROGRESS_PREFIX}version`, '1');
+    const { container } = render(<ProgressTransfer />);
+    await waitFor(() => expect(unit(container, 'progress-transfer').dataset.verifyState).toBe('empty'));
+    expect(unit(container, 'progress-transfer').dataset.verifyCount).toBe('0');
+  });
+
+  it('exports a repaired state that can be imported again', async () => {
+    localStorage.setItem(`${PROGRESS_PREFIX}version`, '1');
+    localStorage.setItem(`${PROGRESS_PREFIX}tasks`, JSON.stringify({ 't04-p001': { score: 2, max: 4 } }));
+    localStorage.setItem(`${PROGRESS_PREFIX}quiz`, '{kaputt');
+    const blobs: Blob[] = [];
+    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob) => {
+      blobs.push(blob as Blob);
+      return 'blob:test';
+    });
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+    render(<ProgressTransfer />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Fortschritt exportieren' }));
+    expect(blobs).toHaveLength(1);
+    const json = await blobs[0].text();
+    expect(JSON.parse(json).data[`${PROGRESS_PREFIX}quiz`]).toBe('{}');
+    progress.reset();
+    expect(progress.import(json).ok).toBe(true);
+    expect(progress.load().tasks).toEqual({ 't04-p001': { score: 2, max: 4 } });
+    vi.restoreAllMocks();
+  });
+
+  it('returns the focus to the reset button after cancelling or confirming', async () => {
+    localStorage.setItem(`${PROGRESS_PREFIX}cards`, '{}');
+    render(<ProgressTransfer />);
+    const reset = await screen.findByRole('button', { name: 'Fortschritt zurücksetzen' });
+    await waitFor(() => expect((reset as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(reset);
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Ja, alles löschen' })));
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Fortschritt zurücksetzen' })));
+    fireEvent.click(screen.getByRole('button', { name: 'Fortschritt zurücksetzen' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Ja, alles löschen' }));
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Fortschritt zurücksetzen' })));
+  });
+
+  it('does not move the focus on page load', async () => {
+    localStorage.setItem(`${PROGRESS_PREFIX}cards`, '{}');
+    const { container } = render(<ProgressTransfer />);
+    await waitFor(() => expect(unit(container, 'progress-transfer').dataset.verifyState).toBe('ready'));
+    expect(document.activeElement).toBe(document.body);
+  });
+
+  it('can still export when the quota is full', async () => {
+    const data = new Map([[`${PROGRESS_PREFIX}tasks`, JSON.stringify({ a: { score: 1, max: 1 } })]]);
+    vi.stubGlobal('localStorage', {
+      getItem: (k: string) => data.get(k) ?? null,
+      setItem: () => {
+        throw new DOMException('full', 'QuotaExceededError');
+      },
+      removeItem: (k: string) => void data.delete(k),
+      clear: () => data.clear(),
+      key: (i: number) => [...data.keys()][i] ?? null,
+      get length() {
+        return data.size;
+      },
+    });
+    const { container } = render(<ProgressTransfer />);
+    const el = unit(container, 'progress-transfer');
+    await waitFor(() => expect(el.dataset.verifyState).toBe('error'));
+    expect(el.dataset.verifyCount).toBe('1');
+    expect((screen.getByRole('button', { name: 'Fortschritt exportieren' }) as HTMLButtonElement).disabled).toBe(false);
   });
 
   it('shows an import error for a broken file and stays usable', async () => {

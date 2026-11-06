@@ -15,6 +15,38 @@ const TOPICS = [
   { id: 't06', title: 'Normalisierung' },
 ];
 
+/** Complete FSRS-7 card fields as stored by ts-fsrs 6. */
+const FULL_CARD = {
+  stability: 3,
+  stabilityFast: 3,
+  difficulty: 3,
+  state: 2,
+  scheduleStatus: 'review',
+  reps: 1,
+  lapses: 0,
+  scheduledDays: 3,
+  learningStep: 0,
+};
+
+/** Readable storage that rejects every write (full quota). */
+function quotaStorage(initial: Record<string, string> = {}): Storage {
+  const data = new Map(Object.entries(initial));
+  return {
+    getItem: (k: string) => (data.has(k) ? data.get(k)! : null),
+    setItem: () => {
+      throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+    },
+    removeItem: (k: string) => {
+      data.delete(k);
+    },
+    clear: () => data.clear(),
+    key: (i: number) => [...data.keys()][i] ?? null,
+    get length() {
+      return data.size;
+    },
+  } as unknown as Storage;
+}
+
 function unit(container: Element): HTMLElement {
   const el = container.querySelector<HTMLElement>('[data-verify-unit="flashcards"]');
   if (!el) throw new Error('flashcards unit not found');
@@ -114,7 +146,7 @@ describe('Flashcards', () => {
     const future = new Date(Date.now() + 3 * 86_400_000).toISOString();
     progress.update((p) => {
       for (const c of CARDS) {
-        p.cards[c.id] = { dueAt: future, lastReviewAt: new Date().toISOString(), stability: 3, difficulty: 3, state: 2, reps: 1, lapses: 0 };
+        p.cards[c.id] = { ...FULL_CARD, cardId: c.id, dueAt: future, lastReviewAt: new Date().toISOString() };
       }
     });
     const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
@@ -141,6 +173,56 @@ describe('Flashcards', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
     fireEvent.click(screen.getByRole('button', { name: /^Gut/ }));
     await waitFor(() => expect(el.dataset.verifyCount).toBe('2'));
+  });
+
+  it('warns instead of confirming when the rating cannot be saved (full quota)', async () => {
+    const future = new Date(Date.now() + 3 * 86_400_000).toISOString();
+    const stored = { 't06-c001': { ...FULL_CARD, cardId: 't06-c001', dueAt: future, lastReviewAt: new Date().toISOString() } };
+    vi.stubGlobal('localStorage', quotaStorage({ 'db1:progress:version': '1', 'db1:progress:cards': JSON.stringify(stored) }));
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    // the stored (readable) progress is used: t06-c001 is not due
+    expect(el.dataset.verifyCount).toBe('2');
+    expect(container.textContent).toMatch(/nur in diesem Tab/);
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Gut/ }));
+    await waitFor(() => expect(el.dataset.verifyCount).toBe('1'));
+    expect(screen.getByRole('status').textContent).not.toMatch(/Gespeichert/);
+    expect(screen.getByRole('status').textContent).toMatch(/nicht gespeichert/);
+  });
+
+  it('shows a save warning if storage stops accepting writes after loading', async () => {
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    expect(container.textContent).not.toMatch(/nur in diesem Tab/);
+    const full = quotaStorage({ ...localStorage });
+    vi.stubGlobal('localStorage', full);
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Gut/ }));
+    await waitFor(() => expect(el.dataset.verifyCount).toBe('2'));
+    expect(screen.getByRole('alert').textContent).toMatch(/Speichern fehlgeschlagen/);
+    expect(screen.getByRole('status').textContent).not.toMatch(/Gespeichert/);
+  });
+
+  it('labels the answer area as a group', async () => {
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    await ready(container);
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
+    const back = container.querySelector('.flashcard__back')!;
+    expect(back.getAttribute('role')).toBe('group');
+    expect(screen.getByRole('group', { name: 'Antwort' })).toBe(back);
+  });
+
+  it('moves the focus to the empty-state heading after the last due card', async () => {
+    window.history.replaceState(null, '', '/datenbanken-1-kurs/karten/?thema=t06');
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Gut/ }));
+    await waitFor(() => expect(el.dataset.verifyState).toBe('empty'));
+    const heading = screen.getByRole('heading', { name: 'Keine Karten fällig' });
+    expect(heading.getAttribute('tabindex')).toBe('-1');
+    expect(document.activeElement).toBe(heading);
   });
 
   it('reports error when the scheduler cannot be loaded', async () => {

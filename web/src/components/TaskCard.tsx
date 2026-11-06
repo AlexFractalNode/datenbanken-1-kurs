@@ -1,7 +1,6 @@
 import type { ComponentChildren } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { progress, recordActivity, type TaskScore } from '../lib/progress';
-import { isStorageAvailable } from '../lib/storage';
 
 /** A paper task; prompt, solution and criteria are HTML rendered and sanitised at build time. */
 export interface TaskCardData {
@@ -58,16 +57,15 @@ export default function TaskCard({ task, headingLevel = 2, children }: Props) {
 
   const onSave = () => {
     const now = new Date();
-    const next = progress.update((p) => {
+    const { progress: next, persisted } = progress.update((p) => {
       p.tasks[task.id] = { score, max };
       recordActivity(p, now);
     });
-    const persisted = isStorageAvailable();
     setSaved(next.tasks[task.id]);
     setMessage(
       persisted
         ? `Gespeichert: ${score} von ${max} Punkten.`
-        : `Bewertung ${score} von ${max} Punkten gilt nur in diesem Tab (Speicher nicht verfügbar).`,
+        : `Nicht gespeichert: Die Bewertung ${score} von ${max} Punkten gilt nur in diesem Tab (Speicher nicht verfügbar).`,
     );
   };
 
@@ -114,7 +112,7 @@ export default function TaskCard({ task, headingLevel = 2, children }: Props) {
       </div>
 
       {open && (
-        <div id={solutionId} class="task-card__solution" ref={solutionRef} tabIndex={-1} aria-labelledby={`${task.id}-solution-title`}>
+        <div id={solutionId} class="task-card__solution" role="group" ref={solutionRef} tabIndex={-1} aria-labelledby={`${task.id}-solution-title`}>
           <Sub id={`${task.id}-solution-title`} class="task-card__label">
             Lösung
           </Sub>

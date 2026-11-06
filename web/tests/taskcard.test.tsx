@@ -106,6 +106,24 @@ describe('TaskCard', () => {
     expect(container.querySelector('.status-line')!.textContent).toMatch(/nur in diesem Tab/);
   });
 
+  it('does not claim success when the write is refused (unknown stored version)', async () => {
+    localStorage.setItem('db1:progress:version', '2');
+    const { container } = render(<TaskCard task={TASK} />);
+    await waitFor(() => expect(unit(container).dataset.verifyState).toBe('ready'));
+    fireEvent.click(screen.getByRole('button', { name: 'Lösung und Bewertungsraster aufdecken' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Bewertung speichern' }));
+    expect(container.querySelector('.status-line')!.textContent).not.toMatch(/Gespeichert/);
+    expect(container.querySelector('.status-line')!.textContent).toMatch(/nur in diesem Tab/);
+    expect(localStorage.getItem('db1:progress:tasks')).toBeNull();
+  });
+
+  it('labels the solution area as a group', async () => {
+    const { container } = render(<TaskCard task={TASK} />);
+    await waitFor(() => expect(unit(container).dataset.verifyState).toBe('ready'));
+    fireEvent.click(screen.getByRole('button', { name: 'Lösung und Bewertungsraster aufdecken' }));
+    expect(screen.getByRole('group', { name: 'Lösung' })).toBe(container.querySelector('.task-card__solution'));
+  });
+
   it('renders slotted children (source note)', async () => {
     render(
       <TaskCard task={TASK}>

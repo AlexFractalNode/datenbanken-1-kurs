@@ -50,19 +50,32 @@ function toStored(card: SchedulerCard): FsrsCard {
 }
 
 export function createSrs(scheduler: SchedulerLike): Srs {
+  const previewOf = (card: SchedulerCard, now: Date) => {
+    const out = {} as Record<Grade, Date>;
+    for (const item of scheduler.preview({ card, now })) {
+      const grade = GRADES.find((g) => RATING[g] === item.grade);
+      if (grade) out[grade] = item.card.dueAt;
+    }
+    return out;
+  };
   return {
+    // ts-fsrs validates the stored card and throws on missing or invalid fields (e.g. from an older
+    // app version or a hand-edited export). Such a card starts over as a new card instead.
     review(id, stored, grade, now) {
-      const card = toSchedulerCard(scheduler, id, stored, now);
-      return toStored(scheduler.review({ card, grade: RATING[grade], now }).card);
+      try {
+        const card = toSchedulerCard(scheduler, id, stored, now);
+        return toStored(scheduler.review({ card, grade: RATING[grade], now }).card);
+      } catch {
+        const card = scheduler.newCard({ now, cardId: id });
+        return toStored(scheduler.review({ card, grade: RATING[grade], now }).card);
+      }
     },
     preview(id, stored, now) {
-      const card = toSchedulerCard(scheduler, id, stored, now);
-      const out = {} as Record<Grade, Date>;
-      for (const item of scheduler.preview({ card, now })) {
-        const grade = GRADES.find((g) => RATING[g] === item.grade);
-        if (grade) out[grade] = item.card.dueAt;
+      try {
+        return previewOf(toSchedulerCard(scheduler, id, stored, now), now);
+      } catch {
+        return previewOf(scheduler.newCard({ now, cardId: id }), now);
       }
-      return out;
     },
   };
 }

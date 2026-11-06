@@ -172,6 +172,25 @@ describe('Quiz', () => {
     expect(screen.getByRole('heading', { name: 'Leider falsch' })).toBeTruthy();
   });
 
+  it('warns when an answer cannot be saved after loading', async () => {
+    const { container } = render(<Quiz items={[SINGLE]} topics={TOPICS} />);
+    await ready(container);
+    expect(screen.queryByRole('alert')).toBeNull();
+    // another tab (newer app) writes an unknown version marker: this tab must not overwrite it
+    localStorage.setItem('db1:progress:version', '2');
+    fireEvent.click(screen.getByRole('radio', { name: 'Rechteck' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort prüfen' }));
+    expect(screen.getByRole('alert').textContent).toMatch(/Speichern fehlgeschlagen/);
+    expect(localStorage.getItem('db1:progress:quiz')).toBeNull();
+  });
+
+  it('names an unknown stored version instead of overwriting it', async () => {
+    localStorage.setItem('db1:progress:version', '2');
+    const { container } = render(<Quiz items={[SINGLE]} topics={TOPICS} />);
+    await ready(container);
+    expect(container.textContent).toMatch(/unbekannten Version/);
+  });
+
   it('reports error for a question without correct option', async () => {
     const broken = { ...SINGLE, options: SINGLE.options.map((o) => ({ ...o, correct: false })) };
     const { container } = render(<Quiz items={[broken]} topics={TOPICS} />);

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
-import { RECOVERED_NOTICE, progress, recordActivity } from '../lib/progress';
-import { STORAGE_UNAVAILABLE } from '../lib/storage';
+import { RECOVERED_NOTICE, SAVE_FAILED_NOTICE, progress, recordActivity, storageNotice } from '../lib/progress';
 import { topicFromUrl, writeTopicToUrl, type TopicOption } from '../lib/topic-filter';
 
 /** One quiz question; all HTML was rendered and sanitised at build time (`renderMarkdown`/`renderInline`). */
@@ -41,7 +40,8 @@ function validate(items: QuizQuestion[]): string {
 export default function Quiz({ items, topics, initialTopic }: Props) {
   const [mounted, setMounted] = useState(false);
   const [error, setError] = useState('');
-  const [available, setAvailable] = useState(true);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [saveFailed, setSaveFailed] = useState(false);
   const [recovered, setRecovered] = useState(false);
   const [topic, setTopic] = useState('');
   const [index, setIndex] = useState(0);
@@ -62,7 +62,7 @@ export default function Quiz({ items, topics, initialTopic }: Props) {
     const wanted = initialTopic ?? topicFromUrl();
     setTopic(knownTopics.has(wanted) ? wanted : '');
     const loaded = progress.loadDetailed();
-    setAvailable(loaded.available);
+    setNotice(storageNotice(loaded));
     setRecovered(loaded.recovered.length > 0);
     setError(validate(items));
     setMounted(true);
@@ -105,11 +105,13 @@ export default function Quiz({ items, topics, initialTopic }: Props) {
   const onCheck = () => {
     if (!q || selection.length === 0) return;
     const ok = isExactlyCorrect(q, selection);
-    progress.update((p) => {
+    const { persisted } = progress.update((p) => {
       const stat = p.quiz[q.id] ?? { correct: 0, seen: 0 };
       p.quiz[q.id] = { correct: stat.correct + (ok ? 1 : 0), seen: stat.seen + 1 };
       recordActivity(p);
     });
+    // The general notice already says that nothing is stored; otherwise warn about this failed write.
+    setSaveFailed(!persisted && notice === null);
     setResults((r) => ({ ...r, [q.id]: ok }));
     setChecked(true);
     focusNext.current = 'feedback';
@@ -159,8 +161,13 @@ export default function Quiz({ items, topics, initialTopic }: Props) {
         </p>
       </div>
 
-      {!available && <p class="notice notice--warn">{STORAGE_UNAVAILABLE}</p>}
+      {notice && <p class="notice notice--warn">{notice}</p>}
       {recovered && <p class="notice notice--warn">{RECOVERED_NOTICE}</p>}
+      {saveFailed && (
+        <p role="alert" class="notice notice--warn">
+          {SAVE_FAILED_NOTICE}
+        </p>
+      )}
       {error && (
         <p role="alert" class="notice notice--error">
           {error}
