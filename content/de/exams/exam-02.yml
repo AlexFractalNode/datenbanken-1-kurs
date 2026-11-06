@@ -1,0 +1,973 @@
+title: "Probeklausur 2: Konzertveranstalter „Klangwerk“"
+minutes: 90
+tasks:
+- id: e02-p001
+  topic: t01
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: watt-database-design-2e
+      ref: "Kap. 3 Characteristics and Benefits of a Database (Redundanz, Konsistenz)"
+  tags: [redundanz, konsistenz, zeitbezug]
+  type: define-example
+  difficulty: 1
+  points: 5
+  minutes: 5
+  prompt: |-
+    Der Konzertveranstalter „Klangwerk“ speichert seinen Ticketverkauf relational (Auszug):
+
+    - kategorie(va_id, kat_code, preis, kontingent): aktueller Preis einer Ticketkategorie
+    - bestellung(best_id, kd_id, best_datum, status)
+    - ticket(ticket_id, best_id, va_id, kat_code, preis_bezahlt)
+
+    `preis_bezahlt` wird beim Kauf aus `kategorie.preis` übernommen. Ein Entwickler schlägt vor, in `bestellung` zusätzlich die Spalte `gesamtbetrag` zu speichern, die Summe der `preis_bezahlt` aller Tickets der Bestellung.
+
+    a) Erkläre die Begriffe **Redundanz** und **Inkonsistenz** und wie sie zusammenhängen. (2 P)
+
+    b) Wende die Begriffe auf das Beispiel an: Ist `gesamtbetrag` redundant? Ist `preis_bezahlt` redundant? Begründe jeweils. Beschreibe bei einer redundanten Spalte, wie eine Inkonsistenz entstehen kann und wie man sie vermeidet. (3 P)
+  solution: |-
+    **a)**
+    - **Redundanz:** Dieselbe Information ist mehrfach gespeichert oder lässt sich aus anderen gespeicherten Daten ableiten. Man könnte sie weglassen, ohne dass Information verloren geht.
+    - **Inkonsistenz:** Gespeicherte Daten widersprechen sich oder der Miniwelt, z. B. zwei Kopien desselben Sachverhalts mit verschiedenen Werten.
+    - **Zusammenhang:** Redundanz ist die häufigste Ursache von Inkonsistenz. Wird bei einer Änderung nur eine Kopie angepasst, widersprechen sich die Daten. Redundanz ist aber nicht schon Inkonsistenz: Bei kontrollierter Redundanz hält das System die Kopien synchron.
+
+    **b)**
+    - **`gesamtbetrag` ist redundant**, denn der Wert lässt sich jederzeit als `SUM(preis_bezahlt)` der Tickets der Bestellung berechnen.
+      Inkonsistenz: Ein Ticket wird nachträglich gelöscht (Teilstorno) oder hinzugefügt, `gesamtbetrag` wird aber nicht angepasst. Danach stimmt der Betrag nicht mehr mit den Tickets überein.
+      Vermeidung: Die Spalte weglassen und den Betrag bei Bedarf berechnen, z. B. in einer Abfrage oder Sicht. Alternativ bewusst als kontrollierte Redundanz speichern und per Trigger bei jeder Änderung an `ticket` nachführen.
+    - **`preis_bezahlt` ist nicht redundant**, obwohl der Wert beim Kauf mit `kategorie.preis` übereinstimmt. Der Kategoriepreis kann sich später ändern, z. B. wenn ein Frühbucherpreis endet. Der bezahlte Preis darf sich dann gerade nicht mitändern. Die Spalte hält eine eigene Information mit Zeitbezug fest, nämlich den Preis zum Kaufzeitpunkt. Ohne sie ginge diese Information verloren.
+  rubric:
+    - criterion: "a) Redundanz korrekt erklärt (mehrfach gespeichert bzw. aus anderen Daten ableitbar)"
+      points: 0.75
+    - criterion: "a) Inkonsistenz korrekt erklärt (Widerspruch zwischen Daten bzw. zur Miniwelt)"
+      points: 0.75
+    - criterion: "a) Zusammenhang: Redundanz als Ursache bei unvollständiger Änderung; Redundanz ist nicht automatisch Inkonsistenz"
+      points: 0.5
+    - criterion: "b) gesamtbetrag als redundant erkannt und mit der Ableitbarkeit aus den Tickets begründet"
+      points: 0.5
+    - criterion: "b) konkretes Szenario, wie gesamtbetrag inkonsistent wird (Ticket geändert, Betrag nicht)"
+      points: 0.75
+    - criterion: "b) Vermeidung genannt: berechnen statt speichern (Abfrage/Sicht) oder Trigger als kontrollierte Redundanz"
+      points: 0.75
+    - criterion: "b) preis_bezahlt als nicht redundant erkannt, begründet mit späterer Preisänderung bzw. Preis zum Kaufzeitpunkt"
+      points: 1
+  space: lines:14
+- id: e02-p002
+  topic: t02
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-hierarchisches-datenbankmodell
+      ref: "Aufbau (Baum, Wurzel, Eltern-Kind-Beziehung)"
+  tags: [hierarchisches-modell, anomalien, navigierender-zugriff, zugriffspfad]
+  type: explain
+  difficulty: 2
+  points: 5
+  minutes: 5
+  prompt: |-
+    Ein früheres **hierarchisches** System von „Klangwerk“ speicherte den Verkauf in einem einzigen Baum: Die Wurzel ist der Satztyp Veranstaltung (Nr., Titel, Datum), darunter hängt Ticket (Barcode, Kategorie), und unter jedem Ticket hängt ein Satz Käufer:in (Name, E-Mail). Kauft eine Person mehrere Tickets, steht ihr Käufer:in-Satz unter jedem dieser Tickets. Weitere Bäume oder Verweise gibt es nicht.
+
+    a) Beschreibe, was in diesem Baum jeweils passiert, und benenne die Anomalie: (1) Eine Person meldet sich für den Newsletter an, hat aber noch kein Ticket. (2) Veranstaltung V3 wird abgesagt, ihr Satz wird mit allen untergeordneten Sätzen gelöscht. (3) Anna Roth hat Tickets für fünf Veranstaltungen und ändert ihre E-Mail-Adresse. (1,5 P)
+
+    b) Das Marketing braucht alle Veranstaltungen, für die Anna Roth Tickets hat. Beschreibe, wie ein Programm diese Liste im gegebenen Baum ermittelt und warum das aufwendiger ist als die Liste aller Käufer:innen von V3. (1,5 P)
+
+    c) Angenommen, der Baum wird umgedreht: Wurzel Käufer:in, darunter Ticket, unter jedem Ticket ein Satz mit den Veranstaltungsdaten. Welche der beiden Listen aus b) wird dadurch billig, welche teuer? Welche Anomalie tritt jetzt an den Veranstaltungsdaten auf? (1,5 P)
+
+    d) Wie aufwendig sind beide Listen im relationalen Modell? Ein Satz genügt. (0,5 P)
+  solution: |-
+    **a)**
+    1. **Einfügeanomalie:** Ein Käufer:in-Satz kann nur unter einem Ticket stehen. Eine Person ohne Ticket lässt sich nicht speichern.
+    2. **Löschanomalie:** Mit V3 verschwinden alle Tickets und die darunter hängenden Käufer:in-Sätze. Hatte eine Person nur Tickets für V3, sind ihr Name und ihre E-Mail-Adresse ganz verloren.
+    3. **Änderungsanomalie:** Annas Daten stehen mindestens fünfmal im Baum. Alle Kopien müssen geändert werden, sonst widersprechen sie sich.
+
+    **b)** Der Einstieg ist nur über die Wurzel möglich, für Käufer:innen gibt es keinen eigenen Zugriffspfad. Das Programm durchläuft deshalb **alle** Veranstaltungen, unter jeder alle Tickets, und liest jeweils den Käufer:in-Satz. Bei passender E-Mail merkt es sich die Veranstaltung und entfernt Duplikate. Gelesen wird praktisch der ganze Bestand.
+    Für „alle Käufer:innen von V3“ springt das Programm dagegen direkt zu V3 und liest nur dessen Teilbaum.
+
+    **c)** Jetzt ist die Anna-Liste billig: Einstieg bei Annas Satz, dann nur ihr Teilbaum. Die Liste der Käufer:innen von V3 wird teuer, denn dafür müssen alle Käufer:innen und ihre Tickets durchlaufen werden.
+    Die Anomalien wandern zu den Veranstaltungsdaten (eine genügt):
+    - Änderungsanomalie: Wird V3 verlegt, muss das Datum in jeder Kopie unter jedem Ticket geändert werden.
+    - Einfügeanomalie: Eine Veranstaltung ohne verkauftes Ticket lässt sich nicht speichern.
+    - Löschanomalie: Mit der letzten Käufer:in einer Veranstaltung gehen deren Daten verloren.
+
+    Personen ohne Ticket lassen sich dagegen jetzt speichern.
+
+    **d)** Relational sind beide Listen gleich einfache deklarative Abfragen über die Fremdschlüssel. Eine bevorzugte Richtung gibt es nicht.
+  rubric:
+    - criterion: "a1) Einfügeanomalie: Person ohne Ticket nicht speicherbar"
+      points: 0.5
+    - criterion: "a2) Löschanomalie: Käufer:innen-Daten gehen mit der Veranstaltung verloren"
+      points: 0.5
+    - criterion: "a3) Änderungsanomalie: mehrere Kopien ändern, sonst Widerspruch"
+      points: 0.5
+    - criterion: "b) Einstieg nur über die Wurzel, kein Zugriffspfad für Käufer:innen, daher Durchlauf über alle Veranstaltungen und Tickets mit Vergleich"
+      points: 1
+    - criterion: "b) Vergleich: Käufer:innen von V3 erfordern nur einen Teilbaum"
+      points: 0.5
+    - criterion: "c) Anna-Liste billig, V3-Liste teuer, mit Begründung über den Einstieg"
+      points: 0.75
+    - criterion: "c) eine passende Anomalie an den Veranstaltungsdaten (Änderung, Einfügen oder Löschen) konkret beschrieben"
+      points: 0.75
+    - criterion: "d) relational beide gleich einfach bzw. deklarativ, ohne bevorzugte Richtung"
+      points: 0.5
+  space: lines:18
+- id: e02-p003
+  topic: t03
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: watt-database-design-2e
+      ref: "Kap. 13 Database Development Process"
+    - id: wpen-database-design
+      ref: "Conceptual, logical and physical design"
+  tags: [anforderungsanalyse, phasenmodell, physischer-entwurf]
+  type: explain
+  difficulty: 1
+  points: 5
+  minutes: 5
+  prompt: |-
+    In der Anforderungsanalyse für das Ticketsystem wurden notiert:
+
+    (1) „Eine Bestellung umfasst mindestens ein und höchstens acht Tickets. Jedes Ticket gehört zu genau einer Bestellung.“
+
+    (2) „An der Abendkasse wird eine Bestellung über den Nachnamen der Kund:in gesucht. Das Ergebnis muss in unter 2 Sekunden erscheinen. Pro Saison kommen etwa 60 000 Bestellungen hinzu.“
+
+    a) Ordne (1) und (2) jeweils als Informations- oder Verarbeitungsanforderung ein. (1 P)
+
+    b) Verfolge die Anforderungen durch die Entwurfsphasen (Stichworte oder eine Anweisung genügen):
+    - Gib für den **konzeptionellen Entwurf**, den **logischen Entwurf** und die **Datendefinition** je ein konkretes Ergebnis aus (1) an, und dazu jeweils, wie die Grenzen 1 und 8 dort festgehalten bzw. gesichert werden.
+    - Gib für den **physischen Entwurf** ein konkretes Ergebnis aus (2) an.
+
+    (4 P)
+  solution: |-
+    **a)** (1) ist eine **Informationsanforderung**: Sie beschreibt den Datenbestand und eine Kardinalität (Integritätsbedingung). (2) ist eine **Verarbeitungsanforderung** (gleichbedeutend: Datenverarbeitungs- bzw. Bearbeitungsanforderung). Sie beschreibt einen Suchvorgang mit Antwortzeit und Datenvolumen.
+
+    **b)**
+    - **Konzeptioneller Entwurf:** Beziehung Bestellung ⟨umfasst⟩ Ticket, Chen 1:n. Die Grenzen stehen als (min,max): Bestellung (1,8), Ticket (1,1).
+    - **Logischer Entwurf:** ticket(<u>ticket_id</u>, …, best_id → bestellung) mit `best_id` NOT NULL. Die Grenzen „mindestens 1“ und „höchstens 8“ Tickets je Bestellung werden als zusätzliche (benutzerdefinierte) Integritätsbedingung notiert, weil der Fremdschlüssel sie nicht ausdrückt.
+    - **Datendefinition:** `CREATE TABLE ticket (…, best_id INTEGER NOT NULL, …, CONSTRAINT fk_ticket_bestellung FOREIGN KEY (best_id) REFERENCES bestellung (best_id))`. Die Grenzen 1 und 8 lassen sich nicht mit einem einfachen CHECK sichern. Dafür braucht es einen Trigger (prozedural) oder eine Prüfung in der Anwendung. Firebird erlaubt auch einen CHECK mit Zählunterabfrage auf `ticket`. Der sichert die Obergrenze aber nur teilweise: Er prüft nur die eingefügte bzw. geänderte Zeile, und die Untergrenze 1 lässt sich so gar nicht sichern.
+    - **Physischer Entwurf:** Index auf den Nachnamen, z. B. `CREATE INDEX ix_kunde_nachname ON kunde (nachname);`, begründet mit der geforderten Antwortzeit bei wachsender Datenmenge.
+  rubric:
+    - criterion: "a) (1) als Informationsanforderung eingeordnet"
+      points: 0.5
+    - criterion: "a) (2) als Verarbeitungsanforderung eingeordnet (Datenverarbeitungs- bzw. Bearbeitungsanforderung gleichwertig)"
+      points: 0.5
+    - criterion: "b) konzeptionell: 1:n-Beziehung Bestellung–Ticket"
+      points: 0.5
+    - criterion: "b) konzeptionell: Grenzen als (min,max) Bestellung (1,8) und Ticket (1,1)"
+      points: 0.5
+    - criterion: "b) logisch: Fremdschlüssel best_id in ticket, NOT NULL"
+      points: 0.5
+    - criterion: "b) logisch: Grenzen 1 bis 8 als zusätzliche Integritätsbedingung notiert"
+      points: 0.5
+    - criterion: "b) Datendefinition: DDL mit FK und NOT NULL"
+      points: 0.5
+    - criterion: "b) Datendefinition: Grenzen per Trigger oder Anwendung; ein Firebird-CHECK mit Unterabfrage zählt nur, wenn seine Unvollständigkeit genannt wird"
+      points: 0.5
+    - criterion: "b) physisch: Index auf den Nachnamen, mit Antwortzeit bzw. Datenmenge begründet"
+      points: 1
+  space: lines:16
+- id: e02-p004
+  topic: t04
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-entity-relationship-modell
+      ref: "Entitätstyp, Attribute, Beziehungstypen; Notationen (Chen, Min-Max)"
+    - id: oer-informatik-erm
+      ref: "Erweiterte Notationsmittel (mehrwertige Attribute, schwache Entitätstypen)"
+  tags: [erm-modellierung, spezialisierung, schwache-entitaet, abgeleitetes-attribut, min-max]
+  type: erm-model
+  difficulty: 2
+  points: 11
+  minutes: 12
+  prompt: |-
+    Erstelle zum folgenden Text ein ER-Diagramm in **Chen-Notation** mit allen Attributen und Schlüsseln. Gib an jeder Beziehung die Chen-Kardinalität **und** die (min,max)-Angaben an. Kennzeichne bei der Spezialisierung, ob sie disjunkt oder überlappend und ob sie total oder partiell ist.
+
+    > Die Booking-Abteilung von „Klangwerk“ verwaltet Künstler:innen mit Künstlernummer und Name. Jede Künstler:in ist entweder eine Solokünstler:in oder eine Band, etwas Drittes gibt es nicht. Von Solokünstler:innen wird das Geburtsjahr gespeichert; ihr Alter soll angezeigt, aber nicht gespeichert werden. Von Bands wird das Gründungsjahr gespeichert.
+    > Eine Veranstaltung hat eine Veranstaltungsnummer und ein Datum. Bei jeder Veranstaltung tritt mindestens eine Künstler:in auf, je Auftritt wird die Gage festgehalten. Künstler:innen werden schon erfasst, bevor ein Auftritt vereinbart ist.
+    > „Klangwerk“ mietet Hallen, die über eine Hallennummer identifiziert werden. Jede Halle ist in mindestens einen Block gegliedert. Ein Block hat eine Bezeichnung, die nur innerhalb seiner Halle eindeutig ist (z. B. „Block C“), und eine Platzzahl.
+    > Für jede Veranstaltung wird festgelegt, welche Blöcke geöffnet sind (mindestens einer) und wie viele Tickets je geöffnetem Block in den Verkauf gehen (Kontingent). Ein Block kann bei vielen Veranstaltungen geöffnet sein. Neu erfasste Blöcke waren noch bei keiner geöffnet.
+  solution: |-
+    **Entitätstypen und Attribute**
+    - `Künstler:in`: <u>Künstlernummer</u>, Name
+    - `Solokünstler:in` (Subtyp): Geburtsjahr, Alter (abgeleitet, gestrichelte Ellipse)
+    - `Band` (Subtyp): Gründungsjahr
+    - `Veranstaltung`: <u>Veranstaltungsnummer</u>, Datum
+    - `Halle`: <u>Hallennummer</u>
+    - `Block` (schwacher Entitätstyp, doppelter Rahmen): Bezeichnung (partieller Schlüssel, gestrichelt unterstrichen), Platzzahl
+
+    **Spezialisierung:** Künstler:in —is-a (Dreieck)— Solokünstler:in, Band; **disjunkt und total**. Die Subtypen erben den Schlüssel Künstlernummer und haben keinen eigenen.
+
+    **Beziehungstypen**
+    | Beziehung | Chen | (min,max) |
+    |---|---|---|
+    | Künstler:in ⟨tritt auf bei⟩ Veranstaltung, Attribut Gage an der Raute | m:n | Künstler:in (0,n), Veranstaltung (1,n) |
+    | Halle ⟨gliedert sich in⟩ Block, identifizierend (doppelte Raute) | 1 bei Halle, n bei Block | Halle (1,n), Block (1,1) |
+    | Veranstaltung ⟨öffnet⟩ Block, Attribut Kontingent an der Raute | m:n | Veranstaltung (1,n), Block (0,n) |
+
+    Hinweise:
+    - ⟨tritt auf bei⟩ hängt am Obertyp Künstler:in, weil Solokünstler:innen und Bands gleichermaßen auftreten.
+    - ⟨öffnet⟩ verbindet Veranstaltung mit **Block**, nicht mit Halle, denn geöffnet werden einzelne Blöcke. Das Kontingent hängt von der Kombination ab und gehört an die Raute.
+    - Das Alter gehört als abgeleitetes Attribut zum Subtyp Solokünstler:in, weil es aus dessen Geburtsjahr berechnet wird.
+    - Subtypen mit doppeltem Rahmen (einseitig existenzabhängig) führen nicht zu Abzug, sofern is-a, geerbter Schlüssel und Subtyp-Attribute stimmen. Die Kriterien zum schwachen Typ gelten nur für Block.
+    - Fremdschlüssel gehören nicht ins ER-Diagramm.
+  rubric:
+    - criterion: "Künstler:in, Veranstaltung, Halle mit unterstrichenem Schlüssel und ihren übrigen Attributen, keine Fremdschlüssel als Attribute (je 0,5)"
+      points: 1.5
+    - criterion: "Alter als abgeleitetes Attribut (gestrichelte Ellipse) am Subtyp Solokünstler:in"
+      points: 0.5
+    - criterion: "is-a mit Subtypen Solokünstler:in (Geburtsjahr) und Band (Gründungsjahr), Subtypen ohne eigenen Schlüssel; doppelter Rahmen an den Subtypen ohne Abzug"
+      points: 1
+    - criterion: "Spezialisierung als disjunkt und total gekennzeichnet"
+      points: 1
+    - criterion: "Block als schwacher Entitätstyp (doppelter Rahmen) mit partiellem Schlüssel Bezeichnung, Platzzahl, identifizierende Beziehung (doppelte Raute)"
+      points: 1.5
+    - criterion: "gliedert sich in: Chen 1 bei Halle, n bei Block (0,5); (min,max) Halle (1,n), Block (1,1) (0,5)"
+      points: 1
+    - criterion: "tritt auf bei: m:n am Obertyp Künstler:in (0,5), Gage an der Raute (0,5)"
+      points: 1
+    - criterion: "tritt auf bei: (min,max) Künstler:in (0,n), Veranstaltung (1,n)"
+      points: 1
+    - criterion: "öffnet: Beziehung zwischen Veranstaltung und Block (nicht Halle) als m:n (1), Kontingent an der Raute (0,5)"
+      points: 1.5
+    - criterion: "öffnet: (min,max) Veranstaltung (1,n), Block (0,n)"
+      points: 1
+  space: box:240
+- id: e02-p005
+  topic: t05
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-referentielle-integritaet
+      ref: "Abschnitt „Begriffe und ihre Bedeutung“ (Fremdschlüssel-Bedingung)"
+    - id: firebird-30-language-reference
+      ref: "Kap. 4 Common Language Elements (Domains, Constraints); Kap. 5 DDL (CREATE TABLE)"
+  tags: [integritaet, check, fremdschluessel, domaene]
+  type: explain
+  difficulty: 1
+  points: 5
+  minutes: 5
+  prompt: |-
+    Gegeben ist ein Ausschnitt des Ticketschemas in Firebird 3 (PK unterstrichen):
+
+    - kategorie(<u>va_id → veranstaltung, kat_code</u>, preis, kontingent) mit `CHECK (preis > 0)`
+    - bestellung(<u>best_id</u>, kd_id → kunde, status, versandgebuehr)
+    - ticket(<u>ticket_id</u>, best_id → bestellung, va_id, kat_code, preis_bezahlt) mit (va_id, kat_code) → kategorie
+
+    Entscheide bei jeder Aussage, ob sie **richtig** oder **falsch** ist, begründe in einem Satz und nenne die betroffene Integritätsart (Entitäts-, referenzielle, Domänen- oder benutzerdefinierte Integrität). Nicht jede Art muss vorkommen.
+
+    1. Für den Fremdschlüssel von `ticket` auf `kategorie` würde die Spalte `kat_code` allein genügen, weil sie die Kategorie kennzeichnet.
+    2. Der `CHECK (preis > 0)` sorgt dafür, dass jede Kategorie einen Preis hat.
+    3. Die Fremdschlüsselspalten in `ticket` müssen genauso heißen wie die Zielspalten in `kategorie`, sonst lässt sich der Fremdschlüssel nicht anlegen.
+    4. In Firebird 3 kann ein Fremdschlüssel nur auf den `PRIMARY KEY` der Zieltabelle verweisen, nicht auf eine Spalte oder Spaltenkombination mit `UNIQUE`.
+    5. Soll für `ticket.preis_bezahlt` und `bestellung.versandgebuehr` gleichermaßen gelten „Betrag mit Cent, nie negativ“, muss in beiden Tabellen je ein eigener CHECK stehen.
+  solution: |-
+    1. **Falsch.** Ein Fremdschlüssel verweist auf den ganzen Schlüssel der Zieltabelle, hier (va_id, kat_code). Den Code 'A' gibt es bei jeder Veranstaltung, `kat_code` allein ist also nicht eindeutig. *Referenzielle Integrität.*
+    2. **Falsch.** Für NULL ergibt `preis > 0` UNKNOWN, und ein CHECK weist nur FALSE ab. Die Pflicht braucht zusätzlich `NOT NULL`. *Domänenintegrität.*
+    3. **Falsch.** Die Namen sind frei wählbar, die Zuordnung steht in der Klausel `FOREIGN KEY (…) REFERENCES kategorie (…)`. Nötig sind passende Datentypen bzw. dieselbe Domäne. *Referenzielle Integrität.*
+    4. **Falsch.** In SQL, auch in Firebird 3, darf ein Fremdschlüssel auf den Primärschlüssel oder auf eine `UNIQUE`-Spalte bzw. -Spaltenkombination verweisen. *Referenzielle Integrität.* (Im Modell verweist ein Fremdschlüssel auf einen Schlüsselkandidaten. Das kann der Primärschlüssel sein, ein deklarierter Alternativschlüssel ist aber ebenso zulässig.)
+    5. **Falsch.** Mit einer Domäne steht die Regel an einer Stelle, z. B. `CREATE DOMAIN d_betrag AS NUMERIC(7,2) CHECK (VALUE >= 0);`. Beide Spalten verwenden `d_betrag` als Typ. Zwei einzelne CHECKs wären möglich, aber nicht nötig. *Domänenintegrität.*
+  rubric:
+    - criterion: "1: falsch, FK muss den ganzen Schlüssel (va_id, kat_code) abdecken, kat_code allein nicht eindeutig (0,75); referenzielle Integrität (0,25)"
+      points: 1
+    - criterion: "2: falsch, NULL führt zu UNKNOWN und passiert den CHECK, NOT NULL nötig (0,75); Domänenintegrität (0,25)"
+      points: 1
+    - criterion: "3: falsch, Namen frei, nötig sind passende Typen bzw. Domänen (0,75); referenzielle Integrität (0,25)"
+      points: 1
+    - criterion: "4: falsch, in SQL bzw. Firebird 3 sind PK und UNIQUE als Ziel erlaubt (0,75; wer mit der Modell-Lesart „FK verweist auf den Primärschlüssel“ argumentiert und ergänzt, dass SQL auch UNIQUE-Ziele erlaubt, erhält die vollen 0,75; eine reine Modell-Lesart ohne SQL-Bezug erhält 0,25); referenzielle Integrität (0,25)"
+      points: 1
+    - criterion: "5: falsch, eine Domäne mit CHECK gilt für beide Spalten (0,75); Domänenintegrität (0,25)"
+      points: 1
+  space: lines:14
+- id: e02-p006
+  topic: t06
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: oer-informatik-relationenmodell
+      ref: "Transformationsschritte: Kardinalitäten in Fremdschlüssel transformieren"
+    - id: wp-objektrelationale-abbildung
+      ref: "Abbildung von Vererbungshierarchien (Tabelle pro Vererbungshierarchie, pro Unterklasse, pro konkrete Klasse)"
+  tags: [erm-nach-relationen, generalisierung, ternaer, alternativschluessel, rekursiv]
+  type: erm-to-sql
+  difficulty: 3
+  points: 11
+  minutes: 9
+  prompt: |-
+    Für die Personalplanung an Veranstaltungsabenden liegt folgendes ER-Modell vor. Bei jeder Beziehung steht neben jedem Entitätstyp zuerst die Chen-Kardinalität, dann seine (min,max)-Angabe. Die Tabelle veranstaltung(<u>va_id</u>, titel, datum) existiert bereits.
+
+    ```
+    Entitätstypen (Schlüssel jeweils zuerst)
+      Mitarbeiter:in    (Pers-Nr., Name, Telefon)
+        Spezialisierung, disjunkt und total, in
+        Festangestellte:r (Monatsgehalt, Urlaubstage)
+        Aushilfe          (Stundenlohn)
+      Einsatzbereich    (Bereichs-Nr., Bezeichnung)   z. B. Kasse, Garderobe, Einlass
+      Veranstaltung     (va_id, Titel, Datum)          Tabelle existiert
+
+    Beziehungstypen
+      ist Teamleitung von (rekursiv an Mitarbeiter:in):
+        Rolle Teamleitung 1 (0,n), Rolle Teammitglied n (0,1)
+      leitet Bereich bei (ternär):
+        Mitarbeiter:in 1 (0,n), Veranstaltung n (1,n), Einsatzbereich 1 (0,n)
+        Attribut: Stunden
+    ```
+
+    a) Überführe das Modell in ein Relationenschema in Kurzschreibweise (PK unterstrichen, FK mit Pfeil auf die Zieltabelle). Bilde die Spezialisierung mit einer für dieses Modell **geeigneten** Variante ab, also nicht mit der horizontalen. Nenne die Variante. Gib bei jedem Fremdschlüssel außerhalb des Primärschlüssels an, ob er `NOT NULL` sein muss, und gib an, welche `UNIQUE`-Bedingungen (auch über mehrere Spalten) nötig sind. (10 P)
+
+    b) Nenne einen Grund, warum die horizontale Variante für dieses Modell ungeeignet ist. (1 P)
+  solution: |-
+    **a)** Musterlösung mit der **vertikalen Fragmentierung** (Class Table Inheritance, Tabelle je Ober- und Subtyp):
+    - mitarbeiter(<u>pers_nr</u>, name, telefon, teamleitung_nr → mitarbeiter), `teamleitung_nr` NULL-fähig, nicht UNIQUE
+    - festangestellte(<u>pers_nr → mitarbeiter</u>, monatsgehalt, urlaubstage)
+    - aushilfe(<u>pers_nr → mitarbeiter</u>, stundenlohn)
+    - einsatzbereich(<u>bereich_nr</u>, bezeichnung)
+    - bereichsleitung(<u>va_id → veranstaltung, bereich_nr → einsatzbereich</u>, pers_nr → mitarbeiter, stunden), `pers_nr` NOT NULL, zusätzlich `UNIQUE (pers_nr, va_id)`
+
+    Begründungen:
+    - ⟨ist Teamleitung von⟩ ist rekursiv 1:n. Der FK steht auf der n-Seite, also in jeder Zeile des Teammitglieds, und der Spaltenname nennt die Rolle. Er ist NULL-fähig wegen Teammitglied (0,1) und nicht UNIQUE, weil eine Teamleitung mehrere Mitglieder hat.
+    - ⟨leitet Bereich bei⟩ ist ternär und wird zu einer eigenen Tabelle mit einem FK je Entitätstyp. Es gibt zwei Einsen:
+      - Die 1 bei Mitarbeiter:in bedeutet: Zu einer Kombination aus Veranstaltung und Bereich gehört höchstens eine Leitung. Also ist (va_id, bereich_nr) eindeutig.
+      - Die 1 bei Einsatzbereich bedeutet: Zu einer Kombination aus Mitarbeiter:in und Veranstaltung gehört höchstens ein Bereich. Also ist auch (pers_nr, va_id) eindeutig.
+      - Es gibt damit **zwei Schlüsselkandidaten**. Einer wird PK, der andere `UNIQUE` und seine Spalte außerhalb des PK `NOT NULL`. Gleichwertig: PK (pers_nr, va_id), dazu `UNIQUE (va_id, bereich_nr)` und `bereich_nr` NOT NULL.
+    - FKs, die Teil des PK sind, sind dadurch schon NOT NULL. Ein Subtyp-PK ist zugleich eindeutig.
+
+    Gleichwertig mit der **virtuellen Fragmentierung** (Single Table Inheritance, eine Gesamttabelle für die ganze Hierarchie): mitarbeiter(<u>pers_nr</u>, name, telefon, art, monatsgehalt, urlaubstage, stundenlohn, teamleitung_nr → mitarbeiter). Dabei ist `art` NOT NULL mit `CHECK (art IN ('F', 'A'))`, weil die Spezialisierung total und disjunkt ist. Die Subtypattribute sind NULL-fähig, sinnvoll mit einem CHECK je Art.
+    Für die Benennung zählen der Fragmentierungsbegriff, der ORM-Mustername und eine eindeutige Beschreibung („Tabelle je Ober- und Subtyp“, „eine Gesamttabelle“) gleichermaßen.
+
+    **b)** Einer davon:
+    - `bereichsleitung.pers_nr` und `teamleitung_nr` müssten auf zwei Tabellen (festangestellte und aushilfe) zeigen. Ein einfacher Fremdschlüssel ist so nicht möglich.
+    - Dass eine Personalnummer nicht in beiden Subtyp-Tabellen vorkommt, ist nicht deklarativ gesichert.
+    - Abfragen über alle Mitarbeiter:innen brauchen `UNION`.
+  rubric:
+    - criterion: "a) mitarbeiter mit Attributen und teamleitung_nr → mitarbeiter (0,5), NULL-fähig (0,5), nicht UNIQUE (0,5)"
+      points: 1.5
+    - criterion: "a) Variante (vertikal bzw. Class Table Inheritance oder virtuell bzw. Single Table Inheritance bzw. Gesamttabelle) genannt (0,5) und konsistent umgesetzt (1,5)"
+      points: 2
+    - criterion: "a) einsatzbereich als eigene Tabelle"
+      points: 0.5
+    - criterion: "a) leitet Bereich bei als eigene Tabelle mit FKs auf mitarbeiter, veranstaltung und einsatzbereich"
+      points: 1
+    - criterion: "a) beide Schlüsselkandidaten (va_id, bereich_nr) und (pers_nr, va_id) aus den beiden Chen-Einsen abgeleitet (je 1,25)"
+      points: 2.5
+    - criterion: "a) einer als PK, der andere als UNIQUE"
+      points: 1
+    - criterion: "a) dritte FK-Spalte außerhalb des PK NOT NULL (0,5), stunden als Attribut der Beziehungstabelle (0,5)"
+      points: 1
+    - criterion: "a) Notation: PK unterstrichen, jeder FK mit Ziel"
+      points: 0.5
+    - criterion: "b) ein zutreffender Grund gegen die horizontale Variante"
+      points: 1
+  space: lines:24
+- id: e02-p007
+  topic: t07
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-normalisierung-datenbank
+      ref: "Normalformen: 1NF, 2NF, 3NF; Anomalien"
+    - id: wp-funktionale-abhaengigkeit
+      ref: "Formale Definition (volle funktionale Abhängigkeit)"
+  tags: [1nf, wiederholungsgruppe, funktionale-abhaengigkeit, 2nf, 3nf, anomalien]
+  type: normalize
+  difficulty: 2
+  points: 11
+  minutes: 10
+  prompt: |-
+    Kleines Zusatzszenario: Eine Volkshochschule führt ihre Kurse bisher in dieser Liste.
+
+    | KursNr | Titel | Gebuehr | LeitungNr | LeitungName | Termine (Datum: Raum) |
+    |---|---|---|---|---|---|
+    | K1 | Spanisch A1 | 90 | L2 | Ortiz | 03.03.: R11; 10.03.: R14 |
+    | K2 | Töpfern | 120 | L5 | Lange | 04.03.: R12 |
+    | K3 | Spanisch A2 | 90 | L2 | Ortiz | 05.03.: R11; 12.03.: R11 |
+
+    Fachliche Regeln:
+    - Ein Kurs hat einen Titel, eine Gebühr und genau eine Leitung.
+    - Eine Leitung hat eine Nummer und einen Namen und kann mehrere Kurse leiten.
+    - Ein Kurs hat einen oder mehrere Termine, höchstens einen pro Tag. An jedem Termin findet er in genau einem Raum statt. Alle Termine liegen im selben Jahr.
+
+    a) Warum ist die Liste nicht in 1NF? Gib die Relation in 1NF mit Primärschlüssel an. (2,5 P)
+
+    b) Gib die funktionalen Abhängigkeiten an, die sich aus den Regeln ergeben. Die linken Seiten sollen minimal sein. Abhängigkeiten, die nur durch Transitivität folgen, darfst du weglassen. (2 P)
+
+    c) Überführe die Relation in die 2NF und begründe mit einer partiellen Abhängigkeit. (2,5 P)
+
+    d) Überführe das Ergebnis in die 3NF und begründe. Gib alle Relationen mit Primär- und Fremdschlüsseln an. (3 P)
+
+    e) Beschreibe an der 1NF-Relation eine Anomalie mit den Beispieldaten. (1 P)
+  solution: |-
+    **a)** Die Spalte Termine enthält eine **Wiederholungsgruppe**, nämlich mehrere Termine in einer Zelle. Jeder Eintrag ist außerdem **nicht atomar**, denn er besteht aus Datum und Raum. Auflösen: je Termin eine Zeile, Datum und Raum als eigene Attribute.
+
+    Kurstermin(<u>KursNr, Datum</u>, Titel, Gebuehr, LeitungNr, LeitungName, Raum)
+
+    Der Schlüssel ist (KursNr, Datum), weil ein Kurs höchstens einen Termin pro Tag hat.
+
+    **b)**
+    - FD 1: KursNr → Titel, Gebuehr, LeitungNr
+    - FD 2: LeitungNr → LeitungName
+    - FD 3: KursNr, Datum → Raum
+
+    KursNr → LeitungName folgt transitiv und darf fehlen.
+
+    **c)** Titel, Gebuehr, LeitungNr und LeitungName hängen nur von KursNr ab, einem echten Teil des Schlüssels (KursNr, Datum). Sie sind also nicht voll funktional abhängig.
+    - Kurs(<u>KursNr</u>, Titel, Gebuehr, LeitungNr, LeitungName)
+    - Termin(<u>KursNr → Kurs, Datum</u>, Raum)
+
+    **d)** In Kurs gilt KursNr → LeitungNr → LeitungName. LeitungName ist **transitiv** abhängig, denn es hängt über das Nichtschlüsselattribut LeitungNr vom Schlüssel ab.
+    - Leitung(<u>LeitungNr</u>, LeitungName)
+    - Kurs(<u>KursNr</u>, Titel, Gebuehr, LeitungNr → Leitung)
+    - Termin(<u>KursNr → Kurs, Datum</u>, Raum)
+
+    **e)** Eine davon:
+    - **Änderungsanomalie:** Der Name von L2 (Ortiz) steht in vier Zeilen. Wird er nur in einer geändert, widersprechen sich die Daten.
+    - **Einfügeanomalie:** Eine neue Leitung ohne Kurs lässt sich nicht erfassen, weil KursNr und Datum zum Schlüssel gehören.
+    - **Löschanomalie:** Entfällt der einzige Termin von K2, gehen mit der Zeile auch der Kurs K2 und die Leitung Lange verloren.
+
+    **Folgefehler:** c) bis e) werden auf Grundlage der eigenen 1NF-Relation und FDs gewertet, sofern sie konsistent weitergeführt werden.
+  rubric:
+    - criterion: "a) Begründung: Wiederholungsgruppe bzw. mehrere Werte in einer Zelle, Eintrag aus Datum und Raum nicht atomar"
+      points: 1
+    - criterion: "a) 1NF-Relation mit einer Zeile je Termin und allen Attributen, Datum und Raum getrennt"
+      points: 0.75
+    - criterion: "a) Primärschlüssel (KursNr, Datum). Wer die Wiederholungsgruppe gleich in eine eigene Relation abspaltet, erhält Begründung und Schlüssel, nicht aber das Kriterium „eine Zeile je Termin“; c) wird dann gegen die eigene Zerlegung gewertet"
+      points: 0.75
+    - criterion: "b) FD 1 KursNr → Titel, Gebuehr, LeitungNr (0,75); FD 2 LeitungNr → LeitungName (0,5); FD 3 KursNr, Datum → Raum (0,75)"
+      points: 2
+    - criterion: "c) partielle Abhängigkeit von KursNr als Teil des Schlüssels benannt"
+      points: 1
+    - criterion: "c) Zerlegung in Kurs und Termin mit korrekten Attributen und Schlüsseln"
+      points: 1.5
+    - criterion: "d) transitive Abhängigkeit über LeitungNr benannt"
+      points: 1
+    - criterion: "d) Leitung als eigene Relation abgespalten"
+      points: 1
+    - criterion: "d) alle drei Relationen mit PK und den FKs LeitungNr → Leitung und KursNr → Kurs"
+      points: 1
+    - criterion: "e) eine Anomalie konkret an den Beispieldaten"
+      points: 1
+  space: lines:30
+- id: e02-p008
+  topic: t08
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-relationale-algebra
+      ref: "Mengenoperationen; Produkt und Verbund"
+    - id: wpen-join-relational-algebra
+      ref: "Natural join; Division"
+  tags: [differenz, durchschnitt, division-ausblick, natuerlicher-verbund]
+  type: relalg
+  difficulty: 2
+  points: 5
+  minutes: 5
+  prompt: |-
+    Gegeben sind folgende Relationen des Ticketsystems (Schlüssel unterstrichen). In dieser Aufgabe gibt es keine NULL-Werte.
+
+    - Kunde(<u>kd_id</u>, vorname, nachname, stadt)
+    - Bestellung(<u>best_id</u>, kd_id, best_datum, status)
+    - Ticket(<u>ticket_id</u>, best_id, va_id, kat_code)
+    - Veranstaltung(<u>va_id</u>, titel, datum, st_id, k_id), dabei ist k_id der Hauptact
+
+    Formuliere in relationaler Algebra (σ, π, ρ, ×, ⋈, ∪, ∩, −). Der natürliche Verbund ⋈ verbindet über alle gleichnamigen Attribute. Der Bestellstatus spielt nur in a) eine Rolle.
+
+    a) Vor- und Nachname aller Kund:innen, die **keine einzige** Bestellung mit Status 'bezahlt' haben. Kund:innen ganz ohne Bestellung gehören dazu. (2 P)
+
+    b) kd_id aller Kund:innen, die **sowohl** für Veranstaltung 7 **als auch** für Veranstaltung 8 mindestens ein Ticket haben. (1,5 P)
+
+    c) Ausblick: kd_id aller Kund:innen, die für **jede** Veranstaltung mit dem Hauptact k_id = 7 mindestens ein Ticket haben. Du darfst die Division ÷ verwenden oder die Ersatzformel R ÷ S = π_X(R) − π_X((π_X(R) × S) − R), wobei X die Attribute von R sind, die nicht in S vorkommen. (1,5 P)
+  solution: |-
+    **a)** Die Differenz wird über den Schlüssel gebildet, erst danach kommen die Namen dazu:
+
+    `π_{vorname, nachname}(Kunde ⋈ (π_{kd_id}(Kunde) − π_{kd_id}(σ_{status='bezahlt'}(Bestellung))))`
+
+    Gleichwertig: die Differenz über π_{kd_id, vorname, nachname}, mit `Kunde ⋈ σ_{status='bezahlt'}(Bestellung)` im Subtrahenden, und danach die Projektion auf die Namen. Falsch wäre es, nur π_{vorname, nachname} voneinander abzuziehen. Hat eine zahlende Kund:in denselben Namen wie eine nicht zahlende, verschwände auch diese.
+
+    **b)**
+    `π_{kd_id}(σ_{va_id=7}(Bestellung ⋈ Ticket)) ∩ π_{kd_id}(σ_{va_id=8}(Bestellung ⋈ Ticket))`
+
+    Der Verbund läuft über best_id. Falsch wäre `σ_{va_id=7 ∧ va_id=8}`: Diese Bedingung prüft jedes Tupel einzeln und ist nie erfüllt.
+
+    **c)**
+    `π_{kd_id, va_id}(Bestellung ⋈ Ticket) ÷ π_{va_id}(σ_{k_id=7}(Veranstaltung))`
+
+    Der Dividend R enthält, welche Kund:in Tickets für welche Veranstaltung hat. Der Divisor S enthält die Veranstaltungen des Hauptacts 7. Gleichwertig mit der Ersatzformel und X = {kd_id}: `π_{kd_id}(R) − π_{kd_id}((π_{kd_id}(R) × S) − R)`.
+  rubric:
+    - criterion: "a) Differenz über kd_id (oder über eine Attributmenge, die kd_id enthält)"
+      points: 1
+    - criterion: "a) Selektion status = 'bezahlt' auf Bestellung im Subtrahenden"
+      points: 0.5
+    - criterion: "a) Namen erst nach der Differenz per Verbund und Projektion ermittelt"
+      points: 0.5
+    - criterion: "b) je eine Selektion auf va_id = 7 bzw. 8 nach dem Verbund Bestellung ⋈ Ticket, projiziert auf kd_id"
+      points: 0.75
+    - criterion: "b) Durchschnitt ∩ der beiden Ergebnisse (gleichwertig: Verbund über kd_id); σ mit va_id=7 ∧ va_id=8 ergibt 0 für dieses Kriterium"
+      points: 0.75
+    - criterion: "c) Dividend π_{kd_id, va_id}(Bestellung ⋈ Ticket)"
+      points: 0.5
+    - criterion: "c) Divisor π_{va_id}(σ_{k_id=7}(Veranstaltung))"
+      points: 0.5
+    - criterion: "c) Division oder Ersatzformel mit passenden Attributmengen, Ergebnis nur kd_id"
+      points: 0.5
+  space: lines:14
+- id: e02-p009
+  topic: t09
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: firebird-30-language-reference
+      ref: "Kap. 5 Data Definition (DDL) Statements (CREATE TABLE, ALTER TABLE)"
+    - id: postgresql-17-docs-sql
+      ref: "5.5 Constraints (CHECK, NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY)"
+  tags: [create-table, zusammengesetzter-schluessel, identity, set-null, cascade, alter-table]
+  type: sql-write
+  difficulty: 2
+  points: 11
+  minutes: 7
+  prompt: |-
+    In der Firebird-3-Datenbank von „Klangwerk“ existieren bereits:
+
+    ```sql
+    CREATE TABLE veranstaltung (
+      va_id INTEGER GENERATED BY DEFAULT AS IDENTITY,
+      titel VARCHAR(80) NOT NULL,
+      datum DATE        NOT NULL,
+      -- weitere Spalten hier ohne Bedeutung
+      CONSTRAINT pk_veranstaltung PRIMARY KEY (va_id)
+    );
+    CREATE TABLE kunde (
+      kd_id    INTEGER GENERATED BY DEFAULT AS IDENTITY,
+      vorname  VARCHAR(30) NOT NULL,
+      nachname VARCHAR(40) NOT NULL,
+      email    VARCHAR(80) NOT NULL,
+      stadt    VARCHAR(40),
+      CONSTRAINT pk_kunde PRIMARY KEY (kd_id)
+    );
+    ```
+
+    Schreibe die Anweisungen in Firebird-3-Syntax. Constraint-Namen (`CONSTRAINT …`) sind erwünscht, aber keine Pflicht.
+
+    a) Vervollständige die Tabelle `kategorie`: Ergänze bei den Spalten, was fehlt, und schreibe die Constraints. (5 P)
+    - `va_id` und `kat_code` identifizieren eine Kategorie gemeinsam.
+    - `bezeichnung` ist Pflicht. Innerhalb einer Veranstaltung kommt jede Bezeichnung nur einmal vor.
+    - `preis` und `kontingent` sind Pflicht und jeweils größer als 0.
+    - Wird eine Veranstaltung gelöscht, verschwinden ihre Kategorien mit.
+
+    ```sql
+    CREATE TABLE kategorie (
+      va_id       INTEGER,
+      kat_code    CHAR(1),
+      bezeichnung VARCHAR(30),
+      preis       NUMERIC(7,2),
+      kontingent  INTEGER,
+      -- Constraints ergänzen
+    );
+    ```
+
+    b) Vervollständige ebenso die Tabelle `bestellung` (4,5 P):
+    - `best_id` vergibt die Datenbank automatisch.
+    - `kd_id` ist optional (Barverkauf an der Abendkasse ohne Kundenkonto). Löscht eine Kund:in ihr Konto, bleiben ihre Bestellungen für die Buchhaltung erhalten, dann ohne Kund:in.
+    - `best_datum` ist Pflicht. Ohne Angabe gilt das aktuelle Datum.
+    - `status` ist Pflicht und nur 'offen', 'bezahlt' oder 'storniert'. Standard ist 'offen'.
+
+    ```sql
+    CREATE TABLE bestellung (
+      best_id    INTEGER,
+      kd_id      INTEGER,
+      best_datum DATE,
+      status     VARCHAR(10),
+      -- Constraints ergänzen
+    );
+    ```
+
+    c) Nachträglich soll in `kunde` jede E-Mail-Adresse nur einmal vorkommen. Schreibe die Anweisung. Was passiert, wenn in `kunde` bereits zwei Zeilen mit derselben Adresse stehen? (1,5 P)
+  solution: |-
+    **a)**
+    ```sql
+    CREATE TABLE kategorie (
+      va_id       INTEGER,
+      kat_code    CHAR(1),
+      bezeichnung VARCHAR(30)  NOT NULL,
+      preis       NUMERIC(7,2) NOT NULL,
+      kontingent  INTEGER      NOT NULL,
+      CONSTRAINT pk_kategorie PRIMARY KEY (va_id, kat_code),
+      CONSTRAINT fk_kategorie_veranstaltung FOREIGN KEY (va_id)
+        REFERENCES veranstaltung (va_id) ON DELETE CASCADE,
+      CONSTRAINT uq_kategorie_bezeichnung UNIQUE (va_id, bezeichnung),
+      CONSTRAINT ck_kategorie_preis CHECK (preis > 0),
+      CONSTRAINT ck_kategorie_kontingent CHECK (kontingent > 0)
+    );
+    ```
+    In `CREATE TABLE` setzt Firebird 3 die PK-Spalten automatisch auf NOT NULL. Ein ausdrückliches `NOT NULL` bei `va_id` und `kat_code` ist erlaubt, aber nicht nötig. Nur ein nachträgliches `ALTER TABLE … ADD PRIMARY KEY` verlangt bereits als NOT NULL deklarierte Spalten.
+
+    **b)**
+    ```sql
+    CREATE TABLE bestellung (
+      best_id    INTEGER GENERATED BY DEFAULT AS IDENTITY,
+      kd_id      INTEGER,
+      best_datum DATE        DEFAULT CURRENT_DATE NOT NULL,
+      status     VARCHAR(10) DEFAULT 'offen' NOT NULL,
+      CONSTRAINT pk_bestellung PRIMARY KEY (best_id),
+      CONSTRAINT fk_bestellung_kunde FOREIGN KEY (kd_id)
+        REFERENCES kunde (kd_id) ON DELETE SET NULL,
+      CONSTRAINT ck_bestellung_status
+        CHECK (status IN ('offen', 'bezahlt', 'storniert'))
+    );
+    ```
+    `kd_id` muss NULL-fähig sein: wegen des Barverkaufs und weil `ON DELETE SET NULL` sonst scheitern würde. In Firebird steht `DEFAULT` vor `NOT NULL`.
+
+    **c)**
+    ```sql
+    ALTER TABLE kunde ADD CONSTRAINT uq_kunde_email UNIQUE (email);
+    ```
+    Stehen schon doppelte Adressen in der Tabelle, weist das DBMS die Anweisung mit einem Fehler ab, und der Constraint wird nicht angelegt. Erst müssen die Duplikate bereinigt werden.
+
+    Datentypen, Längen und Constraint-Namen dürfen abweichen, z. B. `VARCHAR(10)` oder länger für `status`. Unbenannte Constraints und Spalten-Constraints statt Tabellen-Constraints bei einspaltigen Bedingungen sind gleichwertig, es gibt dafür keinen Abzug.
+  rubric:
+    - criterion: "a) NOT NULL bei bezeichnung, preis und kontingent (für die PK-Spalten nicht verlangt)"
+      points: 1
+    - criterion: "a) PRIMARY KEY (va_id, kat_code) als Tabellen-Constraint"
+      points: 1
+    - criterion: "a) FK va_id → veranstaltung mit ON DELETE CASCADE"
+      points: 1
+    - criterion: "a) UNIQUE (va_id, bezeichnung), nicht UNIQUE über bezeichnung allein"
+      points: 1
+    - criterion: "a) CHECK preis > 0 und CHECK kontingent > 0"
+      points: 1
+    - criterion: "b) best_id als Identity-Spalte und PRIMARY KEY (ein NOT NULL dort ist nicht verlangt)"
+      points: 1
+    - criterion: "b) kd_id NULL-fähig, FK auf kunde mit ON DELETE SET NULL"
+      points: 1.5
+    - criterion: "b) best_datum DEFAULT CURRENT_DATE NOT NULL (0,75) und status DEFAULT 'offen' NOT NULL (0,75), jeweils DEFAULT vor NOT NULL"
+      points: 1.5
+    - criterion: "b) CHECK status IN ('offen', 'bezahlt', 'storniert')"
+      points: 0.5
+    - criterion: "c) ALTER TABLE kunde ADD [CONSTRAINT …] UNIQUE (email)"
+      points: 1
+    - criterion: "c) bei vorhandenen Duplikaten wird die Anweisung abgewiesen, der Constraint entsteht nicht"
+      points: 0.5
+  space: lines:30
+- id: e02-p010
+  topic: t10
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: firebird-30-language-reference
+      ref: "Kap. 6 Data Manipulation (DML) Statements (SELECT); Kap. 9 Aggregate Functions"
+    - id: postgresql-17-docs-sql
+      ref: "9.24 Subquery Expressions (IN, ANY, ALL, EXISTS)"
+  tags: [left-join, coalesce, not-exists, korrelierte-unterabfrage, having]
+  type: sql-write
+  difficulty: 3
+  points: 10
+  minutes: 9
+  prompt: |-
+    Gegeben ist das (vereinfachte) Ticketschema von „Klangwerk“ in Firebird 3. Je Veranstaltung ist nur der Hauptact erfasst.
+
+    ```
+    spielstaette  (st_id PK, name, stadt, kapazitaet)
+    kuenstler     (k_id PK, name, genre)
+    veranstaltung (va_id PK, titel, datum DATE, st_id → spielstaette, k_id → kuenstler)
+    kategorie     (va_id → veranstaltung, kat_code, bezeichnung, preis, kontingent)
+                  PK (va_id, kat_code)
+    kunde         (kd_id PK, vorname, nachname, email, stadt)
+    bestellung    (best_id PK, kd_id → kunde, best_datum DATE, status)
+    ticket        (ticket_id PK, best_id → bestellung, va_id, kat_code, barcode,
+                   preis_bezahlt, eingelassen BOOLEAN)
+                  (va_id, kat_code) → kategorie
+    ```
+    `bestellung.kd_id` ist NULL bei Barverkäufen ohne Kundenkonto. `status` ist nie NULL und hat einen der Werte 'offen', 'bezahlt', 'storniert'. `preis_bezahlt` ist nie NULL.
+
+    Schreibe die Abfragen von Hand in Firebird-3-Syntax.
+
+    a) Für jede Veranstaltung im Dezember 2025: Titel, Datum und Umsatz (`umsatz`, Summe von `preis_bezahlt` aller Tickets der Veranstaltung, unabhängig vom Bestellstatus). Veranstaltungen ohne Tickets erscheinen mit Umsatz 0. Höchster Umsatz zuerst. (3 P)
+
+    b) Vor- und Nachname aller Kund:innen, die noch **nie** ein Ticket für eine Veranstaltung in einer Spielstätte der Stadt 'Leipzig' hatten, unabhängig vom Bestellstatus. Kund:innen ganz ohne Bestellung gehören dazu. Vervollständige das Gerüst. (3 P)
+
+    ```sql
+    SELECT k.vorname, k.nachname
+    FROM kunde k
+    WHERE NOT EXISTS (SELECT *
+                      FROM bestellung b
+                      JOIN ticket t ON t.best_id = b.best_id
+                      -- hier ergänzen
+                     );
+    ```
+
+    c) Gesucht sind die **ausverkauften** Veranstaltungen mit Titel, Datum und `verkauft`, der Zahl der Tickets aus **nicht stornierten** Bestellungen. Ausverkauft heißt: `verkauft` ist mindestens so groß wie die Summe der Kontingente aller Kategorien der Veranstaltung. Ergänze das Gerüst um `WHERE`, `GROUP BY` und `HAVING`. (4 P)
+
+    ```sql
+    SELECT v.titel, v.datum, COUNT(*) AS verkauft
+    FROM veranstaltung v
+    JOIN ticket t     ON t.va_id = v.va_id
+    JOIN bestellung b ON b.best_id = t.best_id
+    -- hier ergänzen
+    ```
+  solution: |-
+    **a)**
+    ```sql
+    SELECT v.titel, v.datum,
+           COALESCE(SUM(t.preis_bezahlt), 0) AS umsatz
+    FROM veranstaltung v
+    LEFT JOIN ticket t ON t.va_id = v.va_id
+    WHERE v.datum BETWEEN DATE '2025-12-01' AND DATE '2025-12-31'
+    GROUP BY v.va_id, v.titel, v.datum
+    ORDER BY umsatz DESC;
+    ```
+    Der `LEFT JOIN` erhält Veranstaltungen ohne Tickets. Für sie ergibt `SUM` NULL, `COALESCE` macht daraus 0. Gleichwertig: `EXTRACT(YEAR …) = 2025 AND EXTRACT(MONTH …) = 12`, `ORDER BY 3 DESC` oder eine korrelierte Unterabfrage `COALESCE((SELECT SUM(…) FROM ticket t WHERE t.va_id = v.va_id), 0)` in der SELECT-Liste.
+
+    **b)** Ergänzung im Gerüst:
+    ```sql
+                      JOIN veranstaltung v ON v.va_id = t.va_id
+                      JOIN spielstaette s  ON s.st_id = v.st_id
+                      WHERE b.kd_id = k.kd_id
+                        AND s.stadt = 'Leipzig'
+    ```
+    Die Bedingung auf Leipzig muss **in** der Unterabfrage stehen. Kund:innen ohne Bestellung liefern dort keine Zeile und erscheinen deshalb im Ergebnis.
+
+    **c)** Ergänzung im Gerüst:
+    ```sql
+    WHERE b.status <> 'storniert'
+    GROUP BY v.va_id, v.titel, v.datum
+    HAVING COUNT(*) >= (SELECT SUM(k.kontingent)
+                        FROM kategorie k
+                        WHERE k.va_id = v.va_id);
+    ```
+    Die Kontingentsumme kommt aus einer korrelierten Unterabfrage. Ein zusätzlicher Join mit `kategorie` im Hauptteil würde jedes Ticket mit jeder Kategorie seiner Veranstaltung verbinden und beide Zahlen verfälschen.
+  rubric:
+    - criterion: "a) LEFT JOIN veranstaltung–ticket (Veranstaltungen ohne Tickets bleiben erhalten)"
+      points: 1
+    - criterion: "a) COALESCE(SUM(preis_bezahlt), 0) oder gleichwertig"
+      points: 1
+    - criterion: "a) WHERE auf Dezember 2025 und GROUP BY über die Veranstaltung samt titel und datum"
+      points: 0.5
+    - criterion: "a) ORDER BY umsatz absteigend"
+      points: 0.5
+    - criterion: "b) Joins auf veranstaltung und spielstaette in der Unterabfrage korrekt ergänzt (oder gleichwertig, z. B. IN- bzw. EXISTS-Unterabfrage auf veranstaltung/spielstaette)"
+      points: 1
+    - criterion: "b) Korrelation b.kd_id = k.kd_id"
+      points: 1
+    - criterion: "b) Bedingung stadt = 'Leipzig' innerhalb der Unterabfrage"
+      points: 1
+    - criterion: "c) WHERE b.status <> 'storniert'"
+      points: 0.5
+    - criterion: "c) GROUP BY über die Veranstaltung samt titel und datum"
+      points: 1
+    - criterion: "c) HAVING COUNT(*) >= Unterabfrage"
+      points: 0.5
+    - criterion: "c) Unterabfrage mit SUM(kontingent) aus kategorie"
+      points: 1
+    - criterion: "c) Unterabfrage korreliert über k.va_id = v.va_id (gleichwertig: Join mit abgeleiteter Tabelle je va_id)"
+      points: 1
+  space: lines:30
+- id: e02-p011
+  topic: t10
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-dreiwertige-logik
+      ref: "Kleene-Logik (SQL: TRUE/FALSE/UNKNOWN)"
+  tags: [dreiwertige-logik, "null", where-auswertung, is-distinct-from]
+  type: 3vl
+  difficulty: 2
+  points: 2
+  minutes: 2
+  prompt: |-
+    Gegeben ist die Tabelle `bestellung` (Auszug):
+
+    | best_id | kd_id | status |
+    |---|---|---|
+    | 1 | 5 | bezahlt |
+    | 2 | NULL | storniert |
+    | 3 | NULL | offen |
+    | 4 | 7 | offen |
+
+    ```sql
+    SELECT best_id FROM bestellung
+    WHERE NOT (kd_id = 7) OR status = 'storniert';
+    ```
+
+    a) Gib für jede Zeile den Wahrheitswert der WHERE-Bedingung an (TRUE, FALSE oder UNKNOWN) und welche Zeilen die Abfrage liefert. (1,5 P)
+
+    b) Gemeint waren alle Bestellungen, die nicht von Kund:in 7 stammen, sowie alle stornierten. Ändere die Bedingung so, dass auch Bestellung 3 geliefert wird. (0,5 P)
+  solution: |-
+    **a)**
+    | best_id | NOT (kd_id = 7) | status = 'storniert' | Bedingung |
+    |---|---|---|---|
+    | 1 | NOT FALSE = TRUE | FALSE | **TRUE** |
+    | 2 | NOT UNKNOWN = UNKNOWN | TRUE | **TRUE** |
+    | 3 | NOT UNKNOWN = UNKNOWN | FALSE | **UNKNOWN** |
+    | 4 | NOT TRUE = FALSE | FALSE | **FALSE** |
+
+    `WHERE` behält nur TRUE. Ergebnis: Bestellungen **1 und 2**.
+
+    **b)** Eine davon, andere korrekte Formulierungen gleichwertig:
+    - `WHERE kd_id IS DISTINCT FROM 7 OR status = 'storniert'`
+    - `WHERE NOT (kd_id = 7) OR kd_id IS NULL OR status = 'storniert'`
+    - `WHERE COALESCE(kd_id, 0) <> 7 OR status = 'storniert'` (sofern 0 keine Kundennummer ist)
+  rubric:
+    - criterion: "a) Wahrheitswerte TRUE, TRUE, UNKNOWN, FALSE (je 0,25)"
+      points: 1
+    - criterion: "a) Ergebnis Bestellungen 1 und 2"
+      points: 0.5
+    - criterion: "b) korrigierte Bedingung mit IS DISTINCT FROM, IS NULL oder gleichwertig korrekt"
+      points: 0.5
+  space: lines:8
+- id: e02-p012
+  topic: t11
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: firebird-30-language-reference
+      ref: "Kap. 6 Data Manipulation (DML) Statements (INSERT, UPDATE, DELETE)"
+    - id: postgresql-17-docs-sql
+      ref: "Kap. 6 Data Manipulation (INSERT, UPDATE, DELETE)"
+  tags: [insert, update, unterabfrage, delete, referenzielle-aktionen, kaskade]
+  type: sql-write
+  difficulty: 2
+  points: 5
+  minutes: 5
+  prompt: |-
+    Es gilt das Ticketschema aus Aufgabe e02-p010 (Auszug):
+
+    ```
+    spielstaette  (st_id PK, name, stadt, kapazitaet)
+    veranstaltung (va_id PK, titel, datum DATE, st_id → spielstaette, k_id)
+    kategorie     (va_id → veranstaltung, kat_code, bezeichnung, preis, kontingent)
+                  PK (va_id, kat_code)
+    bestellung    (best_id PK, kd_id → kunde, best_datum DATE, status)
+    ticket        (ticket_id PK, best_id → bestellung, va_id, kat_code, barcode,
+                   preis_bezahlt, eingelassen)
+    ```
+    Für `kategorie` und `bestellung` gelten die Anforderungen aus Aufgabe e02-p009. Fremdschlüssel von `ticket`: `best_id → bestellung` mit `ON DELETE CASCADE`, `(va_id, kat_code) → kategorie` ohne Aktion. Per Fremdschlüssel verweist nur `kategorie` auf `veranstaltung`.
+
+    a) Lege für die vorhandene Kund:in 42 eine neue Bestellung an. Nummer, Datum und Status sollen automatisch bzw. mit ihren Standardwerten belegt werden. (1 P)
+
+    b) Für alle Veranstaltungen des Jahres 2026 in Spielstätten der Stadt 'Dresden' soll der Preis der Kategorie 'A' um 5,00 € steigen. (2 P)
+
+    c) Gib für jede Anweisung an, ob sie gelingt und was danach in `veranstaltung`, `kategorie`, `bestellung` und `ticket` fehlt. (2 P)
+    1. `DELETE FROM veranstaltung WHERE va_id = 12;` (Veranstaltung 12 hat die Kategorien A und B. Für Kategorie B gibt es verkaufte Tickets.)
+    2. `DELETE FROM bestellung WHERE best_id = 900;` (Bestellung 900 hat drei Tickets.)
+  solution: |-
+    **a)**
+    ```sql
+    INSERT INTO bestellung (kd_id) VALUES (42);
+    ```
+    Nicht genannte Spalten erhalten den Identity-Wert bzw. ihren Standardwert. `best_id` gibt man nicht selbst an.
+
+    **b)**
+    ```sql
+    UPDATE kategorie
+    SET preis = preis + 5.00
+    WHERE kat_code = 'A'
+      AND va_id IN (SELECT v.va_id
+                    FROM veranstaltung v
+                    JOIN spielstaette s ON s.st_id = v.st_id
+                    WHERE s.stadt = 'Dresden'
+                      AND v.datum BETWEEN DATE '2026-01-01' AND DATE '2026-12-31');
+    ```
+    Gleichwertig mit `EXISTS` statt `IN`.
+
+    **c)**
+    1. **Wird abgewiesen.** Die Kategorien sollen nach e02-p009 a) mit ihrer Veranstaltung verschwinden (CASCADE). Die Kaskade würde aber Kategorie B löschen, auf die noch Tickets verweisen. Für diesen Fremdschlüssel gilt NO ACTION, also scheitert die ganze Anweisung. Es fehlt nichts, auch Kategorie A und Veranstaltung 12 bleiben erhalten.
+    2. **Gelingt.** Bestellung 900 wird gelöscht, wegen `ON DELETE CASCADE` auch ihre drei Tickets.
+
+    Bewertet wird nach den Anforderungen aus e02-p009, unabhängig von der eigenen Lösung dort.
+  rubric:
+    - criterion: "a) INSERT nur mit kd_id, ohne best_id, best_datum und status"
+      points: 1
+    - criterion: "b) UPDATE kategorie SET preis = preis + 5 mit Bedingung kat_code = 'A'"
+      points: 1
+    - criterion: "b) Einschränkung auf Veranstaltungen 2026 in Dresden per Unterabfrage (IN oder EXISTS)"
+      points: 1
+    - criterion: "c1) abgewiesen, weil die Kaskade auf kategorie an NO ACTION von ticket scheitert (0,5); nichts gelöscht, auch nicht Kategorie A (0,5)"
+      points: 1
+    - criterion: "c2) gelingt, Bestellung 900 und ihre drei Tickets gelöscht (CASCADE)"
+      points: 1
+  space: lines:18
+- id: e02-p013
+  topic: t12
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-sicht-datenbank
+      ref: "Sichten"
+    - id: firebird-30-language-reference
+      ref: "Kap. 5 (CREATE VIEW); Kap. 13 Security (GRANT)"
+  tags: [view, externes-schema, grant]
+  type: sql-write
+  difficulty: 1
+  points: 2
+  minutes: 2
+  prompt: |-
+    Es gelten aus dem Ticketschema (Aufgabe e02-p010) die Tabellen veranstaltung(va_id PK, titel, datum, st_id, k_id) und ticket(ticket_id PK, best_id, va_id, kat_code, barcode, preis_bezahlt, eingelassen). Die Rolle `r_abendkasse` existiert.
+
+    Das Abendkassen-Personal soll für die Veranstaltungen des laufenden Tages nur Titel, Barcode, Kategoriecode und den Einlassstatus der Tickets sehen, keine Preise und keine anderen Tage.
+
+    a) Lege dafür die Sicht `v_einlass` an. (1,5 P)
+
+    b) Gib der Rolle Lesezugriff auf die Sicht. (0,5 P)
+  solution: |-
+    **a)**
+    ```sql
+    CREATE VIEW v_einlass AS
+    SELECT v.titel, t.barcode, t.kat_code, t.eingelassen
+    FROM ticket t
+    JOIN veranstaltung v ON v.va_id = t.va_id
+    WHERE v.datum = CURRENT_DATE;
+    ```
+
+    **b)**
+    ```sql
+    GRANT SELECT ON v_einlass TO r_abendkasse;
+    ```
+    Gleichwertig: `GRANT SELECT ON v_einlass TO ROLE r_abendkasse;`. Die Rolle braucht keine Rechte auf die Basistabellen, sofern der Eigentümer der Sicht diese Rechte hat.
+  rubric:
+    - criterion: "a) Join ticket–veranstaltung über va_id"
+      points: 0.5
+    - criterion: "a) nur titel, barcode, kat_code, eingelassen, ohne preis_bezahlt"
+      points: 0.5
+    - criterion: "a) Einschränkung auf den laufenden Tag (datum = CURRENT_DATE)"
+      points: 0.5
+    - criterion: "b) GRANT SELECT ON v_einlass TO [ROLE] r_abendkasse"
+      points: 0.5
+  space: lines:10
+- id: e02-p014
+  topic: t13
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: wp-java-database-connectivity
+      ref: "Einleitung (einheitliche Java-API, Treiber je DBMS)"
+    - id: wp-open-database-connectivity
+      ref: "Einleitung (standardisierte Schnittstelle, Treiber je DBMS)"
+  tags: [jdbc, treiber, schnittstelle, dbms-wechsel]
+  type: explain
+  difficulty: 1
+  points: 2
+  minutes: 2
+  prompt: |-
+    Die Einlass-App von „Klangwerk“ ist in Java geschrieben und greift über JDBC auf die Firebird-Datenbank zu (`Connection`, `PreparedStatement`, `ResultSet`). Später soll die Datenbank auf PostgreSQL umziehen.
+
+    a) Welche Aufgabe hat der JDBC-Treiber? (0,5 P)
+
+    b) Nenne zwei Dinge, die an der App für den Umzug geändert werden müssen, und eines, das bleiben kann. (1,5 P)
+  solution: |-
+    **a)** Der Treiber setzt die einheitlichen JDBC-Aufrufe in die Kommunikation mit einem bestimmten DBMS um. Jedes DBMS hat seinen eigenen Treiber, die Anwendung programmiert nur gegen die gemeinsame API.
+
+    **b)**
+    - **Ändern** (zwei davon):
+      - den Treiber, also den Firebird-JDBC-Treiber durch den PostgreSQL-JDBC-Treiber ersetzen,
+      - die Verbindungsangaben (URL, ggf. Benutzer und Passwort),
+      - dialektspezifisches SQL im Programmcode, z. B. `SELECT FIRST 10 …` durch `… FETCH FIRST 10 ROWS ONLY` bzw. `LIMIT 10` ersetzen.
+    - **Bleiben** (eines davon):
+      - der Programmcode gegen die JDBC-API (Verbindung aufbauen, `PreparedStatement` mit `?`-Platzhaltern, Ergebnis über `ResultSet` lesen),
+      - Anweisungen in Standard-SQL, das beide Systeme verstehen.
+  rubric:
+    - criterion: "a) Treiber übersetzt die einheitliche API für ein bestimmtes DBMS, ein Treiber je DBMS"
+      points: 0.5
+    - criterion: "b) zwei zutreffende Änderungen, z. B. Treiber, Verbindungs-URL, dialektspezifisches SQL (je 0,5)"
+      points: 1
+    - criterion: "b) etwas, das bleibt: Code gegen die JDBC-API bzw. Standard-SQL"
+      points: 0.5
+  space: lines:8
