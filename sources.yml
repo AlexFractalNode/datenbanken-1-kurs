@@ -601,6 +601,15 @@
   topics: [t13]
   refs: ["Connection Objects (close, commit, rollback, cursor), Cursor Objects (execute, fetchone, fetchall), Module Interface (paramstyle: qmark, numeric, named, format, pyformat)"]
 
+- id: wpen-jdbc-driver
+  title: "JDBC driver (Wikipedia, English)"
+  url: "https://en.wikipedia.org/wiki/JDBC_driver"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t13]
+  refs: ["Type 1 driver – JDBC-ODBC bridge (removed in Java 8); Type 2–4 drivers"]
+
 # ---------- Primärliteratur / weiterführend (nur Verweis, keine topics) ----------
 - id: codd-1970-relational-model
   title: "A Relational Model of Data for Large Shared Data Banks"
