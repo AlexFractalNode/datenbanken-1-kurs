@@ -363,3 +363,121 @@ select:disabled {
 .rubric-check__sum output {
   font-family: var(--font-mono);
 }
+
+/* ---------- Exam simulation ---------- */
+
+.exam-list {
+  display: grid;
+  gap: var(--sp-4);
+  max-width: var(--measure);
+  padding: 0;
+  list-style: none;
+}
+
+.exam-list__title {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-lg);
+}
+
+.exam-list__item .meta {
+  margin: 0;
+}
+
+.exam {
+  max-width: 52rem;
+  margin-bottom: var(--sp-6);
+}
+
+/* Clock bar: stays visible while scrolling (below the mobile top bar, at the top on desktop). */
+.exam-bar {
+  position: sticky;
+  top: 3.5rem;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-4);
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-left: 6px solid var(--c-accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+}
+
+@media (min-width: 64rem) {
+  .exam-bar {
+    top: 0;
+  }
+}
+
+.exam-bar__clock {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+
+.exam-bar__label {
+  font-size: var(--fs-sm);
+  color: var(--c-text-muted);
+}
+
+.exam-bar__time {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-text);
+}
+
+.exam-bar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+
+/* Last ten minutes: the bar turns to the warning palette. */
+.exam-bar--low {
+  background: var(--c-warn-soft);
+  border-left-color: var(--c-warn-text);
+}
+
+.exam-bar--low .exam-bar__time,
+.exam-bar--low .exam-bar__label {
+  color: var(--c-warn-text);
+}
+
+.exam-tasks {
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.exam-tasks > h2 {
+  margin: 0;
+}
+
+.exam-task__title {
+  margin: 0;
+  font-size: var(--fs-lg);
+}
+
+.exam-total {
+  margin-top: var(--sp-5);
+}
+
+.exam-total__line {
+  margin: 0;
+  font-weight: 600;
+}
+
+.exam-total__line output {
+  font-family: var(--font-mono);
+}
+
+.exam-result h2 {
+  margin-top: 0;
+  font-size: var(--fs-2xl);
+}

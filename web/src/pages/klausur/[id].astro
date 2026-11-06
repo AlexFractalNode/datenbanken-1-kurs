@@ -1,0 +1,31 @@
+---
+/** Timed exam simulation (ExamRunner island) for one exam. */
+import ExamRunner from '../../components/ExamRunner';
+import Base from '../../layouts/Base.astro';
+import { getExams } from '../../lib/content';
+import { examProps } from '../../lib/island-props';
+import { withBase } from '../../lib/nav';
+
+export function getStaticPaths() {
+  return getExams().map((exam) => ({ params: { id: exam.id } }));
+}
+
+const { id } = Astro.params;
+const exam = examProps().find((e) => e.id === id);
+if (!exam) throw new Error(`Unknown exam ${id}`);
+---
+
+<Base title={exam.title} description={`Klausur-Simulation: ${exam.title} (${exam.minutes} Minuten).`} noindex>
+  <header class="page-head">
+    <p class="eyebrow">
+      <a href={withBase('klausur/')}>Klausur</a>
+      <span aria-hidden="true">/</span>
+      <span class="key">{exam.id}</span>
+    </p>
+    <h1>{exam.title}</h1>
+  </header>
+  <ExamRunner client:load exam={exam} />
+  <noscript>
+    <p class="notice notice--warn">Die Klausur-Simulation braucht JavaScript für Timer und Selbstbewertung.</p>
+  </noscript>
+</Base>

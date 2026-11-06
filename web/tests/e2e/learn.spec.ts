@@ -142,3 +142,54 @@ test.describe('self-graded tasks', () => {
     expect(errors).toEqual([]);
   });
 });
+
+test.describe('exam simulation', () => {
+  const GRADE_WORDS = /\bNoten?\b|Notenschlüssel|bestanden|durchgefallen|sehr gut|befriedigend|ausreichend|mangelhaft|ungenügend/i;
+
+  test('start, reload keeps the clock, expiry locks and self-assessment gives percent', async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.clock.install({ time: new Date('2026-11-06T10:00:00Z') });
+    await page.goto('klausur/');
+    await page.getByRole('link', { name: 'Probeklausur 1' }).click();
+    const unit = page.locator('[data-verify-unit="exam-runner"]');
+    await expect(unit).toHaveAttribute('data-verify-state', 'ready');
+    await expect(unit).toHaveAttribute('data-exam-phase', 'intro');
+
+    await page.getByRole('button', { name: 'Klausur starten' }).click();
+    await expect(page.getByRole('timer')).toHaveText('90:00');
+    await expect(page.getByRole('heading', { name: 'Aufgaben' })).toBeFocused();
+    await page.getByRole('textbox', { name: /Notizen zu Aufgabe e01-p001/ }).fill('Buch, Leser');
+    expect(await axe(page)).toEqual([]);
+
+    await page.clock.fastForward(20 * 60_000);
+    // the fake clock keeps running in real time, so allow a few seconds of drift
+    await expect(page.getByRole('timer')).toHaveText(/^(70:00|69:[45]\d)$/);
+    await page.reload();
+    await expect(page.getByRole('timer')).toHaveText(/^(70:00|69:[0-5]\d)$/);
+    await expect(page.getByRole('textbox', { name: /Notizen zu Aufgabe e01-p001/ })).toHaveValue('Buch, Leser');
+
+    await page.clock.fastForward(70 * 60_000);
+    await expect(unit).toHaveAttribute('data-exam-phase', 'grading');
+    await expect(page.getByRole('textbox', { name: /Notizen zu Aufgabe e01-p001/ })).toBeDisabled();
+    await expect(page.getByRole('heading', { name: 'Selbstbewertung' })).toBeVisible();
+    await page.getByRole('checkbox', { name: /Modell vollständig/ }).check();
+    await expect(page.locator('[data-exam-total]')).toHaveText('90 von 90 Punkten (100 %)');
+    expect(await axe(page)).toEqual([]);
+    await page.getByRole('button', { name: 'Auswertung abschließen' }).click();
+    await expect(page.getByRole('heading', { name: 'Ergebnis: 100 %' })).toBeFocused();
+    expect(await page.locator('main').innerText()).not.toMatch(GRADE_WORDS);
+    expect(errors).toEqual([]);
+  });
+
+  test('cancelling resets the attempt (keyboard)', async ({ page }) => {
+    await page.goto('klausur/e01/');
+    await page.getByRole('button', { name: 'Klausur starten' }).click();
+    await page.getByRole('button', { name: 'Versuch abbrechen' }).click();
+    await expect(page.getByRole('button', { name: 'Ja, Versuch verwerfen' })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('[data-verify-unit="exam-runner"]')).toHaveAttribute('data-exam-phase', 'intro');
+    await expect(page.getByRole('button', { name: 'Klausur starten' })).toBeFocused();
+    const exams = await page.evaluate(() => JSON.parse(localStorage.getItem('db1:progress:exams') ?? '{}'));
+    expect(exams).toEqual({});
+  });
+});

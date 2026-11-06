@@ -1,7 +1,7 @@
 ---
-import Placeholder from '../components/Placeholder.astro';
 import Base from '../layouts/Base.astro';
 import { getExams } from '../lib/content';
+import { withBase } from '../lib/nav';
 
 const exams = getExams();
 ---
@@ -9,15 +9,37 @@ const exams = getExams();
 <Base title="Klausur" description="Klausur-Simulation mit 90-Minuten-Timer und Selbstbewertung." noindex>
   <header class="page-head">
     <h1>Klausur-Simulation</h1>
-  </header>
-  <Placeholder
-    unit="exam"
-    heading="Die Klausur-Simulation folgt"
-    prepared={exams.length ? `${exams.length === 1 ? 'Eine Probeklausur ist' : `${exams.length} Probeklausuren sind`} bereits vorbereitet.` : undefined}
-  >
-    <p>
-      Hier schreibst du bald eine Probeklausur mit 90-Minuten-Timer und bewertest dich anschließend selbst anhand des
-      Rasters. Das Ergebnis wird als Prozentwert angezeigt.
+    <p class="lead">
+      Schreibe eine Probeklausur unter Zeitdruck auf Papier und bewerte dich danach selbst anhand des Rasters. Das
+      Ergebnis siehst du als Prozentwert.
     </p>
-  </Placeholder>
+  </header>
+
+  <div data-verify-unit="exam" data-verify-state={exams.length ? 'ready' : 'empty'} data-verify-count={exams.length}>
+    {
+      exams.length === 0 ? (
+        <section class="empty-state" aria-labelledby="no-exams">
+          <h2 id="no-exams">Noch keine Probeklausur veröffentlicht</h2>
+          <p>
+            Die Probeklausuren entstehen gerade. Bis dahin übst du mit den <a href={withBase('aufgaben/')}>Papier-Aufgaben</a>{' '}
+            oder den <a href={withBase('karten/')}>Karteikarten</a>.
+          </p>
+        </section>
+      ) : (
+        <ul class="exam-list" role="list">
+          {exams.map((exam) => (
+            <li class="card exam-list__item">
+              <h2 class="exam-list__title">
+                <a href={withBase(`klausur/${exam.id}/`)}>{exam.title}</a>
+              </h2>
+              <p class="meta">
+                <span class="key">{exam.id}</span> {exam.minutes} Minuten · {exam.tasks.length} Aufgaben ·{' '}
+                {exam.tasks.reduce((n, t) => n + t.points, 0)} Punkte
+              </p>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
 </Base>

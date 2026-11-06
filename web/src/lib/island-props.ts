@@ -4,10 +4,11 @@
  * All Markdown is rendered here with `renderMarkdown`/`renderInline` (raw HTML escaped, URLs
  * filtered), so the islands only ever receive sanitised HTML and never parse Markdown themselves.
  */
+import type { ExamData } from '../components/ExamRunner';
 import type { FlashcardItem } from '../components/Flashcards';
 import type { QuizQuestion } from '../components/Quiz';
 import type { TaskCardData } from '../components/TaskCard';
-import { contentRoot, getDiagram, getTopic, getTopics, type ExamTask, type Task } from './content';
+import { contentRoot, getDiagram, getExams, getTopic, getTopics, type ExamTask, type Task } from './content';
 import { diagramFigureHtml, renderDot } from './diagram';
 import { DIFFICULTY_LABEL, TASK_TYPE_LABEL } from './labels';
 import { renderInline, renderMarkdown } from './markdown';
@@ -75,4 +76,13 @@ export function taskCardData(task: Task | ExamTask, headingLevel = 4): TaskCardD
     solution: renderMarkdown(task.solution, headingLevel),
     rubric: task.rubric.map((r) => ({ criterion: renderInline(r.criterion), points: r.points })),
   };
+}
+
+export function examProps(root: string = contentRoot()): ExamData[] {
+  return getExams(root).map((exam) => ({
+    id: exam.id,
+    title: exam.title,
+    minutes: exam.minutes,
+    tasks: exam.tasks.map((task) => ({ ...taskCardData(task), topic: task.topic })),
+  }));
 }

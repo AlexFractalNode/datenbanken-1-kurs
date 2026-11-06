@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { flashcardProps, quizProps, taskCardData } from '../src/lib/island-props';
+import { examProps, flashcardProps, quizProps, taskCardData } from '../src/lib/island-props';
 import { getTopic } from '../src/lib/content';
 
 const ROOT = 'tests/fixtures/content_ok';
@@ -57,5 +57,21 @@ describe('taskCardData', () => {
       { criterion: 'Definition', points: 2 },
       { criterion: 'Beispiel', points: 2 },
     ]);
+  });
+});
+
+describe('examProps', () => {
+  it('maps exams with rendered tasks', () => {
+    const exams = examProps(ROOT);
+    expect(exams).toHaveLength(1);
+    const [e01] = exams;
+    expect(e01).toMatchObject({ id: 'e01', title: 'Probeklausur 1', minutes: 90 });
+    expect(e01.tasks).toHaveLength(1);
+    expect(e01.tasks[0]).toMatchObject({ id: 'e01-p001', topic: 't04', points: 90 });
+    expect(e01.tasks[0].solution).toContain('<code>Buch</code>');
+  });
+
+  it('is empty without exams', () => {
+    expect(examProps(EMPTY)).toEqual([]);
   });
 });
