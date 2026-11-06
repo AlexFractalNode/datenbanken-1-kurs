@@ -1,0 +1,247 @@
+- id: t02-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellbegriff]
+  front: Was ist ein Modell, und welche drei Merkmale nennt die allgemeine Modelltheorie?
+  back: |-
+    Ein Modell ist ein vereinfachtes, zweckgebundenes Abbild eines Originals. Vertiefend unterscheidet man:
+    - **Abbildungsmerkmal:** Das Modell steht für ein Original.
+    - **Verkürzungsmerkmal:** Es enthält nur die für den Zweck wichtigen Eigenschaften des Originals.
+    - **Pragmatisches Merkmal:** Es ist für einen bestimmten Zweck, bestimmte Nutzer und eine bestimmte Zeit gemacht.
+- id: t02-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellbegriff]
+  front: Zeige das Verkürzungsmerkmal an einem Beispiel aus einer Kletterhalle.
+  back: |-
+    Die Mitgliederverwaltung speichert Name, Geburtsdatum, Tarif und Schuhgröße (für Leihschuhe). Augenfarbe oder Lieblingsessen fehlen, obwohl die reale Person sie hat. Sie sind für den Zweck „Einlass und Abrechnung“ unwichtig und werden bewusst weggelassen.
+- id: t02-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellbegriff]
+  front: Was ist der Unterschied zwischen einem Datenbankmodell (Datenmodell) und dem Schema einer Anwendung?
+  back: |-
+    - **Datenbankmodell** bzw. **Datenmodell** im allgemeinen Sinn (*data model*): die allgemeinen Beschreibungsmittel – Strukturen, Operatoren, Integritätsbedingungen –, z. B. „alles sind Relationen“.
+    - **Schema:** das konkrete Ergebnis für eine Anwendung, z. B. die Tabellen der Kletterhalle.
+    Bild: Bauweise vs. Bauplan eines bestimmten Hauses. Variante: Entwurfstexte nennen auch das Ergebnis „Datenmodell“.
+- id: t02-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellbegriff]
+  front: Aus welchen drei Bestandteilen besteht ein Datenbankmodell nach Codd?
+  back: |-
+    1. **Generische Datenstrukturen** – statische Eigenschaften (relational: Relationen aus Tupeln),
+    2. **generische Operatoren** – dynamische Eigenschaften, Abfragen und Ändern (relationale Algebra, SQL),
+    3. **Integritätsbedingungen** für zulässige Zustände und Zustandsübergänge; teils **modellinhärent** (z. B. genau ein Elternsatz im Baum), teils **explizit** definiert (z. B. Primär- und Fremdschlüssel).
+- id: t02-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [hierarchisch]
+  front: Wie sind Daten im hierarchischen Datenbankmodell strukturiert?
+  back: |-
+    Als **Baum**: Ein Satztyp ist die Wurzel, jeder andere hat **genau einen** Elternsatztyp (Eltern-Kind-Beziehung). Satztypen ohne Kinder sind Blätter. Direkt darstellbar sind nur 1:1 und 1:n. Typischer Vertreter: IMS von IBM (entstanden in den 1960ern, verbreitet vor allem in den 1970ern).
+- id: t02-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [hierarchisch]
+  front: Warum ist eine m:n-Beziehung im hierarchischen Modell ein Problem?
+  back: |-
+    Ein Kind hat nur einen Elternsatz. Spielt Jana in zwei Mannschaften, muss ihr Datensatz unter beiden Mannschaften **doppelt** stehen. Das ist Redundanz mit Änderungsanomalie (siehe t07). Ausweg nur über Kopien oder **virtuelle Eltern-Kind-Beziehungen** (Verweise auf einen anderen Baum).
+- id: t02-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [hierarchisch]
+  front: Nenne je zwei Vor- und Nachteile des hierarchischen Modells.
+  back: |-
+    **Vorteile:** passt zu natürlich hierarchischen Daten; Zugriffe entlang der vorgesehenen Pfade sind einfach und schnell (Einsatz noch in großen Altsystemen).
+    **Nachteile:** m:n nur mit Redundanz; Struktur und Zugriffspfade beim Entwurf fest, Programme hängen davon ab (kaum physische Datenunabhängigkeit).
+- id: t02-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [netzwerk]
+  front: Was unterscheidet das Netzwerkmodell vom hierarchischen Modell?
+  back: |-
+    Statt eines Baums ein **allgemeiner Graph**: Ein Datensatz darf mit **mehreren** übergeordneten Datensätzen verknüpft sein. So lassen sich auch m:n-Zusammenhänge ohne Kopien abbilden. Standardisiert wurde es Ende der 1960er durch **CODASYL** (Vertreter z. B. IDMS, UDS). Der Zugriff bleibt **navigierend** über gespeicherte Verweise.
+- id: t02-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [netzwerk, hierarchisch]
+  front: Was bedeutet „navigierender Zugriff“ bei hierarchischen und Netzwerkdatenbanken?
+  back: |-
+    Das Anwendungsprogramm folgt selbst den gespeicherten Verweisen, Satz für Satz: „Gehe zum Verein, dann zur Abteilung, dann zur ersten Mannschaft …“. Es muss die Zugriffspfade kennen. Ändern sich die Pfade, muss das Programm geändert werden.
+- id: t02-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [relational]
+  front: Wer hat das relationale Modell vorgeschlagen, wann, und was ist die Grundidee?
+  back: |-
+    **Edgar F. Codd** (IBM), 1970. Grundidee: Alle Daten stehen als Werte in **Relationen** (Tabellen aus Tupeln). Beziehungen entstehen über **gleiche Werte** (Fremdschlüssel), nicht über Zeiger. Details zu Relation, Tupel, Attribut: siehe t05.
+- id: t02-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [relational]
+  front: Was heißt „deklarativ abfragen“ im relationalen Modell?
+  back: |-
+    Man beschreibt, **was** man haben will, nicht **wie** es gefunden wird. Den Zugriffsweg (Index, Reihenfolge, Join-Verfahren) wählt das DBMS. Gegenstück: navigierender Zugriff im hierarchischen und im Netzwerkmodell.
+- id: t02-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [relational]
+  front: Nenne drei Kritikpunkte am relationalen Modell.
+  back: |-
+    - Verhalten (Methoden) lässt sich nicht mit den Daten speichern.
+    - Mengenorientiertes SQL passt schlecht zu satzorientierten Programmiersprachen (*impedance mismatch*).
+    - Ein Objekt ist auf viele Tabellen verteilt, zum Lesen braucht man Joins.
+    Weitere: künstliche Schlüssel nur zur Verwaltung; klassische relationale Algebra ohne Rekursion.
+- id: t02-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [objektorientiert]
+  front: Welche Grundprinzipien hat eine objektorientierte Datenbank (Objektdatenbank)?
+  back: |-
+    - komplexe Objekte aus beliebigen Typen
+    - **Objektidentität** (systemweit eindeutige OID)
+    - **Kapselung** (Daten und Methoden als Einheit)
+    - **Nachrichten** (Objekte rufen Methoden anderer Objekte auf)
+    - Klassen, **Vererbung** und **Spezialisierung**, späte Bindung
+    Abfragesprache nach ODMG: OQL. Entstanden Ende der 1980er, verbreitet (in Nischen) in den 1990ern.
+- id: t02-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [objektorientiert]
+  front: Was ist eine Objektidentität (OID) und wie unterscheidet sie sich von einem Primärschlüssel?
+  back: |-
+    Die OID vergibt das System; sie ist eindeutig und bleibt gleich, auch wenn sich alle Attributwerte ändern. Ein Primärschlüssel (*Primary Key*) besteht dagegen aus Attributwerten der Relation, die man selbst festlegt (siehe t04). Mit OID braucht man keine künstlichen Schlüssel.
+- id: t02-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [objektorientiert]
+  front: Nenne je zwei Vor- und Nachteile objektorientierter Datenbanken.
+  back: |-
+    **Vorteile:** komplexe Objekte ohne Joins lesbar; kein *impedance mismatch* zur OO-Programmiersprache.
+    **Nachteile:** Daten eng an das Klassenmodell einer Sprache gebunden, spontane Auswertungen schwerer; Schnittstellen uneinheitlich, Wechsel aufwendig; kleiner Markt, wenig Werkzeugunterstützung (ODBC/JDBC).
+- id: t02-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [objektrelational]
+  front: Was ist eine objektrelationale Datenbank, und wie verbreitet ist sie?
+  back: |-
+    Ein **relationales** DBMS, erweitert um eigene (strukturierte) Datentypen, Methoden und Vererbung; Tabellen und SQL bleiben die Grundlage (SQL:1999, z. B. `INHERITS` in PostgreSQL). Entstanden in den 1990ern durch Erweiterung relationaler Systeme.
+    Verbreitung: als Erweiterung großer relationaler Systeme (z. B. Oracle, Db2, PostgreSQL) breit verfügbar, anders als Objektdatenbanken; wie stark die Erweiterungen genutzt werden, wird unterschiedlich eingeschätzt.
+- id: t02-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc]
+  front: Welche drei Ebenen hat die ANSI-SPARC-Architektur und was ist die Aufgabe jeder Ebene?
+  back: |-
+    - **Extern** (Benutzer-/Sichtenebene): jeder Gruppe ihren Ausschnitt zeigen (viele Schemata).
+    - **Konzeptionell** (auch logische Ebene): gesamte logische Struktur, welche Daten es gibt und wie sie zusammenhängen (genau eines).
+    - **Intern** (auch physisch): wie und wo gespeichert wird, z. B. Dateien, Indexe (genau eines).
+    Auch *Drei-Ebenen-Modell*, vorgeschlagen 1975 von ANSI/X3/SPARC.
+- id: t02-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc]
+  front: Welches Ziel verfolgt die ANSI-SPARC-Architektur?
+  back: |-
+    Benutzer und Anwendungen sollen von Änderungen an der Datenbankstruktur möglichst nicht betroffen sein. Dazu trennt sie die Beschreibung in drei Ebenen. Jede Ebene hängt nur von der Abbildung auf die nächste ab. Das Ergebnis ist **Datenunabhängigkeit**.
+- id: t02-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc]
+  front: Was gehört bei einer relationalen Datenbank auf die konzeptionelle Ebene, was auf die interne?
+  back: |-
+    **Konzeptionell:** die normalisierten Tabellen mit Attributen, Schlüsseln, Fremdschlüsseln und Integritätsbedingungen, vollständig und redundanzfrei.
+    **Intern:** Dateien und Seiten, Satzformat, Dateiorganisation (Heap, B-Baum, Hash), Indexe, Zugriffspfade. Hier ist bewusste Redundanz erlaubt (ein Index kopiert Spaltenwerte).
+- id: t02-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit]
+  front: Was ist physische Datenunabhängigkeit? Nenne ein Beispiel.
+  back: |-
+    Die **interne Ebene** lässt sich ändern, ohne dass konzeptionelles Schema und Anwendungen angepasst werden müssen.
+    Beispiel: Für die Tabelle besuch wird ein Index auf datum angelegt. Die Thekenanwendung läuft unverändert weiter, nur schneller.
+- id: t02-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit]
+  front: Was ist logische Datenunabhängigkeit? Nenne ein Beispiel.
+  back: |-
+    Das **konzeptionelle Schema** lässt sich ändern, ohne dass externe Schemata und Anwendungen angepasst werden müssen; angepasst wird nur die Abbildung (z. B. eine Sicht).
+    Beispiel: mitglied erhält die neue Spalte schuhgroesse. Die Theken-Sicht zeigt sie nicht und bleibt gleich.
+- id: t02-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit]
+  front: Wo endet die logische Datenunabhängigkeit?
+  back: |-
+    Bei Änderungen, die **Information vernichten**. Löscht man die Spalte Geburtsdatum, kann keine Sicht der Theke das Alter zurückliefern. Logische Datenunabhängigkeit gilt nur für informationserhaltende Änderungen (Codd, Regel 9; siehe t01). Sie ist deshalb nur eingeschränkt erreichbar, physische dagegen weitgehend.
+- id: t02-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit, hierarchisch, relational]
+  front: Warum bieten hierarchische und Netzwerkdatenbanken kaum physische Datenunabhängigkeit, relationale dagegen schon?
+  back: |-
+    Bei hierarchischen und Netzwerkdatenbanken navigieren die Programme selbst über die gespeicherten Zugriffspfade; ändert man die Pfade, brechen sie. Relationale Anfragen sind deklarativ: Das DBMS wählt den Zugriffsweg und kann einen neuen Index nutzen, ohne dass sich die Anfrage ändert.
+- id: t02-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc, begriffe]
+  front: Gehört das ER-Modell auf die konzeptionelle Ebene von ANSI-SPARC?
+  back: |-
+    Je nach Lesart:
+    - **Eng (Architektur):** Dort steht das logische Gesamtschema der laufenden Datenbank, relational also die Tabellen; das ER-Modell gehört zum Entwurf.
+    - **Weit (Ebenen mit dem Entwurf verbunden):** Dort stehen ER-/semantisches Schema **und** das daraus abgeleitete Tabellenschema.
+    Lesart der eigenen Lehrveranstaltung nutzen und nennen. Achtung: Das Entwurfs-Phasenmodell (t03) nennt Tabellen „logisch“, eine vierstufige Lehrbuchvariante nennt sie „intern“.
+- id: t02-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [hierarchisch, netzwerk, relational, objektorientiert, objektrelational]
+  front: Ordne typische DBMS-Produkte ihrem Datenbankmodell zu.
+  back: |-
+    - hierarchisch: IMS (IBM)
+    - Netzwerk (CODASYL): IDMS, UDS
+    - relational: Firebird, MySQL/MariaDB, SQL Server, SQLite
+    - relational mit objektrelationalen Erweiterungen, daher oft als **objektrelational** eingeordnet: Oracle, IBM Db2, PostgreSQL
+    - objektorientiert: db4o, ObjectStore, O2
+- id: t02-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [hierarchisch, netzwerk, relational, objektorientiert, objektrelational]
+  front: Ordne die Datenbankmodelle zeitlich ein. Warum findet man unterschiedliche Jahreszahlen?
+  back: |-
+    Hierarchisch (1960er) und Netzwerk (Ende 1960er), verbreitet in den 1970ern → relational (1970 vorgeschlagen, verbreitet ab den 1980ern) → objektorientiert (Ende 1980er, verbreitet in den 1990ern) und objektrelational (1990er, SQL:1999).
+    Manche Darstellungen nennen die Entstehung, andere die Hauptverbreitung.
+- id: t02-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc]
+  front: Welche typische Anweisung bzw. welches Schemaobjekt gehört zu welcher ANSI-SPARC-Ebene?
+  back: |-
+    - extern: Sicht (`CREATE VIEW`)
+    - konzeptionell: Tabelle mit Schlüsseln und Integritätsbedingungen (`CREATE TABLE`, `ALTER TABLE`)
+    - intern: Index (`CREATE INDEX`), Dateiorganisation (Heap, B-Baum, Hash), Satzformat, Speicherort
+- id: t02-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc]
+  front: Was leisten die Abbildungen zwischen den ANSI-SPARC-Ebenen, und in welche Richtungen wirken sie?
+  back: |-
+    Sie übersetzen zwischen extern ↔ konzeptionell und konzeptionell ↔ intern. **Nach unten:** Eine Anfrage an eine Sicht wird in eine Anfrage an die Tabellen und dann in Datei- und Indexzugriffe übersetzt. **Nach oben:** Das Ergebnis wird in die Form der Sicht gebracht, z. B. ein Durchschnitt berechnet. Bei Änderungen passt man nur die Abbildung an.
+- id: t02-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc]
+  front: Was unterscheidet die Anwendungssicht (ANSI-SPARC) von der Systemsicht auf die Datenbankarchitektur?
+  back: |-
+    **Anwendungssicht:** Welche Beschreibungen (Schemata) gibt es, und wer sieht welche? → externe, konzeptionelle, interne Ebene.
+    **Systemsicht:** Wie ist das DBMS intern aufgebaut? → Fünf-Schichten-Modell (nach Härder), grob: Anfrageübersetzung und Optimierung, satzweiser Zugriff über Zugriffspfade, Sätze auf Seiten, Pufferverwaltung, Dateien auf dem Externspeicher.
+- id: t02-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenbankmodelle, nosql]
+  front: Welche Datenhaltungsformen gibt es außer den fünf klassischen Datenbankmodellen?
+  back: |-
+    - **flache Dateien** als einfachste Form und historische Vorstufe
+    - **semistrukturierte** Daten, z. B. XML (baumartig)
+    - **NoSQL** (wichtiger ab etwa 2001): Key-Value-Speicher, dokumentenorientierte Datenbanken, Graphdatenbanken, spaltenorientierte Systeme (Achtung, zwei Bedeutungen: spaltenweise Ablage als *Column Store* oder Spaltenfamilien als *Wide Column*)

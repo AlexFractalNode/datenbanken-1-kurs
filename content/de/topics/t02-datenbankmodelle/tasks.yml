@@ -1,0 +1,304 @@
+- id: t02-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellbegriff]
+  type: define-example
+  difficulty: 1
+  points: 7
+  minutes: 7
+  prompt: |-
+    a) Erkläre den Begriff **Modell** an einer Datenbank für einen Anwendungsbereich deiner Wahl (nicht Kletterhalle und nicht Sportverein). Benenne dabei das Original, mindestens eine bewusst weggelassene Eigenschaft und den Zweck des Modells.
+    b) Nenne die drei Bestandteile eines **Datenbankmodells** und erkläre jeden an einem Beispiel aus dem relationalen Modell. Gib an, welcher Bestandteil die statischen und welcher die dynamischen Eigenschaften beschreibt.
+    c) Integritätsbedingungen können modellinhärent oder explizit definiert sein. Erkläre den Unterschied mit je einem Beispiel.
+    d) Grenze das *Datenbankmodell* vom *Schema* deiner Beispieldatenbank aus a) ab.
+  solution: |-
+    a) Ein **Modell** ist ein vereinfachtes Abbild eines Originals, angefertigt für einen bestimmten Zweck. Beispiel (Musterlösung, andere passende Beispiele gleichwertig): Kundenkarten-Datenbank eines **Hofladens**.
+    - Original: Der Datensatz „Kundin 312, Mara Hess“ steht für eine reale Stammkundin.
+    - Weggelassen: Gespeichert werden Name, Kartennummer, Punktestand und E-Mail; Beruf oder Lieblingsgemüse fehlen, weil sie für das Bonusprogramm unwichtig sind.
+    - Zweck: Das Modell dient dem Bonusprogramm; für die Ernteplanung wäre es unbrauchbar.
+    (Wer die Fachbegriffe Abbildungs-, Verkürzungs- und pragmatisches Merkmal verwendet, erfüllt die Anforderung ebenfalls; verlangt sind sie nicht.)
+
+    b)
+    - **Generische Datenstrukturen** (statisch): wie Daten aufgebaut sind; relational: Relationen aus Tupeln mit festen Attributen.
+    - **Generische Operatoren** (dynamisch): wie Daten abgefragt, eingefügt, geändert und abgeleitet werden; relational: relationale Algebra bzw. SQL, z. B. Selektion oder Join.
+    - **Integritätsbedingungen:** legen zulässige Zustände (und ggf. Übergänge) fest; relational z. B. Primärschlüssel, Fremdschlüssel, „punkte ≥ 0“.
+
+    c) **Modellinhärent** sind Bedingungen, die schon aus der Struktur des Modells folgen und nicht eigens angegeben werden, z. B. dass jedes Tupel einer Relation dieselben Attribute hat (im hierarchischen Modell: jeder Satz hat genau einen Elternsatz). **Explizit** definiert man Bedingungen im Schema, z. B. `CHECK (punkte >= 0)` oder einen Fremdschlüssel von einkauf auf kunde.
+
+    d) Das **Datenbankmodell** (z. B. relational) legt allgemein fest, mit welchen Strukturen, Operatoren und Integritätsbedingungen man Daten beliebiger Anwendungen beschreibt. Das **Schema** ist das konkrete Ergebnis für den Hofladen, z. B. kunde(<u>karten_nr</u>, name, email, punkte) und einkauf(…).
+  rubric:
+    - criterion: "a) Modell als vereinfachtes, zweckgebundenes Abbild erklärt"
+      points: 0.5
+    - criterion: "a) Eigenes Beispiel außerhalb der ausgeschlossenen Bereiche mit Original, weggelassener Eigenschaft und Zweck (je 0,5 Punkte)"
+      points: 1.5
+    - criterion: "b) Drei Bestandteile genannt und je mit relationalem Beispiel erklärt (je 0,5 Punkte)"
+      points: 1.5
+    - criterion: "b) Struktur als statisch und Operatoren als dynamisch zugeordnet (je 0,5 Punkte)"
+      points: 1
+    - criterion: "c) Modellinhärente und explizite Integritätsbedingung unterschieden, je mit passendem Beispiel (je 0,5 Punkte)"
+      points: 1
+    - criterion: "d) Datenbankmodell (allgemeine Beschreibungsmittel) und Schema (konkrete Struktur einer Anwendung) korrekt abgegrenzt, mit Bezug auf das eigene Beispiel"
+      points: 1.5
+  space: lines:20
+- id: t02-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit, ansi-sparc]
+  type: define-example
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    a) Erkläre die Begriffe **physische Datenunabhängigkeit** und **logische Datenunabhängigkeit**. Gib jeweils an, welche Ebene der ANSI-SPARC-Architektur sich ändert und welche davon unberührt bleiben soll.
+    b) Gib zu jedem Begriff ein **eigenes**, konkretes Änderungsbeispiel an (Tabellen- und Spaltennamen nennen). Beschreibe kurz, wie das DBMS bzw. die Datenbankentwickler:in dafür sorgt, dass die Anwendungen unverändert bleiben.
+    c) Nenne eine Änderung am konzeptionellen Schema, bei der logische Datenunabhängigkeit **nicht** erreichbar ist, und begründe.
+  solution: |-
+    a)
+    - **Physische Datenunabhängigkeit:** Die **interne Ebene** (Speicherstrukturen, Indexe, Dateiorganisation, Speichermedium) kann geändert werden, ohne dass konzeptionelles Schema, externe Schemata und Anwendungen angepasst werden müssen.
+    - **Logische Datenunabhängigkeit:** Das **konzeptionelle Schema** (Tabellen, Spalten, Beziehungen) kann geändert werden, ohne dass externe Schemata und Anwendungen angepasst werden müssen; angepasst wird nur die Abbildung zwischen externer und konzeptioneller Ebene.
+
+    b) Beispiel (Musterlösung, Szenario Fahrschule; andere gleichwertig):
+    - Physisch: Die Tabelle fahrstunde(<u>stunde_nr</u>, schueler_nr → schueler, datum, beginn) wird langsam nach Datum abgefragt. Es wird ein Index auf fahrstunde(datum) angelegt. Die Terminplanungs-Anwendung schickt dieselben SQL-Anfragen wie vorher; das DBMS entscheidet selbst, den Index zu nutzen, weil die Anfragen deklarativ sind.
+    - Logisch: Die Spalte name in schueler(<u>schueler_nr</u>, name, telefon) wird in vorname und nachname aufgeteilt. Dazu wird eine neue Tabelle schueler_basis(<u>schueler_nr</u>, vorname, nachname, telefon) angelegt, die Daten werden umkopiert und die alte Tabelle schueler gelöscht (Firebird 3 kann Tabellen nicht umbenennen). Danach liefert eine Sicht mit dem alten Namen schueler die Spalte name als `vorname || ' ' || nachname`. Lesende Anwendungen bleiben unverändert. Schreibende Anwendungen bräuchten zusätzlich Trigger auf der Sicht, weil sich die berechnete Spalte name in Firebird nicht direkt beschreiben lässt; im Beispiel wird nur gelesen.
+
+    c) Beispiel: Die Spalte fahrstunde.beginn wird vom Datentyp TIMESTAMP auf DATE verkürzt, um Platz zu sparen. Die Uhrzeit ist danach für alle vorhandenen Stunden verloren; keine Sicht kann der Terminplanung zurückliefern, wann eine Stunde beginnt. Logische Datenunabhängigkeit gelingt nur bei informationserhaltenden Änderungen.
+  rubric:
+    - criterion: "Physische Datenunabhängigkeit korrekt erklärt: interne Ebene ändert sich, konzeptionelle und externe Ebene bleiben"
+      points: 1
+    - criterion: "Logische Datenunabhängigkeit korrekt erklärt: konzeptionelle Ebene ändert sich, externe Ebene bzw. Anwendungen bleiben"
+      points: 1
+    - criterion: "Eigenes physisches Beispiel, das tatsächlich nur die interne Ebene betrifft (z. B. Index, Speicherort, Dateiorganisation), mit konkretem Tabellen-/Spaltennamen"
+      points: 1.5
+    - criterion: "Eigenes logisches Beispiel, das tatsächlich das konzeptionelle Schema ändert, mit konkreten Namen und ohne Namenskollision zwischen Basistabelle und Sicht"
+      points: 1.5
+    - criterion: "Mechanismus physisch: deklarative Anfrage, das DBMS wählt den Zugriffsweg"
+      points: 0.5
+    - criterion: "Mechanismus logisch: Sicht bzw. angepasste Abbildung"
+      points: 0.5
+    - criterion: "Grenzfall c) mit informationsvernichtender Änderung und richtiger Begründung"
+      points: 2
+  space: lines:18
+- id: t02-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc]
+  type: explain
+  difficulty: 1
+  points: 4
+  minutes: 4
+  prompt: |-
+    Eine Jugendherberge betreibt eine relationale Datenbank. Ordne jeden der folgenden Punkte der **externen**, **konzeptionellen** oder **internen** Ebene der ANSI-SPARC-Architektur zu.
+    1. Die Tabelle zimmer(zimmer_nr, betten, etage) mit Primärschlüssel zimmer_nr.
+    2. Die Belegungsübersicht der Rezeption zeigt je Zimmer nur „frei/belegt“ für heute.
+    3. Auf buchung(anreise) gibt es einen Index.
+    4. Der Fremdschlüssel buchung.zimmer_nr verweist auf zimmer.
+    5. Die Datenbank liegt in einer Datei auf einem Server-Laufwerk.
+    6. Die Buchhaltung sieht pro Gruppe nur Rechnungsbetrag und Zahlungsstatus.
+
+    Erkläre anschließend in einem Satz: Warum hat eine Datenbank viele externe Schemata, aber nur ein konzeptionelles Schema?
+  solution: |-
+    1. konzeptionell (Tabellenstruktur mit Schlüssel)
+    2. extern (Sicht einer Benutzergruppe)
+    3. intern (Zugriffsstruktur)
+    4. konzeptionell (Integritätsbedingung zwischen Tabellen)
+    5. intern (Speicherort und -medium)
+    6. extern (Sicht einer anderen Benutzergruppe)
+
+    Begründung: Jede Benutzergruppe oder Anwendung darf ihren eigenen Ausschnitt in eigener Form sehen, deshalb gibt es viele externe Schemata; das konzeptionelle Schema ist dagegen die eine, integrierte und anwendungsneutrale Beschreibung aller Daten, aus der alle Sichten abgeleitet werden.
+  rubric:
+    - criterion: "Je richtig zugeordnetem Punkt 0,5 Punkte"
+      points: 3
+    - criterion: "Begründung: viele externe Schemata (je Benutzergruppe), genau ein konzeptionelles Schema als integrierte Gesamtsicht"
+      points: 1
+  space: lines:8
+- id: t02-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [hierarchisch, netzwerk, relational]
+  type: explain
+  difficulty: 2
+  points: 11
+  minutes: 11
+  prompt: |-
+    Ein Stadtorchester verwaltet: Das Orchester hat Register (Streicher, Bläser, Schlagwerk). Jede Musikerin und jeder Musiker gehört genau einem Register an. Zusätzlich gibt es Kammerensembles: Eine Person kann in mehreren Ensembles spielen, und jedes Ensemble hat mehrere Mitglieder. So spielt Nele Voss (Bratsche) im Register Streicher **und** in den Ensembles „Quartett Ost“ und „Barockkreis“.
+    a) Skizziere, wie die Daten im **hierarchischen Modell** gespeichert würden, und zeige, welches Problem bei Nele entsteht. Benenne das Problem mit einem Fachbegriff.
+    b) Beschreibe, wie das **Netzwerkmodell** dieses Problem löst, und nenne einen Nachteil, den es mit dem hierarchischen Modell gemeinsam hat.
+    c) Gib ein **relationales** Schema (Tabellen mit Primär- und Fremdschlüsseln) für Register, Musiker:innen, Ensembles und ihre Zuordnung an und nenne zwei Vorteile gegenüber a) und b).
+  solution: |-
+    a) Jeder Satztyp hat genau einen Elternsatztyp. Ein Satztyp Musiker:in kann deshalb nicht zugleich unter Register und unter Ensemble hängen. Lösung im strengen Modell: zwei getrennte Kind-Satztypen, z. B. Orchester → Register → Musiker:in und Orchester → Ensemble → Ensemblemitglied (oder ein zweiter Baum für die Ensembles). Neles Daten stehen dann einmal unter Streicher und als Kopie je einmal unter Quartett Ost und Barockkreis.
+    Problem: **Redundanz** (Mehrfachspeicherung) mit Gefahr einer **Änderungsanomalie** bzw. Inkonsistenz: Ändert sich Neles Telefonnummer, muss das in allen Kopien geschehen. Ursache: Die m:n-Beziehung Musiker:in–Ensemble ist im Baum nicht direkt darstellbar (nur über Kopien oder virtuelle Eltern-Kind-Beziehungen).
+
+    b) Im Netzwerkmodell darf ein Satz mehrere übergeordnete Sätze haben (Graph statt Baum). Neles Datensatz existiert einmal und ist über gespeicherte Verweise mit ihrem Register und mit beiden Ensembles verknüpft. Gemeinsamer Nachteil (einer genügt): Zugriff navigierend über gespeicherte Verweise; Programme hängen an den Zugriffspfaden, kaum physische Datenunabhängigkeit; Struktur beim Entwurf fest.
+
+    c) Musterlösung:
+    - register(<u>register_nr</u>, bezeichnung)
+    - musiker(<u>musiker_nr</u>, name, instrument, telefon, register_nr → register)
+    - ensemble(<u>ensemble_nr</u>, name)
+    - mitwirkung(<u>musiker_nr → musiker, ensemble_nr → ensemble</u>)
+    Gleichwertig: mitwirkung(<u>mitwirkung_nr</u>, musiker_nr → musiker, ensemble_nr → ensemble) mit UNIQUE über (musiker_nr, ensemble_nr).
+    Vorteile (zwei genügen): Nele steht nur einmal in musiker; Beziehungen über Werte statt Zeiger; Abfragen in beide Richtungen („Wer spielt in Quartett Ost?“, „Wo spielt Nele?“) gleich einfach und deklarativ; das DBMS wählt den Zugriffsweg, dadurch physische Datenunabhängigkeit; Normalisierung möglich.
+  rubric:
+    - criterion: "a) Skizze mit genau einem Elternsatz je Satz: zwei getrennte Kind-Satztypen oder zweiter Baum für die Ensembles"
+      points: 2
+    - criterion: "a) Nele als Kopie in mehreren Teilbäumen, begründet mit genau einem Elternsatz; gleichwertig: umgekehrte Hierarchie (Ensembles unter den Musiker:innen) mit mehrfach gespeicherten Ensembles, ebenfalls mit Redundanz begründet"
+      points: 1
+    - criterion: "a) Problem mit einem Fachbegriff benannt (Redundanz, Änderungsanomalie/Inkonsistenz oder m:n nicht direkt darstellbar)"
+      points: 1
+    - criterion: "b) Lösung im Netzwerkmodell: mehrere übergeordnete Sätze, Nele nur einmal gespeichert und verknüpft"
+      points: 1.5
+    - criterion: "b) Gemeinsamer Nachteil korrekt (navigierender Zugriff bzw. Bindung an Zugriffspfade)"
+      points: 1
+    - criterion: "c) register, musiker, ensemble mit Primärschlüsseln und Fremdschlüssel von musiker auf register"
+      points: 1.5
+    - criterion: "c) Zuordnungstabelle mit zwei Fremdschlüsseln und eindeutiger Kombination (zusammengesetzter Primärschlüssel oder Surrogatschlüssel mit UNIQUE über beide Fremdschlüssel)"
+      points: 2
+    - criterion: "c) Zwei zutreffende Vorteile des relationalen Modells (je 0,5 Punkte)"
+      points: 1
+  space: box:140
+- id: t02-p005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit, ansi-sparc]
+  type: explain
+  difficulty: 3
+  points: 8
+  minutes: 8
+  prompt: |-
+    Eine Musikschule nutzt eine relationale Datenbank mit u. a. der Tabelle schueler(schueler_nr, vorname, nachname, instrument). Für jede Änderung: Welche ANSI-SPARC-Ebene wird geändert? Welche Art von Datenunabhängigkeit (physisch, logisch oder keine nötig) sorgt dafür, dass die übrigen Anwendungen unverändert weiterlaufen? Begründe jeweils kurz.
+    1. Die Datensätze von schueler werden intern nicht mehr unsortiert abgelegt, sondern nach schueler_nr geordnet in einer Baumstruktur.
+    2. schueler erhält eine neue Spalte geburtsjahr. Die Anwendungen lesen über Sichten mit fester Spaltenliste.
+    3. Die Sicht der Lehrkräfte zeigt künftig zusätzlich das Instrument an.
+    4. Die Seitengröße der Datenbankdatei wird von 4 KB auf 16 KB erhöht.
+    5. Die Spalte instrument wird in eine eigene Tabelle belegung(schueler_nr, instrument) ausgelagert, weil manche zwei Instrumente lernen. Die alte Sicht wird per Join nachgebildet. Bleibt die Änderung für alle Anwendungen unsichtbar? Begründe.
+    6. Eine Anwendung liest mit `SELECT * FROM schueler` direkt aus der Tabelle und zeigt alle Spalten in einer festen Bildschirmmaske an. Danach wird Änderung 2 durchgeführt. Was passiert, und was lernt man daraus?
+  solution: |-
+    1. **Intern** geändert (Dateiorganisation); **physische** Datenunabhängigkeit. Anfragen bleiben gleich, das DBMS nutzt die neue Organisation selbst.
+    2. **Konzeptionell** geändert; **logische** Datenunabhängigkeit. Die Sichten nennen ihre Spalten ausdrücklich und zeigen die neue Spalte nicht.
+    3. **Extern** geändert; **keine** Datenunabhängigkeit nötig. Nur das externe Schema einer Gruppe ändert sich, die anderen Ebenen bleiben gleich; die Lehrkräfte-Anwendung wird bewusst angepasst.
+    4. **Intern** geändert (Speicherparameter); **physische** Datenunabhängigkeit.
+    5. **Konzeptionell** geändert; **logische** Datenunabhängigkeit über die angepasste Sicht. Nicht ganz unsichtbar: Wer zwei Instrumente lernt, erscheint in der Join-Sicht zweimal. Eine Anwendung, die genau eine Zeile je Schüler:in erwartet, merkt die Änderung.
+    6. Die Anwendung bekommt plötzlich eine zusätzliche Spalte, die feste Maske passt nicht mehr (Fehler oder verschobene Anzeige). Die logische Datenunabhängigkeit greift nur, wenn Anwendungen über eine stabile Schnittstelle zugreifen (Sicht oder ausdrückliche Spaltenliste). `SELECT *` direkt auf Basistabellen untergräbt sie.
+  rubric:
+    - criterion: "1 und 4 richtig: interne Ebene, physische Datenunabhängigkeit (je 0,5 Punkte)"
+      points: 1
+    - criterion: "2 richtig: konzeptionelle Ebene, logische Datenunabhängigkeit, mit Bezug auf die feste Spaltenliste der Sichten"
+      points: 1
+    - criterion: "3 richtig: nur externe Ebene, keine Datenunabhängigkeit nötig, mit Begründung"
+      points: 1.5
+    - criterion: "5 richtig: konzeptionelle Ebene, logische Datenunabhängigkeit über Sicht"
+      points: 1
+    - criterion: "5: Frage nach der Sichtbarkeit beantwortet: nicht für alle unsichtbar, weil Personen mit zwei Instrumenten doppelt erscheinen"
+      points: 1
+    - criterion: "6: Folge richtig beschrieben (zusätzliche Spalte bricht die feste Maske)"
+      points: 1
+    - criterion: "6: Lehre: logische Datenunabhängigkeit setzt stabile Schnittstelle (Sicht/ausdrückliche Spaltenliste) voraus"
+      points: 1.5
+  space: lines:20
+- id: t02-p006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [objektorientiert, objektrelational]
+  type: define-example
+  difficulty: 2
+  points: 7
+  minutes: 7
+  prompt: |-
+    a) Nenne drei Grundprinzipien objektorientierter Datenbanken und erläutere jedes an einem **eigenen** Beispielobjekt.
+    b) Erkläre, wie eine objektrelationale Datenbank zwischen relationaler und objektorientierter Welt vermittelt, nenne einen Nachteil dieses Kompromisses und vergleiche die Verbreitung objektorientierter und objektrelationaler Systeme.
+    c) (Vertiefung) Erkläre den Begriff **Impedance Mismatch** an einem eigenen Beispiel: Ein Objekt einer objektorientierten Anwendung soll in einer relationalen Datenbank gespeichert werden.
+  solution: |-
+    a) Musterlösung mit einer Veranstaltungsplanung (andere Beispiele gleichwertig; drei Prinzipien genügen):
+    - **Objektidentität:** Das Objekt `Konferenz` „Datentage 2027“ bekommt vom System eine OID; sie bleibt gleich, auch wenn Titel und Datum später geändert werden.
+    - **Kapselung:** `Konferenz` bündelt ihre Daten mit Methoden wie `teilnehmerZaehlen()`; andere Programmteile greifen nur über diese Methoden zu.
+    - **Nachrichten:** `teilnehmerZaehlen()` schickt jedem `Programmpunkt`-Objekt die Nachricht `anmeldungen()` und summiert die Antworten.
+    - **Vererbung/Spezialisierung:** `Workshop` ist eine Unterklasse von `Programmpunkt`, übernimmt Titel und Zeit und ergänzt eine maximale Teilnehmerzahl.
+    - **Komplexe Objekte:** Eine `Konferenz` enthält eine Liste von `Programmpunkt`-Objekten, jedes mit einem `Raum`-Objekt.
+
+    b) Ein objektrelationales DBMS bleibt relational (Tabellen, SQL), erlaubt aber eigene strukturierte Datentypen, Methoden und Vererbung von Typen bzw. Tabellen (SQL:1999, z. B. `INHERITS` in PostgreSQL). Nachteil (einer genügt): herstellerspezifisch und weniger portabel; Vererbung mit Lücken (in PostgreSQL werden Primär- und Fremdschlüssel nicht an Untertabellen vererbt); komplexeres Schema. Verbreitung: Reine Objektdatenbanken sind Nischensysteme. Objektrelationale Merkmale stecken als Erweiterung in großen relationalen Systemen (z. B. Oracle, Db2, PostgreSQL) und sind damit breit verfügbar; wie stark sie genutzt werden, wird unterschiedlich eingeschätzt, viele Anwendungen bilden ihre Objekte weiter im Programm auf klassische Tabellen ab.
+
+    c) **Impedance Mismatch** (*Fehlanpassung*): Objektorientierte Programme arbeiten mit geschachtelten Objekten, Referenzen und einzelnen Objekten, relationale Datenbanken mit flachen Tabellen und mengenorientiertem SQL. Beispiel: Die `Konferenz` mit ihren `Programmpunkt`- und `Raum`-Objekten muss auf die Tabellen konferenz, programmpunkt und raum verteilt werden, mit Schlüsseln und Fremdschlüsseln. Zum Laden setzt man sie per Join wieder zusammen und baut die Objekte in Schleifen neu auf.
+  rubric:
+    - criterion: "a) Drei Grundprinzipien zutreffend erklärt (je 0,5 Punkte)"
+      points: 1.5
+    - criterion: "a) Jedes Prinzip an einem eigenen, konkreten Objekt gezeigt (je 0,5 Punkte)"
+      points: 1.5
+    - criterion: "b) Objektrelationale Vermittlung korrekt (relationale Basis + eigene Typen/Methoden/Vererbung)"
+      points: 1
+    - criterion: "b) Ein zutreffender Nachteil"
+      points: 0.5
+    - criterion: "b) Verbreitung verglichen: Objektdatenbanken als Nische eingeordnet (0,5 Punkte) und objektrelationale Merkmale zutreffend eingeschätzt (0,5 Punkte), entweder als in großen relationalen Systemen verfügbar oder als verfügbar, aber in der Praxis wenig genutzt; beide Einschätzungen gelten als richtig"
+      points: 1
+    - criterion: "c) Impedance Mismatch erklärt (Objekte/Referenzen vs. flache Tabellen bzw. satz- vs. mengenorientiert)"
+      points: 0.5
+    - criterion: "c) Eigenes Beispiel zeigt, wie ein Objekt auf mehrere Tabellen verteilt und wieder zusammengesetzt wird"
+      points: 1
+  space: lines:18
+- id: t02-p007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellbegriff, hierarchisch, netzwerk, relational, objektorientiert, objektrelational]
+  type: explain
+  difficulty: 1
+  points: 6
+  minutes: 6
+  prompt: |-
+    a) Erkläre in einem Satz, was ein **Datenbankmodell** festlegt (die Bestandteile musst du nicht einzeln erläutern).
+    b) Nenne vier typische Datenbankmodelle in ihrer historischen Reihenfolge, jeweils mit ungefährem Jahrzehnt und einem kennzeichnenden Strukturmerkmal. Modelle, die etwa gleichzeitig entstanden sind, darfst du in beliebiger Reihenfolge oder als gleichzeitig angeben.
+    c) Nenne zu drei der Modelle aus b) je ein typisches DBMS-Produkt.
+    d) Begründe in ein bis zwei Sätzen, warum sich das relationale Modell gegen das hierarchische und das Netzwerkmodell durchgesetzt hat.
+  solution: |-
+    a) Ein **Datenbankmodell** (auch Datenmodell im allgemeinen Sinn) legt die allgemeinen Mittel fest – Datenstrukturen, Operatoren und Integritätsbedingungen –, mit denen man die Daten beliebiger Anwendungen beschreibt.
+
+    b) (Jahreszahlen je nach Darstellung als Entstehung oder Hauptverbreitung; beides wird gewertet)
+    1. hierarchisch – 1960er (verbreitet 1970er): Baum, jeder Satz genau ein Elternsatz.
+    2. Netzwerk – Ende 1960er/1970er (CODASYL), etwa gleichzeitig mit 1.: Graph, mehrere übergeordnete Sätze möglich.
+    3. relational – 1970 vorgeschlagen, verbreitet ab den 1980ern: Relationen, Beziehungen über gleiche Werte.
+    4. objektorientiert – Ende 1980er/1990er: Objekte mit OID, Kapselung, Vererbung.
+    (Gleichwertig als viertes: objektrelational – 1990er, SQL:1999: Tabellen plus eigene Typen und Vererbung.)
+
+    c) z. B. hierarchisch: IMS; Netzwerk: IDMS oder UDS; relational: Firebird, MySQL, SQL Server; objektorientiert: db4o, ObjectStore; objektrelational: Oracle, Db2, PostgreSQL.
+
+    d) Relationale Anfragen sind deklarativ: Das DBMS wählt den Zugriffsweg, Programme hängen nicht an gespeicherten Zugriffspfaden, dadurch weitgehende physische Datenunabhängigkeit. Dazu kommen eine einfache, einheitliche Struktur mit mathematischer Grundlage und SQL als Standard.
+  rubric:
+    - criterion: "a) Datenbankmodell als allgemeine Beschreibungsmittel (Strukturen, Operatoren, Integritätsbedingungen) für beliebige Anwendungen erklärt"
+      points: 1
+    - criterion: "b) Vier Modelle je mit plausiblem Jahrzehnt und zutreffendem Strukturmerkmal (je 0,5 Punkte)"
+      points: 2
+    - criterion: "b) Reihenfolge stimmt (hierarchisch und Netzwerk in beliebiger Reihenfolge oder als gleichzeitig, beide vor relational, relational vor objektorientiert/objektrelational)"
+      points: 0.5
+    - criterion: "c) Drei Produkte richtig zugeordnet (je 0,5 Punkte); auch andere zutreffende Produkte zählen"
+      points: 1.5
+    - criterion: "d) Zutreffender Grund genannt, z. B. deklarative Anfragen bzw. Datenunabhängigkeit statt Bindung an Zugriffspfade"
+      points: 1
+  space: lines:18
+- id: t02-p008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc, datenunabhaengigkeit]
+  type: explain
+  difficulty: 2
+  points: 6
+  minutes: 6
+  prompt: |-
+    Ein Tierheim betreibt eine relationale Datenbank für Tiere, Pflegestellen und Vermittlungen.
+    a) Erläutere die drei Ebenen der ANSI-SPARC-Architektur. Gib für jede Ebene ihre Aufgabe und ein typisches Schemaobjekt aus dem Tierheim an, jeweils mit der Art der SQL-Anweisung, mit der es angelegt wird.
+    b) Erkläre, was die Abbildungen zwischen den Ebenen leisten und welches Ziel die Architektur damit verfolgt.
+  solution: |-
+    a) Musterlösung (andere passende Objekte gleichwertig):
+    - **Externe Ebene:** Aufgabe: jeder Benutzergruppe bzw. Anwendung nur ihren Ausschnitt der Daten in passender Form zeigen. Beispiel: Sicht für die Website mit Name, Art, Alter und Foto aller vermittelbaren Tiere, ohne Pflegekosten (`CREATE VIEW`).
+    - **Konzeptionelle Ebene:** Aufgabe: die eine, vollständige und anwendungsneutrale Gesamtbeschreibung aller Daten, ihrer Zusammenhänge und Integritätsbedingungen. Beispiel: tier(<u>tier_nr</u>, name, art, aufnahme_am, status) mit Primärschlüssel und Fremdschlüssel aus vermittlung (`CREATE TABLE`). In der weiten Lesart gehört hierher zusätzlich das ER-Schema, aus dem die Tabellen abgeleitet sind.
+    - **Interne Ebene:** Aufgabe: festlegen, wie und wo die Daten gespeichert werden, damit der Zugriff schnell ist. Beispiel: Index auf tier(status) (`CREATE INDEX`); ebenso Dateiorganisation, Seitengröße, Speicherort.
+
+    b) Die **Abbildungen** übersetzen zwischen extern ↔ konzeptionell und konzeptionell ↔ intern: Anfragen an eine Sicht werden nach unten in Zugriffe auf Tabellen und Speicherstrukturen übersetzt, Ergebnisse nach oben in die Form der Sicht gebracht. **Ziel:** Datenunabhängigkeit. Ändert sich die interne Ebene, passt man nur die untere Abbildung an (physische Datenunabhängigkeit); ändert sich das konzeptionelle Schema, nur die obere (logische Datenunabhängigkeit). Anwendungen bleiben unverändert.
+  rubric:
+    - criterion: "Externe Ebene: Aufgabe richtig (1 Punkt) und passende Sicht mit CREATE VIEW (0,5 Punkte)"
+      points: 1.5
+    - criterion: "Konzeptionelle Ebene: Aufgabe richtig (1 Punkt) und Tabelle mit CREATE TABLE (0,5 Punkte); ein zusätzlich genanntes ER-Schema ist zulässig, wenn die Tabellen ebenfalls hier eingeordnet sind"
+      points: 1.5
+    - criterion: "Interne Ebene: Aufgabe richtig (1 Punkt) und Index mit CREATE INDEX oder andere Speicherstruktur (0,5 Punkte)"
+      points: 1.5
+    - criterion: "b) Abbildungen als Übersetzung zwischen den Ebenen erklärt"
+      points: 0.5
+    - criterion: "b) Ziel Datenunabhängigkeit genannt und physische bzw. logische der richtigen Abbildung zugeordnet"
+      points: 1
+  space: lines:18

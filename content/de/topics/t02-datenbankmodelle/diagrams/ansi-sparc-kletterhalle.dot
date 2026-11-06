@@ -1,0 +1,33 @@
+// ANSI-SPARC-Drei-Ebenen-Architektur am Beispiel einer Kletterhalle (Architekturskizze, kein ER-Diagramm).
+// Oben mehrere externe Schemata (Sichten), in der Mitte genau ein konzeptionelles Schema, unten genau ein internes Schema.
+// Die Kanten stehen für die Abbildungen, die das DBMS zwischen den Ebenen ausführt.
+digraph ansi_sparc_kletterhalle {
+  rankdir=TB;
+  node [shape=box, fontsize=10];
+  edge [fontsize=9, dir=both];
+  label="Drei Ebenen: Änderungen unten sollen oben nicht ankommen (physische bzw. logische Datenunabhängigkeit).";
+  labelloc=b;
+  fontsize=11;
+
+  subgraph cluster_extern {
+    label="Externe Ebene (viele externe Schemata, z. B. CREATE VIEW)";
+    theke   [label="Sicht Theke\nmitglied_nr, name, tarif,\nAbo gültig bis, offener Betrag"];
+    routen  [label="Sicht Routenbau\nroute, wand, grad, farbe,\nschraubdatum, Ø sterne"];
+    app     [label="Sicht Mitglieder-App\nnur eigene Besuche\nund eigene Bewertungen"];
+  }
+
+  subgraph cluster_konzept {
+    label="Konzeptionelle Ebene (genau ein Schema, z. B. CREATE TABLE)";
+    konzept [label="mitglied(mitglied_nr, vorname, nachname, geburtsdatum, tarif, abo_ende)\nbesuch(mitglied_nr, datum, uhrzeit)\nroute(route_nr, wand, grad, farbe, schraubdatum)\nbewertung(mitglied_nr, route_nr, sterne)\n+ Schlüssel, Fremdschlüssel, Integritätsbedingungen"];
+  }
+
+  subgraph cluster_intern {
+    label="Interne Ebene (genau ein Schema, z. B. CREATE INDEX)";
+    intern  [label="Datenbankdatei auf SSD, Seitengröße 8 KB\nIndex auf besuch(datum), Index auf mitglied(nachname)\nDateiorganisation, Satzformat, Pufferverwaltung"];
+  }
+
+  theke  -> konzept [label="Abbildung\nextern/konzeptionell\n(Anfrage nach unten,\nErgebnis nach oben)"];
+  routen -> konzept;
+  app    -> konzept;
+  konzept -> intern [label="Abbildung\nkonzeptionell/intern\n(Anfrage nach unten,\nErgebnis nach oben)"];
+}

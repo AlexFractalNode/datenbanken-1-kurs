@@ -1,0 +1,286 @@
+- id: t02-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellbegriff]
+  type: single
+  question: |-
+    Eine Musikschule erfasst für ihre Stundenplanung von jeder Lehrkraft nur Name, Instrumente und freie Wochentage, nicht aber Hobbys oder Körpergröße. Welches Modellmerkmal zeigt sich vor allem darin?
+  options:
+    - text: "Abbildungsmerkmal"
+      correct: false
+      explain: "Das Abbildungsmerkmal besagt nur, dass das Modell für ein Original steht. Das Weglassen von Eigenschaften ist damit nicht beschrieben."
+    - text: "Pragmatisches Merkmal"
+      correct: false
+      explain: "Der Zweck steckt zwar hinter der Auswahl, das Merkmal beschreibt aber die Zweck-, Nutzer- und Zeitbindung. Das Weglassen selbst ist die Verkürzung."
+    - text: "Verkürzungsmerkmal"
+      correct: true
+      explain: "Vom Original (der Person) werden nur die Eigenschaften übernommen, die für den Zweck Stundenplanung wichtig sind."
+    - text: "Integritätsmerkmal"
+      correct: false
+      explain: "Ein solches Modellmerkmal gibt es in der allgemeinen Modelltheorie nicht. Integritätsbedingungen sind Teil eines Datenbankmodells."
+- id: t02-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [modellbegriff]
+  type: multi
+  question: |-
+    Welche Bestandteile gehören nach Codd zu einem Datenbankmodell?
+  options:
+    - text: "Operatoren zum Abfragen und Ändern der Daten"
+      correct: true
+      explain: "Sie beschreiben die dynamischen Eigenschaften, im relationalen Modell z. B. die Operatoren der relationalen Algebra."
+    - text: "Die konkreten Tabellen einer bestimmten Anwendung"
+      correct: false
+      explain: "Das ist das Schema einer Anwendung, das mit den Mitteln des Modells beschrieben wird, nicht das Modell selbst."
+    - text: "Integritätsbedingungen, die zulässige Inhalte einschränken"
+      correct: true
+      explain: "Etwa Schlüssel- und Fremdschlüsselbedingungen. Änderungen, die sie verletzen, werden abgewiesen."
+    - text: "Generische Datenstrukturen, mit denen sich Schemata beschreiben lassen"
+      correct: true
+      explain: "Sie beschreiben die statischen Eigenschaften, im relationalen Modell Relationen aus Tupeln."
+- id: t02-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [hierarchisch]
+  type: single
+  question: |-
+    Ein Weingut speichert hierarchisch: Lage → Rebsorte → Jahrgang. Ein Jahrgang soll nun als Cuvée aus zwei Rebsorten stammen. Was ist im reinen hierarchischen Modell die Folge?
+  options:
+    - text: "Der Jahrgang bekommt einfach zwei Elternsätze."
+      correct: false
+      explain: "Mehrere Elternsätze sind gerade das, was das Netzwerkmodell vom hierarchischen unterscheidet."
+    - text: "Der Jahrgang muss unter beiden Rebsorten gespeichert werden oder über einen virtuellen Verweis angebunden werden."
+      correct: true
+      explain: "Jeder Satz hat genau einen Elternsatz. Ein zweiter Elternteil geht nur über eine Kopie (Redundanz) oder eine virtuelle Eltern-Kind-Beziehung."
+    - text: "Das DBMS legt automatisch eine Zwischentabelle an."
+      correct: false
+      explain: "Zwischentabellen für m:n gibt es im relationalen Modell (siehe t06), und auch dort legt man sie selbst an."
+    - text: "Es gibt kein Problem, weil das hierarchische Modell m:n direkt unterstützt."
+      correct: false
+      explain: "Direkt darstellbar sind nur 1:1 und 1:n."
+- id: t02-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [netzwerk, hierarchisch]
+  type: multi
+  question: |-
+    Welche Aussagen treffen auf das Netzwerkmodell zu?
+  options:
+    - text: "Anfragen werden deklarativ formuliert, das DBMS wählt den Zugriffsweg."
+      correct: false
+      explain: "Der Zugriff bleibt navigierend: Das Programm folgt selbst den gespeicherten Verweisen."
+    - text: "Ein Datensatz kann mit mehreren übergeordneten Datensätzen verknüpft sein."
+      correct: true
+      explain: "Das macht den Baum zum allgemeinen Graphen."
+    - text: "Es bietet volle physische Datenunabhängigkeit."
+      correct: false
+      explain: "Die Programme hängen an den Zugriffspfaden. Ändern sich diese, müssen auch die Programme geändert werden."
+    - text: "Es wurde durch CODASYL standardisiert."
+      correct: true
+      explain: "CODASYL definierte parallel zu den hierarchischen Systemen ein netzwerkartiges Modell."
+- id: t02-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [relational]
+  type: truefalse
+  question: |-
+    Im relationalen Modell werden Beziehungen zwischen Datensätzen über gespeicherte Zeiger hergestellt, denen das Anwendungsprogramm folgt.
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Das beschreibt den navigierenden Zugriff älterer Modelle."
+    - text: "Falsch"
+      correct: true
+      explain: "Beziehungen entstehen über gleiche Werte, etwa einen Fremdschlüssel, der den Primärschlüsselwert einer anderen Tabelle enthält. Die Anfrage nennt nur die Bedingung."
+- id: t02-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [objektorientiert, objektrelational]
+  type: single
+  question: |-
+    Eine Firma entwickelt in Java und will ihre bewährte relationale Datenbank und die vorhandenen SQL-Auswertungen behalten, aber eigene strukturierte Datentypen und Vererbung zwischen Tabellen nutzen. Welche Art von DBMS passt am besten?
+  options:
+    - text: "Objektdatenbank (ODBMS)"
+      correct: false
+      explain: "Sie speichert Objekte direkt, die vorhandenen Tabellen und SQL-Auswertungen müssten aber umgestellt werden."
+    - text: "Hierarchisches DBMS"
+      correct: false
+      explain: "Es bietet weder Vererbung noch SQL und erzwingt eine Baumstruktur."
+    - text: "Netzwerk-DBMS"
+      correct: false
+      explain: "Navigierender Zugriff über Verweise, kein SQL und keine Vererbung."
+    - text: "Objektrelationales DBMS"
+      correct: true
+      explain: "Es erweitert ein relationales System um eigene Typen und Vererbung, Tabellen und SQL bleiben erhalten."
+- id: t02-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [objektorientiert]
+  type: multi
+  question: |-
+    Welche Eigenschaften gelten als Grundprinzipien einer objektorientierten Datenbank?
+  options:
+    - text: "Kapselung: Daten und Methoden bilden eine Einheit, Zugriff über Methoden"
+      correct: true
+      explain: "Verhalten und Daten gehören zusammen."
+    - text: "Alle Daten liegen ausschließlich in flachen Tabellen mit atomaren Werten."
+      correct: false
+      explain: "Das ist die relationale Sicht (1NF, siehe t07). Objektdatenbanken speichern gerade komplexe, geschachtelte Objekte."
+    - text: "Objekte arbeiten zusammen, indem sie einander Nachrichten schicken (Methodenaufrufe)."
+      correct: true
+      explain: "Ein Objekt ruft eine Methode eines anderen Objekts auf, statt dessen Daten direkt zu lesen."
+    - text: "Beziehungen entstehen nur über gleiche Attributwerte in Fremdschlüsseln."
+      correct: false
+      explain: "Das ist das relationale Prinzip. Objekte verweisen über Referenzen bzw. OIDs aufeinander."
+    - text: "Objektidentität: jedes Objekt hat eine systemweit eindeutige OID"
+      correct: true
+      explain: "Die OID bleibt gleich, auch wenn sich alle Attributwerte ändern."
+    - text: "Klassen mit Vererbung und Spezialisierung"
+      correct: true
+      explain: "Unterklassen übernehmen Attribute und Methoden der Oberklasse und ergänzen oder überschreiben sie."
+- id: t02-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc]
+  type: single
+  question: |-
+    In einer Kletterhalle sieht das Thekenpersonal eine Bildschirmliste mit Mitgliedsnummer, Name und „Abo gültig ja/nein“. Zu welcher Ebene der ANSI-SPARC-Architektur gehört diese Beschreibung?
+  options:
+    - text: "Konzeptionelle Ebene"
+      correct: false
+      explain: "Dort steht die gesamte logische Struktur aller Daten, nicht die Sicht einer einzelnen Gruppe."
+    - text: "Externe Ebene"
+      correct: true
+      explain: "Sie zeigt die Sicht einer bestimmten Benutzergruppe auf einen Ausschnitt der Daten."
+    - text: "Interne Ebene"
+      correct: false
+      explain: "Dort geht es um Dateien, Indexe und Speicherorganisation."
+    - text: "Gar keine, Bildschirmlisten liegen außerhalb der Architektur."
+      correct: false
+      explain: "Formulare, Listen und Schnittstellen für Benutzer sind gerade Beispiele für die externe Ebene."
+- id: t02-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc]
+  type: truefalse
+  question: |-
+    Eine Datenbank nach ANSI-SPARC hat genau ein konzeptionelles Schema, kann aber viele externe Schemata haben.
+  options:
+    - text: "Wahr"
+      correct: true
+      explain: "Das konzeptionelle Schema ist die eine, integrierte Gesamtbeschreibung. Für jede Benutzergruppe oder Anwendung kann es ein eigenes externes Schema geben."
+    - text: "Falsch"
+      correct: false
+      explain: "Gerade die Vielzahl externer Sichten auf ein gemeinsames konzeptionelles Schema ist der Kern der Architektur."
+- id: t02-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit]
+  type: multi
+  question: |-
+    Welche der folgenden Änderungen sind Beispiele für physische Datenunabhängigkeit, wenn alle Anwendungen danach unverändert weiterlaufen?
+  options:
+    - text: "Die Tabelle Mitglied bekommt eine zusätzliche Spalte Telefon."
+      correct: false
+      explain: "Das ändert das konzeptionelle Schema. Bleiben die Anwendungen trotzdem unverändert, ist das logische Datenunabhängigkeit."
+    - text: "Ein Index auf die Spalte Nachname wird angelegt."
+      correct: true
+      explain: "Ein Index ist eine Speicher- bzw. Zugriffsstruktur der internen Ebene. Die Tabellen bleiben gleich."
+    - text: "Eine Tabelle wird in zwei Tabellen zerlegt, eine Sicht bildet die alte Struktur nach."
+      correct: false
+      explain: "Auch das ist eine Änderung des konzeptionellen Schemas, die Sicht sorgt für logische Datenunabhängigkeit."
+    - text: "Die Datenbankdatei wird auf eine schnellere Festplatte verschoben."
+      correct: true
+      explain: "Das Speichermedium gehört zur internen Ebene."
+- id: t02-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit]
+  type: single
+  question: |-
+    In einer Vereinsdatenbank wird die Spalte Eintrittsdatum gelöscht. Die Beitragsberechnung braucht diesen Wert für den Treuerabatt. Was gilt?
+  options:
+    - text: "Eine Sicht mit dem alten Tabellennamen löst das Problem vollständig."
+      correct: false
+      explain: "Die Sicht kann die Spalte nicht aus dem Nichts erzeugen. Die Werte sind verloren."
+    - text: "Das ist ein Fall von physischer Datenunabhängigkeit."
+      correct: false
+      explain: "Spalten gehören zum konzeptionellen Schema, nicht zur internen Ebene."
+    - text: "Logische Datenunabhängigkeit hilft hier nicht, weil die Änderung Information vernichtet."
+      correct: true
+      explain: "Eine Sicht kann nur Daten zeigen, die noch vorhanden sind. Logische Datenunabhängigkeit gilt nur für informationserhaltende Änderungen."
+    - text: "Das DBMS rechnet das Eintrittsdatum automatisch aus der Mitgliedsnummer zurück."
+      correct: false
+      explain: "Ein DBMS leitet keine gelöschten Fachdaten aus anderen Werten ab."
+- id: t02-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit, relational]
+  type: single
+  question: |-
+    Warum erreicht ein relationales DBMS physische Datenunabhängigkeit leichter als ein Netzwerk-DBMS?
+  options:
+    - text: "Relationale Datenbanken speichern alle Daten im Hauptspeicher."
+      correct: false
+      explain: "Wo gespeichert wird, ist eine Frage der internen Ebene und für die Unabhängigkeit nicht entscheidend."
+    - text: "Relationale Datenbanken haben keine interne Ebene."
+      correct: false
+      explain: "Auch sie haben Dateien, Seiten und Indexe. Diese sind vor den Anwendungen nur verborgen."
+    - text: "Netzwerk-DBMS speichern keine Beziehungen."
+      correct: false
+      explain: "Sie speichern Beziehungen sogar ausdrücklich als Verweise. Genau daran hängen die Programme."
+    - text: "Anfragen sind deklarativ, das DBMS wählt den Zugriffsweg selbst und kann neue Speicherstrukturen nutzen."
+      correct: true
+      explain: "Die Anfrage beschreibt nur das gewünschte Ergebnis. Wie die Daten gefunden werden, ist Sache des Systems."
+- id: t02-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [hierarchisch, netzwerk, relational, objektorientiert, objektrelational]
+  type: multi
+  question: |-
+    Welche Zuordnungen von DBMS-Produkt zu Datenbankmodell stimmen?
+  options:
+    - text: "db4o – relational"
+      correct: false
+      explain: "db4o speichert Objekte direkt und ist eine Objektdatenbank."
+    - text: "IMS – hierarchisch"
+      correct: true
+      explain: "IMS von IBM ist der klassische Vertreter des Baummodells."
+    - text: "Firebird – Netzwerk"
+      correct: false
+      explain: "Firebird arbeitet mit Tabellen und SQL und ist damit relational."
+    - text: "ObjectStore – objektorientiert"
+      correct: true
+      explain: "ObjectStore ist eine Objektdatenbank."
+    - text: "IMS – Netzwerk"
+      correct: false
+      explain: "IMS ist hierarchisch: Jeder Satz hat genau einen Elternsatz."
+    - text: "Firebird – relational"
+      correct: true
+      explain: "Tabellen, Beziehungen über gleiche Werte, deklarative Anfragen mit SQL."
+    - text: "PostgreSQL – objektorientierte Datenbank ohne Tabellen"
+      correct: false
+      explain: "PostgreSQL ist relational mit objektrelationalen Erweiterungen (z. B. INHERITS); Grundlage bleiben Tabellen und SQL."
+    - text: "ObjectStore – hierarchisch"
+      correct: false
+      explain: "ObjectStore speichert Objekte mit Objektidentität, nicht Sätze in einem Baum."
+- id: t02-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [hierarchisch, netzwerk, relational, objektorientiert]
+  type: single
+  question: |-
+    In welcher Reihenfolge sind die Datenbankmodelle historisch entstanden?
+  options:
+    - text: "relational → hierarchisch und Netzwerk (etwa gleichzeitig) → objektorientiert"
+      correct: false
+      explain: "Das relationale Modell (Codd 1970) kam nach den hierarchischen und Netzwerksystemen der 1960er."
+    - text: "hierarchisch → relational → Netzwerk → objektorientiert"
+      correct: false
+      explain: "Das Netzwerkmodell (CODASYL, Ende der 1960er) entstand etwa gleichzeitig mit dem hierarchischen Modell und vor dem relationalen."
+    - text: "hierarchisch und Netzwerk (etwa gleichzeitig) → relational → objektorientiert"
+      correct: true
+      explain: "Hierarchisch (1960er) und Netzwerk (Ende 1960er) etwa parallel, relational (1970, verbreitet ab den 1980ern), objektorientiert (Ende 1980er, verbreitet in den 1990ern)."
+    - text: "Netzwerk → objektorientiert → hierarchisch → relational"
+      correct: false
+      explain: "Objektdatenbanken sind die jüngsten der genannten Modelle; das hierarchische Modell gilt als ältestes."

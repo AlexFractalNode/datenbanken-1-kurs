@@ -1,0 +1,30 @@
+// Hierarchisches Datenbankmodell am Beispiel eines Sportvereins (Ausprägungen, kein ER-Diagramm).
+// Jeder Datensatz hat genau einen Elternsatz, die Wurzel keinen.
+// Jana spielt in zwei Mannschaften. Im Baum muss ihr Datensatz deshalb doppelt gespeichert werden (rot markiert).
+digraph hierarchie_sportverein {
+  rankdir=TB;
+  node [shape=box, fontsize=11];
+  edge [fontsize=10, arrowhead=none];
+  label="Hierarchisches Modell: ein Baum, jeder Satz hat genau einen Elternsatz. Mitgliedschaft in zwei Mannschaften erzwingt eine Kopie.";
+  labelloc=b;
+  fontsize=11;
+
+  verein     [label="Verein\nTSV Nordhang"];
+  handball   [label="Abteilung\nHandball"];
+  volleyball [label="Abteilung\nVolleyball"];
+  hb_damen1  [label="Mannschaft\nHandball Damen 1"];
+  vb_mixed   [label="Mannschaft\nVolleyball Mixed"];
+  jana_1     [label="Spieler:in\nJana Ruf (Tel. 0170 …)", color=red];
+  timo       [label="Spieler:in\nTimo Brandt"];
+  jana_2     [label="Spieler:in\nJana Ruf (Tel. 0170 …)\nKopie!", color=red, fontcolor=red];
+  ida        [label="Spieler:in\nIda Kern"];
+
+  verein -> handball;
+  verein -> volleyball;
+  handball -> hb_damen1;
+  volleyball -> vb_mixed;
+  hb_damen1 -> jana_1;
+  hb_damen1 -> ida;
+  vb_mixed -> timo;
+  vb_mixed -> jana_2;
+}
