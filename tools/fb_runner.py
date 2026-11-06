@@ -196,6 +196,21 @@ def create_scratch_db(settings: dict[str, str]):
     return driver.create_database(dsn, user=settings["user"], password=settings["password"])
 
 
+_WARNED: set[str] = set()
+
+
+def _warn_once(api: str, exc: Exception) -> None:
+    """Report a missing firebird-driver private API on stderr (once per API)."""
+    if api in _WARNED:
+        return
+    _WARNED.add(api)
+    print(
+        f"fb_runner: WARNING: firebird-driver private API {api} unavailable ({exc!r}); "
+        "the pinned version (2.1.2) may have changed",
+        file=sys.stderr,
+    )
+
+
 def _char_columns(cur) -> list[bool] | None:
     """Which result columns are CHAR(n); None if the driver does not tell."""
     try:
@@ -203,7 +218,8 @@ def _char_columns(cur) -> list[bool] | None:
 
         # firebird-driver has no public API for the SQL type of a result column
         return [m.datatype == SQLDataType.TEXT for m in cur._stmt._out_desc]
-    except Exception:
+    except Exception as exc:
+        _warn_once("_stmt._out_desc", exc)
         return None
 
 
@@ -261,8 +277,8 @@ class Deadline:
 
             # Connection has no public cancel method in firebird-driver 2.1
             self.con._att.cancel_operation(CancelType.RAISE)
-        except Exception:
-            pass
+        except Exception as exc:
+            _warn_once("_att.cancel_operation", exc)
 
     def __enter__(self) -> "Deadline":
         self.timer.start()
