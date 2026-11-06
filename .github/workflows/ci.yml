@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
   workflow_call:
+    inputs:
+      # deploy.yml passes false: publishing must not depend on the Playwright smoke suite.
+      run_smoke:
+        description: Run the Playwright smoke tests after the checks
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -93,18 +99,30 @@ jobs:
       - name: Run all checks
         run: uv run tools/check.py --ci
 
-      - name: Upload build artifacts
+      # check.py --ci builds dist/pdf (pdf step) and dist/anki (anki step). One artifact per folder with a
+      # single path each: the artifact root is that folder, whether the other one exists or not, so
+      # deploy.yml can download each into the same place again.
+      - name: Upload PDFs
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: dist
-          path: |
-            dist/pdf
-            dist/anki
+          name: pdf
+          path: dist/pdf
+          if-no-files-found: ignore
+
+      - name: Upload Anki decks
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: anki
+          path: dist/anki
           if-no-files-found: ignore
 
   smoke:
     needs: checks
+    # Runs on push and pull_request (inputs.run_smoke is null there) and when called with run_smoke: true.
+    # toJSON: in GitHub expressions null == false, so a plain comparison would skip push runs too.
+    if: ${{ toJSON(inputs.run_smoke) != 'false' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:

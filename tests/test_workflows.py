@@ -23,7 +23,6 @@ def test_ci_jobs():
     text = (WF / "ci.yml").read_text(encoding="utf-8")
     assert "UV_NATIVE_TLS" not in text
     assert "libfbclient2" in text
-    assert ci["jobs"]["smoke"]["if"] is False
 
 
 def test_deploy_triggers_and_steps():

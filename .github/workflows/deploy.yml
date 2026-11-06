@@ -16,7 +16,10 @@ jobs:
   checks:
     # The same checks as on every push/PR; nothing is published unless they pass.
     # A push to main therefore runs them twice (ci.yml and here); accepted for a simple gate.
+    # The Playwright smoke suite is not part of the gate: it runs in ci.yml for pushes and pull requests.
     uses: ./.github/workflows/ci.yml
+    with:
+      run_smoke: false
 
   build:
     needs: checks
@@ -44,14 +47,38 @@ jobs:
           npm ci
           uv run tools/sqltest.py --engines pg --write-snapshots web/src/data/sql-expected
 
-      # PDFs and Anki decks built by the reused ci.yml (artifact "dist" = dist/pdf + dist/anki).
-      # The downloads page publishes the files it finds in ./dist; without them it shows a note.
-      - name: Download PDFs and Anki decks of the checks job
+      # PDFs and Anki decks built by the reused ci.yml (artifacts "pdf" and "anki", one folder each).
+      # The downloads page publishes the files it finds in ./dist/pdf and ./dist/anki; without them it shows a note.
+      - name: Download PDFs of the checks job
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         continue-on-error: true
         with:
-          name: dist
-          path: dist
+          name: pdf
+          path: dist/pdf
+
+      - name: Download Anki decks of the checks job
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        continue-on-error: true
+        with:
+          name: anki
+          path: dist/anki
+
+      # Missing files: a warning for main (the page says "noch nicht verfügbar"), an error for a release tag.
+      - name: Check PDFs and Anki decks for the downloads page
+        env:
+          REF: ${{ github.ref }}
+        run: |
+          missing=""
+          compgen -G "dist/pdf/*.pdf" > /dev/null || missing="PDFs (dist/pdf)"
+          compgen -G "dist/anki/*.apkg" > /dev/null || missing="${missing:+$missing, }Anki decks (dist/anki)"
+          if [ -z "$missing" ]; then
+            echo "Downloads: $(ls dist/pdf/*.pdf | wc -l) PDFs, $(ls dist/anki/*.apkg | wc -l) Anki decks"
+          elif [[ "$REF" == refs/tags/* ]]; then
+            echo "::error::Missing for the release build: $missing"
+            exit 1
+          else
+            echo "::warning::Missing, the downloads page shows notes instead: $missing"
+          fi
 
       - name: Build site
         working-directory: web
