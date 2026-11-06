@@ -15,6 +15,7 @@ concurrency:
 jobs:
   checks:
     # The same checks as on every push/PR; nothing is published unless they pass.
+    # A push to main therefore runs them twice (ci.yml and here); accepted for a simple gate.
     uses: ./.github/workflows/ci.yml
 
   build:
@@ -85,7 +86,7 @@ jobs:
           restore-keys: typst-${{ runner.os }}-
 
       - name: Validate with total minimum counts
-        run: uv run tools/validate.py --strict
+        run: uv run tools/validate.py
 
       - name: Install web dependencies
         working-directory: web

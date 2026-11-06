@@ -445,11 +445,15 @@ def run_with_warnings(root: Path, min_totals: bool) -> tuple[list[str], list[str
     return errs, ctx.warns
 
 
-def main(argv: list[str] | None = None) -> int:
+def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description="Validate course content.")
     ap.add_argument("--root", default=".", help="directory with content/ and sources.yml")
     ap.add_argument("--no-min", action="store_true", help="skip total minimum counts")
-    args = ap.parse_args(argv)
+    return ap
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = build_parser().parse_args(argv)
     errs, warns = run_with_warnings(Path(args.root), min_totals=not args.no_min)
     for w in warns:
         print(f"warning: {w}", file=sys.stderr)

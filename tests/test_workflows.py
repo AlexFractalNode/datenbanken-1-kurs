@@ -93,7 +93,7 @@ def test_deploy_gated_by_checks_and_main_only():
     assert d["jobs"]["build"]["needs"] == "checks"
     assert d["jobs"]["deploy"]["if"] == "github.ref == 'refs/heads/main'"
     runs = " ".join(s.get("run", "") for s in _steps(d, "release"))
-    assert "tools/validate.py --strict" in runs
+    assert "tools/validate.py" in runs
 
 
 def test_typst_cache_independent_of_uv_lock_and_in_release():
@@ -106,3 +106,26 @@ def test_typst_cache_independent_of_uv_lock_and_in_release():
 
 def test_smoke_caches_playwright():
     assert "ms-playwright" in (WF / "ci.yml").read_text(encoding="utf-8")
+
+
+def test_workflow_validate_commands_parse_with_real_parser():
+    import shlex
+
+    import validate
+
+    found = 0
+    for name in ("ci.yml", "deploy.yml"):
+        wf = load(name)
+        for job in wf["jobs"].values():
+            for step in job.get("steps", []):
+                for line in step.get("run", "").splitlines():
+                    if "tools/validate.py" not in line:
+                        continue
+                    args = shlex.split(line)
+                    args = args[args.index("tools/validate.py") + 1 :]
+                    validate.build_parser().parse_args(args)  # SystemExit(2) on unknown flags
+                    found += 1
+    assert found >= 1
+    # the release gate must run the full mode (no --no-min)
+    release = " ".join(s.get("run", "") for s in load("deploy.yml")["jobs"]["release"]["steps"])
+    assert "--no-min" not in release
