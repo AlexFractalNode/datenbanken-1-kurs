@@ -4,10 +4,14 @@
  * All Markdown is rendered here with `renderMarkdown`/`renderInline` (raw HTML escaped, URLs
  * filtered), so the islands only ever receive sanitised HTML and never parse Markdown themselves.
  */
-import type { FlashcardItem, TopicOption } from '../components/Flashcards';
-import { contentRoot, getDiagram, getTopic, getTopics } from './content';
+import type { FlashcardItem } from '../components/Flashcards';
+import type { QuizQuestion } from '../components/Quiz';
+import type { TaskCardData } from '../components/TaskCard';
+import { contentRoot, getDiagram, getTopic, getTopics, type ExamTask, type Task } from './content';
 import { diagramFigureHtml, renderDot } from './diagram';
-import { renderMarkdown } from './markdown';
+import { DIFFICULTY_LABEL, TASK_TYPE_LABEL } from './labels';
+import { renderInline, renderMarkdown } from './markdown';
+import type { TopicOption } from './topic-filter';
 
 /** Graph-level `label="…"` of a DOT source, used as accessible name of the figure. */
 function graphLabel(dot: string): string | undefined {
@@ -37,4 +41,38 @@ export async function flashcardProps(root: string = contentRoot()): Promise<{ ca
     }
   }
   return { cards, topics };
+}
+
+export function quizProps(root: string = contentRoot()): { items: QuizQuestion[]; topics: TopicOption[] } {
+  const items: QuizQuestion[] = [];
+  const topics: TopicOption[] = [];
+  for (const topic of getTopics(root)) {
+    const { quiz } = getTopic(topic.id, root);
+    if (quiz.length === 0) continue;
+    topics.push({ id: topic.id, title: topic.title });
+    for (const q of quiz) {
+      items.push({
+        id: q.id,
+        topic: topic.id,
+        type: q.type,
+        question: renderMarkdown(q.question, 3),
+        options: q.options.map((o) => ({ text: renderInline(o.text), correct: o.correct, explain: renderMarkdown(o.explain, 4) })),
+      });
+    }
+  }
+  return { items, topics };
+}
+
+/** Paper task (or exam task) for TaskCard/ExamRunner; `headingLevel` is the level of headings inside Markdown. */
+export function taskCardData(task: Task | ExamTask, headingLevel = 4): TaskCardData {
+  return {
+    id: task.id,
+    typeLabel: TASK_TYPE_LABEL[task.type],
+    difficultyLabel: DIFFICULTY_LABEL[task.difficulty],
+    points: task.points,
+    minutes: task.minutes,
+    prompt: renderMarkdown(task.prompt, headingLevel),
+    solution: renderMarkdown(task.solution, headingLevel),
+    rubric: task.rubric.map((r) => ({ criterion: renderInline(r.criterion), points: r.points })),
+  };
 }

@@ -46,6 +46,11 @@ const TEXT_PAIRS: [string, string][] = [
   ['c-on-danger', 'c-danger'],
   ['c-warn-text', 'c-warn-soft'],
   ['c-ok-text', 'c-ok-soft'],
+  // learning modes: body text on feedback backgrounds, points in the rubric box
+  ['c-text', 'c-ok-soft'],
+  ['c-text', 'c-danger-soft'],
+  ['c-text', 'c-warn-soft'],
+  ['c-key', 'c-surface-2'],
   ['c-nav-text', 'c-nav-bg'],
   ['c-nav-active-text', 'c-nav-active-bg'],
 ];

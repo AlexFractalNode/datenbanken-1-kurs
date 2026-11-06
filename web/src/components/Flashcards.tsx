@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { RECOVERED_NOTICE, progress, recordActivity, type FsrsCard } from '../lib/progress';
 import { GRADES, GRADE_LABEL, formatInterval, isDue, loadSrs, type Grade, type Srs } from '../lib/srs';
 import { STORAGE_UNAVAILABLE } from '../lib/storage';
+import { topicFromUrl, writeTopicToUrl, type TopicOption } from '../lib/topic-filter';
 
 /** One card with Markdown already rendered (and sanitised) at build time by `renderMarkdown`. */
 export interface FlashcardItem {
@@ -13,10 +14,7 @@ export interface FlashcardItem {
   figure?: string;
 }
 
-export interface TopicOption {
-  id: string;
-  title: string;
-}
+export type { TopicOption };
 
 interface Props {
   cards: FlashcardItem[];
@@ -32,25 +30,6 @@ type UnitState = 'loading' | 'empty' | 'ready' | 'error';
 export const SCHEDULER_ERROR = 'Der Kartentrainer konnte nicht geladen werden. Bitte lade die Seite neu.';
 
 const dateFormat = new Intl.DateTimeFormat('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
-
-function topicFromUrl(): string {
-  try {
-    return new URLSearchParams(window.location.search).get('thema') ?? '';
-  } catch {
-    return '';
-  }
-}
-
-function writeTopicToUrl(topic: string): void {
-  try {
-    const url = new URL(window.location.href);
-    if (topic) url.searchParams.set('thema', topic);
-    else url.searchParams.delete('thema');
-    window.history.replaceState(window.history.state, '', url);
-  } catch {
-    // Without history API the filter still works, it is just not reflected in the URL.
-  }
-}
 
 /** Due cards of the filter: known cards (oldest due first) before new ones (content order). */
 function buildQueue(cards: FlashcardItem[], stored: Record<string, FsrsCard>, now: Date): string[] {

@@ -38,7 +38,7 @@ const state = summary || elementCount > 0 ? 'ready' : 'empty';
 const jumps = [
   { label: 'Karten lernen', href: withBase(`karten/?thema=${topic.id}`), count: cards.length },
   { label: 'Quiz', href: withBase(`quiz/?thema=${topic.id}`), count: quiz.length },
-  { label: 'Papier-Aufgaben', href: withBase(`aufgaben/#${topic.id}`), count: tasks.length },
+  { label: 'Papier-Aufgaben', href: withBase(`aufgaben/${topic.id}/`), count: tasks.length },
   { label: 'SQL-Playground', href: withBase(`playground/?thema=${topic.id}`), count: sqlTasks.length },
 ].filter((j) => j.count > 0);
 ---

@@ -1,16 +1,21 @@
 ---
-import Placeholder from '../components/Placeholder.astro';
+import Quiz from '../components/Quiz';
 import Base from '../layouts/Base.astro';
-import { getOverview } from '../lib/content';
+import { quizProps } from '../lib/island-props';
+import { withBase } from '../lib/nav';
 
-const quiz = getOverview().reduce((n, o) => n + o.counts.quiz, 0);
+const { items, topics } = quizProps();
 ---
 
 <Base title="Quiz" description="Quizfragen mit Sofort-Feedback." noindex>
   <header class="page-head">
     <h1>Quiz</h1>
+    <p class="lead">Wähle deine Antwort und prüfe sie sofort. Zu jeder Antwort gibt es eine Erklärung, auch zu den falschen.</p>
   </header>
-  <Placeholder unit="quiz" heading="Das Quiz folgt" prepared={`${quiz} Fragen sind bereits vorbereitet.`}>
-    <p>Hier beantwortest du bald Fragen mit sofortiger Rückmeldung und Erklärung zu jeder Antwort.</p>
-  </Placeholder>
+  <Quiz client:load items={items} topics={topics} />
+  <noscript>
+    <p class="notice notice--warn">
+      Das Quiz braucht JavaScript. Ohne JavaScript übst du mit den <a href={withBase('aufgaben/')}>Papier-Aufgaben</a>.
+    </p>
+  </noscript>
 </Base>

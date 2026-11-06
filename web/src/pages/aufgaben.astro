@@ -35,6 +35,9 @@ const total = groups.reduce((n, g) => n + g.tasks.length, 0);
             <h2 id={`${topic.id}-heading`}>
               <span class="key">{topic.id}</span> {topic.title}
             </h2>
+            <p>
+              <a href={withBase(`aufgaben/${topic.id}/`)}>Mit Selbstbewertung bearbeiten ({topic.id})</a>
+            </p>
             <div class="task-list">
               {tasks.map((task) => (
                 <article class="card" id={task.id} aria-labelledby={`${task.id}-title`}>

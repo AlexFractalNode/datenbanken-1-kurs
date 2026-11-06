@@ -1,0 +1,55 @@
+---
+/** Paper tasks of one topic with self-assessment (TaskCard islands). */
+import SourceNote from '../../components/SourceNote.astro';
+import TaskCard from '../../components/TaskCard';
+import Base from '../../layouts/Base.astro';
+import { getTopic, getTopics, type Topic } from '../../lib/content';
+import { taskCardData } from '../../lib/island-props';
+import { withBase } from '../../lib/nav';
+
+export function getStaticPaths() {
+  return getTopics()
+    .filter((topic) => getTopic(topic.id).tasks.length > 0)
+    .map((topic) => ({ params: { topic: topic.id }, props: { topic } }));
+}
+
+interface Props {
+  topic: Topic;
+}
+
+const { topic } = Astro.props;
+const tasks = getTopic(topic.id).tasks;
+const points = tasks.reduce((n, t) => n + t.points, 0);
+const minutes = tasks.reduce((n, t) => n + t.minutes, 0);
+---
+
+<Base title={`Aufgaben ${topic.id}`} description={`Papier-Aufgaben mit Selbstbewertung: ${topic.title}.`}>
+  <header class="page-head">
+    <p class="eyebrow">
+      <a href={withBase('aufgaben/')}>Aufgaben</a>
+      <span aria-hidden="true">/</span>
+      <span class="key">{topic.id}</span>
+    </p>
+    <h1>Papier-Aufgaben: {topic.title}</h1>
+    <p class="lead">
+      Löse jede Aufgabe zuerst auf Papier. Dann deckst du Lösung und Raster auf, hakst ab, was du hattest, und speicherst
+      deine Punkte.
+    </p>
+    <p class="meta">{tasks.length} Aufgaben · {points} Punkte · ca. {minutes} Minuten</p>
+  </header>
+
+  <div class="task-list" data-verify-unit="topic-tasks" data-verify-state="ready" data-verify-count={tasks.length}>
+    {
+      tasks.map((task) => (
+        <TaskCard client:visible task={taskCardData(task)}>
+          <SourceNote sources={task.resolvedSources} />
+        </TaskCard>
+      ))
+    }
+  </div>
+
+  <nav class="pager" aria-label="Weiter">
+    <a href={withBase(`themen/${topic.id}/`)}>Zur Zusammenfassung {topic.id}</a>
+    <a href={withBase('aufgaben/')}>Alle Aufgaben</a>
+  </nav>
+</Base>
