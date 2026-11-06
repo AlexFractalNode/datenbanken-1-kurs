@@ -1,0 +1,278 @@
+- id: t13-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql-injection, prepared-statement, union, minimale-rechte]
+  type: explain
+  difficulty: 2
+  points: 12
+  minutes: 12
+  prompt: |-
+    Die Kantinen-App eines Unternehmens nutzt eine Firebird-Datenbank mit diesen Tabellen (Auszug):
+
+    ```
+    gericht (gericht_id INTEGER, name VARCHAR(60), preis NUMERIC(5,2), aktiv BOOLEAN)
+    konto   (konto_id INTEGER, karten_nr VARCHAR(10), guthaben NUMERIC(6,2))
+    ```
+
+    Die Suchfunktion der App ist so programmiert (Python, Schnittstelle nach DB-API):
+
+    ```python
+    def gerichte_suchen(con, suchwort):
+        sql = ("SELECT gericht_id, name, preis FROM gericht "
+               "WHERE name LIKE '%" + suchwort + "%' AND aktiv = TRUE")
+        cur = con.cursor()
+        cur.execute(sql)
+        return cur.fetchall()
+    ```
+
+    a) Jemand gibt als Suchwort `x' OR 1=1 --` ein. Schreibe den SQL-Text auf, der beim DBMS ankommt, und erkläre, welche Zeilen er liefert und warum. (3 P)
+
+    b) Gib ein Suchwort an, mit dem ein Angreifer stattdessen die Kartennummern und Guthaben **aller Konten** angezeigt bekommt. Begründe, warum der angehängte Teil genau drei Spalten liefern muss, deren Typen zu denen der Originalabfrage passen. (3 P)
+
+    c) Schreibe die Funktion so um, dass sie mit einem Prepared Statement bzw. Parameterbindung arbeitet. Die Suche soll weiterhin Teiltreffer finden. Du darfst Python (Platzhalter `?`), eine andere Sprache oder Pseudocode verwenden. Begründe in einem Satz, warum die Eingabe aus a) danach keinen Schaden mehr anrichtet. (4 P)
+
+    d) Nenne zwei weitere Maßnahmen außer Parameterbindung und erkläre je in einem Satz, wie sie den Schaden aus b) verhindert oder begrenzt hätten. (2 P)
+  solution: |-
+    **a)** Beim DBMS kommt an:
+
+    ```sql
+    SELECT gericht_id, name, preis FROM gericht WHERE name LIKE '%x' OR 1=1 --%' AND aktiv = TRUE
+    ```
+
+    Das Apostroph der Eingabe schließt das Literal nach `'%x`. Allein würde `name LIKE '%x'` nur Gerichte liefern, deren Name auf „x“ endet. Danach steht aber `OR 1=1`, und das ist für jede Zeile wahr. `--` macht den Rest (`%' AND aktiv = TRUE`) zum Kommentar. Ergebnis: **alle** Gerichte, auch die nicht mehr aktiven, denn die Bedingung `aktiv = TRUE` ist weggefallen.
+
+    **b)** Zum Beispiel:
+
+    `x' UNION SELECT konto_id, karten_nr, guthaben FROM konto --`
+
+    Beim DBMS kommt an (eine Zeile, hier umbrochen):
+
+    ```sql
+    SELECT gericht_id, name, preis FROM gericht WHERE name LIKE '%x'
+    UNION SELECT konto_id, karten_nr, guthaben FROM konto --%' AND aktiv = TRUE
+    ```
+
+    Die App zeigt die Kontozeilen wie Gerichte an. Gleichwertig sind Varianten wie `x' UNION SELECT NULL, karten_nr, guthaben FROM konto --` oder mit `0` an erster Stelle.
+
+    Begründung: `UNION` verlangt in beiden Teilabfragen **gleich viele Spalten**, und die Typen an derselben Position müssen zueinander passen. Die Originalabfrage liefert Ganzzahl, Text, Dezimalzahl. Der angehängte Teil muss deshalb drei Spalten in dieser Reihenfolge liefern; nicht benötigte Spalten füllt man mit `NULL` oder einer Konstante. Bei abweichender Spaltenzahl weist das DBMS die Abfrage ab.
+
+    **c)** Eine gleichwertige Lösung in einer anderen Sprache oder in Pseudocode bekommt volle Punkte.
+
+    ```python
+    def gerichte_suchen(con, suchwort):
+        sql = ("SELECT gericht_id, name, preis FROM gericht "
+               "WHERE name LIKE ? AND aktiv = TRUE")
+        cur = con.cursor()
+        cur.execute(sql, ("%" + suchwort + "%",))
+        return cur.fetchall()
+    ```
+
+    Der SQL-Text enthält keine Eingabe mehr, nur den Platzhalter `?` ohne Anführungszeichen. Die Prozentzeichen gehören zum **Wert**, das Suchmuster wird als Ganzes gebunden. `'%?%'` wäre falsch: In Anführungszeichen ist `?` kein Platzhalter, sondern ein Fragezeichen im Text. Die Eingabe `x' OR 1=1 --` ist jetzt nur ein Suchtext. Gesucht werden Gerichte, deren Name genau diese Zeichenfolge enthält, also keine.
+
+    Gleichwertig in Java (JDBC):
+    ```java
+    PreparedStatement ps = con.prepareStatement(
+        "SELECT gericht_id, name, preis FROM gericht WHERE name LIKE ? AND aktiv = TRUE");
+    ps.setString(1, "%" + suchwort + "%");
+    ResultSet rs = ps.executeQuery();
+    ```
+
+    (Wer `%` und `_` in der Eingabe nicht als Joker zulassen will, maskiert sie zusätzlich für LIKE. Das ist eine fachliche Frage, keine Sicherheitslücke.)
+
+    **d)** zwei davon, z. B.:
+    - **Minimale Rechte:** Das Konto der Suchfunktion hat nur `SELECT` auf `gericht` und kein Recht auf `konto`. Die UNION-Abfrage aus b) würde dann mit einem Rechtefehler abgewiesen.
+    - **Eingabeprüfung per Whitelisting:** Suchwörter dürfen nur Buchstaben, Ziffern, Leerzeichen und Bindestrich enthalten und höchstens 40 Zeichen lang sein. Das Apostroph aus b) würde abgelehnt.
+    - **Zugriff nur über Prozeduren:** Die App bekommt nur `EXECUTE` auf eine Suchprozedur, die Rechte auf `gericht` liegen bei der Prozedur. Auf `konto` hat das App-Konto dann gar keinen Zugriff.
+    - **Maskieren (Escaping) der Apostrophe:** Das Programm verdoppelt jedes `'` in der Eingabe. Das Apostroph aus b) beendet dann das Literal nicht mehr, der ganze Text wird als Suchmuster gelesen. (Hinweis: Escaping ist fehleranfällig, und bei Zahlenparametern ohne Anführungszeichen wirkt es nicht; die Parameterbindung geht deshalb vor.)
+  rubric:
+    - criterion: "a) Vollständiger SQL-Text korrekt hingeschrieben (Literal endet nach '%x, OR 1=1, Rest hinter --)"
+      points: 1
+    - criterion: "a) Begründung: OR 1=1 ist für jede Zeile wahr, deshalb kommen alle Gerichte zurück (nicht nur die auf x endenden)"
+      points: 1
+    - criterion: "a) erkannt, dass der Kommentar die Bedingung aktiv = TRUE entfernt (inaktive Gerichte erscheinen)"
+      points: 1
+    - criterion: "b) UNION SELECT auf konto mit drei Spalten in passender Typfolge; NULL oder Konstanten als Platzhalterspalten zählen gleichwertig"
+      points: 1
+    - criterion: "b) Literal sauber beendet und Rest unschädlich gemacht (z. B. mit --)"
+      points: 1
+    - criterion: "b) Begründung: gleiche Spaltenzahl und an jeder Position zueinander passende Typen bei UNION"
+      points: 1
+    - criterion: "c) Platzhalter statt Eingabe im SQL-Text, ohne Anführungszeichen"
+      points: 1
+    - criterion: "c) Wert getrennt übergeben (z. B. execute mit Parametertupel, setString), keine Verkettung im SQL-Text"
+      points: 1
+    - criterion: "c) Prozentzeichen in den gebundenen Wert verlagert, Teiltreffer bleiben möglich; die Bedingung aktiv = TRUE bleibt erhalten"
+      points: 1
+    - criterion: "c) Satz zur Wirkung: Die Eingabe aus a) wird nur als Wert (Suchtext) verwendet und nicht als SQL gelesen. Alle c)-Kriterien gelten gleichermaßen für Lösungen in anderen Sprachen oder in Pseudocode."
+      points: 1
+    - criterion: "d) zwei passende Maßnahmen mit je einem Satz Wirkung auf den Angriff aus b) (je 1). Zählt: minimale Rechte, Whitelisting/Format- bzw. Längenprüfung, Zugriff nur über Prozeduren mit EXECUTE, Maskieren (Escaping) der Apostrophe, wenn die Wirkung richtig erklärt ist (das Apostroph beendet das Literal nicht mehr), getrennte Datenbankkonten (nur als eigene Maßnahme, wenn begründet wird, dass das Suchkonto keinen Zugriff auf konto hat; sonst als minimale Rechte gewertet). Zählt nicht: Fehlermeldungen verbergen (die Ausgabe in b) ist sichtbar), Stored Procedures ohne Bezug zur Rechtevergabe."
+      points: 2
+  space: "lines:30"
+- id: t13-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schichtenarchitektur, client-server, schnittstelle, treiber, vertiefung]
+  type: define-example
+  difficulty: 1
+  points: 8
+  minutes: 8
+  prompt: |-
+    *Vertiefung.* Wähle eine eigene Datenbankanwendung (nicht die Kantinen-App), z. B. die Online-Terminbuchung eines Friseursalons.
+
+    a) Nenne die drei Schichten der Drei-Schichten-Architektur und ordne jeder Schicht **zwei konkrete Bestandteile oder Aufgaben** aus deinem Beispiel zu. (3 P)
+
+    b) Erkläre am selben Beispiel den Unterschied zwischen einer Zwei-Schichten-Architektur (klassisches Client-Server) und einer Drei-Schichten-Architektur. Gehe darauf ein, wo die Logik läuft und wer sich mit der Datenbank verbindet. (2 P)
+
+    c) Erkläre, was eine Datenbankschnittstelle wie JDBC oder ODBC leistet und welche Aufgabe der Treiber hat. Nenne einen Vorteil für dein Beispiel. (2 P)
+
+    d) Begründe in einem Satz, warum in der Drei-Schichten-Variante der Browser keine Zugangsdaten zur Datenbank kennen sollte. (1 P)
+  solution: |-
+    Beispiel: Online-Terminbuchung eines Friseursalons.
+
+    **a)**
+    - **Präsentationsschicht:** Buchungsseite im Browser bzw. Handy-App, die freie Termine als Kalender zeigt; Formular für Name, Telefonnummer und gewünschte Leistung.
+    - **Logikschicht:** prüft, ob der gewählte Termin noch frei ist und zur Dauer der Leistung passt (Färben 90 min); berechnet den Preis, verschickt die Bestätigung, schickt die nötigen SQL-Anweisungen an die Datenbank.
+    - **Datenhaltungsschicht:** Datenbankserver mit den Tabellen `termin`, `kunde`, `leistung`; sichert z. B. per UNIQUE, dass ein Stuhl zur selben Zeit nicht doppelt vergeben wird.
+
+    **b)**
+    - **Zwei Schichten:** Am Empfangstresen läuft ein Buchungsprogramm, das Oberfläche **und** Prüfregeln enthält und sich selbst direkt mit dem Datenbankserver verbindet. Jeder Rechner braucht Treiber und Zugangsdaten; ändert sich eine Regel, muss das Programm auf allen Rechnern erneuert werden.
+    - **Drei Schichten:** Der Browser der Kundschaft spricht nur per HTTP mit dem Anwendungsserver. Dort läuft die Logik, und nur er verbindet sich mit der Datenbank. Eine Regeländerung betrifft nur den Server.
+
+    **c)** JDBC (Java) bzw. ODBC (sprachunabhängig) bieten eine **einheitliche Programmierschnittstelle**: Verbindung aufbauen, SQL senden, Ergebniszeilen lesen. Der **Treiber** übersetzt diese Aufrufe in das Protokoll des konkreten DBMS. Vorteil: Wechselt der Salon von einem DBMS zu einem anderen, tauscht man im Wesentlichen den Treiber und die Verbindungsangaben; die Programmlogik bleibt (Dialektunterschiede im SQL ausgenommen).
+
+    **d)** Alles, was im Browser liegt, kann die Kundschaft einsehen und verändern; mit den Zugangsdaten könnte sie am Anwendungsserver vorbei beliebiges SQL an die Datenbank schicken.
+  rubric:
+    - criterion: "a) drei Schichten richtig benannt"
+      points: 1
+    - criterion: "a) Bestandteile aus dem eigenen Beispiel: 2 P, wenn jede der drei Schichten zwei passende, konkrete Bestandteile hat; 1 P, wenn jede Schicht nur einen passenden Bestandteil hat oder nur zwei Schichten vollständig belegt sind"
+      points: 2
+    - criterion: "b) Zwei Schichten: Logik im Client, Client verbindet sich direkt mit der DB, am eigenen Beispiel erläutert (ohne Beispielbezug 0,5 P)"
+      points: 1
+    - criterion: "b) Drei Schichten: Logik auf dem Anwendungsserver, nur dieser verbindet sich mit der DB, am eigenen Beispiel erläutert (ohne Beispielbezug 0,5 P)"
+      points: 1
+    - criterion: "c) Schnittstelle als einheitliche API (verbinden, SQL senden, Ergebnis lesen) und Treiber als Übersetzer in das DBMS-Protokoll erklärt"
+      points: 1
+    - criterion: "c) ein passender Vorteil für das eigene Beispiel (z. B. DBMS-Wechsel durch Treibertausch)"
+      points: 1
+    - criterion: "d) Begründung: Zugangsdaten im Browser sind für Nutzer sichtbar und erlauben direkten DB-Zugriff an der Logik vorbei"
+      points: 1
+  space: "lines:22"
+- id: t13-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grant, revoke, rolle, set-role, firebird, vertiefung]
+  type: sql-write
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    *Vertiefung.* In der Firebird-3-Datenbank der Kantinen-App gibt es die Tabellen `gericht`, `bestellung` (mit der Spalte `status`) und `konto` (mit der Spalte `guthaben`). Die Benutzer `kasse_eva`, `kantine_app` und `aushilfe_tom` sowie die Rolle `r_ausgabe` existieren bereits. Du bist Eigentümer:in aller Tabellen und hast alle bisherigen GRANTs selbst ausgeführt. Die Vergabe der Schlüsselwerte lässt du außer Acht. Schreibe die Anweisungen von Hand.
+
+    a) Lege die Rolle `r_kasse` an. Sie darf Konten und Bestellungen lesen und bei Konten **nur die Spalte `guthaben`** ändern. Weise die Rolle der Benutzerin `kasse_eva` zu. Was muss Eva in Firebird 3 tun, damit die Rechte der Rolle für sie gelten? (3 P)
+
+    b) Das Konto `kantine_app` der Anwendung soll Gerichte lesen, Bestellungen lesen und anlegen und bei Bestellungen nur den `status` ändern dürfen (zum Stornieren), sonst nichts. (2 P)
+
+    c) Tom hatte `GRANT DELETE ON bestellung TO aushilfe_tom` erhalten. Außerdem ist ihm die Rolle `r_ausgabe` zugewiesen, die ebenfalls `DELETE` auf `bestellung` hat. Tom soll keine Bestellungen mehr löschen können; die übrigen Rechte aus `r_ausgabe` braucht er nicht mehr. Die anderen Mitglieder von `r_ausgabe` sollen ihr Löschrecht behalten. Gib die nötigen Anweisungen an und erkläre, warum ein einzelnes `REVOKE DELETE ON bestellung FROM aushilfe_tom` nicht genügt und warum man das Löschrecht nicht der Rolle `r_ausgabe` entzieht. (3 P)
+  solution: |-
+    **a)**
+    ```sql
+    CREATE ROLE r_kasse;
+    GRANT SELECT ON konto TO r_kasse;
+    GRANT SELECT ON bestellung TO r_kasse;
+    GRANT UPDATE (guthaben) ON konto TO r_kasse;
+    GRANT r_kasse TO kasse_eva;
+    ```
+    (Hier steht je Tabelle eine eigene Anweisung, das läuft in beiden Systemen. PostgreSQL erlaubt zusätzlich mehrere Tabellen in einer Anweisung. Firebird empfiehlt, `TO ROLE r_kasse` bzw. `TO USER kasse_eva` ausdrücklich zu schreiben; ohne Schlüsselwort sucht der Server zuerst eine Rolle dieses Namens und sonst einen Benutzer.)
+
+    In Firebird 3 gelten die Rechte nur, solange `r_kasse` Evas **aktive Rolle** ist. Dazu gibt sie die Rolle beim Verbinden an (Rollenname in den Verbindungsangaben) oder setzt sie in der laufenden Sitzung mit `SET ROLE r_kasse;`. Aktiv ist immer genau eine Rolle; ohne aktive Rolle hat Eva nur ihre direkt vergebenen Rechte und die von `PUBLIC`.
+
+    **b)**
+    ```sql
+    GRANT SELECT ON gericht TO kantine_app;
+    GRANT SELECT, INSERT ON bestellung TO kantine_app;
+    GRANT UPDATE (status) ON bestellung TO kantine_app;
+    ```
+
+    **c)**
+    ```sql
+    REVOKE DELETE ON bestellung FROM aushilfe_tom;
+    REVOKE r_ausgabe FROM aushilfe_tom;
+    ```
+    Rechte addieren sich: Tom darf alles, was ihm direkt, über seine aktive Rolle oder über `PUBLIC` erlaubt ist. Das erste REVOKE entzieht nur das direkte Recht. Sobald Tom mit der Rolle `r_ausgabe` arbeitet (beim Verbinden oder per `SET ROLE`), kann er weiter löschen. Deshalb wird ihm auch die Rolle entzogen. `REVOKE DELETE ON bestellung FROM r_ausgabe` wäre falsch, denn das träfe alle Mitglieder der Rolle. (Bräuchte Tom die übrigen Rechte von `r_ausgabe` weiter, bekäme er eine eigene Rolle ohne `DELETE`. Wer diese Variante vollständig ausschreibt, also Rolle anlegen, Rechte vergeben, zuweisen und `r_ausgabe` entziehen, erhält ebenfalls volle Punkte.)
+  rubric:
+    - criterion: "a) CREATE ROLE r_kasse und SELECT-Rechte auf konto und bestellung an die Rolle"
+      points: 1
+    - criterion: "a) UPDATE mit Spaltenliste (guthaben) auf konto an die Rolle und Rolle an kasse_eva"
+      points: 1
+    - criterion: "a) Rolle muss Evas aktive Rolle sein: beim Verbinden angeben oder mit SET ROLE r_kasse setzen (jeder der beiden Wege zählt voll)"
+      points: 1
+    - criterion: "b) SELECT auf gericht"
+      points: 1
+    - criterion: "b) SELECT und INSERT sowie UPDATE (status) auf bestellung; jedes zusätzlich vergebene Recht (z. B. DELETE, UPDATE ohne Spaltenliste, Rechte auf konto) kostet 1 P, höchstens bis 0 P für b)"
+      points: 1
+    - criterion: "c) REVOKE DELETE ON bestellung FROM aushilfe_tom und REVOKE r_ausgabe FROM aushilfe_tom syntaktisch richtig"
+      points: 1
+    - criterion: "c) Erklärung: Rechte addieren sich, Tom behält DELETE über die Rolle r_ausgabe"
+      points: 1
+    - criterion: "c) begründet, warum das Recht nicht der Rolle r_ausgabe entzogen wird (andere Mitglieder verlören es ebenfalls)"
+      points: 1
+  space: "lines:20"
+- id: t13-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql-injection, zahlenparameter, prepared-statement]
+  type: explain
+  difficulty: 2
+  points: 6
+  minutes: 6
+  prompt: |-
+    Die Detailseite der Kantinen-App zeigt ein einzelnes Gericht. Die Nummer des Gerichts steht in der Adresse der Seite (`…/gericht?nr=12`) und kommt als Text im Programm an (Pseudocode):
+
+    ```
+    nr = anfrage["nr"]
+    sql = "SELECT name, kategorie, preis FROM gericht WHERE aktiv = TRUE AND gericht_id = " + nr
+    zeige(ausfuehren(sql))
+    ```
+
+    a) Schreibe den SQL-Text auf, der bei `nr` = `0 OR aktiv = FALSE` beim DBMS ankommt, und gib an, welche Zeilen er liefert. Beachte die Vorrangregel von AND vor OR. (2 P)
+
+    b) Schreibe den SQL-Text für `nr` = `12; UPDATE konto SET guthaben = 999` auf und beschreibe die Wirkung. Begründe außerdem, warum es hier nichts nützen würde, Apostrophe in der Eingabe zu verdoppeln. (2 P)
+
+    c) Repariere den Code mit Parameterbindung. Sprache frei wählbar, Pseudocode genügt. Nenne zusätzlich eine Prüfung, die das Programm vor der Abfrage machen sollte. (2 P)
+  solution: |-
+    **a)**
+    ```sql
+    SELECT name, kategorie, preis FROM gericht WHERE aktiv = TRUE AND gericht_id = 0 OR aktiv = FALSE
+    ```
+    AND bindet stärker als OR, die Bedingung lautet also `(aktiv = TRUE AND gericht_id = 0) OR aktiv = FALSE`. Ein Gericht mit Nummer 0 gibt es nicht, deshalb liefert die Abfrage **alle inaktiven Gerichte**, die die Seite eigentlich nie zeigen soll. (Mit `0 OR 1=1` kämen alle Gerichte.)
+
+    **b)**
+    ```sql
+    SELECT name, kategorie, preis FROM gericht WHERE aktiv = TRUE AND gericht_id = 12; UPDATE konto SET guthaben = 999
+    ```
+    Nach der Abfrage wird das **Guthaben aller Konten auf 999 gesetzt**. Das gelingt, wenn Schnittstelle bzw. Treiber mehrere Anweisungen in einem Aufruf ausführen und das Konto der Anwendung `UPDATE` auf `konto` darf. Nimmt die Schnittstelle nur eine Anweisung je Aufruf an, gibt es einen Fehler, der Angriff aus a) funktioniert trotzdem.
+
+    Apostrophe zu verdoppeln, nützt nichts: Die Zahl steht ohne Anführungszeichen im SQL-Text. Es muss also kein Literal beendet werden, und die Eingaben enthalten gar kein Apostroph.
+
+    **c)**
+    ```
+    nr = anfrage["nr"]
+    wenn nr keine ganze Zahl ist: abweisen
+    sql = "SELECT name, kategorie, preis FROM gericht WHERE aktiv = TRUE AND gericht_id = ?"
+    zeige(ausfuehren(sql, [ganzzahl(nr)]))
+    ```
+    Der Wert wird getrennt vom SQL-Text gebunden und nur als Zahl verwendet, `0 OR aktiv = FALSE` wird nie als SQL gelesen. Die Typprüfung (nur ganze Zahl, ggf. in einem sinnvollen Bereich) weist solche Eingaben schon vorher ab.
+  rubric:
+    - criterion: "a) SQL-Text korrekt (gericht_id = 0 OR aktiv = FALSE, ohne Anführungszeichen)"
+      points: 1
+    - criterion: "a) Ergebnis mit Vorrang AND vor OR begründet: alle inaktiven Gerichte"
+      points: 1
+    - criterion: "b) SQL-Text mit angehängtem UPDATE und Wirkung „Guthaben aller Konten wird 999“. Das zählt voll, auch ohne die Bedingungen (mehrere Anweisungen je Aufruf, UPDATE-Recht); diese sind eine willkommene Ergänzung. Ebenso voll zählt: Eine Schnittstelle, die nur eine Anweisung je Aufruf annimmt, weist die Eingabe mit Fehler ab."
+      points: 1
+    - criterion: "b) Begründung: kein Literal zu beenden, kein Apostroph nötig, Maskieren daher wirkungslos"
+      points: 1
+    - criterion: "c) Platzhalter im SQL-Text, Wert getrennt gebunden (jede Sprache oder Pseudocode)"
+      points: 1
+    - criterion: "c) zusätzliche Prüfung genannt. Zählt: Umwandlung in eine ganze Zahl bzw. Formatprüfung, Bereichs- oder Längenprüfung, Prüfung, ob das Gericht angezeigt werden darf. Zählt nicht: einzelne Zeichen oder Wörter filtern bzw. verbieten (Negativliste, z. B. ; oder Apostroph entfernen)."
+      points: 1
+  space: "lines:16"

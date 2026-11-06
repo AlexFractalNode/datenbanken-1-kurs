@@ -1,0 +1,13 @@
+// Drei-Schichten-Architektur der Kantinen-App (kein ER-Diagramm, daher keine Chen-Notation)
+digraph drei_schichten_kantine {
+  rankdir=LR;
+  node [shape=box, fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=10];
+
+  praesentation [label="Präsentationsschicht\nBrowser oder Handy-App\n(Speiseplan anzeigen,\nBestellung absenden)"];
+  logik [label="Logikschicht\nAnwendungsserver\n(Bestellschluss prüfen, Guthaben abbuchen,\nEingaben prüfen, Prepared Statements)"];
+  daten [label="Datenhaltungsschicht\nDatenbankserver (Firebird 3)\n(gericht, bestellung, konto;\nConstraints, Rechte)", shape=cylinder];
+
+  praesentation -> logik [label="HTTP"];
+  logik -> daten [label="SQL über Treiber\n(JDBC, ODBC, Python DB-API)\nals Benutzer kantine_app"];
+}

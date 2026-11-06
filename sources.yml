@@ -610,6 +610,15 @@
   topics: [t13]
   refs: ["Type 1 driver – JDBC-ODBC bridge (removed in Java 8); Type 2–4 drivers"]
 
+- id: wpen-java-database-connectivity
+  title: "Java Database Connectivity (Wikipedia, English)"
+  url: "https://en.wikipedia.org/wiki/Java_Database_Connectivity"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t13]
+  refs: ["Examples (DriverManager.getConnection, executeQuery/executeUpdate, ResultSet.next, setAutoCommit/commit/rollback)"]
+
 # ---------- Primärliteratur / weiterführend (nur Verweis, keine topics) ----------
 - id: codd-1970-relational-model
   title: "A Relational Model of Data for Large Shared Data Banks"

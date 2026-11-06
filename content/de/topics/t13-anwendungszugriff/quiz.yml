@@ -1,0 +1,203 @@
+- id: t13-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql-injection, ursache]
+  type: single
+  question: "Ein Programm erzeugt die Abfrage mit `sql = \"SELECT name FROM gericht WHERE kategorie = '\" + eingabe + \"'\"` und führt sie aus. Was ist die eigentliche Ursache dafür, dass hier SQL-Injection möglich ist?"
+  options:
+    - text: "Die Eingabe wird als Teil des SQL-Textes eingesetzt, sodass das DBMS nicht unterscheiden kann, was Befehl und was Wert ist."
+      correct: true
+      explain: "Genau das ist die Ursache: Durch die Verkettung landet die Eingabe im Befehlstext und kann seine Struktur ändern."
+    - text: "Die Spalte `kategorie` hat keinen Index."
+      correct: false
+      explain: "Ein Index beeinflusst nur die Geschwindigkeit, nicht, wie der SQL-Text zustande kommt."
+    - text: "Das DBMS prüft die Rechte des Benutzers nicht."
+      correct: false
+      explain: "Das DBMS prüft die Rechte des angemeldeten Kontos. Die Injection läuft aber mit genau diesen Rechten ab, sie umgeht die Rechteprüfung nicht."
+    - text: "Die Abfrage verwendet einfache statt doppelter Anführungszeichen."
+      correct: false
+      explain: "Textliterale stehen in SQL richtig in einfachen Anführungszeichen. Das Problem ist das Zusammensetzen mit der Eingabe, nicht die Wahl der Zeichen."
+- id: t13-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql-injection, tautologie, zahlenparameter]
+  type: single
+  question: "Ein Programm baut `\"SELECT bestell_id, status FROM bestellung WHERE konto_id = \" + eingabe` zusammen, die Eingabe steht also ohne Anführungszeichen im Text. Vorher werden alle Apostrophe in der Eingabe verdoppelt. Jemand gibt `0 OR 1=1` ein. Was passiert?"
+  options:
+    - text: "Beim DBMS kommt `… WHERE konto_id = 0 OR 1=1` an, die Abfrage liefert die Bestellungen aller Konten."
+      correct: true
+      explain: "Die Eingabe enthält kein Apostroph, das Verdoppeln ändert nichts. Da kein Literal beendet werden muss, wird `OR 1=1` direkt Teil der Bedingung, und sie ist für jede Zeile wahr."
+    - text: "Das Verdoppeln der Apostrophe verhindert den Angriff, die Abfrage liefert nichts."
+      correct: false
+      explain: "Verdoppeln wirkt nur, wenn die Eingabe in einem Textliteral steht. Bei einem Zahlenparameter ohne Anführungszeichen braucht der Angreifer gar kein Apostroph."
+    - text: "Das DBMS meldet einen Typfehler, weil `0 OR 1=1` keine Zahl ist."
+      correct: false
+      explain: "Das DBMS sieht keinen Wert `0 OR 1=1`, sondern den fertigen Text `konto_id = 0 OR 1=1`, gültiges SQL. Eine Typprüfung müsste das Programm vorher selbst machen, z. B. die Eingabe in eine ganze Zahl umwandeln."
+    - text: "Die Abfrage liefert nur die Bestellungen von Konto 0."
+      correct: false
+      explain: "Das wäre so, wenn der Wert gebunden würde (`konto_id = ?`). Hier wird `OR 1=1` als SQL gelesen."
+- id: t13-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schutzmassnahmen, prepared-statement, whitelisting, minimale-rechte]
+  type: multi
+  question: "Welche Maßnahmen verhindern SQL-Injection oder begrenzen ihren Schaden wirksam?"
+  options:
+    - text: "Werte über Platzhalter an ein Prepared Statement binden, statt sie in den SQL-Text einzusetzen."
+      correct: true
+      explain: "Die Struktur der Anweisung steht fest, bevor die Werte ankommen. Eingaben werden nur als Werte verwendet."
+    - text: "Für die Sortierspalte nur Werte aus einer festen Liste erlauben (Whitelisting)."
+      correct: true
+      explain: "Spaltennamen können keine Platzhalter sein. Eine Positivliste lässt nur vorgesehene SQL-Bausteine zu."
+    - text: "Die Anwendung mit einem Konto verbinden, das nur die nötigen Rechte hat."
+      correct: true
+      explain: "Das verhindert keine Injection, begrenzt aber, was ein Angreifer lesen oder ändern kann."
+    - text: "Fehlermeldungen der Datenbank vor den Nutzern verbergen."
+      correct: false
+      explain: "Das macht Angriffe mühsamer, verhindert sie aber nicht. Blinde SQL-Injection arbeitet gerade ohne Fehlermeldungen, etwa über Ja/Nein-Antworten oder Zeitverzögerungen."
+    - text: "Eingaben mit Pythons `%`-Operator (`sql % wert`) oder einem f-String statt mit `+` in den SQL-Text einsetzen."
+      correct: false
+      explain: "Das ist nur eine andere Schreibweise für Verkettung, die Eingabe steht vor dem Aufruf im SQL-Text. Nicht zu verwechseln mit `%s` als Platzhalter des Treibers (`paramstyle` format): `cur.execute(sql, (wert,))` mit `%s` im Text ist echte Parameterbindung und sicher."
+- id: t13-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [prepared-statement, grenzen]
+  type: single
+  question: "Eine Entwicklerin möchte die Sortierung der Speisekarte vom Benutzer wählen lassen und schreibt `SELECT name, preis FROM gericht ORDER BY ?` mit dem Spaltennamen als Parameter. Was ist richtig?"
+  options:
+    - text: "Das funktioniert nicht wie gedacht: Ein Platzhalter steht für einen Wert, nicht für einen Spaltennamen. Die Spalte wählt man per Whitelisting aus fest hinterlegten Namen."
+      correct: true
+      explain: "Platzhalter ersetzen nur Literale. Gebunden wird ein Text wie `'preis'`, nach einem konstanten Wert wird aber nicht sinnvoll sortiert, oder das DBMS lehnt die Anweisung ab."
+    - text: "Das ist die empfohlene sichere Lösung, weil alles, was über Platzhalter kommt, geschützt ist."
+      correct: false
+      explain: "Geschützt ist es, aber es tut nicht, was gewünscht ist. Bezeichner lassen sich nicht binden."
+    - text: "Man sollte den Spaltennamen besser direkt anhängen, das ist bei `ORDER BY` ungefährlich."
+      correct: false
+      explain: "Auch hinter `ORDER BY` kann eine Eingabe SQL einschleusen, z. B. eine Unterabfrage. Ohne Positivliste ist direktes Anhängen unsicher."
+    - text: "Man muss den Spaltennamen in Anführungszeichen setzen: `ORDER BY '?'`."
+      correct: false
+      explain: "In Anführungszeichen ist `?` kein Platzhalter mehr, sondern ein Textliteral aus einem Fragezeichen."
+- id: t13-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schichtenarchitektur, drei-schichten]
+  type: single
+  question: "In einer Drei-Schichten-Architektur bestellen Mitarbeitende im Browser ihr Mittagessen. Welche Schicht baut die Verbindung zum Datenbankserver auf und schickt die SQL-Anweisungen?"
+  options:
+    - text: "Die Logikschicht auf dem Anwendungsserver."
+      correct: true
+      explain: "Nur die Logikschicht spricht mit der Datenbank. Der Browser kennt weder Treiber noch Zugangsdaten."
+    - text: "Die Präsentationsschicht im Browser."
+      correct: false
+      explain: "Das wäre eher eine Zwei-Schichten-Architektur mit Datenbankzugriff vom Client aus. Im Browser lägen dann die Zugangsdaten offen."
+    - text: "Die Datenhaltungsschicht, sie holt sich die Anfragen selbst ab."
+      correct: false
+      explain: "Das DBMS ist der Server, es wartet auf Anfragen. Es fragt die Anwendung nicht von sich aus ab."
+    - text: "Jede Schicht verbindet sich selbst mit der Datenbank."
+      correct: false
+      explain: "Gerade das vermeidet die Schichtung: Jede Schicht nutzt nur die Schnittstelle der Schicht darunter."
+- id: t13-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [jdbc, resultset]
+  type: single
+  question: "Welches JDBC-Objekt enthält die Zeilen, die eine mit `executeQuery` ausgeführte Abfrage zurückgibt?"
+  options:
+    - text: "`ResultSet`"
+      correct: true
+      explain: "Das Programm liest die Ergebniszeilen nacheinander aus dem ResultSet."
+    - text: "`Connection`"
+      correct: false
+      explain: "Die Connection steht für die Verbindung zur Datenbank. Aus ihr erzeugt man Anweisungsobjekte."
+    - text: "`PreparedStatement`"
+      correct: false
+      explain: "Das PreparedStatement ist die vorbereitete Anweisung mit Platzhaltern. Ihre Ausführung liefert das ResultSet."
+    - text: "Der Treiber"
+      correct: false
+      explain: "Der Treiber übersetzt die Aufrufe in das Protokoll des DBMS. Ergebniszeilen hält er nicht für das Programm bereit."
+- id: t13-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grant, firebird, dialekt]
+  type: multi
+  question: "Welche Anweisungen bewirken in Firebird 3 genau das, was hinter `--` beabsichtigt ist? (Die Tabelle `bestellung`, die Prozedur `bestellen`, die Rollen `r_kueche` und `r_kasse` sowie der Benutzer `koch_jan` existieren.)"
+  options:
+    - text: "`GRANT UPDATE (status) ON bestellung TO r_kueche; -- Küche darf nur den Status ändern`"
+      correct: true
+      explain: "UPDATE darf in Firebird 3 auf einzelne Spalten beschränkt werden."
+    - text: "`GRANT r_kueche TO koch_jan; -- Jan bekommt die Küchenrolle`"
+      correct: true
+      explain: "Eine Rolle wird einem Benutzer zugewiesen. Nutzen kann Jan ihre Rechte, wenn sie seine aktive Rolle ist: beim Verbinden angegeben oder später mit `SET ROLE r_kueche` gesetzt. Aktiv ist in Firebird 3 genau eine Rolle je Sitzung."
+    - text: "`GRANT EXECUTE ON PROCEDURE bestellen TO r_kasse; -- Kasse darf die Prozedur aufrufen`"
+      correct: true
+      explain: "EXECUTE ist das Recht, eine Prozedur aufzurufen. Die Tabellenrechte kann man der Prozedur selbst geben (`GRANT … TO PROCEDURE bestellen`), dann braucht die Kasse keine."
+    - text: "`GRANT SELECT (status) ON bestellung TO r_kueche; -- Küche darf nur den Status lesen`"
+      correct: false
+      explain: "Firebird 3 erlaubt Spaltenlisten nur bei UPDATE und REFERENCES, die Anweisung wird mit einem Fehler abgewiesen. PostgreSQL kennt auch Spaltenrechte für SELECT. In Firebird beschränkt man das Lesen über eine Sicht."
+    - text: "`GRANT r_kasse TO r_kueche; -- Rolle r_kueche erbt alle Rechte von r_kasse`"
+      correct: false
+      explain: "Die Anweisung läuft ohne Fehler, bewirkt aber etwas anderes: Der Empfänger einer Rollenzuweisung ist in Firebird 3 immer ein Benutzername. `r_kasse` geht an einen Benutzer namens `R_KUECHE`, eine Rollenhierarchie entsteht nicht. PostgreSQL erlaubt Rollen als Mitglieder anderer Rollen."
+- id: t13-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [revoke, public]
+  type: truefalse
+  question: "Früher wurde `GRANT SELECT ON konto TO PUBLIC` ausgeführt. Nach `REVOKE SELECT ON konto FROM tom` kann der Benutzer Tom die Tabelle `konto` nicht mehr lesen."
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Rechte addieren sich aus direkt vergebenen Rechten, Rollen und PUBLIC. Tom liest weiter über das Recht an PUBLIC."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig. Ein Recht an PUBLIC muss mit `REVOKE SELECT ON konto FROM PUBLIC` entzogen werden. Das gilt in Firebird 3 und PostgreSQL."
+- id: t13-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grant, with-grant-option, revoke]
+  type: single
+  question: "Lea erhielt `GRANT SELECT ON gericht TO lea WITH GRANT OPTION` und hat das Recht noch an niemanden weitergegeben. Danach führt die Person, die es ihr gegeben hat, `REVOKE GRANT OPTION FOR SELECT ON gericht FROM lea` aus. Was gilt jetzt für Lea?"
+  options:
+    - text: "Sie darf `gericht` weiter lesen, das Recht aber nicht mehr an andere weitergeben."
+      correct: true
+      explain: "GRANT OPTION FOR entzieht nur das Weitergaberecht, nicht das Recht selbst."
+    - text: "Sie darf `gericht` nicht mehr lesen und nichts mehr weitergeben."
+      correct: false
+      explain: "Das bewirkt `REVOKE SELECT ON gericht FROM lea` ohne den Zusatz GRANT OPTION FOR."
+    - text: "Nichts ändert sich, weil Lea `SELECT` weiterhin besitzt."
+      correct: false
+      explain: "Das Recht selbst bleibt zwar, das Weitergaberecht wird aber entzogen. Hätte Lea schon weitergegeben, würde PostgreSQL das REVOKE ohne `CASCADE` abweisen; das ist hier nicht der Fall."
+    - text: "Sie darf nur noch einzelne Spalten lesen."
+      correct: false
+      explain: "Mit Spaltenrechten hat GRANT OPTION FOR nichts zu tun."
+- id: t13-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [prepared-statement, performance]
+  type: truefalse
+  question: "Ein Prepared Statement, das in einer Schleife mit 500 verschiedenen Werten ausgeführt wird, muss vom DBMS nur einmal analysiert werden."
+  options:
+    - text: "Wahr"
+      correct: true
+      explain: "Vorbereitet wird einmal, danach werden nur neue Werte gebunden und ausgeführt. Das spart Zeit neben dem Schutz vor Injection."
+    - text: "Falsch"
+      correct: false
+      explain: "Gerade das Wiederverwenden der vorbereiteten Anweisung ist ein Vorteil. Nur der SQL-Text darf sich dabei nicht ändern, die Werte schon."
+- id: t13-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [revoke, cascade, rechtegraph, postgresql, vertiefung]
+  type: multi
+  question: "PostgreSQL, Tabelle `konto`, Eigentümerin E. Vergeben wurde: E → Mia `SELECT WITH GRANT OPTION`, E → Ole `SELECT WITH GRANT OPTION`, Mia → Ben `SELECT WITH GRANT OPTION`, Ben → Ida `SELECT`, Ole → Ida `SELECT`. Jetzt führt E `REVOKE SELECT ON konto FROM mia CASCADE` aus. Wer darf `konto` danach noch lesen (außer E)?"
+  options:
+    - text: "Ole"
+      correct: true
+      explain: "Oles Recht stammt direkt von E und hängt nicht an Mia."
+    - text: "Ida"
+      correct: true
+      explain: "Ida verliert zwar die Vergabe von Ben, hat aber eine zweite von Ole. Wer ein Recht von zwei Seiten hat, behält es, solange eine Vergabe besteht."
+    - text: "Mia"
+      correct: false
+      explain: "Mias Recht wird direkt entzogen."
+    - text: "Ben"
+      correct: false
+      explain: "Ben hatte das Recht nur von Mia. Mit CASCADE fällt es mit, denn es hing an Mias Weitergaberecht."

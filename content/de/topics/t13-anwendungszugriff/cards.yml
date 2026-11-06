@@ -1,0 +1,261 @@
+- id: t13-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenbankanwendung, definition]
+  front: "Was ist eine Datenbankanwendung? Nenne ein eigenes Beispiel."
+  back: |-
+    Ein Programm, das seine Daten nicht selbst in Dateien ablegt, sondern **über ein Datenbanksystem** verwaltet. Die Anwendung schickt SQL an das DBMS und verarbeitet die Ergebnisse.
+
+    Beispiel: Die Kantinen-App eines Unternehmens zeigt den Speiseplan aus der Tabelle `gericht` und speichert Vorbestellungen in `bestellung`.
+- id: t13-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schichtenarchitektur, drei-schichten]
+  front: "Welche drei Schichten hat die klassische Drei-Schichten-Architektur, und wofür ist jede zuständig?"
+  back: |-
+    - **Präsentationsschicht** (Frontend): anzeigen, Eingaben entgegennehmen.
+    - **Logikschicht** (Anwendungs- bzw. Geschäftslogik): Regeln und Abläufe, Prüfungen, baut die SQL-Anweisungen und spricht mit der Datenbank.
+    - **Datenhaltungsschicht** (Backend): speichern, suchen, Integrität sichern, meist ein DBMS.
+- id: t13-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [client-server, zwei-schichten, drei-schichten]
+  front: "Worin unterscheiden sich eine Zwei-Schichten-Architektur (klassisches Client-Server) und eine Drei-Schichten-Architektur beim Datenbankzugriff?"
+  back: |-
+    - **Zwei Schichten:** Das Client-Programm enthält Oberfläche **und** Logik und verbindet sich selbst mit dem DB-Server. Jeder Client braucht Treiber und Zugangsdaten.
+    - **Drei Schichten:** Der Client (oft ein Browser) spricht nur mit dem Anwendungsserver. Nur dieser verbindet sich mit der Datenbank. Logik und Zugangsdaten liegen zentral.
+- id: t13-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schichtenarchitektur, vorteile, vertiefung]
+  front: "Nenne je zwei Vor- und Nachteile einer Schichtenarchitektur."
+  back: |-
+    **Vorteile:** Schichten sind lose gekoppelt und einzeln austauschbar (z. B. neue App-Oberfläche bei gleicher Logik), leichter zu verstehen und zu testen, gut auf mehrere Rechner verteilbar.
+
+    **Nachteile:** Daten laufen durch mehrere Schichten und werden umgewandelt, das kostet Zeit; mehr Komponenten müssen betrieben werden.
+- id: t13-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schnittstelle, treiber]
+  front: "Wozu dient eine Datenbankschnittstelle wie ODBC oder JDBC, und welche Rolle spielt der Treiber?"
+  back: |-
+    Die Schnittstelle bietet dem Programm **eine einheitliche API**: verbinden, SQL senden, Ergebnis lesen. Der **Treiber** (meist vom DBMS-Hersteller) übersetzt diese Aufrufe in das Protokoll des jeweiligen DBMS.
+
+    Beim Wechsel des DBMS tauscht man den Treiber. Der SQL-Dialekt kann trotzdem Anpassungen nötig machen.
+- id: t13-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [odbc, jdbc]
+  front: "Was ist ODBC, was ist JDBC? Nenne je ein Merkmal."
+  back: |-
+    - **ODBC** (*Open Database Connectivity*): sprachunabhängige Funktionsschnittstelle; Programme schicken darüber SQL an jedes DBMS, für das es einen ODBC-Treiber gibt. Grundlage ist das Call Level Interface von X/Open und ISO/IEC, Urheber Microsoft; nicht mehr nur unter Windows verfügbar.
+    - **JDBC** (*Java Database Connectivity*): die entsprechende Schnittstelle der Java-Plattform (Pakete `java.sql`, `javax.sql`), mit Treibern je DBMS.
+- id: t13-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [jdbc, resultset, prepared-statement]
+  front: "Welche Aufgabe haben in JDBC `Connection`, `Statement`/`PreparedStatement` und `ResultSet`?"
+  back: |-
+    - `Connection`: die Verbindung zur Datenbank (`DriverManager.getConnection(url, benutzer, passwort)`); Auto-Commit ist anfangs an, `commit()`/`rollback()` erst nach `setAutoCommit(false)`.
+    - `Statement`: schickt einen fertigen SQL-Text. `PreparedStatement` (über `prepareStatement`): SQL mit `?`-Platzhaltern, Werte per `setString` usw. binden.
+    - `ResultSet`: Ergebnis einer Abfrage (`executeQuery`), Zeile für Zeile mit `while (rs.next())` gelesen. DML läuft über `executeUpdate`.
+- id: t13-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [python-db-api, ablauf]
+  front: "In welchen Schritten greift ein Programm über eine Schnittstelle wie die Python DB-API auf eine Datenbank zu?"
+  back: |-
+    1. Verbindung aufbauen: `con = treiber.connect(...)` (Server, Datenbank, Benutzer, Passwort)
+    2. Cursor erzeugen: `cur = con.cursor()`
+    3. Anweisung ausführen: `cur.execute(sql, parameter)`
+    4. Ergebnis lesen: `cur.fetchone()` (am Ende `None`) / `cur.fetchall()`
+    5. Änderungen bestätigen (`con.commit()`) oder verwerfen (`con.rollback()`), danach `close()`. Auto-Commit ist in der DB-API anfangs aus.
+- id: t13-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [cursor, resultset]
+  front: "Warum braucht ein Programm einen Cursor bzw. ein ResultSet, um ein Abfrageergebnis zu verarbeiten?"
+  back: |-
+    SQL liefert eine **Menge** von Zeilen, Programmiersprachen arbeiten mit einzelnen Variablen. Der Cursor steht auf einer Zeile des Ergebnisses, das Programm holt die Zeilen **nacheinander** ab (`fetchone`, Schleife über das `ResultSet`). Damit überbrückt er den Unterschied zwischen mengen- und satzweiser Verarbeitung.
+- id: t13-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql-injection, definition, ursache]
+  front: "Was ist SQL-Injection (SQL-Einschleusung), und was ist ihre Ursache?"
+  back: |-
+    Ein Angriff, bei dem eine Eingabe den **SQL-Text verändert**, den die Anwendung an das DBMS schickt.
+
+    Ursache, zwei gleichwertige Formulierungen:
+    - Mechanismus: Das Programm baut den SQL-Text durch **Verkettung oder String-Formatierung** mit der Eingabe zusammen.
+    - Lücke: Die Eingabe wird nicht geprüft, Metazeichen (`'`, `;`, `--`) werden nicht maskiert.
+
+    Das DBMS kann Programmteil und Eingabe nicht unterscheiden: Daten werden zu Befehlen.
+- id: t13-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql-injection, angriffsmuster]
+  front: "Nenne vier typische Muster einer SQL-Injection mit ihrer Wirkung."
+  back: |-
+    - `' OR '1'='1` (bei Zahlen ohne Apostroph: `0 OR 1=1`): macht die WHERE-Bedingung immer wahr.
+    - `--` am Ende: kommentiert den Rest der Anweisung aus, z. B. weitere Bedingungen.
+    - `' UNION SELECT …`: hängt Zeilen anderer Tabellen an (gleiche Spaltenzahl, passende Typen, Lücken mit `NULL` gefüllt), oft zuerst aus dem Systemkatalog (in Firebird `RDB$RELATIONS`), um Tabellennamen zu erfahren.
+    - `'; DELETE …`: zweite Anweisung, nur wenn Schnittstelle bzw. Treiber mehrere Anweisungen je Aufruf ausführen.
+- id: t13-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql-injection, folgen]
+  front: "Welche Folgen kann eine erfolgreiche SQL-Injection haben, und wovon hängt das Ausmaß ab?"
+  back: |-
+    Vertrauliche Daten lesen, Daten ändern oder löschen, Prüfungen und Anmeldungen umgehen, höhere Rechte erlangen, auf manchen Systemen sogar Befehle auf dem Server ausführen.
+
+    Das Ausmaß hängt vor allem an den **Rechten des Datenbankkontos**, mit dem die Anwendung verbunden ist.
+- id: t13-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [prepared-statement, parameterbindung]
+  front: "Wie funktioniert ein Prepared Statement, und warum verhindert es SQL-Injection?"
+  back: |-
+    1. SQL-Text mit Platzhaltern (`?`) an das DBMS schicken, es analysiert und **legt die Struktur fest**.
+    2. Werte getrennt **binden**, dann ausführen (beliebig oft mit neuen Werten).
+
+    Die Eingabe kommt erst an, wenn die Struktur feststeht, und wird nur als Wert benutzt. `x' OR '1'='1` ist dann eine gewöhnliche, nicht vorhandene Kartennummer.
+- id: t13-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [prepared-statement, whitelisting, grenzen]
+  front: "Wofür kann ein Platzhalter nicht stehen, und wie sichert man solche Teile ab?"
+  back: |-
+    Platzhalter stehen nur für **Werte** (Literale). Tabellen- und Spaltennamen, Schlüsselwörter wie `ASC`/`DESC` oder ganze Bedingungen gehen nicht.
+
+    Absichern per **Whitelisting** (Positivliste): Die Eingabe wählt nur aus fest im Programm hinterlegten SQL-Bausteinen, z. B. `{"preis": "preis", "name": "name"}`. Alles andere wird abgewiesen.
+- id: t13-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [minimale-rechte, least-privilege]
+  front: "Was besagt das Prinzip der minimalen Rechte (*principle of least privilege*) für das Datenbankkonto einer Anwendung?"
+  back: |-
+    Das Konto bekommt **nur die Rechte, die die Anwendung wirklich braucht**, z. B. `SELECT` auf `gericht` und `SELECT, INSERT` auf `bestellung`, kein `DELETE`, keine DDL, kein Admin- oder Eigentümerkonto.
+
+    Es verhindert keine Injection, begrenzt aber den Schaden.
+- id: t13-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [escaping, stored-procedure, quellenvariante]
+  front: "Wie bewerten die Quellen Escaping und Stored Procedures als Schutz vor SQL-Injection?"
+  back: |-
+    - **Escaping** (Sonderzeichen maskieren): eine Quelle nennt es als Gegenmaßnahme mit den Funktionen des DBMS, eine andere stuft es als fehleranfällig ein. Vorrang hat die Parameterbindung.
+    - **Stored Procedures**: eine Quelle sieht keinen generellen Schutz, eine andere führt sie unter den empfohlenen Maßnahmen. Sie schützen nur, wenn sie intern keinen SQL-Text aus Parametern zusammensetzen. Ihr Hauptnutzen: Die Anwendung bekommt nur `EXECUTE`, keine Tabellenrechte.
+- id: t13-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [authentifizierung, autorisierung]
+  front: "Was ist der Unterschied zwischen Authentifizierung und Autorisierung im DBMS?"
+  back: |-
+    - **Authentifizierung**: Wer bist du? Anmeldung mit Benutzername und Passwort.
+    - **Autorisierung**: Was darfst du? Das DBMS prüft bei jeder Anweisung, ob der Benutzer (oder eine seiner Rollen oder `PUBLIC`) das nötige Recht hat, sonst wird sie abgewiesen.
+- id: t13-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grant, objektrechte]
+  front: "Welche Objektrechte gibt es auf Tabellen in Firebird 3, und wie vergibt man sie?"
+  back: |-
+    `SELECT`, `INSERT`, `UPDATE`, `DELETE`, `REFERENCES`, `ALL`; dazu `EXECUTE` für Prozeduren und `USAGE` für Sequenzen.
+
+    `GRANT SELECT, INSERT ON bestellung TO kantine_app;`
+
+    Mit Spaltenliste nur `UPDATE` und `REFERENCES`: `GRANT UPDATE (status) ON bestellung TO r_kueche;`
+- id: t13-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rolle, grant]
+  front: "Was ist eine Rolle in der Rechteverwaltung, und wie setzt man sie ein?"
+  back: |-
+    Ein **benanntes Bündel von Rechten** für eine Aufgabe (nicht zu verwechseln mit der Rolle im ER-Modell).
+
+    ```
+    CREATE ROLE r_kueche;
+    GRANT SELECT ON bestellung TO r_kueche;
+    GRANT r_kueche TO koch_jan;
+    ```
+    Vorteil: Wechselt jemand die Aufgabe, ändert man nur die Rollenzuordnung.
+- id: t13-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grant, with-grant-option, public]
+  front: "Was bewirken `WITH GRANT OPTION`, `WITH ADMIN OPTION` und der Empfänger `PUBLIC`?"
+  back: |-
+    - `WITH GRANT OPTION`: Der Empfänger darf das Recht an andere weitergeben.
+    - `WITH ADMIN OPTION`: dasselbe für eine Rolle, der Empfänger darf die Rolle weiter zuweisen.
+    - `PUBLIC`: alle Benutzer, auch künftige. Rechte an `PUBLIC` sparsam vergeben.
+- id: t13-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [revoke, public]
+  front: "Was entzieht `REVOKE UPDATE ON bestellung FROM tom`, und warum kann Tom danach trotzdem noch ändern?"
+  back: |-
+    Es entzieht nur die Vergabe **des Ausführenden** an Tom. Gibt es sie nicht, passiert nichts, unter Umständen ohne Fehlermeldung.
+
+    Rechte addieren sich: Tom behält `UPDATE`, wenn er es zusätzlich von einem anderen Gewährenden, über eine Rolle oder über `PUBLIC` hat. Dann müssen auch diese Wege entzogen werden (`… FROM PUBLIC`, `REVOKE r_… FROM tom`).
+- id: t13-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [revoke, grant-option, cascade, postgresql, vertiefung]
+  front: "Was bewirkt `REVOKE GRANT OPTION FOR`, und was passiert in PostgreSQL mit Rechten, die der Empfänger weitergegeben hat?"
+  back: |-
+    `REVOKE GRANT OPTION FOR SELECT ON gericht FROM lea;` nimmt nur das **Weitergaberecht**, Lea behält `SELECT`.
+
+    PostgreSQL: Hat Lea das Recht weitergegeben, scheitert ein REVOKE ohne Zusatz (`RESTRICT`). Mit `CASCADE` verlieren auch die abhängigen Empfänger das Recht. Die Zusätze stammen aus der SQL-Norm; Firebird 3 kennt sie nicht.
+- id: t13-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dialekt, firebird, postgresql, rolle, vertiefung]
+  front: "Nenne drei Unterschiede zwischen Firebird 3 und PostgreSQL bei Rollen und Rechten."
+  back: |-
+    - Spaltenrechte: FB3 nur `UPDATE`, `REFERENCES`; PG auch `SELECT`, `INSERT`.
+    - Rollen: FB3 nur an Benutzer (`GRANT r1 TO r2` meint einen Benutzer `R2`); PG auch an Rollen.
+    - Wirksamkeit: FB3 genau eine aktive Rolle je Sitzung, beim Verbinden angegeben oder per `SET ROLE`; PG erbt Rollenrechte (`INHERIT`, Default an), zusätzlich `SET ROLE`.
+    - Benutzer: FB3 in der Sicherheitsdatenbank; PG `CREATE USER` = Rolle mit `LOGIN`.
+- id: t13-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [revoke, cascade, rechtegraph, postgresql, vertiefung]
+  front: "E gibt A und B je `SELECT … WITH GRANT OPTION`. A gibt das Recht an C und D weiter, B ebenfalls an C. Wer hat es nach `REVOKE SELECT … FROM a CASCADE` (ausgeführt von E, PostgreSQL) noch?"
+  back: |-
+    - **B** und **C** behalten es. C hat es zusätzlich von B.
+    - **A** verliert es, ebenso **D**, das es nur über A hatte.
+
+    Regel: Der kaskadierende Entzug folgt nur der Kette des Entziehenden. Wer dasselbe Recht noch von anderer Seite hat, behält es. Ohne `CASCADE` wäre das REVOKE abgewiesen worden.
+- id: t13-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql-injection, zahlenparameter]
+  front: "Warum braucht eine SQL-Injection in einen Zahlenparameter kein Apostroph, und was schützt hier?"
+  back: |-
+    Bei `"… WHERE konto_id = " + eingabe` steht die Eingabe ohne Anführungszeichen im Text. Mit `0 OR 1=1` ergibt sich `WHERE konto_id = 0 OR 1=1`, es muss kein Literal beendet werden.
+
+    Apostrophe maskieren oder verbieten nützt deshalb nichts. Schutz: Parameterbindung (`konto_id = ?`) und Typprüfung (Eingabe vorher in eine ganze Zahl umwandeln).
+- id: t13-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [stored-procedure, minimale-rechte, execute, firebird]
+  front: "Wie sorgt man in Firebird 3 dafür, dass eine Anwendung Daten nur über eine Prozedur ändern kann?"
+  back: |-
+    Die Anwendung erhält **keine** Tabellenrechte, nur `EXECUTE`. Die Tabellenrechte bekommt die Prozedur selbst:
+
+    ```
+    GRANT SELECT ON gericht TO PROCEDURE bestellen;
+    GRANT SELECT, UPDATE ON konto TO PROCEDURE bestellen;
+    GRANT INSERT ON bestellung TO PROCEDURE bestellen;
+    GRANT EXECUTE ON PROCEDURE bestellen TO kantine_app;
+    ```
+    PostgreSQL: Funktion mit `SECURITY DEFINER`, vorher `EXECUTE` von `PUBLIC` entziehen.
+- id: t13-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [python-db-api, paramstyle, platzhalter]
+  front: "Ist `%s` in Python-Datenbankcode sicher oder unsicher?"
+  back: |-
+    Das kommt auf den Aufruf an. Der Treiber legt im Attribut `paramstyle` den Platzhalter fest (`?`, `:1`, `:name`, `%s`, `%(name)s`).
+
+    - **sicher:** `cur.execute("… = %s", (wert,))`, der Wert wird gebunden.
+    - **unsicher:** `cur.execute("… = '%s'" % wert)` oder ein f-String, der Wert steht schon vor dem Aufruf im Text.
