@@ -32,7 +32,14 @@ Mengenoperationen bei NULL: In PostgreSQL behandelt `EXCEPT` zwei NULL-Werte als
 | mehrspaltiges `UNIQUE (a, b)` mit NULL | `(1, NULL)` zweimal → **Verletzung**; nur vollständig leere Schlüssel `(NULL, NULL)` sind mehrfach erlaubt | `(1, NULL)` beliebig oft erlaubt | Aufgaben nicht auf das Verhalten von Teil-NULL in mehrspaltigen UNIQUE stützen; im Lerntext als Dialektunterschied nennen |
 | `NUMERIC(p,s)` mit `p` ≤ 9 | Präzision **nicht erzwungen** (gespeichert als INTEGER/BIGINT), `NUMERIC(6,2)` nimmt `99999.99` an | Präzision erzwungen (`numeric field overflow`) | Obergrenzen per `CHECK` absichern, nicht über die Präzision |
 
-Geprüft am FB-3.0.14-Container (2026-11-06). Ebenfalls dort bestätigt: `ALTER TABLE … ALTER COLUMN x TO y` scheitert in Firebird 3, wenn `x` in einem Constraint vorkommt (PK, UNIQUE, FK, CHECK): „Column … is referenced in …“. PostgreSQL benennt in diesem Fall um und passt den Constraint an.
+| `ORDER BY` nach `UNION` mit Spaltenname/Alias | **Fehler** „invalid ORDER BY clause“, nur Spaltennummern | Namen der ersten Teilabfrage erlaubt | `ORDER BY 1, 2` |
+| `ROUND(2.5, 0)`, `ROUND(-2.5, 0)` | 3, −3 (halbe Werte von null weg) | 3, −3 bei NUMERIC | gleich; bei DOUBLE PRECISION in PG Banker's Rounding möglich → NUMERIC verwenden |
+| `MOD(7.5, 2)` | 0 (Argumente werden auf ganze Zahlen gerundet) | 1.5 | `MOD` nur mit ganzen Zahlen |
+| `EXTRACT(YEARDAY …)` / `EXTRACT(DOY …)` | YEARDAY, 1. Januar = **0** | DOY, 1. Januar = 1 | nicht in Auto-Checks vergleichen |
+| `HAVING` ohne `GROUP BY` | erlaubt (ganze Tabelle = eine Gruppe) | erlaubt | gleich |
+| Datumsliteral `'24.12.2025'` | gültig | von `DateStyle` abhängig | `DATE '2025-12-24'` |
+
+Geprüft am FB-3.0.14-Container (2026-11-06). Ebenfalls am Container bestätigt (2026-11-06): UPDATE `SET a = b, b = a` tauscht in FB3; `DEFAULT` als Wert in VALUES und `TRUNCATE` gibt es in FB3 nicht. Ebenfalls dort bestätigt: `ALTER TABLE … ALTER COLUMN x TO y` scheitert in Firebird 3, wenn `x` in einem Constraint vorkommt (PK, UNIQUE, FK, CHECK): „Column … is referenced in …“. PostgreSQL benennt in diesem Fall um und passt den Constraint an.
 
 Vergleiche wie `c = 'ab'` auf einer `CHAR(5)`-Spalte sind in beiden Systemen wahr. Der Ergebnisvergleich entfernt das Auffüllen ohnehin.
 
