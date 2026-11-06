@@ -50,14 +50,14 @@ jobs:
       # PDFs and Anki decks built by the reused ci.yml (artifacts "pdf" and "anki", one folder each).
       # The downloads page publishes the files it finds in ./dist/pdf and ./dist/anki; without them it shows a note.
       - name: Download PDFs of the checks job
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         continue-on-error: true
         with:
           name: pdf
           path: dist/pdf
 
       - name: Download Anki decks of the checks job
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         continue-on-error: true
         with:
           name: anki
