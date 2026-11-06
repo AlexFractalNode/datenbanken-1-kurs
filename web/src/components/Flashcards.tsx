@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { RECOVERED_NOTICE, SAVE_FAILED_NOTICE, progress, recordActivity, storageNotice, type FsrsCard } from '../lib/progress';
 import { withBase } from '../lib/nav';
 import { GRADES, GRADE_LABEL, formatInterval, isDue, loadSrs, type Grade, type Srs } from '../lib/srs';
+import { onLocalMidnight } from '../lib/day';
 import { newCardAllowance, readIntroducedToday, readNewCardLimit, recordIntroduced } from '../lib/settings';
 import { topicFromUrl, writeTopicToUrl, type TopicOption } from '../lib/topic-filter';
 
@@ -61,6 +62,11 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
   const backRef = useRef<HTMLDivElement>(null);
   const emptyRef = useRef<HTMLHeadingElement>(null);
   const focusNext = useRef<'reveal' | 'back' | 'empty' | null>(null);
+  /** Cards rated "Nochmal" in this round: they stay in the queue although they are not due yet. */
+  const again = useRef(new Set<string>());
+  /** Latest topic and queue for the refresh listeners (registered once). */
+  const live = useRef({ topic: '', queue: [] as string[] });
+  live.current = { topic, queue };
 
   const knownTopics = useMemo(() => new Set(topics.map((t) => t.id)), [topics]);
   const titleOf = useMemo(() => new Map(topics.map((t) => [t.id, t.title])), [topics]);
@@ -89,6 +95,34 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
     // Mount only: the props are static build output.
   }, []);
 
+  // Due cards and the daily limit depend on the time and on other tabs: re-evaluate the queue when the
+  // tab becomes visible again and at local midnight. The card on screen and "Nochmal" cards stay.
+  useEffect(() => {
+    const refresh = () => {
+      const loaded = progress.loadDetailed();
+      const { topic: current, queue: before } = live.current;
+      const built = buildQueue(cards.filter((c) => !current || c.topic === current), loaded.progress.cards, new Date());
+      const head = before[0];
+      const kept = before.filter((id) => again.current.has(id) && !built.queue.includes(id));
+      let next = [...built.queue, ...kept];
+      if (head !== undefined && next.includes(head)) next = [head, ...next.filter((id) => id !== head)];
+      else setRevealed(false);
+      setStored(loaded.progress.cards);
+      setQueue(next);
+      setHeld(built.held);
+    };
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refresh();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    const stopMidnight = onLocalMidnight(refresh);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      stopMidnight();
+    };
+    // Registered once; the current topic and queue come from `live`.
+  }, []);
+
   useEffect(() => {
     if (focusNext.current === 'reveal') revealRef.current?.focus();
     if (focusNext.current === 'back') backRef.current?.focus();
@@ -113,6 +147,7 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
     setTopic(next);
     setRevealed(false);
     setMessage('');
+    again.current.clear();
     const built = buildQueue(cards.filter((c) => !next || c.topic === next), stored, new Date());
     setQueue(built.queue);
     setHeld(built.held);
@@ -138,6 +173,8 @@ export default function Flashcards({ cards, topics, initialTopic, loadScheduler 
     // The general notice already says that nothing is stored; otherwise warn about this failed write.
     setSaveFailed(!saved.persisted && notice === null);
     const rest = queue.slice(1);
+    if (grade === 'again') again.current.add(current.id);
+    else again.current.delete(current.id);
     const nextQueue = grade === 'again' ? [...rest, current.id] : rest;
     setQueue(nextQueue);
     setRevealed(false);

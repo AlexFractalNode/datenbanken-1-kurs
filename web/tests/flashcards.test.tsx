@@ -1,9 +1,9 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/preact';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/preact';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Flashcards, { type FlashcardItem } from '../src/components/Flashcards';
 import { progress } from '../src/lib/progress';
-import { NEW_CARDS_KEY, NEW_TODAY_KEY, readIntroducedToday } from '../src/lib/settings';
+import { NEW_CARDS_KEY, NEW_TODAY_KEY, readIntroducedToday, recordIntroduced } from '../src/lib/settings';
 import { formatInterval, isDue } from '../src/lib/srs';
 
 const CARDS: FlashcardItem[] = [
@@ -68,6 +68,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  vi.useRealTimers();
   progress.reset();
 });
 
@@ -320,6 +321,49 @@ describe('Flashcards: daily limit for new cards', () => {
     fireEvent.change(screen.getByLabelText('Thema'), { target: { value: 't06' } });
     expect(el.dataset.verifyState).toBe('empty');
     expect(container.textContent).toContain('Tageslimit');
+  });
+
+  it('re-evaluates the queue at local midnight: the limit of the new day applies (G4)', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ['setTimeout', 'clearTimeout', 'Date'] });
+    vi.setSystemTime(new Date(2026, 10, 6, 23, 59, 50));
+    localStorage.setItem(NEW_CARDS_KEY, '1');
+    recordIntroduced('t99-c001');
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    expect(el.dataset.verifyState).toBe('empty');
+    await act(() => vi.advanceTimersByTimeAsync(15_000));
+    expect(el.dataset.verifyState).toBe('ready');
+    expect(el.dataset.verifyCount).toBe('1');
+  });
+
+  it('re-evaluates the queue when the tab becomes visible again (another tab reviewed the cards, G4)', async () => {
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    expect(el.dataset.verifyCount).toBe('3');
+    const later = new Date(Date.now() + 5 * 86_400_000).toISOString();
+    progress.update((p) => {
+      for (const id of ['t04-c001', 't04-c002']) p.cards[id] = { ...FULL_CARD, dueAt: later, lastReviewAt: new Date().toISOString(), cardId: id };
+    });
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    expect(el.dataset.verifyCount).toBe('1');
+    expect(screen.getByText('Was ist 1NF?')).toBeTruthy();
+  });
+
+  it('keeps the current card and a card rated "Nochmal" when the queue is re-evaluated', async () => {
+    const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
+    const el = await ready(container);
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Nochmal/ }));
+    // now: t04-c002 first, t04-c001 again at the end; the answer of c002 is open
+    fireEvent.click(screen.getByRole('button', { name: 'Antwort zeigen' }));
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    expect(el.dataset.verifyCount).toBe('3');
+    expect(screen.getByText('Was ist eine Raute?')).toBeTruthy();
+    expect(screen.getByText('Ein Beziehungstyp.')).toBeTruthy();
   });
 
   it('ignores a corrupt daily record', async () => {

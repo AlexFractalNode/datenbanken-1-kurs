@@ -3,7 +3,8 @@
  * coverage and the current streak. The page passes the build-time content structure
  * (`DashboardTopic`), the browser passes the stored progress; nothing here touches storage.
  */
-import { localDay, newCardAllowance } from './settings';
+import { localDay, previousLocalDay } from './day';
+import { newCardAllowance } from './settings';
 import { isDue } from './srs';
 import type { ProgressV1, Streak } from './progress';
 
@@ -116,6 +117,5 @@ export function computeDashboard(topics: DashboardTopic[], p: ProgressV1, now: D
  */
 export function currentStreak(streak: Streak, now: Date): number {
   if (streak.last === '' || streak.days <= 0) return 0;
-  const yesterday = localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
-  return streak.last === localDay(now) || streak.last === yesterday ? streak.days : 0;
+  return streak.last === localDay(now) || streak.last === previousLocalDay(now) ? streak.days : 0;
 }

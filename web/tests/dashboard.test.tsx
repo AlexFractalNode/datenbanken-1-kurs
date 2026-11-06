@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, render, waitFor } from '@testing-library/preact';
+import { act, cleanup, render, waitFor } from '@testing-library/preact';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Dashboard from '../src/components/Dashboard';
 import { computeDashboard, currentStreak, type DashboardTopic } from '../src/lib/dashboard';
@@ -150,7 +150,10 @@ beforeEach(() => {
   localStorage.clear();
   progress.reset(); // drops the in-memory copy of earlier tests
 });
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.useRealTimers();
+});
 
 describe('Dashboard island', () => {
   it('starts as loading and is empty without progress', async () => {
@@ -201,6 +204,31 @@ describe('Dashboard island', () => {
     const { container } = render(<Dashboard topics={topics} />);
     await waitFor(() => expect(unit(container, 'dashboard-progress').dataset.verifyState).toBe('empty'));
     expect(container.textContent).toContain('Speicher nicht verfügbar');
+  });
+
+  it('updates when another tab changes the progress (storage event, G4)', async () => {
+    const { container } = render(<Dashboard topics={topics} />);
+    await waitFor(() => expect(unit(container, 'dashboard-progress').dataset.verifyState).toBe('empty'));
+    progress.update((p) => {
+      p.cards['t04-c001'] = card(2, 4);
+    });
+    act(() => {
+      window.dispatchEvent(new StorageEvent('storage', { key: 'db1:progress:cards' }));
+    });
+    await waitFor(() => expect(unit(container, 'dashboard-progress').dataset.verifyState).toBe('ready'));
+    expect(container.querySelector('[data-stat="coverage"]')!.textContent).toContain('17 %');
+  });
+
+  it('starts a new day at local midnight: the new-card allowance is fresh again (G4)', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true, toFake: ['setTimeout', 'clearTimeout', 'Date'] });
+    vi.setSystemTime(new Date(2026, 10, 6, 23, 59, 50));
+    localStorage.setItem(NEW_CARDS_KEY, '1');
+    recordIntroduced('t99-c001');
+    const { container } = render(<Dashboard topics={topics} />);
+    await waitFor(() => expect(container.querySelector('[data-stat="due"]')).toBeTruthy());
+    expect(container.querySelector('[data-stat="due"] strong')!.textContent).toBe('0 Karten');
+    await act(() => vi.advanceTimersByTimeAsync(15_000));
+    expect(container.querySelector('[data-stat="due"] strong')!.textContent).toBe('1 Karte');
   });
 
   it('is empty with no topics at all', async () => {

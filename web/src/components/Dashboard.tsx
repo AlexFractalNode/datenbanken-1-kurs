@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
 import { computeDashboard, type DashboardStats, type DashboardTopic } from '../lib/dashboard';
+import { onLocalMidnight } from '../lib/day';
 import { withBase } from '../lib/nav';
 import { RECOVERED_NOTICE, progress, storageNotice } from '../lib/progress';
 import { readIntroducedToday, readNewCardLimit } from '../lib/settings';
@@ -40,12 +41,23 @@ export default function Dashboard({ topics }: Props) {
 
   useEffect(() => {
     setData(load(topics));
-    // The data changes only in other tabs or islands; a returning tab shows the current state.
-    const refresh = () => {
-      if (document.visibilityState === 'visible') setData(load(topics));
+    // The data changes in other tabs (storage event, or seen when the tab returns) and with the day:
+    // at local midnight the streak and the new-card allowance move on.
+    const reload = () => setData(load(topics));
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') reload();
     };
-    document.addEventListener('visibilitychange', refresh);
-    return () => document.removeEventListener('visibilitychange', refresh);
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === null || event.key.startsWith('db1:')) reload();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('storage', onStorage);
+    const stopMidnight = onLocalMidnight(reload);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('storage', onStorage);
+      stopMidnight();
+    };
     // Mount only: the topics are static build output.
   }, []);
 

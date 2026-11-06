@@ -17,6 +17,7 @@
  * copy for the current tab. Data with an unknown version marker (e.g. from a newer app) is never
  * overwritten; the app then works on an empty in-memory store and says so.
  */
+import { localDay, previousLocalDay } from './day';
 import { clearIntroducedToday } from './settings';
 import {
   PROGRESS_FORMAT,
@@ -429,16 +430,11 @@ export function importJson(json: string): ImportResult {
 // Activity streak
 // ---------------------------------------------------------------------------
 
-function localDay(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
 /** Counts consecutive local calendar days with learning activity. Mutates and returns `p`. */
 export function recordActivity(p: ProgressV1, now: Date = new Date()): ProgressV1 {
   const today = localDay(now);
   if (p.streak.last === today) return p;
-  const yesterday = localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1));
+  const yesterday = previousLocalDay(now);
   p.streak = { last: today, days: p.streak.last === yesterday ? p.streak.days + 1 : 1 };
   return p;
 }

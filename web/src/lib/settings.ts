@@ -8,6 +8,7 @@
  * - `newToday`: the cards that were new at their first review today (`{day, ids}`), so the daily
  *   limit survives a reload. It is removed when the progress is reset.
  */
+import { localDay } from './day';
 import { readItem, removeItem, writeItem } from './storage';
 
 export const NEW_CARDS_KEY = 'db1:settings:newCardsPerDay';
@@ -45,12 +46,6 @@ export function writeNewCardLimit(value: number): { ok: boolean; value: number }
   const ok = writeItem(NEW_CARDS_KEY, String(value));
   limitInMemory = ok ? null : value;
   return { ok, value };
-}
-
-/** Local calendar day as YYYY-MM-DD (same convention as the streak). */
-export function localDay(d: Date): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
 function readToday(now: Date): string[] {
