@@ -1,0 +1,278 @@
+- id: t11-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dml, sprachklassen]
+  front: "Welche drei Anweisungen bilden den Kern der DML (Data Manipulation Language), und was tun sie?"
+  back: |-
+    - `INSERT` fügt neue Zeilen ein.
+    - `UPDATE` ändert Werte in vorhandenen Zeilen.
+    - `DELETE` entfernt Zeilen.
+
+    Alle drei ändern den **Inhalt** einer Tabelle, nicht ihre Struktur. Manche Quellen zählen auch `SELECT` zur DML.
+- id: t11-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert, spaltenliste]
+  front: "Wie lautet die Grundform von `INSERT … VALUES`, und warum schreibt man die Spaltenliste mit?"
+  back: |-
+    `INSERT INTO tabelle (sp1, sp2, …) VALUES (w1, w2, …);`
+
+    Die Spaltenliste legt fest, welcher Wert in welche Spalte kommt. Die Anweisung bleibt richtig, wenn jemand später Spalten ergänzt oder umsortiert, und man kann Identity- und Default-Spalten weglassen.
+- id: t11-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert, default, "null"]
+  front: "Welchen Wert bekommt eine Spalte, die in der Spaltenliste eines INSERT fehlt?"
+  back: |-
+    - ihren **Default**, falls einer definiert ist,
+    - sonst **NULL**,
+    - bei einer Identity-Spalte den nächsten Zählerwert.
+
+    Ist die Spalte `NOT NULL` und hat keinen Default, wird das INSERT abgewiesen. Ein ausdrücklich geschriebenes `NULL` überschreibt den Default.
+- id: t11-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert, ohne-spaltenliste]
+  front: "Was gilt für ein INSERT **ohne** Spaltenliste?"
+  back: |-
+    Es braucht einen Wert für **jede** Spalte, genau in der Reihenfolge der Tabellendefinition. Defaults greifen nicht, Identity-Werte müsste man selbst angeben. Das ist fehleranfällig und bricht bei jeder Schemaänderung. Brauchbar ist es nur bei Tabellen ohne Identity-Spalte, z. B. Zwischentabellen.
+- id: t11-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert, mehrere-zeilen, dialekt]
+  front: "Wie fügt man mehrere Zeilen ein, in Firebird 3 und in PostgreSQL?"
+  back: |-
+    - **PostgreSQL:** `INSERT INTO t (a, b) VALUES (1, 'x'), (2, 'y');`
+    - **Firebird 3:** `VALUES` liefert genau eine Zeile. Also je Zeile ein INSERT, oder `INSERT … SELECT`, wenn die Zeilen aus einer Abfrage kommen.
+- id: t11-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert, default, dialekt]
+  front: "Wie lässt man beim INSERT bewusst den Default greifen?"
+  back: |-
+    - In beiden Systemen: die Spalte in der Spaltenliste weglassen.
+    - PostgreSQL zusätzlich: `DEFAULT` als Wert in der Liste, z. B. `VALUES ('R203', 2, 4, DEFAULT)`. Firebird 3 weist das ab (getestet).
+    - Ganze Zeile nur aus Defaults: `INSERT INTO t DEFAULT VALUES;` (Firebird und PostgreSQL).
+- id: t11-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert-select]
+  front: "Wie funktioniert `INSERT INTO … SELECT …`?"
+  back: |-
+    Jede Ergebniszeile der Abfrage wird als neue Zeile eingefügt, das können null bis beliebig viele sein. `VALUES` fällt weg. Spaltenzahl und Typen der SELECT-Liste müssen zur Spaltenliste passen. In der SELECT-Liste dürfen Konstanten und Ausdrücke stehen.
+- id: t11-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update, where]
+  front: "Wie lautet die Grundform von `UPDATE`, und was passiert ohne WHERE?"
+  back: |-
+    `UPDATE tabelle SET sp1 = ausdruck1, sp2 = ausdruck2 WHERE bedingung;`
+
+    Geändert werden alle Zeilen, für die die Bedingung TRUE ist. **Ohne WHERE** ändert das DBMS **jede** Zeile der Tabelle, ohne Rückfrage.
+- id: t11-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update, berechneter-wert]
+  front: "Welche Werte sehen die Ausdrücke rechts im SET, die alten oder die neuen?"
+  back: |-
+    Die **alten**. Alle Ausdrücke einer Zeile werden mit den Werten vor der Änderung berechnet. `SET a = b, b = a` tauscht deshalb die beiden Werte (in Firebird 3 getestet). So verlangt es der SQL-Standard, und so arbeiten PostgreSQL und Firebird (seit 2.5). Jede Spalte darf im SET nur einmal stehen.
+- id: t11-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update, unterabfrage]
+  front: "Wo darf in einem UPDATE eine Unterabfrage stehen?"
+  back: |-
+    - im **WHERE**, z. B. `WHERE instrument_id IN (SELECT …)` oder `EXISTS (…)`,
+    - im **SET** als skalare Unterabfrage, auch korreliert mit der gerade geänderten Zeile.
+
+    Liefert die Unterabfrage im SET mehrere Zeilen, gibt es einen Fehler. Liefert sie keine, wird der Wert NULL.
+- id: t11-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update, delete, dialekt]
+  front: "Was bieten PostgreSQL und Firebird 3, wenn sich ein UPDATE oder DELETE auf eine zweite Tabelle beziehen soll?"
+  back: |-
+    - **Beide:** Unterabfrage im WHERE oder SET (neutral, in beiden Systemen lauffähig).
+    - **PostgreSQL:** zusätzlich `UPDATE t SET … FROM andere WHERE …` und `DELETE FROM t USING andere WHERE …`.
+    - **Firebird 3:** kein `UPDATE … FROM`; dafür gibt es `MERGE`.
+- id: t11-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [delete, where]
+  front: "Wie lautet die Grundform von `DELETE`, und was bleibt nach `DELETE FROM t` ohne WHERE übrig?"
+  back: |-
+    `DELETE FROM tabelle WHERE bedingung;`
+
+    Ohne WHERE werden **alle Zeilen** gelöscht. Die Tabelle selbst bleibt mit Spalten, Constraints und Rechten bestehen, sie ist dann nur leer.
+- id: t11-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [delete, truncate, drop]
+  front: "Wie unterscheiden sich `DELETE FROM t`, `TRUNCATE TABLE t` und `DROP TABLE t`?"
+  back: |-
+    - `DELETE`: löscht Zeilen einzeln, mit optionalem WHERE; Aktionen und Trigger wirken je Zeile.
+    - `TRUNCATE`: leert die ganze Tabelle auf einmal, ohne WHERE, meist schneller, ohne ON-DELETE-Trigger und zeilenweise Aktionen. **Nicht in Firebird 3.**
+    - `DROP TABLE`: entfernt die Tabelle selbst (DDL).
+
+    Nach DELETE und TRUNCATE bleibt die Struktur, nach DROP nicht.
+- id: t11-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, reihenfolge, insert]
+  front: "In welcher Reihenfolge fügt man Zeilen in Tabellen ein, die über Fremdschlüssel verbunden sind, und in welcher löscht man sie?"
+  back: |-
+    **Einfügen:** erst die referenzierte Elternzeile, dann die Kindzeile, denn ein Fremdschlüsselwert muss NULL sein oder schon existieren.
+    **Löschen** (bei NO ACTION): erst die Kinder, dann die Eltern. Bei CASCADE übernimmt das DBMS das Löschen der Kinder.
+- id: t11-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, zyklus, insert]
+  front: "Zwei Tabellen verweisen gegenseitig aufeinander (Abteilung hat eine Leitung, Mitarbeitende gehören zu einer Abteilung). Wie füllt man sie?"
+  back: |-
+    1. Abteilungen einfügen, Leitung zunächst NULL.
+    2. Mitarbeitende mit ihrer Abteilung einfügen.
+    3. Leitung per `UPDATE abteilung SET leiter_id = …` nachtragen.
+
+    Dafür muss mindestens einer der beiden Fremdschlüssel NULL-fähig sein.
+- id: t11-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, cascade, set-null, set-default, no-action]
+  front: "Was bewirken die vier Aktionen `CASCADE`, `SET NULL`, `SET DEFAULT` und `NO ACTION`, wenn eine referenzierte Elternzeile gelöscht wird?"
+  back: |-
+    - `CASCADE`: Die Kindzeilen werden mitgelöscht.
+    - `SET NULL`: Die Kindzeilen bleiben, ihr Fremdschlüssel wird NULL (scheitert bei NOT NULL).
+    - `SET DEFAULT`: Die Kindzeilen bleiben, ihr Fremdschlüssel bekommt den Default (scheitert, wenn es keine Elternzeile mit diesem Wert gibt).
+    - `NO ACTION` (Standard): Das DELETE wird abgewiesen, falls Kindzeilen verweisen.
+- id: t11-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, mehrstufig, atomar]
+  front: "Ein DELETE löst eine Kaskade über mehrere Tabellen aus. Was passiert, wenn auf einer tieferen Ebene ein `NO ACTION` greift?"
+  back: |-
+    Die **ganze** Anweisung wird abgewiesen. Keine Zeile wird gelöscht und kein Fremdschlüssel auf NULL gesetzt, auch nicht auf den Ebenen davor. Eine SQL-Anweisung wirkt immer ganz oder gar nicht. Frühere Anweisungen derselben Transaktion nimmt das DBMS dabei nicht automatisch zurück.
+- id: t11-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, update, on-update]
+  front: "Was passiert, wenn man den Primärschlüssel einer Elternzeile per UPDATE ändert?"
+  back: |-
+    Es entscheidet die `ON UPDATE`-Regel des Fremdschlüssels:
+    - `CASCADE`: Die Kindzeilen übernehmen den neuen Wert.
+    - `SET NULL`: Ihr Fremdschlüssel wird NULL.
+    - `SET DEFAULT`: Ihr Fremdschlüssel bekommt den Default.
+    - nichts angegeben (`NO ACTION`): abgewiesen, falls Kindzeilen auf den alten Wert verweisen.
+
+    Ohne CASCADE: neue Elternzeile einfügen, Kinder umhängen, alte Elternzeile löschen.
+- id: t11-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [identity, insert]
+  front: "Wie fügt man eine Zeile in eine Tabelle mit Identity-Spalte ein, und warum werden gelöschte Nummern nicht neu vergeben?"
+  back: |-
+    Die Identity-Spalte im INSERT weglassen, das DBMS setzt den nächsten Zählerwert ein. Der Zähler läuft nur vorwärts. Gelöschte oder durch ROLLBACK verworfene Nummern bleiben Lücken. Ein Schlüssel soll nie auf eine andere Zeile übergehen.
+- id: t11-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [returning, identity, dialekt]
+  front: "Wozu dient `RETURNING`, und wie unterscheidet es sich in Firebird 3 und PostgreSQL?"
+  back: |-
+    `INSERT … RETURNING kunde_id` gibt Werte der eingefügten Zeile zurück, etwa die neue ID. Das geht auch bei UPDATE (neue Werte, in Firebird auch `OLD.`) und DELETE (Werte der gelöschten Zeile).
+    - **Firebird 3:** höchstens eine betroffene Zeile, sonst Fehler. Bei null Zeilen liefert eine Client-Anweisung (DSQL) eine Ergebniszeile mit NULL-Werten, in PSQL mit `INTO` kommt nichts zurück.
+    - **PostgreSQL:** eine Ergebniszeile je betroffener Zeile.
+- id: t11-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [transaktion, commit, rollback]
+  front: "Was bewirken `COMMIT` und `ROLLBACK`?"
+  back: |-
+    DML-Änderungen laufen in einer **Transaktion**, einer Einheit, die ganz oder gar nicht wirkt.
+    - `COMMIT` macht alle Änderungen der Transaktion dauerhaft und für andere sichtbar.
+    - `ROLLBACK` verwirft sie.
+
+    Viele Werkzeuge arbeiten mit Autocommit nach jeder Anweisung.
+- id: t11-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update-or-insert, merge, upsert, dialekt]
+  front: "Wie fügt man eine Zeile ein oder ändert sie, falls es sie schon gibt (Upsert)?"
+  back: |-
+    - **Firebird:** `UPDATE OR INSERT INTO t (…) VALUES (…) MATCHING (schlüsselspalten);`
+    - **PostgreSQL:** `INSERT … ON CONFLICT (schlüssel) DO UPDATE SET …`
+    - **SQL-Standard, in beiden:** `MERGE INTO ziel USING quelle ON … WHEN MATCHED THEN UPDATE … WHEN NOT MATCHED THEN INSERT …` (PostgreSQL ab 15).
+- id: t11-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update, delete, vorgehen]
+  front: "Wie prüft man vor einem UPDATE oder DELETE, welche Zeilen es trifft?"
+  back: |-
+    Erst ein `SELECT` mit **derselben** WHERE-Bedingung ausführen und das Ergebnis ansehen. Passt es, das SELECT in UPDATE oder DELETE umschreiben. Danach die gemeldete Zahl betroffener Zeilen mit dem SELECT vergleichen. In einer offenen Transaktion lässt sich ein Irrtum noch mit `ROLLBACK` verwerfen.
+- id: t11-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert, constraints, abweisung]
+  front: "Aus welchen Gründen weist das DBMS ein INSERT oder UPDATE ab?"
+  back: |-
+    - Wert passt nicht zum Spaltentyp (nicht umwandelbar, Text zu lang für `VARCHAR(n)`, Zahl außerhalb des Wertebereichs),
+    - NOT-NULL-Spalte bekäme NULL (fehlt ohne Default oder NULL ausdrücklich),
+    - doppelter Wert in PRIMARY KEY oder UNIQUE,
+    - CHECK-Bedingung ergibt FALSE,
+    - Fremdschlüssel ist weder NULL noch in der Elterntabelle vorhanden.
+
+    Eine einzige fehlerhafte Zeile genügt, und die ganze Anweisung scheitert.
+- id: t11-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert, datentyp, typumwandlung]
+  front: "Was passiert bei `INSERT INTO produkt (bezeichnung, preis) VALUES ('Quark', '2.20')`, wenn `preis` eine NUMERIC-Spalte ist? Und bei `'zwei Euro'`?"
+  back: |-
+    `'2.20'` lässt sich in eine Zahl umwandeln, das DBMS speichert 2,20, und das INSERT gelingt.
+    `'zwei Euro'` lässt sich nicht umwandeln, das INSERT wird abgewiesen.
+
+    Sauberer: Zahlen ohne Anführungszeichen, Datumswerte als `DATE '2025-03-01'`.
+- id: t11-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unique, "null", insert]
+  front: "Eine Spalte `email` ist UNIQUE, aber NULL-fähig. Dürfen zwei Zeilen `email = NULL` haben?"
+  back: |-
+    Ja. NULL gilt nicht als gleicher Wert, deshalb verletzen mehrere NULL-Einträge in einer einspaltigen UNIQUE-Spalte die Regel nicht. Abgewiesen wird erst ein zweiter **gleicher** Wert, z. B. zweimal `'ida@example.org'`. (Bei mehrspaltigem UNIQUE mit teilweise NULL unterscheiden sich Firebird und PostgreSQL, siehe t09.)
+- id: t11-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [delete, truncate, dialekt]
+  front: "Welche Eigenschaften von `TRUNCATE` in PostgreSQL unterscheiden es von `DELETE FROM t`?"
+  back: |-
+    - keine `ON DELETE`-Trigger, keine zeilenweisen referenziellen Aktionen,
+    - abgewiesen, wenn Fremdschlüssel anderer Tabellen auf `t` zeigen; `TRUNCATE … CASCADE` leert diese Tabellen vollständig mit,
+    - transaktional (ROLLBACK möglich),
+    - Identity-Zähler läuft weiter, nur `RESTART IDENTITY` setzt ihn zurück.
+
+    In MariaDB/MySQL dagegen: Zähler wird zurückgesetzt, implizites COMMIT, kein ROLLBACK.
+- id: t11-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, mehrstufig, set-null]
+  front: "Setzt `ON DELETE SET NULL` eine Löschkette in tiefere Tabellen fort?"
+  back: |-
+    Nein. SET NULL (ebenso SET DEFAULT) ändert nur die FK-Spalte der Kindzeile. Die Kindzeile bleibt bestehen, also passiert für ihre eigenen Kinder nichts. Nur CASCADE löscht Zeilen und löst damit deren Regeln aus. SET NULL kann aber scheitern, wenn die FK-Spalte NOT NULL ist.
+- id: t11-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sequenz, dialekt, insert]
+  front: "Wie holt man beim INSERT den nächsten Wert einer Sequenz, in Firebird 3 und in PostgreSQL?"
+  back: |-
+    - **Firebird 3:** `NEXT VALUE FOR seq_beleg` (Standardform) oder `GEN_ID(seq_beleg, 1)`.
+    - **PostgreSQL:** `nextval('seq_beleg')`.
+
+    Beispiel: `INSERT INTO beleg (beleg_nr, text) VALUES (NEXT VALUE FOR seq_beleg, 'Kasse');`
+    Bei Identity-Spalten entfällt das, man lässt die Spalte weg.
+- id: t11-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [transaktion, fehler, dialekt]
+  front: "In einer offenen Transaktion scheitert die dritte Anweisung. Was gilt für die ersten beiden, in Firebird und in PostgreSQL?"
+  back: |-
+    Nur die gescheiterte Anweisung wird zurückgenommen, die ersten beiden bleiben vorerst stehen.
+    - **Firebird:** Die Transaktion läuft weiter, am Ende `COMMIT` oder `ROLLBACK`.
+    - **PostgreSQL:** Die Transaktion ist abgebrochen und nimmt keine Anweisung mehr an. Ein `COMMIT` wirkt dann wie `ROLLBACK` und verwirft auch die ersten beiden. Nur `ROLLBACK TO SAVEPOINT` rettet etwas.

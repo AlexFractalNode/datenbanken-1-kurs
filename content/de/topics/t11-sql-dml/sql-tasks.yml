@@ -1,0 +1,313 @@
+- id: t11-s001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert, spaltenliste, default, identity]
+  db: musikschule
+  kind: dml
+  prompt: |-
+    Die Musikschule hat zwei neue Räume bekommen:
+
+    - `R203` im 2. Stock mit 4 Plätzen, **ohne** Klavier
+    - `Studio` im Erdgeschoss (Etage 0) mit 8 Plätzen, **mit** Klavier
+
+    Füge beide Räume in `raum` ein, zuerst `R203`, dann `Studio`. Die Raumnummer vergibt die Datenbank. Für „ohne Klavier“ soll der Default der Spalte `hat_klavier` greifen, schreibe den Wert also nicht hin.
+  solution: |-
+    INSERT INTO raum (bezeichnung, etage, plaetze)
+    VALUES ('R203', 2, 4);
+
+    INSERT INTO raum (bezeichnung, etage, plaetze, hat_klavier)
+    VALUES ('Studio', 0, 8, TRUE);
+  check: SELECT raum_id, bezeichnung, etage, plaetze, hat_klavier FROM raum WHERE raum_id > 6
+  dialect_note: "Firebird 3 kennt je `INSERT … VALUES` nur **eine** Zeile, und `DEFAULT` als Wert in der Liste weist es ab (am Firebird-3-Server getestet). PostgreSQL erlaubt zusätzlich mehrere Zeilen in einer Anweisung (`VALUES ('R203', 2, 4, DEFAULT), ('Studio', 0, 8, TRUE)`). Die Lösung oben läuft in beiden Systemen. Die neuen Räume bekommen die IDs 7 und 8, weil die Beispieldaten sechs Räume enthalten. Hinweis zur automatischen Prüfung: Wer bei `R203` ausdrücklich `FALSE` einträgt, erhält dasselbe Ergebnis und besteht den Vergleich. Fachlich entspricht das aber nicht der Aufgabe, denn der Default greift nur, wenn die Spalte fehlt."
+  hints:
+    - "Nenne in der Spaltenliste nur die Spalten, für die du einen Wert angibst. `raum_id` gehört nicht dazu."
+    - "Eine Spalte, die in der Spaltenliste fehlt, bekommt ihren Default, hier `FALSE` für `hat_klavier`."
+    - "Für zwei Zeilen schreibst du in Firebird 3 zwei `INSERT`-Anweisungen."
+  paper_mode: write
+- id: t11-s002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert, ohne-spaltenliste, fremdschluessel, reihenfolge]
+  db: musikschule
+  kind: dml
+  prompt: |-
+    Lotte Becker (`person_id` 39) steht bisher nur als Person in der Datenbank. Sie tritt am 20.01.2025 als Schülerin ohne Ermäßigung ein und meldet sich am selben Tag zum Kurs „Trompete Grundkurs“ (`kurs_id` 13) an, ohne Rabatt und ohne Abmeldung.
+
+    Schreibe die nötigen `INSERT`-Anweisungen **ohne Spaltenliste**. Die Spalten von `schueler` sind in dieser Reihenfolge definiert: `person_id`, `eintritt`, `ermaessigt`. Die Spalten von `belegung`: `schueler_id`, `kurs_id`, `angemeldet_am`, `abgemeldet_am`, `rabatt_prozent`.
+
+    In welcher Reihenfolge müssen die Anweisungen stehen, und warum?
+  solution: |-
+    -- Reihenfolge: erst schueler, dann belegung.
+    -- belegung.schueler_id ist ein Fremdschlüssel auf schueler.person_id.
+    -- Beim Einfügen der Belegung muss die Schülerzeile 39 also schon existieren,
+    -- sonst wird das INSERT wegen Verletzung der referenziellen Integrität abgewiesen.
+    -- schueler selbst braucht die Person 39, die es schon gibt.
+    INSERT INTO schueler VALUES (39, DATE '2025-01-20', FALSE);
+
+    INSERT INTO belegung VALUES (39, 13, DATE '2025-01-20', NULL, 0);
+  check: SELECT p.vorname, p.nachname, s.eintritt, s.ermaessigt, b.kurs_id, b.angemeldet_am, b.abgemeldet_am, b.rabatt_prozent FROM person p JOIN schueler s ON s.person_id = p.person_id JOIN belegung b ON b.schueler_id = s.person_id WHERE p.person_id = 39
+  dialect_note: "Ohne Spaltenliste braucht jede Spalte einen Wert, in der Reihenfolge der Tabellendefinition. Defaults greifen dann nicht, deshalb stehen `FALSE`, `NULL` und `0` ausdrücklich da. Beide Tabellen haben keine Identity-Spalte: `schueler.person_id` und die Schlüsselspalten von `belegung` sind Fremdschlüssel."
+  hints:
+    - "`belegung.schueler_id` verweist auf `schueler`. Die Schülerzeile muss also zuerst existieren."
+    - "Ohne Spaltenliste musst du auch für `abgemeldet_am` einen Wert schreiben, hier `NULL`."
+  paper_mode: write
+- id: t11-s003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [insert-select, berechnete-spalte, join]
+  db: musikschule
+  kind: dml
+  prompt: |-
+    Für den Kurs „Gitarre in der Gruppe“ wird die Dezembergebühr fällig. Lege für **jede Belegung dieses Kurses, die nicht abgemeldet ist**, eine offene Zahlung an:
+
+    - `schueler_id` und `kurs_id` aus der Belegung
+    - `betrag` = Monatsgebühr des Kurses abzüglich des Rabatts der Belegung (in Prozent)
+    - `faellig_am` = 15.12.2024
+    - `ausleihe_id`, `bezahlt_am` und `zahlungsart` bleiben leer
+
+    Schreibe **eine** Anweisung. Die Zahlungsnummer vergibt die Datenbank, und die `kurs_id` sollst du nicht von Hand einsetzen.
+  solution: |-
+    INSERT INTO zahlung (schueler_id, kurs_id, betrag, faellig_am)
+    SELECT b.schueler_id,
+           b.kurs_id,
+           k.gebuehr_monat * (100 - b.rabatt_prozent) / 100,
+           DATE '2024-12-15'
+    FROM belegung b
+    JOIN kurs k ON k.kurs_id = b.kurs_id
+    WHERE k.titel = 'Gitarre in der Gruppe'
+      AND b.abgemeldet_am IS NULL;
+  check: SELECT schueler_id, kurs_id, ausleihe_id, betrag, faellig_am, bezahlt_am, zahlungsart FROM zahlung WHERE faellig_am = DATE '2024-12-15'
+  hints:
+    - "`INSERT INTO … SELECT …` fügt jede Ergebniszeile der Abfrage als neue Zeile ein. Das Wort `VALUES` fällt dabei weg, und in der SELECT-Liste dürfen Konstanten stehen, etwa `DATE '2024-12-15'`."
+    - "Abgemeldete Belegungen erkennst du an `abgemeldet_am IS NOT NULL`."
+    - "Vorsicht bei `gebuehr_monat * (1 - rabatt_prozent / 100)`: `rabatt_prozent / 100` ist eine Division zweier ganzer Zahlen und ergibt 0, der Rabatt fiele weg. Erst multiplizieren, dann teilen, oder durch `100.0` teilen."
+  paper_mode: write
+- id: t11-s004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update, where, berechneter-wert]
+  db: firma
+  kind: dml
+  prompt: |-
+    Die Entwicklung (`abteilung_id` 3) belohnt langjährige Mitarbeitende. Stichtag ist der 10.12.2024: Wer dort arbeitet und zu diesem Tag **mehr als zehn Jahre** dabei ist, also **vor dem 10. Dezember 2014** eingetreten ist, bekommt 3 % mehr Gehalt. Wer genau am 10.12.2014 eingetreten ist, hat erst zehn Jahre und gehört nicht dazu. Alle anderen Mitarbeitenden der Firma behalten ihr Gehalt.
+
+    Schreibe die `UPDATE`-Anweisung.
+  solution: |-
+    UPDATE mitarbeiter
+    SET gehalt = gehalt * 1.03
+    WHERE abteilung_id = 3
+      AND eintritt < DATE '2014-12-10';
+  check: SELECT mitarbeiter_id, nachname, eintritt, gehalt FROM mitarbeiter
+  hints:
+    - "Rechts vom Gleichheitszeichen im SET darfst du den alten Wert der Spalte verwenden."
+    - "3 % mehr heißt: neuer Wert = alter Wert · 1,03."
+    - "Ohne die Bedingung auf die Abteilung bekämen auch früh eingetretene Personen anderer Abteilungen mehr Gehalt. Prüfe außerdem, ob du `<` oder `<=` brauchst."
+  paper_mode: write
+- id: t11-s005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update, unterabfrage, in, "null"]
+  db: musikschule
+  kind: dml
+  prompt: |-
+    Die Zupfinstrumente (Familie `'Zupf'`) werden im Februar überholt. Deshalb gelten alle **noch offenen** Ausleihen von Zupfinstrumenten als am 31.01.2025 zurückgegeben. Schreibe eine `UPDATE`-Anweisung mit Unterabfrage.
+
+    Sage danach das Ergebnis der Prüfabfrage voraus:
+
+    ```sql
+    SELECT ausleihe_id, inventar_nr, rueckgabe
+    FROM ausleihe
+    WHERE rueckgabe IS NULL OR rueckgabe = DATE '2025-01-31';
+    ```
+
+    Vorher sind genau vier Ausleihen offen: Nr. 1 (E-Bass, `EB-022`), Nr. 4 (Viola, `VA-030`), Nr. 7 (Gitarre, `GI-005`) und Nr. 10 (Gitarre, `GI-035`). E-Bass und Gitarre gehören zur Familie `'Zupf'`, die Viola zu `'Streich'`. Keine Ausleihe hat bisher den 31.01.2025 als Rückgabedatum.
+  solution: |-
+    UPDATE ausleihe
+    SET rueckgabe = DATE '2025-01-31'
+    WHERE rueckgabe IS NULL
+      AND instrument_id IN (SELECT instrument_id
+                            FROM instrument
+                            WHERE familie = 'Zupf');
+
+    -- Vorhersage der Prüfabfrage (4 Zeilen):
+    --   1  | EB-022 | 2025-01-31   (E-Bass, Zupf, zurückgegeben)
+    --   4  | VA-030 | NULL         (Viola, Streich, bleibt offen)
+    --   7  | GI-005 | 2025-01-31   (Gitarre, Zupf)
+    --   10 | GI-035 | 2025-01-31   (Gitarre, Zupf)
+    -- Das UPDATE ändert 3 Zeilen. Abgeschlossene Ausleihen sind nicht dabei,
+    -- weil sie die Bedingung rueckgabe IS NULL nicht erfüllen.
+  check: SELECT ausleihe_id, inventar_nr, rueckgabe FROM ausleihe WHERE rueckgabe IS NULL OR rueckgabe = DATE '2025-01-31'
+  hints:
+    - "Offen heißt `rueckgabe IS NULL`. Mit `= NULL` würdest du keine Zeile treffen."
+    - "Die Familie steht in `instrument`, nicht in `ausleihe`. Die Unterabfrage liefert die passenden `instrument_id`-Werte."
+    - "Ohne die Bedingung `rueckgabe IS NULL` würdest du auch längst abgeschlossene Ausleihen überschreiben."
+  paper_mode: predict
+- id: t11-s006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [delete, unterabfrage, in]
+  db: firma
+  kind: dml
+  prompt: |-
+    Abgeschlossene Projekte erkennt man daran, dass `enddatum` gesetzt ist. Bei diesen Projekten sollen alle Einträge in `mitarbeit` gelöscht werden, die **keine Rolle** haben. Die übrigen Einträge bleiben.
+
+    Schreibe die `DELETE`-Anweisung mit einer Unterabfrage.
+  solution: |-
+    DELETE FROM mitarbeit
+    WHERE rolle IS NULL
+      AND projekt_id IN (SELECT projekt_id
+                         FROM projekt
+                         WHERE enddatum IS NOT NULL);
+  check: SELECT mitarbeiter_id, projekt_id, rolle FROM mitarbeit
+  hints:
+    - "Ob ein Projekt abgeschlossen ist, steht in `projekt`. Die Unterabfrage liefert die Nummern dieser Projekte."
+    - "Gleichwertig ist eine korrelierte Unterabfrage mit `EXISTS (SELECT 1 FROM projekt p WHERE p.projekt_id = mitarbeit.projekt_id AND p.enddatum IS NOT NULL)`."
+    - "Teste die Bedingung vorher mit `SELECT * FROM mitarbeit WHERE …` und vergleiche die Zeilenzahl mit der Meldung des DELETE."
+  paper_mode: write
+- id: t11-s007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [delete, referenzielle-aktionen, cascade, set-null]
+  db: musikschule
+  kind: dml
+  prompt: |-
+    Der Kurs „Schlagzeug-Workshop“ wurde nur testweise angeboten und soll vollständig entfernt werden. Lösche ihn mit **einer** Anweisung aus `kurs`.
+
+    Die Fremdschlüssel auf `kurs`:
+
+    - `belegung.kurs_id`: `ON DELETE CASCADE`
+    - `termin.kurs_id`: `ON DELETE CASCADE`
+    - `zahlung.kurs_id`: `ON DELETE SET NULL`
+
+    Vorher hat der Kurs 5 Belegungen, 8 Termine und 15 Zahlungen. Insgesamt gibt es 50 Belegungen, 88 Termine und 154 Zahlungen. Jede Zahlung gehört bisher entweder zu einem Kurs oder zu einer Ausleihe.
+
+    Sage voraus, was die Prüfabfrage danach liefert:
+
+    ```sql
+    SELECT 'belegung' AS tabelle, COUNT(*) AS zeilen FROM belegung
+    UNION ALL SELECT 'termin', COUNT(*) FROM termin
+    UNION ALL SELECT 'zahlung', COUNT(*) FROM zahlung
+    UNION ALL SELECT 'zahlung ohne Bezug', COUNT(*) FROM zahlung
+              WHERE kurs_id IS NULL AND ausleihe_id IS NULL;
+    ```
+  solution: |-
+    DELETE FROM kurs
+    WHERE titel = 'Schlagzeug-Workshop';
+
+    -- Vorhersage der Prüfabfrage:
+    --   belegung           | 45    (50 - 5, CASCADE)
+    --   termin             | 80    (88 - 8, CASCADE)
+    --   zahlung            | 154   (SET NULL löscht keine Zahlung)
+    --   zahlung ohne Bezug | 15    (die 15 Kurszahlungen haben jetzt kurs_id NULL
+    --                               und gehörten nie zu einer Ausleihe)
+  check: SELECT 'belegung' AS tabelle, COUNT(*) AS zeilen FROM belegung UNION ALL SELECT 'termin', COUNT(*) FROM termin UNION ALL SELECT 'zahlung', COUNT(*) FROM zahlung UNION ALL SELECT 'zahlung ohne Bezug', COUNT(*) FROM zahlung WHERE kurs_id IS NULL AND ausleihe_id IS NULL
+  hints:
+    - "CASCADE löscht die Kindzeilen mit, SET NULL lässt sie stehen und leert nur den Fremdschlüssel."
+    - "Überlege für jede der drei Tabellen, ob sie durch die Aktion Zeilen verliert oder ihre Zeilen behält."
+  paper_mode: predict
+- id: t11-s008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [delete, referenzielle-aktionen, cascade, mehrstufig]
+  db: musikschule
+  kind: dml
+  prompt: |-
+    Emma Vogel (`person_id` 36) verlässt die Musikschule, und ihre Daten sollen gelöscht werden. Lösche sie mit **einer** Anweisung aus `person`.
+
+    Die beteiligten Fremdschlüssel:
+
+    - `schueler.person_id` → `person`: `ON DELETE CASCADE`
+    - `lehrkraft.person_id` → `person`: `ON DELETE CASCADE`
+    - `belegung.schueler_id` → `schueler`: `ON DELETE CASCADE`
+    - `zahlung.schueler_id` → `schueler`: `ON DELETE CASCADE`
+    - `ausleihe.schueler_id` → `schueler`: keine Aktion (`NO ACTION`)
+
+    Emma ist Schülerin, aber keine Lehrkraft. Sie hat 3 Belegungen, 8 Zahlungen und keine Ausleihe. Vorher gibt es 39 Personen, 31 Schüler, 50 Belegungen und 154 Zahlungen.
+
+    a) Sage voraus, was die Prüfabfrage danach liefert:
+
+    ```sql
+    SELECT 'person' AS tabelle, COUNT(*) AS zeilen FROM person
+    UNION ALL SELECT 'schueler', COUNT(*) FROM schueler
+    UNION ALL SELECT 'belegung', COUNT(*) FROM belegung
+    UNION ALL SELECT 'zahlung', COUNT(*) FROM zahlung;
+    ```
+
+    b) Was würde passieren, wenn eine Schülerin mit einer Ausleihe gelöscht werden soll?
+  solution: |-
+    DELETE FROM person
+    WHERE person_id = 36;
+
+    -- a) Vorhersage der Prüfabfrage:
+    --   person   | 38    (39 - 1)
+    --   schueler | 30    (31 - 1, CASCADE von person)
+    --   belegung | 47    (50 - 3, CASCADE von schueler)
+    --   zahlung  | 146   (154 - 8, CASCADE von schueler)
+    --
+    -- b) Hat die Schülerin eine Ausleihe, erreicht die Kaskade die Tabelle ausleihe.
+    --    Dort gilt NO ACTION, und es gibt eine verweisende Zeile.
+    --    Das DBMS weist deshalb die ganze Anweisung ab: Person, Schülerzeile,
+    --    Belegungen und Zahlungen bleiben vollständig erhalten.
+    --    In den Beispieldaten trifft das z. B. auf Person 37 zu.
+  check: SELECT 'person' AS tabelle, COUNT(*) AS zeilen FROM person UNION ALL SELECT 'schueler', COUNT(*) FROM schueler UNION ALL SELECT 'belegung', COUNT(*) FROM belegung UNION ALL SELECT 'zahlung', COUNT(*) FROM zahlung
+  hints:
+    - "Die Kaskade läuft über zwei Ebenen: `person` → `schueler` → `belegung` und `zahlung`."
+    - "Eine einzige `NO ACTION`-Regel irgendwo in der Kette, die auf eine vorhandene Zeile trifft, bricht die ganze Anweisung ab."
+  paper_mode: predict
+- id: t11-s009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update-or-insert, upsert, firebird]
+  db: musikschule
+  kind: dml
+  engines: [fb]
+  prompt: |-
+    Nur Firebird: Das Sekretariat pflegt Belegungen mit `UPDATE OR INSERT`. Gibt es die Kombination aus Schüler und Kurs schon, wird sie geändert, sonst neu angelegt. Schreibe für beide Fälle je eine Anweisung mit `MATCHING (schueler_id, kurs_id)`:
+
+    1. Schüler 25 bekommt in Kurs 2 (Anmeldung am 01.10.2024) künftig 10 % Rabatt. Die Belegung existiert schon.
+    2. Schülerin 16 meldet sich am 20.01.2025 zu Kurs 12 an, mit 20 % Rabatt. Diese Belegung gibt es noch nicht.
+
+    Gib jeweils `schueler_id`, `kurs_id`, `angemeldet_am` und `rabatt_prozent` an.
+  solution: |-
+    UPDATE OR INSERT INTO belegung (schueler_id, kurs_id, angemeldet_am, rabatt_prozent)
+    VALUES (25, 2, DATE '2024-10-01', 10)
+    MATCHING (schueler_id, kurs_id);
+
+    UPDATE OR INSERT INTO belegung (schueler_id, kurs_id, angemeldet_am, rabatt_prozent)
+    VALUES (16, 12, DATE '2025-01-20', 20)
+    MATCHING (schueler_id, kurs_id);
+  check: SELECT schueler_id, kurs_id, angemeldet_am, abgemeldet_am, rabatt_prozent FROM belegung WHERE kurs_id IN (2, 12)
+  dialect_note: "`UPDATE OR INSERT` gibt es nur in Firebird. Im Änderungsfall überschreibt es **alle** genannten Spalten, deshalb steht das alte Anmeldedatum noch einmal da. Ohne `MATCHING` vergleicht Firebird über den Primärschlüssel. Die gleichwertige PostgreSQL-Form setzt ebenfalls alle genannten Spalten: `INSERT … ON CONFLICT (schueler_id, kurs_id) DO UPDATE SET angemeldet_am = EXCLUDED.angemeldet_am, rabatt_prozent = EXCLUDED.rabatt_prozent`. Lässt man `angemeldet_am` im `DO UPDATE` weg, bleibt das alte Datum stehen. Bei diesen Daten ändert das nichts, weil das Datum gleich ist, im Allgemeinen aber schon. Der SQL-Standard sieht dafür `MERGE` vor, das Firebird 3 und PostgreSQL ab Version 15 beherrschen."
+  hints:
+    - "`MATCHING` nennt die Spalten, an denen Firebird erkennt, ob die Zeile schon existiert."
+    - "Für den Einfügefall müssen alle NOT-NULL-Spalten ohne Default einen Wert bekommen, hier also auch `angemeldet_am`."
+  paper_mode: write
+- id: t11-s010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [update, korrelierte-unterabfrage, aggregat, "null"]
+  db: firma
+  kind: dml
+  prompt: |-
+    Für Projekte, die noch **kein Budget** haben, soll ein vorläufiges Budget eingetragen werden: 100 € je bisher gebuchter Projektstunde (Summe von `mitarbeit.stunden` des Projekts). Projekte mit Budget bleiben unverändert.
+
+    Schreibe **eine** `UPDATE`-Anweisung mit korrelierter Unterabfrage. Was würde mit einem Projekt ohne Budget passieren, auf das noch niemand Stunden gebucht hat?
+  solution: |-
+    UPDATE projekt
+    SET budget = (SELECT SUM(m.stunden) * 100
+                  FROM mitarbeit m
+                  WHERE m.projekt_id = projekt.projekt_id)
+    WHERE budget IS NULL;
+
+    -- Projekt ohne Budget und ohne gebuchte Stunden:
+    -- SUM über keine Zeilen liefert NULL, NULL * 100 ist NULL.
+    -- Das Budget bliebe also NULL, ohne Fehlermeldung.
+    -- Wer stattdessen 0 eintragen will, schreibt COALESCE(SUM(m.stunden), 0) * 100.
+    -- In den Beispieldaten hat nur ein Projekt kein Budget, und darauf sind
+    -- Stunden gebucht. Der Fall tritt hier also nicht auf.
+  check: SELECT projekt_id, titel, budget FROM projekt
+  dialect_note: "Firebird und PostgreSQL erlauben beide den Bezug auf die Zieltabelle über ihren Namen (`projekt.projekt_id`). PostgreSQL kennt zusätzlich `UPDATE … FROM`, Firebird 3 nicht. Die Lösung oben ist neutral."
+  hints:
+    - "Die Unterabfrage im SET wird für jede zu ändernde Zeile neu ausgewertet und bezieht sich über `projekt.projekt_id` auf diese Zeile."
+    - "Überlege, was ein Aggregat über eine leere Menge liefert. Bei `SUM` ist das nicht 0."
+  paper_mode: write

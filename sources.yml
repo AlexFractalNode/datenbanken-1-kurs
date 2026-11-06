@@ -112,7 +112,7 @@
   license: "CC BY 4.0"
   accessed: "2026-11-06"
   kind: oer
-  topics: [t01, t02, t03, t04, t05, t06, t07, t09, t11, t13]
+  topics: [t01, t02, t03, t04, t05, t06, t07, t09, t13]
   refs:
     - "Zweit-URL (opentextbc.ca antwortet teils mit HTTP 403): inhaltsgleiche CC-BY-Ausgabe auf LibreTexts, https://eng.libretexts.org/Bookshelves/Computer_Science/Databases_and_Data_Structures/Database_Design_2e_(Watt). Die LibreTexts-Seite nennt „CC BY“ ohne Versionsnummer und Adrienne Watt (BCcampus Open Textbooks) als Autorin; Nelson Eng wird dort nicht genannt. Kap. 5 enthält zudem Material nach Nguyen Kim Anh, Database System Concepts (CC BY 3.0). Version 4.0 und Mitautor laut Katalogseite (siehe unten)."
     - "Kap. 5 Data Modelling auf LibreTexts: https://eng.libretexts.org/Bookshelves/Computer_Science/Databases_and_Data_Structures/Database_Design_2e_(Watt)/01%3A_Chapters/1.05%3A_Chapter_5_Data_Modelling"
