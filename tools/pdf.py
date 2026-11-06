@@ -64,6 +64,19 @@ def _compile(template: str, data: dict[str, Any], target: Path) -> None:
         target.write_bytes(pdf_bytes)
 
 
+IMAGE_RE = re.compile(r"!\[([^\]]*)\]\(([^)\s]+)[^)]*\)")
+
+
+def _strip_images(md: str) -> str:
+    """Typst work dirs hold no content files, so local images become a text placeholder."""
+
+    def repl(m: re.Match) -> str:
+        alt = m.group(1).strip()
+        return f"*[Abbildung: {alt}]*" if alt else "*[Abbildung]*"
+
+    return IMAGE_RE.sub(repl, md)
+
+
 def _task_data(t: dict) -> dict:
     space = t.get("space", "")
     if space == "none":
@@ -74,8 +87,8 @@ def _task_data(t: dict) -> dict:
         "id": t["id"],
         "topic": t.get("topic", ""),
         "points": t["points"],
-        "prompt": t["prompt"],
-        "solution": t.get("solution", ""),
+        "prompt": _strip_images(t["prompt"]),
+        "solution": _strip_images(t.get("solution", "")),
         "rubric": [{"criterion": r["criterion"], "points": r["points"]} for r in t.get("rubric", [])],
         "space": space,
     }

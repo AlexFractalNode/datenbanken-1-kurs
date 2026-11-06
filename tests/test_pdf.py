@@ -173,3 +173,17 @@ def test_cheatsheet_truncates_long_glossary(tmp_path):
     path = pdf.build_cheatsheet(content, tmp_path)
     assert len(PdfReader(path).pages) == 2
     assert "vollständig im Web-Glossar" in _text(path)
+
+
+def test_task_data_replaces_local_images_with_placeholder():
+    import pdf
+
+    t = {
+        "id": "t06-p001",
+        "points": 3,
+        "prompt": "Siehe ![Schema der Vorlage](diagrams/x.dot) oben.",
+        "solution": "![](diagrams/y.dot)",
+    }
+    d = pdf._task_data(t)
+    assert "diagrams/" not in d["prompt"] and "Schema der Vorlage" in d["prompt"]
+    assert "diagrams/" not in d["solution"]
