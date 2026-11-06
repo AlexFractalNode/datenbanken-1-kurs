@@ -1,0 +1,309 @@
+- id: t03-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [phasenmodell]
+  type: single
+  question: |-
+    Welche Reihenfolge der Entwurfsphasen ist richtig?
+  options:
+    - text: "Anforderungsanalyse → konzeptioneller Entwurf → logischer Entwurf → physischer Entwurf → Implementierung"
+      correct: true
+      explain: "Vom Fachlichen zum Technischen: erst klären, was gebraucht wird, dann DBMS-unabhängig modellieren, dann ins Datenmodell übersetzen, dann auf das Produkt zuschneiden und anlegen. Im Kursstandard liegt zwischen logischem und physischem Entwurf noch die Datendefinition. Die Teilfolge bleibt trotzdem richtig."
+    - text: "Anforderungsanalyse → logischer Entwurf → konzeptioneller Entwurf → physischer Entwurf → Implementierung"
+      correct: false
+      explain: "Der logische Entwurf setzt ein konzeptionelles Schema voraus, das er übersetzt. Ohne ER-Modell gäbe es nichts zu übersetzen."
+    - text: "konzeptioneller Entwurf → Anforderungsanalyse → logischer Entwurf → Implementierung → physischer Entwurf"
+      correct: false
+      explain: "Modellieren ohne geklärte Anforderungen führt zu Rätselraten. Und die Implementierung braucht die vorherigen Festlegungen von Datendefinition (Tabellen mit Datentypen) und physischem Entwurf (Indexe)."
+    - text: "Anforderungsanalyse → physischer Entwurf → logischer Entwurf → konzeptioneller Entwurf → Implementierung"
+      correct: false
+      explain: "Das ist die umgekehrte Richtung. Produktspezifische Entscheidungen stehen am Ende, nicht am Anfang des Entwurfs."
+- id: t03-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [verarbeitungsanforderung, informationsanforderung]
+  type: multi
+  question: |-
+    Für die Verwaltungssoftware einer Kletterhalle wurden Anforderungen gesammelt. Welche davon sind **Verarbeitungsanforderungen**?
+  options:
+    - text: "An der Kasse wird eine Zehnerkarte über ihre Nummer in unter einer Sekunde gefunden."
+      correct: true
+      explain: "Beschreibt einen Zugriff mit Antwortzeit, also eine Verarbeitungsanforderung. Sie ist später ein Argument für einen Index."
+    - text: "Jede Route gehört zu genau einem Wandsektor."
+      correct: false
+      explain: "Das ist eine Kardinalität im Datenbestand, also eine Informationsanforderung."
+    - text: "Die Hallenleitung erhält jeden Monat eine Auswertung der Besuche je Tarif."
+      correct: true
+      explain: "Eine regelmäßige Auswertung ist ein Vorgang mit Häufigkeit, also eine Verarbeitungsanforderung."
+    - text: "Der Schwierigkeitsgrad einer Route liegt zwischen 3 und 11."
+      correct: false
+      explain: "Ein Wertebereich ist eine Integritätsbedingung des Bestands und damit eine Informationsanforderung, obwohl er wie eine Regel klingt."
+    - text: "Nur Routenbauer:innen dürfen Routen anlegen oder entfernen."
+      correct: true
+      explain: "Wer welche Operation ausführen darf, gehört zu den Verarbeitungsanforderungen. Umgesetzt wird es später über Rechte und Sichten."
+- id: t03-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [physischer-entwurf, index]
+  type: single
+  question: |-
+    Die Anforderung lautet: „Die Rezeption einer Jugendherberge findet eine Buchung über den Nachnamen in höchstens 2 Sekunden.“ In welcher Phase wird daraufhin ein Index auf die Spalte für den Nachnamen festgelegt?
+  options:
+    - text: "im physischen Entwurf"
+      correct: true
+      explain: "Indexe sind eine produktabhängige Speicher- und Effizienzentscheidung. Sie verändern die Bedeutung der Daten nicht."
+    - text: "im konzeptionellen Entwurf"
+      correct: false
+      explain: "Das ER-Modell kennt keine Indexe, es beschreibt nur Objekte, Eigenschaften und Beziehungen."
+    - text: "im logischen Entwurf"
+      correct: false
+      explain: "Das Relationenschema legt Tabellen und Schlüssel fest. Ein Index ist dagegen eine Zugriffsstruktur des konkreten DBMS."
+    - text: "in der Anforderungsanalyse"
+      correct: false
+      explain: "Dort wird die Antwortzeit als Verarbeitungsanforderung erfasst. Über das technische Mittel (Index) wird erst später entschieden."
+    - text: "in der Datendefinition"
+      correct: false
+      explain: "Die Datendefinition beschreibt Tabellen, Constraints, Views und Rechte. Ein Index ändert die Bedeutung der Daten nicht, sondern nur den Zugriff, und gehört deshalb zur internen Ebene. Dass CREATE INDEX technisch ebenfalls eine DDL-Anweisung ist, ändert daran nichts."
+- id: t03-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, homonym]
+  type: single
+  question: |-
+    In einem Repair-Café nennt die Empfangstheke den Zettel mit Name und Telefonnummer der Besucher:in „Karte“. Am Reparaturtisch ist „Karte“ dagegen die Platine eines Geräts, die ausgetauscht wird. Beide Sichten sollen zusammengeführt werden. Um welchen Konflikt handelt es sich?
+  options:
+    - text: "Homonym: gleicher Name, verschiedene Bedeutung"
+      correct: true
+      explain: "Beide meinen völlig verschiedene Dinge. Auflösung durch Umbenennen, z. B. Annahmezettel und Ersatzplatine."
+    - text: "Synonym: verschiedene Namen, gleiche Bedeutung"
+      correct: false
+      explain: "Beim Synonym ist es umgekehrt: verschiedene Wörter für dasselbe. Hier ist das Wort gleich und die Bedeutung verschieden."
+    - text: "Strukturkonflikt"
+      correct: false
+      explain: "Ein Strukturkonflikt liegt vor, wenn derselbe Sachverhalt mit verschiedenen Modellelementen dargestellt wird (z. B. Attribut vs. Entitätstyp). Hier geht es um verschiedene Sachverhalte."
+    - text: "Es liegt kein Konflikt vor, beide können zu einem Entitätstyp Karte zusammengelegt werden."
+      correct: false
+      explain: "Genau das wäre der Fehler: Ein Entitätstyp Karte würde Personendaten und Bauteile vermischen."
+- id: t03-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, synonym]
+  type: single
+  question: |-
+    In einem Chor führt die Notenwartin einen Entitätstyp „Sänger:in“ (Mitgl.-Nr., Name, Stimmlage), der Kassierer einen Entitätstyp „Beitragszahler:in“ (Mitgl.-Nr., Name, IBAN). Es stellt sich heraus: Jedes Chormitglied singt und zahlt Beitrag, andere Personen kommen in keiner Sicht vor. Wie wird bei der Integration richtig vorgegangen?
+  options:
+    - text: "Einen Entitätstyp, z. B. Chormitglied (Mitgl.-Nr., Name, Stimmlage, IBAN), bilden und den Begriff im Glossar festhalten."
+      correct: true
+      explain: "Es ist ein Synonym-Konflikt mit identischer Objektmenge. Die Attribute werden vereinigt, gemeinsame Attribute (Name) nur einmal aufgenommen."
+    - text: "Beide Entitätstypen getrennt übernehmen und mit einer 1:1-Beziehung verbinden."
+      correct: false
+      explain: "Das speichert dieselben Personen zweimal, inklusive Name. Bei Namensänderungen drohen Widersprüche."
+    - text: "Beitragszahler:in als Spezialisierung von Sänger:in modellieren."
+      correct: false
+      explain: "Eine Spezialisierung wäre nur richtig, wenn die Beitragszahlenden eine echte Teilmenge wären. Laut Text sind beide Mengen gleich."
+    - text: "Nichts tun, der Konflikt wird später bei der Normalisierung automatisch beseitigt."
+      correct: false
+      explain: "Die Normalisierung kennt die Bedeutung der Namen nicht. Zwei Tabellen mit denselben Personen erkennt sie nicht als Doppelung."
+- id: t03-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, strukturkonflikt]
+  type: single
+  question: |-
+    In der Sicht der Rezeption einer Jugendherberge hat Zimmer das Attribut „Etage“. In der Sicht der Haustechnik ist Etage ein eigener Entitätstyp mit Nummer, Notausgang und Brandschutzbeauftragter, und Zimmer ist über „liegt auf“ mit Etage verbunden. Welche Aussage ist richtig?
+  options:
+    - text: "Es ist ein Strukturkonflikt. Im Gesamtschema wird Etage Entitätstyp, weil sie eigene Attribute hat."
+      correct: true
+      explain: "Derselbe Sachverhalt ist unterschiedlich modelliert. Man einigt sich auf die ausdrucksstärkere Form, die Rezeption verliert dabei nichts."
+    - text: "Es ist ein Homonym, weil „Etage“ in beiden Sichten etwas anderes bedeutet."
+      correct: false
+      explain: "Beide meinen dieselbe Etage des Hauses. Verschieden ist nur die Darstellung, nicht die Bedeutung."
+    - text: "Es ist ein Strukturkonflikt. Im Gesamtschema bleibt Etage Attribut, weil Attribute einfacher sind."
+      correct: false
+      explain: "Dann gingen Notausgang und Brandschutzbeauftragte der Haustechnik verloren, oder sie müssten in jedem Zimmer wiederholt werden."
+    - text: "Es ist kein Konflikt, beide Darstellungen können nebeneinander im Gesamtschema stehen."
+      correct: false
+      explain: "Dann gäbe es die Etage eines Zimmers doppelt (als Attribut und über die Beziehung), und beide könnten sich widersprechen."
+- id: t03-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [logischer-entwurf, datenunabhaengigkeit]
+  type: truefalse
+  question: |-
+    Aussage: „Das Ergebnis des logischen Entwurfs ist an ein bestimmtes DBMS-Produkt wie Firebird oder PostgreSQL gebunden.“
+  options:
+    - text: "wahr"
+      correct: false
+      explain: "Der logische Entwurf hängt vom Datenmodell ab (relational), nicht vom Produkt. Das Relationenschema ließe sich in Firebird wie in PostgreSQL umsetzen."
+    - text: "falsch"
+      correct: true
+      explain: "Richtig. Erst die Datendefinition (Tabellen mit produktspezifischen Datentypen, Constraints, Views) und der physische Entwurf (Indexe, Speicherparameter) sind an das Produkt gebunden."
+- id: t03-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ergebnisdokument]
+  type: multi
+  question: |-
+    Welche Zuordnungen von Phase und Ergebnisdokument sind richtig?
+  options:
+    - text: "konzeptioneller Entwurf → integriertes ER-Diagramm mit textlicher Beschreibung"
+      correct: true
+      explain: "Das konzeptionelle Schema ist das Ergebnis dieser Phase, nach der Sichtenintegration."
+    - text: "logischer Entwurf → normalisiertes Relationenschema mit Primär- und Fremdschlüsseln"
+      correct: true
+      explain: "ER-Modell abbilden (t06) und normalisieren (t07) gehören zum logischen Entwurf."
+    - text: "Anforderungsanalyse → DDL-Skript mit CREATE TABLE"
+      correct: false
+      explain: "Die Anforderungsanalyse liefert eine Anforderungsspezifikation mit Glossar. Das DDL-Skript entsteht erst nach dem logischen Entwurf, wenn ein konkretes DBMS feststeht."
+    - text: "physischer Entwurf → Index- und Speicherkonzept (Zugriffspfade, physische Parameter)"
+      correct: true
+      explain: "Der physische Entwurf betrifft die interne Ebene: wie Daten abgelegt und schnell gefunden werden."
+    - text: "Datendefinition → DDL-Skript mit Tabellen, Datentypen, Constraints, Views und Rechten"
+      correct: true
+      explain: "In der Datendefinition werden logisches Schema und externe Schemata in der Sprache des DBMS beschrieben. In der Sieben-Phasen-Variante ohne Datendefinition gehört das Skript zum physischen Entwurf."
+    - text: "Validierung → ER-Diagramm"
+      correct: false
+      explain: "Die Validierung prüft vorhandene Ergebnisse gegen die Anforderungen und liefert z. B. ein Testprotokoll, kein neues Modell."
+- id: t03-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [logischer-entwurf, normalisierung]
+  type: single
+  question: |-
+    In welche Entwurfsphase gehört die Normalisierung im üblichen Phasenmodell?
+  options:
+    - text: "logischer Entwurf"
+      correct: true
+      explain: "Normalformen sind Eigenschaften von Relationen. Normalisiert wird das Relationenschema, das im logischen Entwurf entsteht."
+    - text: "konzeptioneller Entwurf"
+      correct: false
+      explain: "Ein gutes ER-Modell vermeidet Redundanz zwar schon, die Normalformen beziehen sich aber auf Relationen, die es dort noch nicht gibt."
+    - text: "physischer Entwurf"
+      correct: false
+      explain: "Im physischen Entwurf kann bewusst **de**normalisiert werden, normalisiert wird vorher."
+    - text: "Wartung"
+      correct: false
+      explain: "Erst nach dem Betriebsstart zu normalisieren hieße, Anomalien in Kauf zu nehmen und Daten später mühsam umzubauen."
+- id: t03-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, sicht, abgrenzung]
+  type: truefalse
+  question: |-
+    Aussage: „Sichtenintegration bedeutet, in der fertigen Datenbank für jede Benutzergruppe eine SQL-View mit CREATE VIEW anzulegen.“
+  options:
+    - text: "wahr"
+      correct: false
+      explain: "Das verwechselt zwei Bedeutungen von „Sicht“. Sichtenintegration findet im konzeptionellen Entwurf statt und führt Teil-ER-Modelle zu einem Gesamtschema zusammen."
+    - text: "falsch"
+      correct: true
+      explain: "Richtig. Die Benutzersichten werden als externe Schemata entworfen und in der Datendefinition als SQL-Views (t12) beschrieben. Diese Views setzen die Sichten um, sie sind aber nicht die Integration selbst."
+- id: t03-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [validierung]
+  type: multi
+  question: |-
+    Für die Datenbank eines Foodsharing-Vereins wird die Validierung vorbereitet. Was gehört dazu?
+  options:
+    - text: "prüfen, ob jede geforderte Auswertung (z. B. abgeholte Kilogramm je Betrieb und Monat) mit dem Schema beantwortbar ist"
+      correct: true
+      explain: "Verarbeitungsanforderungen sind Prüfsteine für das Schema."
+    - text: "Testdaten einspielen und prüfen, ob unzulässige Werte (z. B. negative Kilogramm) abgelehnt werden"
+      correct: true
+      explain: "So wird geprüft, ob die Integritätsbedingungen tatsächlich umgesetzt sind."
+    - text: "die Ergebnisse von der Fachseite abnehmen lassen"
+      correct: true
+      explain: "Maßstab der Validierung sind die Anforderungen der Benutzer, deshalb gehört ihre Abnahme dazu."
+    - text: "der Fachseite eine vorläufige Eingabemaske zum Ausprobieren geben, bevor endgültig implementiert wird"
+      correct: true
+      explain: "Prototyping liefert früh Rückmeldung und präzisiert die Anforderungen. Daneben gibt es Tests mit Probedaten und formale Prüfungen wie den Beleg der 3NF, streng genommen eine Verifikation."
+    - text: "alle Prüfungen bis nach der Implementierung zurückstellen und dann gesammelt durchführen"
+      correct: false
+      explain: "Validierung begleitet alle Phasen. Das ER-Modell prüft man schon nach dem konzeptionellen Entwurf. Ein Fehler, der erst nach der Implementierung auffällt, ist viel teurer."
+    - text: "einen Index auf die Abholungen anlegen, damit die Monatsauswertung schnell genug ist"
+      correct: false
+      explain: "Einen Index anzulegen ist eine Maßnahme des physischen Entwurfs. Zur Validierung gehört erst die Prüfung, ob die geforderte Antwortzeit damit erreicht wird."
+- id: t03-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, bedingungskonflikt]
+  type: single
+  question: |-
+    Für eine Jugendherberge sagt die Rezeption: „Jede Buchung gehört zu genau einer Schule oder Gruppe.“ Die Leitung sagt: „Einzelreisende buchen auch, ohne Gruppe.“ Wie lautet die angemessene Auflösung im Gesamtschema?
+  options:
+    - text: "Mit der Fachseite bestätigen lassen und die Untergrenze bei Buchung auf 0 senken: Buchung (0,1) zu Gruppe."
+      correct: true
+      explain: "Es ist ein Bedingungs- bzw. Kardinalitätskonflikt. Das Gesamtschema muss alle zulässigen Fälle erlauben, also auch Buchungen ohne Gruppe."
+    - text: "Die Aussage der Rezeption übernehmen, Einzelreisende werden nicht gespeichert."
+      correct: false
+      explain: "Dann wäre eine Anforderung der Leitung nicht erfüllt. Konflikte werden geklärt, nicht durch Weglassen einer Sicht gelöst."
+    - text: "Es ist ein Homonym, „Buchung“ wird umbenannt."
+      correct: false
+      explain: "Beide meinen dieselbe Buchung. Uneinig sind sie nur über die Kardinalität, nicht über die Bedeutung des Wortes."
+    - text: "Für Einzelreisende eine Pseudogruppe „ohne Gruppe“ anlegen, damit (1,1) bleibt."
+      correct: false
+      explain: "Das täuscht eine Gruppe vor, die es nicht gibt, und verfälscht Auswertungen wie „Anzahl Gruppen“. Die Kardinalität soll die Wirklichkeit abbilden."
+- id: t03-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, ober-unterbegriff]
+  type: single
+  question: |-
+    In der Datenbank eines Sportvereins führt die Geschäftsstelle den Entitätstyp „Mitglied“. Die Abteilungsleitung Handball führt „Spieler:in“ mit Trikotnummer und der Regel „jede Spieler:in gehört genau einer Mannschaft an“. Spieler:innen sind Mitglieder, aber viele Mitglieder spielen kein Handball. Wie wird bei der Sichtenintegration richtig vorgegangen?
+  options:
+    - text: "Mitglied als Oberbegriff übernehmen und Spieler:in als Spezialisierung (is-a) mit Trikotnummer und Mannschaftszugehörigkeit modellieren."
+      correct: true
+      explain: "Spieler:in ist ein Unterbegriff, die Menge ist eine echte Teilmenge. Die Spezialisierung behält die Regel „genau eine Mannschaft“ für Spieler:innen, ohne sie allen Mitgliedern aufzuzwingen. Gleichwertig: Mitglied mit optionaler Mannschaft (0,1) und optionaler Trikotnummer."
+    - text: "Beide als Synonyme zu einem Entitätstyp Mitglied zusammenfassen und „genau eine Mannschaft“ (1,1) für alle Mitglieder übernehmen."
+      correct: false
+      explain: "Die Mengen sind nicht gleich. Mit (1,1) könnten Mitglieder ohne Mannschaft nicht mehr gespeichert werden."
+    - text: "Es ist ein Homonym, „Spieler:in“ wird umbenannt."
+      correct: false
+      explain: "Beide Begriffe meinen dieselben Personen, nur unterschiedlich umfassend. Beim Homonym bezeichnet derselbe Name verschiedene Dinge."
+    - text: "Beide Entitätstypen ohne Verbindung getrennt übernehmen."
+      correct: false
+      explain: "Dann wären die Spieler:innen doppelt gespeichert (Name, Adresse), und beide Datensätze könnten sich widersprechen."
+- id: t03-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, typkonflikt, wertebereichskonflikt]
+  type: multi
+  question: |-
+    Zwei Sichten einer Kletterhalle sollen zusammengeführt werden. Welche Zuordnungen von Beispiel und Konfliktart sind richtig?
+  options:
+    - text: "Die Kasse führt die Länge einer Route in Metern (15,5), der Routenbau in Zentimetern (1550) → Typkonflikt"
+      correct: true
+      explain: "Gemeint ist dieselbe Länge, nur in anderer Einheit. Die Werte lassen sich eindeutig umrechnen, also unterscheidet sich nur die Darstellung."
+    - text: "Beide Sichten führen den Schwierigkeitsgrad einer Route als ganze Zahl. Der Routenbau erlaubt für Routen 3 bis 11, die Kasse für dieselben Routen nur 3 bis 9 → Wertebereichskonflikt"
+      correct: true
+      explain: "Dasselbe Attribut hat dieselbe Darstellung, aber die zulässigen Wertemengen unterscheiden sich: Grade 10 und 11 wären in einer Sicht unzulässig. Mit der Fachseite wird geklärt, welche Menge im Gesamtschema gilt."
+    - text: "Die Kasse identifiziert Gäste über die Kartennummer, der Routenbau über die E-Mail-Adresse → Strukturkonflikt"
+      correct: false
+      explain: "Unterschiedliche Schlüssel sind ein Bedingungskonflikt. Ein Strukturkonflikt läge vor, wenn derselbe Sachverhalt einmal als Attribut und einmal als Entitätstyp modelliert wäre."
+    - text: "„Sektor“ ist bei der Kasse ein Attribut der Route, beim Routenbau ein Entitätstyp mit Wandhöhe → Strukturkonflikt"
+      correct: true
+      explain: "Derselbe Sachverhalt wird mit verschiedenen Modellelementen dargestellt. Aufgelöst wird meist zugunsten des Entitätstyps."
+- id: t03-q015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [phasenmodell, datendefinition, zuordnung]
+  type: multi
+  question: |-
+    Für die Datenbank einer Jugendherberge werden folgende Festlegungen getroffen. Welche gehören im Kursstandard (sechs Phasen) zur **Datendefinition**?
+  options:
+    - text: "Die Spalte nachname wird als VARCHAR(60) NOT NULL angelegt."
+      correct: true
+      explain: "Tabellen mit DBMS-Datentypen und Integritätsbedingungen werden in der Datendefinition beschrieben."
+    - text: "Es wird eine View belegung_heute für das Reinigungsteam angelegt, die keine Gastnamen enthält, und das Team erhält nur Leserechte darauf."
+      correct: true
+      explain: "Views und Rechte beschreiben externe Schemata. Auch sie gehören zur Datendefinition."
+    - text: "Für die Suche nach Nachnamen wird ein Index angelegt."
+      correct: false
+      explain: "Ein Index ist ein Zugriffspfad auf der internen Ebene und gehört zum physischen Entwurf."
+    - text: "Die Relation buchung wird so zerlegt, dass der Tarifpreis nicht in jeder Buchung steht."
+      correct: false
+      explain: "Das ist Normalisierung und gehört zum logischen Entwurf."
+    - text: "CHECK (anzahl_gaeste BETWEEN 1 AND 60) wird für die Tabelle buchung festgelegt."
+      correct: true
+      explain: "Integritätsbedingungen werden in der Datendefinition mit der DDL des DBMS beschrieben."

@@ -32,9 +32,10 @@
     - Anforderungsanalyse (Informations- und Verarbeitungsanforderungen)
     - konzeptioneller Entwurf
     - logischer Entwurf
+    - Datendefinition
     - physischer Entwurf
     - Sichtenintegration (Konsolidierung)
-    - Validierung und Wartung
+    - Implementierung und Wartung; Validierung als Querschnittsaufgabe
 - id: t04
   slug: er-modellierung
   order: 4

@@ -1,0 +1,116 @@
+// Drei Einzelsichten der Vereins-App eines Ruderclubs vor der Sichtenintegration (Chen-Notation).
+// Kantenlabel: oben Chen-Kardinalitaet, darunter (min,max). Beide stehen an der Kante
+// des Entitaetstyps, auf den sie sich beziehen. Chen liest man gegenueber, (min,max)
+// beim eigenen Typ. "*" steht fuer beliebig viele.
+// Absichtlich enthaltene Konflikte:
+//   Namenskonflikt Synonym:  Ruderer:in (A) / Mitglied (B) - dieselbe Objektmenge
+//   Namenskonflikt Homonym:  Fahrt (A = Ausfahrt im Fahrtenbuch) / Fahrt (B = Vereinsreise mit Kosten)
+//   Typkonflikt:             Mitgl.-Nr. in B als Text ("RC-0417"), in C als Zahl (417)
+//   Wertebereichskonflikt:   Bootsklasse in A nur Rennbootklassen, in C auch Gig-Boote
+//   Bedingungskonflikt:      Schluessel von Ruderer:in in A = Name, in B = Mitgl.-Nr.
+//   Strukturkonflikt:        Bootsklasse ist in A ein Attribut, in C ein Entitaetstyp
+//   Ober-/Unterbegriff:      Sportler:in (C) ist nur eine Teilmenge von Mitglied (B), kein Synonym
+graph ruderclub_sichten {
+  layout=dot;
+  rankdir=LR;
+  compound=true;
+  node [fontsize=11];
+  edge [fontsize=10];
+
+  subgraph cluster_a {
+    label="Sicht A: Bootswart:in (Fahrtenbuch, Boote)";
+    a_ruderer [shape=box, label="Ruderer:in"];
+    a_fahrt   [shape=box, label="Fahrt"];
+    a_boot    [shape=box, label="Boot"];
+    a_schaden [shape=box, label="Schaden"];
+
+    a_rudert  [shape=diamond, label="rudert mit"];
+    a_mit     [shape=diamond, label="mit"];
+    a_hat     [shape=diamond, label="hat"];
+
+    a_r_name  [shape=ellipse, label=<<u>Name</u>>];
+    a_r_steuer[shape=ellipse, label="Steuerberechtigung"];
+    a_f_nr    [shape=ellipse, label=<<u>Fahrt-Nr.</u>>];
+    a_f_datum [shape=ellipse, label="Datum"];
+    a_f_km    [shape=ellipse, label="km"];
+    a_b_name  [shape=ellipse, label=<<u>Bootsname</u>>];
+    a_b_klasse[shape=ellipse, label="Bootsklasse\n(1x, 2x, 4x+, 8+)"];
+    a_b_bj    [shape=ellipse, label="Baujahr"];
+    a_s_nr    [shape=ellipse, label=<<u>Schaden-Nr.</u>>];
+    a_s_text  [shape=ellipse, label="Beschreibung"];
+
+    a_ruderer -- a_rudert [label="m\n(0,*)"];
+    a_rudert -- a_fahrt   [label="n\n(1,*)"];
+    a_fahrt -- a_mit      [label="n\n(1,1)"];
+    a_mit -- a_boot       [label="1\n(0,*)"];
+    a_boot -- a_hat       [label="1\n(0,*)"];
+    a_hat -- a_schaden    [label="n\n(1,1)"];
+
+    a_ruderer -- a_r_name;
+    a_ruderer -- a_r_steuer;
+    a_fahrt -- a_f_nr;
+    a_fahrt -- a_f_datum;
+    a_fahrt -- a_f_km;
+    a_boot -- a_b_name;
+    a_boot -- a_b_klasse;
+    a_boot -- a_b_bj;
+    a_schaden -- a_s_nr;
+    a_schaden -- a_s_text;
+  }
+
+  subgraph cluster_b {
+    label="Sicht B: Kassenwart:in (Beiträge, Vereinsreisen)";
+    b_mitglied [shape=box, label="Mitglied"];
+    b_fahrt    [shape=box, label="Fahrt"];
+    b_bucht    [shape=diamond, label="bucht"];
+
+    b_m_nr     [shape=ellipse, label=<<u>Mitgl.-Nr.</u> (Text, z. B. RC-0417)>];
+    b_m_name   [shape=ellipse, label="Name"];
+    b_m_iban   [shape=ellipse, label="IBAN"];
+    b_m_gruppe [shape=ellipse, label="Beitragsgruppe"];
+    b_f_nr     [shape=ellipse, label=<<u>Fahrt-Nr.</u>>];
+    b_f_ziel   [shape=ellipse, label="Ziel"];
+    b_f_kosten [shape=ellipse, label="Kosten"];
+
+    b_mitglied -- b_bucht [label="m\n(0,*)"];
+    b_bucht -- b_fahrt    [label="n\n(1,*)"];
+
+    b_mitglied -- b_m_nr;
+    b_mitglied -- b_m_name;
+    b_mitglied -- b_m_iban;
+    b_mitglied -- b_m_gruppe;
+    b_fahrt -- b_f_nr;
+    b_fahrt -- b_f_ziel;
+    b_fahrt -- b_f_kosten;
+  }
+
+  subgraph cluster_c {
+    label="Sicht C: Trainer:in (Trainingsgruppen)";
+    c_sportler [shape=box, label="Sportler:in"];
+    c_gruppe   [shape=box, label="Trainingsgruppe"];
+    c_klasse   [shape=box, label="Bootsklasse"];
+    c_gehoert  [shape=diamond, label="gehört zu"];
+    c_trainiert[shape=diamond, label="trainiert in"];
+
+    c_s_nr     [shape=ellipse, label=<<u>Mitgl.-Nr.</u> (Zahl, z. B. 417)>];
+    c_s_name   [shape=ellipse, label="Name"];
+    c_s_gj     [shape=ellipse, label="Geburtsjahr"];
+    c_g_name   [shape=ellipse, label=<<u>Gruppenname</u>>];
+    c_g_zeit   [shape=ellipse, label="Trainingszeit"];
+    c_k_kurz   [shape=ellipse, label=<<u>Kürzel</u> (auch Gig, z. B. C4x+)>];
+    c_k_plaetze[shape=ellipse, label="Plätze"];
+
+    c_sportler -- c_gehoert  [label="n\n(1,1)"];
+    c_gehoert -- c_gruppe    [label="1\n(1,*)"];
+    c_gruppe -- c_trainiert  [label="m\n(1,*)"];
+    c_trainiert -- c_klasse  [label="n\n(0,*)"];
+
+    c_sportler -- c_s_nr;
+    c_sportler -- c_s_name;
+    c_sportler -- c_s_gj;
+    c_gruppe -- c_g_name;
+    c_gruppe -- c_g_zeit;
+    c_klasse -- c_k_kurz;
+    c_klasse -- c_k_plaetze;
+  }
+}

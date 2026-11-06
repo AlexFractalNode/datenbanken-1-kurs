@@ -1,0 +1,360 @@
+- id: t03-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [informationsanforderung, verarbeitungsanforderung, anforderungsanalyse]
+  type: define-example
+  difficulty: 1
+  points: 6
+  minutes: 8
+  prompt: |-
+    Erkläre die Begriffe **Informationsanforderung** und **Verarbeitungsanforderung**.
+    a) Wähle ein **eigenes** Projekt (nicht aus dem Kurstext) und gib für dieses Projekt je **zwei** Beispiele für beide Anforderungsarten an. Mindestens eine deiner Verarbeitungsanforderungen soll eine Häufigkeit, eine Antwortzeit oder eine Berechtigung enthalten.
+    b) Nenne für jede der beiden Anforderungsarten **eine** spätere Phase, in der sie verwendet wird, und sage jeweils, wofür.
+    c) Für einen Werkzeugverleih wurden zwei Anforderungen notiert:
+       (1) „Bei jeder Ausleihe wird ein vereinbartes Rückgabedatum gespeichert. Es liegt höchstens 14 Tage nach dem Ausleihdatum.“
+       (2) „Ist eine Ausleihe am Tag nach dem vereinbarten Rückgabedatum noch offen, erhält die ausleihende Person eine Erinnerungs-E-Mail.“
+       Eine Kollegin ordnet beide als Verarbeitungsanforderungen ein, „weil es Regeln sind“. Nimm zu beiden Anforderungen Stellung.
+  solution: |-
+    - **Informationsanforderung:** beschreibt den **Datenbestand**, also welche Objekte, Eigenschaften und Beziehungen gespeichert werden und welche Integritätsbedingungen (Wertebereiche, Eindeutigkeit, Kardinalitäten) gelten.
+    - **Verarbeitungsanforderung** (auch Datenverarbeitungs- oder Bearbeitungsanforderung): beschreibt den **Umgang mit den Daten**, also welche Abfragen, Auswertungen und Änderungsvorgänge vorkommen, wie oft, wie schnell, mit welchen Datenmengen und wer sie ausführen darf.
+
+    a) Beispiel (Musterlösung, andere eigene Projekte gleichwertig): Gemüsekisten-Abo eines Hofladens.
+    - Information 1: Zu jeder Kund:in werden Kundennummer (eindeutig), Name und Lieferadresse gespeichert.
+    - Information 2: Jedes Abo gehört genau einer Kund:in und hat genau eine Kistengröße (S, M oder L).
+    - Verarbeitung 1: Jeden Donnerstag wird eine Packliste aller aktiven Abos nach Kistengröße erstellt, etwa 150 Abos.
+    - Verarbeitung 2: Nur die Hofleitung darf die Preise der Kistengrößen ändern.
+
+    b) Akzeptiert wird je Art eine der folgenden Phasen mit passendem Zweck (abschließende Liste; Namen aus der Sieben-Phasen-Variante gleichwertig):
+    - Informationsanforderungen:
+      - konzeptioneller Entwurf: Entitätstypen, Attribute, Beziehungen, Kardinalitäten
+      - logischer Entwurf: Relationen, Schlüssel, Integritätsbedingungen
+      - Datendefinition: Constraints wie `NOT NULL` und `CHECK`; in der Sieben-Phasen-Variante entsprechend physischer Entwurf (Constraints im DDL-Skript)
+      - Validierung als begleitende Aufgabe: Constraints mit Probedaten prüfen
+    - Verarbeitungsanforderungen:
+      - Datendefinition: Views und Rechte
+      - physischer Entwurf: Indexe und Speicher für häufige oder zeitkritische Zugriffe
+      - Implementierung und Wartung: Anwendungsprogramme entwickeln bzw. anbinden
+      - Validierung als begleitende Aufgabe, wenn sie so benannt wird: Prüfstein, ob das Schema jede Auswertung beantworten kann
+
+    c)
+    - (1) ist eine **Informationsanforderung**. Sie legt fest, welche Werte im gespeicherten Bestand zulässig sind: Das gespeicherte vereinbarte Rückgabedatum darf höchstens 14 Tage nach dem gespeicherten Ausleihdatum liegen. Das ist eine Integritätsbedingung über zwei Attribute, später eine `CHECK`-Bedingung. Sie betrifft das Soll-Datum, nicht die tatsächliche Rückgabe. Verspätete Rückgaben bleiben also möglich.
+    - (2) ist eine **Verarbeitungsanforderung**. Sie beschreibt einen Vorgang (Erinnerung versenden) mit Auslöser und Häufigkeit (tägliche Prüfung offener Ausleihen). Hier hat die Kollegin recht. Das Wort „Regel“ ist kein Kriterium.
+  rubric:
+    - criterion: "Informationsanforderung korrekt erklärt (Datenbestand: Objekte, Eigenschaften, Beziehungen, Integritätsbedingungen)"
+      points: 1
+    - criterion: "Verarbeitungsanforderung korrekt erklärt (Vorgänge, Abfragen, Häufigkeit/Antwortzeit/Menge oder Berechtigung)"
+      points: 1
+    - criterion: "a) Eigenes Projekt (nicht aus dem Kurstext) mit zwei passenden Informationsanforderungen (je 0,5)"
+      points: 1
+    - criterion: "a) Zwei passende Verarbeitungsanforderungen zum selben Projekt, mindestens eine mit Häufigkeit, Antwortzeit oder Berechtigung (je 0,5)"
+      points: 1
+    - criterion: "b) Je Anforderungsart eine Phase aus der Liste der Musterlösung mit passendem Zweck (je 0,5)"
+      points: 1
+    - criterion: "c) (1) als Informationsanforderung (Integritätsbedingung über gespeicherte Daten) und (2) als Verarbeitungsanforderung (Vorgang mit Auslöser) eingeordnet, jeweils begründet (je 0,5)"
+      points: 1
+  space: lines:18
+- id: t03-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, synonym, homonym, strukturkonflikt]
+  type: define-example
+  difficulty: 2
+  points: 8
+  minutes: 11
+  prompt: |-
+    Erkläre den Begriff **Sichtenintegration** (Konsolidierung): Was wird integriert, in welcher Entwurfsphase, mit welchem Ergebnis, und warum ist sie nötig?
+    Erkläre danach die Konfliktarten **Synonym**, **Homonym** und **Strukturkonflikt**. Gib zu jeder Konfliktart ein **eigenes** Beispiel aus zwei Sichten eines selbst gewählten Projekts (nicht aus dem Kurstext) an und beschreibe, wie der Konflikt aufgelöst wird.
+  solution: |-
+    **Sichtenintegration:** Im konzeptionellen Entwurf wird zunächst für jede Benutzergruppe eine eigene Sicht (Teilschema, meist ein kleines ER-Modell) erstellt. Die Sichtenintegration führt diese Teilschemata zu **einem** widerspruchs- und redundanzfreien konzeptionellen Gesamtschema zusammen. Nötig ist das, weil jede Gruppe eigene Begriffe verwendet und denselben Sachverhalt anders modelliert. Ein bloßes Nebeneinanderlegen ergäbe doppelte, vermischte oder widersprüchliche Elemente.
+
+    Beispielprojekt (Musterlösung, andere gleichwertig): Verwaltung einer Tanzschule mit den Sichten **Unterricht** und **Buchhaltung**.
+
+    - **Synonym** (Namenskonflikt): verschiedene Namen für dasselbe. Der Unterricht spricht von „Tanzschüler:in“, die Buchhaltung von „Kund:in“. Beide meinen dieselben Personen mit derselben Kunden-Nr. Auflösung: prüfen, ob es wirklich dieselbe Objektmenge ist, dann ein Entitätstyp „Kund:in“ mit den vereinigten Attributen, Begriff ins Glossar.
+    - **Homonym** (Namenskonflikt): gleicher Name, verschiedene Bedeutung. „Stunde“ ist im Unterricht eine einzelne Tanzstunde mit Datum und Saal, in der Buchhaltung eine abgerechnete Arbeitsstunde einer Lehrkraft mit Honorarsatz. Auflösung: umbenennen in „Unterrichtseinheit“ und „Honorarstunde“ und als getrennte Elemente übernehmen.
+    - **Strukturkonflikt:** derselbe Sachverhalt mit unterschiedlichen Modellelementen. Im Unterricht ist „Saal“ ein Attribut des Kurses, in der Buchhaltung ein Entitätstyp mit Bezeichnung, Fläche und Miete pro Stunde. Auflösung: Einigung auf die ausdrucksstärkere Form, also Entitätstyp Saal mit der Beziehung Kurs —n— ⟨findet statt in⟩ —1— Saal.
+  rubric:
+    - criterion: "Sichtenintegration korrekt erklärt: Teilschemata der Benutzergruppen werden im konzeptionellen Entwurf zu einem Gesamtschema zusammengeführt"
+      points: 1
+    - criterion: "Begründung genannt (unterschiedliche Begriffe bzw. Modellierungen; sonst Doppelungen oder Widersprüche)"
+      points: 1
+    - criterion: "Synonym korrekt erklärt"
+      points: 0.5
+    - criterion: "Synonym mit passendem eigenem Beispiel aus zwei Sichten belegt"
+      points: 0.5
+    - criterion: "Auflösung des Synonyms (einheitlicher Name, Attribute vereinigen; Prüfung auf gleiche Objektmenge oder Glossar erwähnt)"
+      points: 1
+    - criterion: "Homonym korrekt erklärt"
+      points: 0.5
+    - criterion: "Homonym mit passendem eigenem Beispiel aus zwei Sichten belegt"
+      points: 0.5
+    - criterion: "Auflösung des Homonyms durch Umbenennen in zwei getrennte Elemente"
+      points: 1
+    - criterion: "Strukturkonflikt korrekt erklärt"
+      points: 0.5
+    - criterion: "Strukturkonflikt mit passendem eigenem Beispiel belegt (z. B. Attribut vs. Entitätstyp)"
+      points: 0.5
+    - criterion: "Auflösung des Strukturkonflikts begründet (Einigung auf eine Form, Begründung z. B. eigene Attribute oder Beziehungen)"
+      points: 1
+  space: lines:22
+- id: t03-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [phasenmodell, ergebnisdokument, zuordnung]
+  type: explain
+  difficulty: 2
+  points: 11
+  minutes: 12
+  prompt: |-
+    a) Nenne die Phasen des Datenbankentwurfs in der richtigen Reihenfolge. Verwende den Kursstandard oder die Sieben-Phasen-Variante und gib an, welche Einteilung du verwendest.
+    b) Beschreibe jede Phase in einem Satz (Ziel bzw. Tätigkeit) und nenne ihr typisches Ergebnisdokument. Gib außerdem an, welche Rolle die Validierung im Prozess spielt.
+    c) Für eine Boulderhalle wird eine Datenbank entwickelt. Ordne jede Tätigkeit einer Phase zu:
+       1. Interview mit der Hallenleitung, welche Auswertungen sie monatlich braucht.
+       2. Entscheidung, dass „Route“ ein eigener Entitätstyp mit Schwierigkeitsgrad und Farbe wird.
+       3. Die bereits erstellten Teil-ER-Modelle von Kasse und Routenbau werden zusammengeführt. Dabei zeigt sich, dass „Kund:in“ (Kasse) und „Besucher:in“ (Routenbau) dieselben Personen bezeichnen. Beide werden zu einem Entitätstyp.
+       4. Die Relation besuch wird so zerlegt, dass der Tarifpreis nicht mehr in jeder Zeile steht.
+       5. In der Tabellendefinition wird die Spalte email als `VARCHAR(254) NOT NULL` festgelegt.
+       6. Für die Spalte besuch.datum wird ein Index angelegt, weil die Monatsauswertung nach Datum filtert.
+       7. 3000 Kundendatensätze aus dem alten Kassensystem werden importiert.
+       8. Nach dem Import der Altdaten wird geprüft, ob die Monatsauswertung mit diesen Daten die erwarteten Zahlen liefert.
+       9. Nach einem Jahr Betrieb kommen Kletterkurse hinzu, dafür wird eine neue Tabelle ergänzt.
+    d) Begründe für den Kursstandard, warum Tätigkeit 6 nicht zur Datendefinition gehört, obwohl `CREATE INDEX` eine DDL-Anweisung ist.
+  solution: |-
+    a) und b) Kursstandard:
+
+    | Nr. | Phase | Ziel bzw. Tätigkeit | Ergebnisdokument |
+    |---|---|---|---|
+    | 1 | Anforderungsanalyse | Miniwelt abgrenzen, Informations- und Verarbeitungsanforderungen erheben | Anforderungsspezifikation mit Glossar |
+    | 2 | konzeptioneller Entwurf | Miniwelt DBMS-unabhängig modellieren, Sichten integrieren | integriertes ER-Modell mit Beschreibung |
+    | 3 | logischer Entwurf | ER-Modell ins Relationenmodell überführen und normalisieren | normalisiertes Relationenschema mit PK/FK |
+    | 4 | Datendefinition | logisches Schema und Sichten in der DDL des DBMS beschreiben | DDL-Skript (Tabellen, Constraints, Views, Rechte) |
+    | 5 | physischer Entwurf | interne Speicherung und Zugriffspfade auf Leistung auslegen | Index- und Speicherkonzept |
+    | 6 | Implementierung und Wartung | Datenbank anlegen, befüllen, Anwendung anbinden, später anpassen | befüllte Datenbank, Import- und Änderungsskripte |
+
+    Validierung: keine eigene Phase, sondern eine Querschnittsaufgabe. Jedes Ergebnis wird gegen die Anforderungen geprüft, etwa mit Probedaten, durch Ausprobieren einer vorläufigen Version oder durch formale Prüfung.
+
+    Zugelassen sind abschließend zwei Einteilungen:
+    - der Kursstandard (oben),
+    - die Sieben-Phasen-Variante: Anforderungsanalyse → konzeptioneller Entwurf → logischer Entwurf → physischer Entwurf (einschließlich DDL-Skript mit Tabellen, Datentypen und Constraints) → Implementierung → Validierung (Test) → Betrieb und Wartung.
+
+    Gröbere Einteilungen (zwei oder drei Schritte, physischer Entwurf als Teil der Implementierung) erfüllen die Aufgabe nicht, weil sie den physischen Entwurf nicht als eigenen Schritt ausweisen.
+
+    b) wird unabhängig von der gewählten Einteilung gegen die sechs Inhaltsblöcke des Kursstandards bewertet:
+    1. Anforderungen erheben
+    2. konzeptionell modellieren und Sichten integrieren
+    3. Relationenschema bilden und normalisieren
+    4. Schema mit DDL beschreiben (Tabellen, Datentypen, Constraints, Views, Rechte)
+    5. interne Speicherung und Zugriffspfade festlegen
+    6. anlegen, befüllen, anbinden und später warten
+
+    In der Sieben-Phasen-Variante werden die Blöcke 4 und 5 innerhalb des physischen Entwurfs erwartet, Block 6 verteilt sich auf Implementierung sowie Betrieb und Wartung.
+
+    c) Zuordnung je Einteilung:
+
+    | Tätigkeit | Kursstandard | Sieben-Phasen-Variante |
+    |---|---|---|
+    | 1 | Anforderungsanalyse (Erhebung einer Verarbeitungsanforderung) | Anforderungsanalyse |
+    | 2 | konzeptioneller Entwurf | konzeptioneller Entwurf |
+    | 3 | konzeptioneller Entwurf, Sichtenintegration (Synonym) | konzeptioneller Entwurf |
+    | 4 | logischer Entwurf (Normalisierung) | logischer Entwurf |
+    | 5 | Datendefinition | physischer Entwurf |
+    | 6 | physischer Entwurf | physischer Entwurf |
+    | 7 | Implementierung und Wartung (Daten laden bzw. migrieren) | Implementierung |
+    | 8 | Validierung als begleitende Aufgabe, zeitlich in der Implementierung (beide Angaben richtig) | Validierung (Test) |
+    | 9 | Implementierung und Wartung (Wartung) | Betrieb und Wartung |
+
+    d) Der Index ändert weder die Struktur noch die Bedeutung der Daten. Er legt nur einen Zugriffspfad auf der internen Ebene an, um die Auswertung zu beschleunigen. Für die Zuordnung zählt, was festgelegt wird (Leistung, interne Ebene), nicht in welcher Sprache es notiert wird.
+  rubric:
+    - criterion: "a) Kursstandard oder benannte Sieben-Phasen-Variante vollständig (vollständig 1; eine Phase fehlt 0,5; ab zwei fehlenden Phasen 0). Andere oder gröbere Einteilungen: 0"
+      points: 1
+    - criterion: "a) Reihenfolge der genannten Phasen korrekt"
+      points: 1
+    - criterion: "b) Je Inhaltsblock des Kursstandards (6) ein zutreffender Satz zu Ziel/Tätigkeit mit passendem Ergebnisdokument, unabhängig von der Gruppierung (je 0,5)"
+      points: 3
+    - criterion: "b) Rolle der Validierung beschrieben: begleitend gegen die Anforderungen prüfen. In der Sieben-Phasen-Variante wird die Validierungsphase nur hier bewertet, nicht zusätzlich bei den Inhaltsblöcken."
+      points: 0.5
+    - criterion: "c) Korrekte Zuordnung je Tätigkeit (je 0,5). Folgefehlerregel: c) wird gegen die in a) benannte Einteilung bewertet, maßgeblich ist die passende Spalte der Lösungstabelle."
+      points: 4.5
+    - criterion: "d) Index als Zugriffspfad auf der internen Ebene bzw. Leistungsmaßnahme erkannt"
+      points: 0.5
+    - criterion: "d) Begründet, dass Bedeutung und Struktur der Daten unverändert bleiben bzw. die Sprache (DDL) kein Zuordnungskriterium ist"
+      points: 0.5
+  space: lines:30
+- id: t03-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, erm, chen, min-max]
+  type: erm-model
+  difficulty: 3
+  points: 12
+  minutes: 16
+  prompt: |-
+    Für ein Repair-Café wurden zwei Sichten erhoben.
+
+    **Sicht A (Empfangstheke):**
+    - Eine Besucher:in (Besucher-Nr., Name, Telefon) bringt ein oder mehrere Geräte mit.
+    - Jedes Gerät (Geräte-Nr., Bezeichnung, Kategorie, Zustand) gehört genau einer Besucher:in.
+    - Die Geräte-Nr. ist die fortlaufende Zahl vom Annahmezettel, z. B. 42.
+    - „Zustand“ ist die Fehlerbeschreibung bei der Annahme, z. B. „Toaster wird nicht warm“.
+    - Kategorie ist ein Text wie „Elektro“ oder „Textil“.
+    - Jedes angenommene Gerät wird genau einer Helfer:in **zugeteilt**.
+
+    **Sicht B (Leitung des Reparaturteams):**
+    - Eine Helfer:in (Helfer-Nr., Name) **repariert** Gegenstände (Geräte-Nr., Bezeichnung, Zustand).
+    - Die Geräte-Nr. wird hier als Text mit Präfix geführt, z. B. „G-0042“ für den Annahmezettel 42.
+    - „Zustand“ ist hier das Reparaturergebnis: repariert, nicht reparierbar oder Ersatzteil nötig.
+    - Jeder Gegenstand gehört zu genau einer Kategorie (Name, Tischnummer).
+    - Eine Helfer:in beherrscht mindestens eine Kategorie, eine Kategorie kann von beliebig vielen Helfer:innen beherrscht werden.
+    - Gegenstände, die an einem Tag nicht mehr drankommen, bleiben ohne Helfer:in.
+
+    a) Benenne alle Konflikte zwischen den beiden Sichten mit ihrer Konfliktart und gib an, wie du sie auflöst.
+    b) Zeichne das integrierte ER-Diagramm in Chen-Notation mit **allen Attributen** und unterstrichenen Schlüsseln. Gib an jeder Beziehung die Chen-Kardinalität **und** die (min,max)-Angaben an.
+  solution: |-
+    a) Konflikte und Auflösung:
+    - **Namenskonflikt (Synonym):** „Gerät“ (A) und „Gegenstand“ (B) bezeichnen dieselben Objekte → ein Entitätstyp **Gerät**.
+    - **Typkonflikt:** Die Geräte-Nr. ist in A die Zahl 42, in B der Text „G-0042“. Die Werte lassen sich eindeutig umrechnen → eine Darstellung festlegen, z. B. Zahl, das Präfix nur bei der Anzeige. Es ist kein Wertebereichskonflikt: Die Werte lassen sich eindeutig ineinander umrechnen, also unterscheidet sich nur die Darstellung.
+    - **Namenskonflikt (Homonym):** „Zustand“ heißt in A Fehlerbeschreibung bei der Annahme, in B Reparaturergebnis → zwei Attribute **Fehlerbeschreibung** und **Reparaturergebnis**.
+    - **Strukturkonflikt:** Kategorie ist in A ein Attribut von Gerät, in B ein Entitätstyp mit Tischnummer und eigener Beziehung zu Helfer:in → **Entitätstyp Kategorie**, Gerät verliert das Attribut.
+    - **Bedingungskonflikt (Kardinalität):** In A hat jedes Gerät genau eine Helfer:in (1,1), in B kann ein Gerät ohne Helfer:in bleiben → nach Rückfrage **(0,1)** auf der Seite von Gerät, weil das Gesamtschema auch nicht bearbeitete Geräte zulassen muss.
+    - **Beziehungsebene:** A spricht von „zugeteilt“, B von „repariert“.
+      - Variante 1: Die zugeteilte Helfer:in ist auch die reparierende. Dann ist es ein Synonym auf Beziehungsebene → eine Beziehung, z. B. ⟨bearbeitet⟩.
+      - Variante 2: Zuteilung (Plan) und Reparatur (tatsächlich) können auseinanderfallen. Dann entstehen mit Begründung zwei Beziehungen ⟨ist zugeteilt⟩ und ⟨repariert⟩. Der Kardinalitätskonflikt löst sich dabei durch die Trennung auf: Die Aussage aus A („genau eine Helfer:in“) betrifft die Zuteilung, die Aussage aus B („bleibt ohne Helfer:in“) die Reparatur.
+      - Beide Varianten sind gleichwertig. Die Lösung unten zeigt Variante 1, die Angaben für Variante 2 stehen darunter.
+
+    b) Integriertes Modell (Chen; Kantenangaben jeweils „Chen-Kardinalität / (min,max)“ an der Seite des genannten Entitätstyps):
+    - Entitätstypen mit allen Attributen, Schlüssel unterstrichen:
+      - Besucher:in(<u>Besucher-Nr.</u>, Name, Telefon)
+      - Gerät(<u>Geräte-Nr.</u>, Bezeichnung, Fehlerbeschreibung, Reparaturergebnis)
+      - Kategorie(<u>Name</u>, Tischnummer)
+      - Helfer:in(<u>Helfer-Nr.</u>, Name)
+    - Besucher:in —1— ⟨bringt⟩ —n— Gerät; (min,max): Besucher:in (1,*), Gerät (1,1)
+    - Gerät —n— ⟨gehört zu⟩ —1— Kategorie; (min,max): Gerät (1,1), Kategorie (0,*)
+    - Helfer:in —1— ⟨bearbeitet⟩ —n— Gerät; (min,max): Helfer:in (0,*), Gerät (0,1)
+    - Helfer:in —m— ⟨beherrscht⟩ —n— Kategorie; (min,max): Helfer:in (1,*), Kategorie (0,*)
+
+    Variante 2: statt ⟨bearbeitet⟩ zwei Beziehungen.
+    - Helfer:in —1— ⟨ist zugeteilt⟩ —n— Gerät; (min,max): Helfer:in (0,*), Gerät (1,1). Jedes angenommene Gerät wird laut A zugeteilt. (0,1) ist mit Begründung ebenfalls richtig, etwa wenn erst später zugeteilt wird.
+    - Helfer:in —1— ⟨repariert⟩ —n— Gerät; (min,max): Helfer:in (0,*), Gerät (0,1), weil nicht jedes Gerät drankommt.
+
+    Lesehilfe: In Chen steht die 1 bei Kategorie, weil jedes Gerät höchstens eine Kategorie hat (gegenüber lesen). In (min,max) steht (1,1) beim Gerät, weil jedes Gerät an genau einer Beziehung „gehört zu“ teilnimmt (beim eigenen Typ lesen).
+
+    Standardannahmen, die der Text offenlässt:
+    - Kategorie (0,*) bei „gehört zu“: Eine Kategorie darf (noch) ohne Gerät sein. (1,*) mit Begründung gilt ebenfalls.
+    - Helfer:in (0,*) bei „bearbeitet“: Neue Helfer:innen haben noch nichts bearbeitet. (1,*) mit Begründung gilt ebenfalls.
+
+    Andere Beziehungsnamen sind gleichwertig.
+  rubric:
+    - criterion: "a) Synonym Gerät/Gegenstand: Konfliktart benannt (0,5) und durch einen Entitätstyp aufgelöst (0,5)"
+      points: 1
+    - criterion: "a) Geräte-Nr. Zahl vs. Text: als Typkonflikt benannt (0,5; „Wertebereichskonflikt“ erhält hier 0), auf eine Darstellung festgelegt (0,5)"
+      points: 1
+    - criterion: "a) Homonym Zustand: Konfliktart benannt (0,5) und in zwei Attribute aufgelöst (0,5)"
+      points: 1
+    - criterion: "a) Strukturkonflikt Kategorie: Konfliktart benannt (0,5) und begründet als Entitätstyp aufgelöst (0,5)"
+      points: 1
+    - criterion: "a) Bedingungs-/Kardinalitätskonflikt Gerät–Helfer:in: Konfliktart benannt (0,5) und aufgelöst (0,5), entweder zu (0,1) in Variante 1 oder begründet durch Trennung in Zuteilung und Reparatur (Variante 2)"
+      points: 1
+    - criterion: "a) „zugeteilt“ vs. „repariert“ behandelt: als Synonym auf Beziehungsebene zusammengeführt oder begründet als zwei Beziehungen modelliert. Zusätzliche, korrekt begründete Konflikte führen nicht zu Abzug."
+      points: 1
+    - criterion: "b) Vier Entitätstypen mit Chen-Symbolen (Rechteck, Raute, Ellipse), allen Attributen und unterstrichenen Schlüsseln; kein Attribut Kategorie oder Zustand an Gerät (je Verstoß −0,5, min. 0)"
+      points: 2
+    - criterion: "b) Beziehungstypen mit richtigen Partnern (je Beziehung 0,25; bei zwei Beziehungen Helfer:in–Gerät beide zusammen 0,25)"
+      points: 1
+    - criterion: "b) Chen-Kardinalitäten korrekt (je Beziehung 0,25; bei Variante 2 zählen beide Beziehungen Helfer:in–Gerät zusammen als eine, 0,25)"
+      points: 1
+    - criterion: "b) (min,max)-Angaben korrekt und beim eigenen Entitätstyp notiert (je Beziehung 0,5; bei Variante 2 beide Beziehungen Helfer:in–Gerät zusammen 0,5). Folgefehlerregel: b) wird gegen die in a) gewählte Auflösung bewertet, ein Fehler aus a) wird in b) nicht erneut abgezogen."
+      points: 2
+  space: box:230
+- id: t03-p005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [informationsanforderung, verarbeitungsanforderung, klassifizieren]
+  type: explain
+  difficulty: 1
+  points: 5
+  minutes: 5
+  prompt: |-
+    Für die Datenbank einer Jugendherberge liegen folgende Anforderungen vor. Ordne jede als **Informationsanforderung (I)** oder **Verarbeitungsanforderung (V)** ein.
+    1. Jedes Zimmer hat eine Nummer, eine Bettenzahl und liegt auf genau einer Etage.
+    2. Beim Check-in sucht das Personal die Buchung über den Nachnamen, die Antwort kommt in höchstens 3 Sekunden.
+    3. Eine Buchung umfasst ein oder mehrere Zimmer.
+    4. Die Herbergsleitung erhält jeden Montag eine Belegungsübersicht für die Woche.
+    5. Die Zahl der Gäste einer Buchung liegt zwischen 1 und 60.
+    6. Nur die Rezeption darf Buchungen stornieren.
+    7. Zu jedem Gast werden Name, Geburtsdatum und, falls vorhanden, die Schulklasse gespeichert.
+    8. Bei der Abreise berechnet das System den Rechnungsbetrag aus Nächten und Tarif.
+
+    Begründe zusätzlich, warum Anforderung 5 trotz ihres Regelcharakters in dieselbe Gruppe gehört wie Anforderung 1.
+  solution: |-
+    1. I (Objekt, Attribute, Kardinalität)
+    2. V (Suchvorgang mit Antwortzeit)
+    3. I (Kardinalität der Beziehung Buchung–Zimmer)
+    4. V (regelmäßige Auswertung)
+    5. I (Integritätsbedingung: Wertebereich)
+    6. V (Berechtigung für eine Operation)
+    7. I (Attribute, darunter ein optionales)
+    8. V (Berechnung eines abgeleiteten Werts; der Betrag wird berechnet, nicht als Grunddatum erhoben)
+
+    Begründung zu 5: Wie Anforderung 1 beschreibt sie, welche Zustände des **gespeicherten Bestands** zulässig sind. Sie ist eine Integritätsbedingung (Wertebereich), die später als Constraint (z. B. `CHECK`) umgesetzt wird. Ein Vorgang, eine Häufigkeit oder eine Antwortzeit kommt darin nicht vor.
+  rubric:
+    - criterion: "Korrekte Einordnung je Anforderung (je 0,5)"
+      points: 4
+    - criterion: "Begründung zu 5: beschreibt zulässige Zustände des Bestands bzw. Integritätsbedingung, kein Vorgang"
+      points: 1
+  space: lines:10
+- id: t03-p006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anforderungsspezifikation, tabellenform, anforderungsanalyse]
+  type: explain
+  difficulty: 2
+  points: 8
+  minutes: 10
+  prompt: |-
+    Ein Schachverein möchte seine Vereinsturniere verwalten. Aus den Gesprächen ist bekannt:
+    - Zu jeder Spieler:in werden eine vom Verein vergebene Spielernummer, der Name, das Geburtsjahr und, falls vorhanden, die Elo-Zahl (1000 bis 2900) gespeichert. Der Verein hat etwa 80 Spieler:innen, rund ein Drittel hat eine Elo-Zahl.
+    - Ein Turnier hat eine Bezeichnung, ein Startdatum und eine Bedenkzeit. Pro Jahr finden etwa 6 Turniere statt.
+    - Spieler:innen melden sich zu Turnieren an, je Turnier 10 bis 40 Personen. Eine Spieler:in kann an beliebig vielen Turnieren teilnehmen.
+    - Ein Turnier hat etwa 7 Runden. Nach jeder Runde gibt die Turnierleitung alle Ergebnisse ein und druckt die aktuelle Tabelle aus. Das soll in unter 5 Sekunden gehen.
+    - Einmal im Jahr wird je Spieler:in die Zahl der gespielten Partien ausgewertet.
+
+    Erstelle die Anforderungsspezifikation in Tabellenform:
+    a) Objektbeschreibung für **Spieler:in** mit den Spalten Typ/Länge, Wertebereich/Regel, Mehrfachwerte, Belegungsgrad, identifizierend.
+    b) Beziehungsbeschreibung für **meldet sich an** mit den Spalten beteiligte Objekte, Kardinalität, Attribute, Mengengerüst.
+    c) Vorgangsbeschreibung für die beiden Vorgänge **Rundenergebnisse eingeben und Tabelle drucken** und **Jahresauswertung** mit den Spalten Auslöser und Häufigkeit, Dringlichkeit, gelesene/geänderte Daten, Umfang je Ausführung.
+    Gleichwertige Spaltennamen (z. B. „Anzahl Werte“ statt „Mehrfachwerte“, „Muss/Kann“ statt Belegungsgrad, „Priorität“ statt Dringlichkeit) sind erlaubt. Fehlende Angaben darfst du sinnvoll annehmen, kennzeichne sie dann als Annahme.
+  solution: |-
+    a) Objekt Spieler:in (ca. 80):
+
+    | Attribut | Typ, Länge | Wertebereich/Regel | Mehrfachwerte | Belegung | identifizierend |
+    |---|---|---|---|---|---|
+    | Spielernummer | Ganzzahl, 4 (Annahme) | vom Verein vergeben, eindeutig | nein (bzw. 1) | 100 % (Muss) | ja |
+    | Name | Zeichenkette, 60 (Annahme) | keine Angabe im Text | nein (bzw. 1) | 100 % (Muss) | nein |
+    | Geburtsjahr | Ganzzahl, 4 | keine Angabe im Text; z. B. 1920 bis aktuelles Jahr (Annahme) | nein (bzw. 1) | 100 % (Muss) | nein |
+    | Elo-Zahl | Ganzzahl, 4 | 1000 bis 2900 | nein (bzw. 0 bis 1) | ca. 33 % (Kann) | nein |
+
+    Für Typangaben sind fachliche („Zahl“, „Text“) wie allgemeine Typnamen („Ganzzahl“, „Zeichenkette“) richtig. Mehrfachwerte dürfen als ja/nein oder als Anzahl bzw. Spanne angegeben werden.
+
+    b) Beziehung meldet sich an:
+
+    | beteiligte Objekte | Kardinalität | Attribute | Mengengerüst |
+    |---|---|---|---|
+    | Spieler:in, Turnier | m:n; je Turnier 10 bis 40 Spieler:innen, je Spieler:in beliebig viele Turniere | laut Text keine (Anmeldedatum als gekennzeichnete Annahme zulässig) | 6 Turniere × 10 bis 40 = 60 bis 240 Anmeldungen pro Jahr |
+
+    c) Vorgänge:
+
+    | Vorgang | Auslöser und Häufigkeit | Dringlichkeit | gelesene/geänderte Daten | Umfang je Ausführung |
+    |---|---|---|---|---|
+    | Rundenergebnisse eingeben und Tabelle drucken | Ende jeder Runde, ca. 7 je Turnier, ca. 42 pro Jahr | hoch (Annahme, begründet durch Turnierbetrieb und unter 5 s) | Turnier, Anmeldungen, Partien der Runde mit Ergebnis, Spieler:innen (Name) | 5 bis 20 Partien je Runde, Tabelle mit 10 bis 40 Zeilen |
+    | Jahresauswertung | Jahresende, 1-mal pro Jahr | niedrig (Annahme: keine Zeitvorgabe im Text) | Spieler:innen, Partien des Jahres | alle Partien eines Jahres, grob 6 × 7 × bis 20 = bis 840 (Annahme: jede Person spielt jede Runde) |
+
+    Begründete abweichende Dringlichkeiten sind ebenfalls richtig.
+  rubric:
+    - criterion: "a) Je Attribut (4) korrekte Zeile: Typ/Länge plausibel (fachliche oder allgemeine Typnamen), Wertebereich bzw. Regel aus dem Text (ohne Textangabe: leer, „keine“ oder gekennzeichnete Annahme), Mehrfachwerte (ja/nein oder Anzahl/Spanne), Belegung (Prozent oder Muss/Kann) und Identifikation richtig (je Zeile 0,75; je falscher Angabe −0,25, je Zeile min. 0)"
+      points: 3
+    - criterion: "b) Beteiligte Objekte und Kardinalität m:n mit den Grenzen 10 bis 40 je Turnier"
+      points: 1
+    - criterion: "b) Attribute (keine bzw. gekennzeichnete Annahme) und Mengengerüst aus den Angaben abgeleitet (je 0,5)"
+      points: 1
+    - criterion: "c) Je Vorgang Auslöser/Häufigkeit (0,5), gelesene/geänderte Daten (0,5) sowie Dringlichkeit und Umfang (0,5); abweichende Spaltennamen gleichwertig, begründete abweichende Dringlichkeit richtig"
+      points: 3
+  space: box:160

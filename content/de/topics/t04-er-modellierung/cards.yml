@@ -299,7 +299,7 @@
   tags: [modellebene]
   front: Auf welcher Ebene der Datenmodellierung liegt das ER-Modell, und was enthält es bewusst nicht?
   back: |-
-    Auf der **konzeptuellen** Ebene. Es beschreibt Objekte, Eigenschaften und Zusammenhänge der Miniwelt unabhängig vom DBMS. Tabellen, Datentypen und Indizes enthält es nicht, Fremdschlüssel nach Konvention ebenfalls nicht. Sie kommen erst im logischen bzw. physischen Entwurf hinzu.
+    Auf der **konzeptuellen** Ebene. Es beschreibt Objekte, Eigenschaften und Zusammenhänge der Miniwelt unabhängig vom DBMS. Tabellen, Datentypen und Indizes enthält es nicht, Fremdschlüssel nach Konvention ebenfalls nicht. Sie kommen erst später hinzu: Tabellen und Fremdschlüssel im logischen Entwurf, Datentypen in der Datendefinition, Indizes im physischen Entwurf (Phasenmodell: t03).
 - id: t04-c037
   status: reviewed
   reviews: [fach, aufgaben, leak]

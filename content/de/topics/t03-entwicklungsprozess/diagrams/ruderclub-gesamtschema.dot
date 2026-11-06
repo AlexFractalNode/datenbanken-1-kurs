@@ -1,0 +1,130 @@
+// Integriertes konzeptionelles Gesamtschema der Ruderclub-App nach der Sichtenintegration
+// (Chen-Notation). Kantenlabel: oben Chen-Kardinalitaet, darunter (min,max). Beide stehen
+// an der Kante des Entitaetstyps, auf den sie sich beziehen. Chen liest man gegenueber,
+// (min,max) beim eigenen Typ. "*" steht fuer beliebig viele.
+// Aufgeloeste Konflikte:
+//   Synonym Ruderer:in / Mitglied           -> ein Entitaetstyp Mitglied
+//   Homonym Fahrt                           -> Ausfahrt (Fahrtenbuch) und Vereinsreise (Kasse)
+//   Typkonflikt Mitgl.-Nr. Text vs. Zahl    -> Zahl; Praefix "RC-" nur bei der Anzeige
+//   Wertebereichskonflikt Bootsklasse       -> Vereinigung: Renn- und Gig-Klassen zulaessig
+//   Bedingungskonflikt Schluessel Name      -> Schluessel Mitgl.-Nr. (Namen nicht eindeutig)
+//   Strukturkonflikt Bootsklasse            -> Entitaetstyp (eigene Attribute und Beziehungen)
+//   Ober-/Unterbegriff Sportler:in          -> Oberbegriff Mitglied; nicht jedes Mitglied
+//                                              trainiert, daher Mitglied (0,1) bei "ist in"
+//                                              (Alternative: Spezialisierung, siehe t04)
+graph ruderclub_gesamtschema {
+  layout=neato;
+  overlap=false;
+  splines=true;
+  sep="+12";
+  node [fontsize=11];
+  edge [fontsize=10];
+
+  // Entitaetstypen
+  mitglied     [shape=box, label="Mitglied"];
+  ausfahrt     [shape=box, label="Ausfahrt"];
+  boot         [shape=box, label="Boot"];
+  bootsklasse  [shape=box, label="Bootsklasse"];
+  schaden      [shape=box, label="Schaden"];
+  reise        [shape=box, label="Vereinsreise"];
+  gruppe       [shape=box, label="Trainingsgruppe"];
+
+  // Beziehungstypen
+  rudert       [shape=diamond, label="rudert mit"];
+  mit          [shape=diamond, label="mit"];
+  ist_klasse   [shape=diamond, label="gehört zu"];
+  hat          [shape=diamond, label="hat"];
+  bucht        [shape=diamond, label="bucht"];
+  ist_in       [shape=diamond, label="ist in"];
+  trainiert    [shape=diamond, label="trainiert in"];
+
+  // Attribute Mitglied
+  m_nr     [shape=ellipse, label=<<u>Mitgl.-Nr.</u>>];
+  m_name   [shape=ellipse, label="Name"];
+  m_iban   [shape=ellipse, label="IBAN"];
+  m_beitr  [shape=ellipse, label="Beitragsgruppe"];
+  m_gj     [shape=ellipse, label="Geburtsjahr"];
+  m_steuer [shape=ellipse, label="Steuerberechtigung"];
+
+  // Attribute Ausfahrt
+  f_nr     [shape=ellipse, label=<<u>Fahrt-Nr.</u>>];
+  f_datum  [shape=ellipse, label="Datum"];
+  f_km     [shape=ellipse, label="km"];
+
+  // Attribute Boot
+  b_name   [shape=ellipse, label=<<u>Bootsname</u>>];
+  b_bj     [shape=ellipse, label="Baujahr"];
+
+  // Attribute Bootsklasse
+  k_kurz   [shape=ellipse, label=<<u>Kürzel</u>>];
+  k_plaetze[shape=ellipse, label="Plätze"];
+
+  // Attribute Schaden
+  s_nr     [shape=ellipse, label=<<u>Schaden-Nr.</u>>];
+  s_text   [shape=ellipse, label="Beschreibung"];
+
+  // Attribute Vereinsreise
+  r_nr     [shape=ellipse, label=<<u>Reise-Nr.</u>>];
+  r_ziel   [shape=ellipse, label="Ziel"];
+  r_kosten [shape=ellipse, label="Kosten"];
+
+  // Attribute Trainingsgruppe
+  g_name   [shape=ellipse, label=<<u>Gruppenname</u>>];
+  g_zeit   [shape=ellipse, label="Trainingszeit"];
+
+  // rudert mit: m:n
+  mitglied -- rudert [label="m\n(0,*)"];
+  rudert -- ausfahrt [label="n\n(1,*)"];
+
+  // mit: jede Ausfahrt mit genau einem Boot
+  ausfahrt -- mit [label="n\n(1,1)"];
+  mit -- boot     [label="1\n(0,*)"];
+
+  // gehoert zu: jedes Boot gehoert genau einer Bootsklasse an
+  boot -- ist_klasse        [label="n\n(1,1)"];
+  ist_klasse -- bootsklasse [label="1\n(0,*)"];
+
+  // hat: Schadensmeldungen je Boot
+  boot -- hat    [label="1\n(0,*)"];
+  hat -- schaden [label="n\n(1,1)"];
+
+  // bucht: m:n
+  mitglied -- bucht [label="m\n(0,*)"];
+  bucht -- reise    [label="n\n(1,*)"];
+
+  // ist in: Mitglied hoechstens in einer Trainingsgruppe (Foerdermitglieder in keiner)
+  mitglied -- ist_in [label="n\n(0,1)"];
+  ist_in -- gruppe   [label="1\n(1,*)"];
+
+  // trainiert in: m:n
+  gruppe -- trainiert      [label="m\n(1,*)"];
+  trainiert -- bootsklasse [label="n\n(0,*)"];
+
+  // Attributkanten
+  mitglied -- m_nr;
+  mitglied -- m_name;
+  mitglied -- m_iban;
+  mitglied -- m_beitr;
+  mitglied -- m_gj;
+  mitglied -- m_steuer;
+
+  ausfahrt -- f_nr;
+  ausfahrt -- f_datum;
+  ausfahrt -- f_km;
+
+  boot -- b_name;
+  boot -- b_bj;
+
+  bootsklasse -- k_kurz;
+  bootsklasse -- k_plaetze;
+
+  schaden -- s_nr;
+  schaden -- s_text;
+
+  reise -- r_nr;
+  reise -- r_ziel;
+  reise -- r_kosten;
+
+  gruppe -- g_name;
+  gruppe -- g_zeit;
+}

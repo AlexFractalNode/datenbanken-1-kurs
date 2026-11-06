@@ -1,0 +1,363 @@
+- id: t03-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [phasenmodell]
+  front: "Welche Phasen durchläuft der Datenbankentwurf im Kursstandard, in welcher Reihenfolge?"
+  back: |-
+    1. Anforderungsanalyse
+    2. konzeptioneller Entwurf (inkl. Sichtenintegration)
+    3. logischer Entwurf
+    4. Datendefinition
+    5. physischer Entwurf
+    6. Implementierung und Wartung
+
+    Validierung begleitet alle Phasen. Variante: sieben Phasen ohne Datendefinition, dafür mit eigener Validierungsphase und getrennter Wartung.
+- id: t03-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [miniwelt, anforderungsanalyse]
+  front: "Was ist die Miniwelt, und warum wird sie zu Beginn abgegrenzt?"
+  back: |-
+    Der Ausschnitt der realen Welt, den die Datenbank abbilden soll (*mini-world*, auch *universe of discourse*). Die Abgrenzung legt fest, was dazugehört und was nicht. Ohne sie wächst das Modell unkontrolliert, und es bleibt unklar, welche Anforderungen überhaupt zu erfüllen sind.
+- id: t03-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anforderungsanalyse, ergebnisdokument]
+  front: "Was ist das Ziel der Anforderungsanalyse, und welches Ergebnis liefert sie?"
+  back: |-
+    Ziel: klären, **was** die Datenbank speichern und leisten soll, bevor modelliert wird.
+    Ergebnis: eine Anforderungsspezifikation mit
+    - Abgrenzung der Miniwelt
+    - Stakeholdern und Benutzergruppen
+    - Objekt-, Beziehungs- und Prozessbeschreibungen (Tabellen)
+    - Glossar
+
+    Je nach Vorgehen entstehen zusätzlich Lasten- und Pflichtenheft oder User Stories.
+- id: t03-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [informationsanforderung]
+  front: "Was sind Informationsanforderungen? Nenne ein Beispiel."
+  back: |-
+    Anforderungen an den **Datenbestand**: welche Objekte, Eigenschaften und Beziehungen gespeichert werden und welche Integritätsbedingungen gelten (Wertebereiche, Eindeutigkeit, Kardinalitäten). Erfasst werden sie in der Datenanalyse.
+    Beispiel Kletterhalle: „Jede Route hat einen Schwierigkeitsgrad und gehört zu genau einem Wandsektor.“
+- id: t03-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [verarbeitungsanforderung]
+  front: "Was sind Verarbeitungsanforderungen? Nenne ein Beispiel."
+  back: |-
+    Auch *Datenverarbeitungs-* oder *Bearbeitungsanforderungen*. Anforderungen an den **Umgang mit den Daten**: Abfragen, Auswertungen und Änderungsvorgänge mit Häufigkeit, Antwortzeit, Datenmenge und Berechtigung. Erfasst werden sie in der Funktionsanalyse.
+    Beispiel Kletterhalle: „An der Kasse wird eine Mitgliedskarte in unter einer Sekunde gefunden, rund 500-mal am Tag.“
+- id: t03-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [informationsanforderung, integritaet]
+  front: "Ist „Die Kilometer einer Ausfahrt liegen zwischen 1 und 200“ eine Informations- oder eine Verarbeitungsanforderung?"
+  back: |-
+    Eine **Informationsanforderung**. Sie beschreibt eine Integritätsbedingung des gespeicherten Bestands (Wertebereich), nicht einen Vorgang. Später wird sie z. B. als `CHECK`-Constraint umgesetzt. Signalwörter für Verarbeitung sind dagegen Tätigkeiten mit Häufigkeit oder Zeit („wird täglich ausgewertet“, „in unter 2 s“).
+- id: t03-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [verarbeitungsanforderung, phasenmodell]
+  front: "Wofür werden die Verarbeitungsanforderungen in den späteren Phasen gebraucht?"
+  back: |-
+    - Validierung: Lässt sich jede geforderte Abfrage mit dem Schema beantworten?
+    - Datendefinition: Views und Zugriffsrechte (wer darf was)
+    - physischer Entwurf: Indexe und Speicherentscheidungen für häufige oder zeitkritische Zugriffe
+    - Implementierung: Anwendungsprogramme und Testfälle
+- id: t03-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anforderungsanalyse, erhebung]
+  front: "Mit welchen Techniken erhebt man Anforderungen?"
+  back: |-
+    - Gespräche/Interviews mit den Stakeholdern
+    - vorhandene Formulare, Listen, Belege und Altdaten auswerten
+    - Abläufe beobachten
+    - Anwendungsfälle (*Use Cases*) beschreiben
+    - *User Stories* formulieren
+    - Unklares mit der Fachseite präzisieren und im Glossar festhalten
+- id: t03-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [konzeptioneller-entwurf]
+  front: "Was ist das Ziel des konzeptionellen Entwurfs, und welches Ergebnis liefert er?"
+  back: |-
+    Ziel: die Miniwelt formal und **unabhängig von Datenmodell und DBMS** beschreiben („was“, nicht „wie“).
+    Ergebnis: ein integriertes ER-Modell plus textliche Beschreibung und Integritätsbedingungen, die das Diagramm nicht zeigt. Im Kurs ist das Diagramm in Chen-Notation mit zusätzlichen (min,max)-Angaben an jeder Kante (t04). Es dient als gemeinsame Sprache von Fachseite und Entwicklung.
+- id: t03-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sicht, sichtenintegration]
+  front: "Was ist eine Sicht im Sinne des Entwurfsprozesses, und wie hängt sie mit einer SQL-View zusammen?"
+  back: |-
+    Eine Sicht (*user view*) ist das Teilschema einer Benutzergruppe in deren Begriffen, meist ein kleines ER-Modell.
+    Eine SQL-View (t12) ist eine gespeicherte Abfrage in der fertigen Datenbank.
+    Brücke: Sichten werden als externe Schemata entworfen und in der Datendefinition als Views samt Rechten beschrieben.
+- id: t03-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration]
+  front: "Was ist Sichtenintegration (Konsolidierung), und warum ist sie nötig?"
+  back: |-
+    Das Zusammenführen der Teilschemata aller Benutzergruppen zu **einem** widerspruchs- und redundanzfreien Gesamtschema (*view integration*). Nötig ist sie, weil jede Gruppe eigene Begriffe und eigene Modellierungsentscheidungen hat. Bloßes Nebeneinanderlegen ergäbe doppelte, vermischte oder widersprüchliche Entitätstypen.
+- id: t03-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, vorgehen]
+  front: "In welchen Schritten läuft die Sichtenintegration ab?"
+  back: |-
+    1. Sichten vergleichen und Konflikte erkennen
+    2. Konflikte mit der Fachseite klären und auflösen (umbenennen, angleichen)
+    3. Sichten zusammenführen, gemeinsame Elemente nur einmal aufnehmen, Redundanz entfernen
+    4. Gesamtschema prüfen: Ist jede Anforderung jeder Sicht noch darstellbar?
+- id: t03-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, synonym, namenskonflikt]
+  front: "Was ist ein Synonym-Konflikt bei der Sichtenintegration, und wie löst man ihn auf?"
+  back: |-
+    Ein Namenskonflikt: **verschiedene Namen für dasselbe**, z. B. „Kletterer:in“ beim Routenbau und „Gast“ an der Kasse für dieselben Personen.
+    Auflösung: Zuerst prüfen, ob die Objektmenge wirklich dieselbe ist. Ist eine nur Teilmenge, liegt ein Ober-/Unterbegriff vor. Sonst einen einheitlichen Namen wählen, die Attribute vereinigen und den Begriff ins Glossar aufnehmen.
+- id: t03-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, homonym, namenskonflikt]
+  front: "Was ist ein Homonym-Konflikt bei der Sichtenintegration, und wie löst man ihn auf?"
+  back: |-
+    Ein Namenskonflikt: **gleicher Name für Verschiedenes**, z. B. „Fahrt“ im Fahrtenbuch (eine Ausfahrt im Boot) und „Fahrt“ in der Kasse (eine Vereinsreise mit Kosten).
+    Auflösung: umbenennen, sodass jeder Name genau eine Bedeutung hat (Ausfahrt, Vereinsreise), und beide als getrennte Elemente übernehmen.
+- id: t03-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, strukturkonflikt]
+  front: "Was ist ein Strukturkonflikt bei der Sichtenintegration? Beispiel und Auflösung."
+  back: |-
+    Derselbe Sachverhalt ist in den Sichten mit **unterschiedlichen Modellierungselementen** dargestellt, z. B. Bootsklasse einmal als Attribut von Boot, einmal als eigener Entitätstyp.
+    Auflösung: auf eine Form einigen, meist die ausdrucksstärkere. Hier wird Bootsklasse Entitätstyp, weil sie eigene Attribute und Beziehungen hat.
+- id: t03-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, bedingungskonflikt]
+  front: "Was ist ein Bedingungskonflikt bei der Sichtenintegration?"
+  back: |-
+    Für dasselbe Element gelten in den Sichten **verschiedene Integritätsbedingungen**, vor allem andere Schlüssel oder Kardinalitäten.
+    Beispiel: Das Fahrtenbuch identifiziert Ruderer:innen über den Namen, die Kasse Mitglieder über die Mitgl.-Nr.
+    Auflösung: mit der Fachseite klären. Hier wird Mitgl.-Nr. Schlüssel, weil Namen nicht eindeutig sind.
+    Abweichende Darstellungen und Wertemengen sind eigene Arten (Typ- und Wertebereichskonflikt).
+- id: t03-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [logischer-entwurf]
+  front: "Was geschieht im logischen Entwurf, und welches Ergebnis liefert er?"
+  back: |-
+    Das konzeptionelle Schema wird in das Datenmodell des Ziel-DBMS übersetzt, hier relational:
+    - ER-Modell → Relationen mit Primär- und Fremdschlüsseln (t06)
+    - Normalisierung (t07)
+    - Integritätsbedingungen festhalten (t05)
+
+    Ergebnis: ein normalisiertes Relationenschema, noch nicht an ein DBMS-Produkt gebunden.
+- id: t03-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [physischer-entwurf]
+  front: "Was wird im physischen Entwurf festgelegt?"
+  back: |-
+    Die **interne Ebene**: wie Daten gespeichert und schnell gefunden werden.
+    - Indexe (Zugriffspfade)
+    - Speicherorganisation und physische Parameter
+    - Leistungsoptimierung, ggf. Denormalisierung (t07)
+
+    Ergebnis: ein Index- und Speicherkonzept. Manche Darstellungen planen hier auch die Datensicherung (Variante), im Kurs gehört sie zu Betrieb und Wartung. Das DDL-Skript gehört im Kursstandard zur Datendefinition. In der Sieben-Phasen-Variante ist es Ergebnis des physischen Entwurfs.
+- id: t03-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [phasenmodell, datenunabhaengigkeit]
+  front: "Wovon hängen die Ergebnisse von konzeptionellem Entwurf, logischem Entwurf, Datendefinition und physischem Entwurf jeweils ab?"
+  back: |-
+    - konzeptionell: weder vom Datenmodell noch vom DBMS
+    - logisch: vom Datenmodell (z. B. relational), nicht vom Produkt
+    - Datendefinition und physisch: vom konkreten DBMS-Produkt (z. B. Firebird 3)
+
+    Vorteil: Ein Produktwechsel bei gleichem Datenmodell erfordert nur neue Datendefinition und neuen physischen Entwurf.
+- id: t03-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [implementierung]
+  front: "Was gehört zur Implementierung der Datenbank?"
+  back: |-
+    - Skripte aus Datendefinition und physischem Entwurf ausführen: Tabellen, Constraints, Views, Indexe (noch ohne Daten)
+    - Daten laden oder aus Altbeständen migrieren, bei Massenimport ggf. Prüfungen zeitweise aussetzen
+    - Benutzer einrichten und Rechte zuweisen
+    - Anwendungsprogramme entwickeln bzw. anbinden (t13)
+- id: t03-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [validierung]
+  front: "Welche Rolle spielt die Validierung im Entwurf, und mit welchen Methoden wird validiert?"
+  back: |-
+    Sie ist keine eigene Phase, sondern begleitet alle Phasen und prüft jedes Ergebnis gegen die Anforderungen.
+    Vorgehensweisen:
+    - Testen mit Probedaten (Constraints, Auswertungen, Antwortzeiten)
+    - Prototyping: Die Fachseite probiert eine vorläufige Version aus.
+    - formale Prüfung, z. B. 3NF anhand der FDs belegen (streng genommen Verifikation)
+
+    Dazu kommt die Abnahme durch die Fachseite.
+- id: t03-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [wartung]
+  front: "Was umfasst Betrieb und Wartung? Nenne Beispiele."
+  back: |-
+    Die Pflege der laufenden Datenbank:
+    - neue Anforderungen (z. B. eine Bootsreservierung kommt hinzu)
+    - Fehler beheben
+    - Performance verbessern (zusätzlicher Index)
+    - DBMS-Updates, Datensicherung
+
+    Schemaänderungen laufen über `ALTER TABLE` (t09) und durchlaufen die Phasen im Kleinen erneut. Die Dokumente werden nachgezogen.
+- id: t03-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [phasenmodell, iteration]
+  front: "Warum ist das Phasenmodell keine Einbahnstraße?"
+  back: |-
+    Spätere Phasen decken Lücken früherer auf: Eine unklare Anforderung fällt oft erst beim logischen Entwurf auf, eine fehlende Beziehung erst im Test. Dann springt man zurück, korrigiert dort und zieht alle betroffenen Dokumente nach. Fehler sind umso billiger zu beheben, je früher sie entdeckt werden.
+- id: t03-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [phasenmodell, notationsvariante]
+  front: "Welche Varianten des Phasenmodells findet man in der Literatur?"
+  back: |-
+    - sieben Phasen ohne Datendefinition, mit eigener Validierungsphase
+    - physischer Entwurf als Teil der Implementierung
+    - konzeptioneller Schritt als *analysis* bezeichnet (nicht verwechseln mit der deutschen *Datenanalyse* in der Anforderungsanalyse)
+    - ER-Modell als „semantisches Modell“, „konzeptionell“ = technisches Modell; dazu Planungsphase, DBMS-Auswahl
+    - Verteilungsentwurf
+    - Drei- und Zwei-Schritt-Darstellungen
+- id: t03-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [phasenmodell, zuordnung]
+  front: "In welche Phase gehören: Glossar erstellen, Homonym umbenennen, Normalisierung, Datentyp `VARCHAR(34)` wählen, Index anlegen?"
+  back: |-
+    - Glossar: begonnen in der Anforderungsanalyse, bei der Sichtenintegration fortgeschrieben
+    - Homonym umbenennen: konzeptioneller Entwurf (Sichtenintegration)
+    - Normalisierung: logischer Entwurf
+    - `VARCHAR(34)`: Datendefinition (Variante: physischer Entwurf)
+    - Index: physischer Entwurf
+- id: t03-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ansi-sparc, abgrenzung]
+  front: "Ist das konzeptionelle Schema im Phasenmodell dasselbe wie die konzeptionelle Ebene der ANSI-SPARC-Architektur?"
+  back: |-
+    Je nach Lesart (t02), beide sind gleichberechtigt:
+    - eng: Die konzeptionelle Ebene ist das DBMS-Gesamtschema (relational: die Tabellen). Es entsteht im logischen Entwurf und wird in der Datendefinition beschrieben.
+    - weit: Schon das ER-Schema gehört auf die konzeptionelle Ebene. Der Entwurf folgt den Ebenen extern → konzeptionell → intern.
+- id: t03-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ergebnisdokument]
+  front: "Welches Ergebnisdokument liefert jede Entwurfsphase im Kursstandard?"
+  back: |-
+    - Anforderungsanalyse: Anforderungsspezifikation mit Glossar
+    - konzeptionell: Sichten und integriertes ER-Modell
+    - logisch: normalisiertes Relationenschema
+    - Datendefinition: DDL-Skript (Tabellen, Constraints, Views, Rechte)
+    - physisch: Index- und Speicherkonzept
+    - Implementierung und Wartung: befüllte Datenbank, später Änderungsskripte
+    - begleitend: Prüfprotokolle der Validierung
+- id: t03-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datendefinition]
+  front: "Was geschieht in der Phase Datendefinition, und was ist ihr Ergebnis?"
+  back: |-
+    Aus dem Relationenschema samt Benutzersichten wird ein ausführbares Skript für das gewählte DBMS:
+    - Tabellen mit DBMS-Datentypen
+    - Schlüssel, NOT NULL, UNIQUE, CHECK, Vorgabewerte
+    - Domänen, Generatoren
+    - Views und Rechte für die Benutzersichten
+
+    Ergebnis: DDL-Skript (t09, t12, t13).
+- id: t03-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, typkonflikt]
+  front: "Was ist ein Typkonflikt bei der Sichtenintegration? Beispiel und Auflösung."
+  back: |-
+    Dasselbe Element ist in den Sichten **unterschiedlich dargestellt bzw. codiert**, die Werte lassen sich aber eindeutig ineinander umrechnen.
+    Beispiele: Mitgl.-Nr. als Zahl 417 in der einen Sicht, als Text „RC-0417“ in der anderen; Bootslänge in m bzw. cm (andere Einheit).
+    Auflösung: eine Darstellung festlegen, Altwerte umrechnen, die andere Form nur bei der Anzeige erzeugen.
+- id: t03-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, wertebereichskonflikt]
+  front: "Was ist ein Wertebereichskonflikt bei der Sichtenintegration? Beispiel und Auflösung."
+  back: |-
+    Gleiche Darstellung, aber **unterschiedliche zulässige Werte**: Eine Sicht erlaubt Werte, die die andere ausschließt.
+    Beispiel: Die Bootswart:in kennt nur Rennbootklassen (1x, 2x, 4x+, 8+), die Trainer:innen auch Gig-Boote (C4x+).
+    Auflösung: mit der Fachseite klären, hier die Wertemengen vereinigen.
+- id: t03-c031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sichtenintegration, ober-unterbegriff]
+  front: "Wie werden Ober- und Unterbegriffe (Hyperonym/Hyponym) bei der Sichtenintegration bereinigt?"
+  back: |-
+    Ein Begriff der einen Sicht bezeichnet nur eine **Teilmenge** eines Begriffs der anderen. Beispiel: „Sportler:in“ (nur Trainierende) gegenüber „Mitglied“. Das ist kein Synonym.
+    Auflösung über den Oberbegriff:
+    - Mitglied mit optionaler Teilnahme, z. B. (0,1) zur Trainingsgruppe
+    - oder Spezialisierung Sportler:in is-a Mitglied (t04)
+- id: t03-c032
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anforderungsspezifikation, tabellenform]
+  front: "Welche Tabellen enthält eine Anforderungsspezifikation in Tabellenform, mit welchen Spalten?"
+  back: |-
+    - **Objektbeschreibung:** je Attribut Typ und Länge (fachlich oder allgemein wie Ganzzahl, Zeichenkette, Datum), Wertebereich/Regel, Mehrfachwerte (ja/nein oder Anzahl bzw. Spanne), Belegungsgrad (auch Füllgrad, Muss/Kann), identifizierend ja/nein
+    - **Beziehungsbeschreibung:** beteiligte Objekte (ggf. mit Rolle), Kardinalität (teils bei den Objekten notiert), Attribute, Mengengerüst
+    - **Vorgangs- bzw. Prozessbeschreibung:** Auslöser und Häufigkeit, Dringlichkeit (Priorität), gelesene/geänderte Daten, Umfang (Datenmenge)
+
+    Die Spaltenauswahl ist eine Kursdarstellung, die Namen variieren.
+- id: t03-c033
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anforderungsanalyse, datenanalyse, funktionsanalyse]
+  front: "Was unterscheidet Datenanalyse und Funktionsanalyse in der Anforderungsanalyse?"
+  back: |-
+    - **Datenanalyse:** erfasst die Informationsanforderungen (Objekte, Attribute, Beziehungen, Integritätsbedingungen)
+    - **Funktionsanalyse:** erfasst die Verarbeitungsanforderungen (Vorgänge, Häufigkeit, Antwortzeit, Datenmenge, Berechtigung)
+
+    Beide sind Teiltätigkeiten der Anforderungsanalyse, nicht des konzeptionellen Entwurfs.
+- id: t03-c034
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [requirements-engineering]
+  front: "Was sind Stakeholder, und welche vier Tätigkeiten umfasst das Requirements Engineering?"
+  back: |-
+    Stakeholder sind alle, die Anforderungen haben oder vom System betroffen sind (Nutzergruppen, Auftraggeber, Datenschutz …).
+    Tätigkeiten:
+    1. ermitteln
+    2. analysieren
+    3. spezifizieren
+    4. validieren
+- id: t03-c035
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [requirements-engineering, vorgehensmodell]
+  front: "Was unterscheidet Lastenheft und Pflichtenheft, und wie verhalten sich schwergewichtige und agile Vorgehensmodelle?"
+  back: |-
+    - **Lastenheft:** Der Auftraggeber beschreibt, *was* er braucht.
+    - **Pflichtenheft:** Der Auftragnehmer beschreibt, *wie* er es umsetzt.
+
+    Schwergewichtige Modelle legen die Anforderungen vorab möglichst vollständig fest. Agile Modelle sammeln sie schrittweise, z. B. als User Stories, und setzen sie in kurzen Iterationen um.
+- id: t03-c036
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anforderungsanalyse, use-case, user-story]
+  front: "Was unterscheidet einen Use Case von einer User Story?"
+  back: |-
+    - **Use Case:** ein beschriebener Ablauf mit Akteur, Auslöser, Schritten und Ergebnis, z. B. „Ausfahrt eintragen“.
+    - **User Story:** ein kurzer Satz aus Nutzersicht nach dem Muster „Als … möchte ich …, damit …“, z. B. „Als Bootswart:in möchte ich offene Schäden je Boot sehen, damit ich Reparaturen planen kann.“
