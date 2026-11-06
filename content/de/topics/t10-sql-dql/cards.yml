@@ -1,0 +1,475 @@
+- id: t10-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundaufbau]
+  front: "In welcher Reihenfolge werden die Klauseln einer SELECT-Abfrage geschrieben?"
+  back: |-
+    `SELECT [DISTINCT] …` → `FROM …` → `WHERE …` → `GROUP BY …` → `HAVING …` → `ORDER BY …` → Ergebnisbegrenzung (`OFFSET … FETCH …`).
+
+    Pflicht sind in Firebird nur `SELECT` und `FROM`. In Firebird stehen `FIRST`/`SKIP` direkt hinter `SELECT`.
+- id: t10-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [auswertungsreihenfolge]
+  front: "In welcher logischen Reihenfolge wertet SQL die Klauseln einer Abfrage nach dem Standard aus?"
+  back: |-
+    FROM (inkl. JOIN) → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → Ergebnisbegrenzung.
+
+    Das beschreibt die Bedeutung, nicht den Ablauf; der Optimierer darf umordnen. Manche Darstellungen setzen SELECT vor GROUP BY (als Spaltenauswahl) oder ganz ans Ende (als Projektion). Nutzt deine Lehrveranstaltung diese Sicht, verwende sie in der Prüfung und begründe kurz.
+- id: t10-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [auswertungsreihenfolge, alias]
+  front: "Warum darf ein Spaltenalias aus der SELECT-Liste im ORDER BY stehen, aber nicht im WHERE?"
+  back: |-
+    Der Alias entsteht erst im SELECT-Schritt. WHERE wird logisch vorher ausgewertet und kennt ihn noch nicht. ORDER BY kommt danach.
+
+    Im WHERE schreibt man deshalb den Ausdruck aus, z. B. `WHERE gebuehr_monat * 12 > 600`.
+- id: t10-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [projektion, distinct]
+  front: "Was bewirkt DISTINCT, und worauf bezieht es sich?"
+  back: |-
+    `SELECT DISTINCT a, b` entfernt doppelte **Ergebniszeilen**. Zwei Zeilen gelten als gleich, wenn alle ausgegebenen Spalten übereinstimmen. Zwei NULL gelten dabei als gleich.
+
+    DISTINCT gilt für die ganze Zeile, nicht nur für die erste Spalte. Ohne DISTINCT (Standard `ALL`) liefert SQL eine Multimenge.
+- id: t10-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alias, berechnete-spalte]
+  front: "Wie gibt man einer berechneten Spalte einen Namen, und wie einer Tabelle?"
+  back: |-
+    - Spaltenalias: `SELECT gebuehr_monat * 0.8 AS ermaessigt`; `AS` ist optional.
+    - Tabellenalias (Korrelationsname): `FROM kurs k` oder `FROM kurs AS k`, danach `k.titel`.
+
+    Tabellenaliase braucht man, wenn dieselbe Tabelle mehrfach vorkommt (Self-Join) oder Spaltennamen sonst mehrdeutig wären.
+- id: t10-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [where, like]
+  front: "Welche Platzhalter kennt LIKE, und was bedeuten sie?"
+  back: |-
+    - `%`: beliebig viele Zeichen, auch keins
+    - `_`: genau ein Zeichen
+
+    Beispiel: `ort LIKE 'B__n%'` trifft „Bonn“ und „Bernau“, aber nicht „Bremen“. Für ein echtes `%` im Text braucht man `ESCAPE`. `*` und `?` sind keine Platzhalter. LIKE unterscheidet in Firebird und PostgreSQL Groß- und Kleinschreibung.
+- id: t10-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [where, between]
+  front: "Sind die Grenzen bei BETWEEN eingeschlossen?"
+  back: |-
+    Ja. `x BETWEEN a AND b` bedeutet `x >= a AND x <= b`.
+
+    Die kleinere Grenze muss zuerst stehen, sonst ist das Ergebnis leer. Bei Datumsbereichen deshalb das letzte gültige Datum angeben, z. B. `BETWEEN DATE '2025-03-01' AND DATE '2025-03-31'`.
+- id: t10-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [where, in]
+  front: "Wofür ist `x IN (a, b, c)` eine Kurzform?"
+  back: |-
+    Für `x = a OR x = b OR x = c`.
+
+    Die Liste kann auch eine Unterabfrage mit einer Spalte sein: `WHERE kurs_id IN (SELECT kurs_id FROM belegung)`.
+- id: t10-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: ["null", is-null]
+  front: "Warum findet `WHERE telefon = NULL` keine einzige Zeile?"
+  back: |-
+    Jeder Vergleich mit NULL ergibt UNKNOWN, auch `NULL = NULL`. WHERE behält nur Zeilen mit TRUE.
+
+    Richtig: `WHERE telefon IS NULL` bzw. `IS NOT NULL`. Für „gleich, NULL eingeschlossen“ gibt es `IS NOT DISTINCT FROM` (Firebird und PostgreSQL).
+- id: t10-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: ["null", dreiwertige-logik]
+  front: "Welche drei Wahrheitswerte kennt SQL, und wann entsteht der dritte?"
+  back: |-
+    TRUE, FALSE und UNKNOWN (*dreiwertige Logik*).
+
+    UNKNOWN entsteht, wenn ein Vergleich einen NULL-Wert enthält, z. B. `NULL > 5`. Es entspricht „½“ der Kleene-Logik.
+
+    Die vereinfachte Lesart „Vergleich mit NULL ist FALSE“ wirkt im WHERE gleich (Zeile fällt heraus), unter NOT aber nicht: NOT FALSE = TRUE, NOT UNKNOWN = UNKNOWN.
+- id: t10-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dreiwertige-logik]
+  front: "Was ergeben TRUE AND UNKNOWN, FALSE AND UNKNOWN, TRUE OR UNKNOWN, FALSE OR UNKNOWN und NOT UNKNOWN?"
+  back: |-
+    - TRUE AND UNKNOWN = UNKNOWN
+    - FALSE AND UNKNOWN = FALSE
+    - TRUE OR UNKNOWN = TRUE
+    - FALSE OR UNKNOWN = UNKNOWN
+    - NOT UNKNOWN = UNKNOWN
+
+    Merkregel: FALSE entscheidet AND, TRUE entscheidet OR.
+- id: t10-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dreiwertige-logik, where, having]
+  front: "Was passiert mit einer Zeile, deren WHERE-Bedingung UNKNOWN ergibt?"
+  back: |-
+    Sie fällt heraus, genau wie bei FALSE. WHERE, HAVING und die ON-Bedingung eines Joins behalten nur TRUE.
+
+    Folge: `WHERE x > 5` und `WHERE NOT (x > 5)` liefern zusammen nicht alle Zeilen; die mit `x` NULL fehlen in beiden.
+- id: t10-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [aggregat, count, "null"]
+  front: "Was ist der Unterschied zwischen COUNT(*), COUNT(spalte) und COUNT(DISTINCT spalte)?"
+  back: |-
+    - `COUNT(*)`: alle Zeilen der Gruppe
+    - `COUNT(spalte)`: nur Zeilen, in denen `spalte` nicht NULL ist
+    - `COUNT(DISTINCT spalte)`: verschiedene Werte ungleich NULL
+
+    Beispiel: E-Mail-Spalte mit (a, b, NULL, a) → 4, 3, 2.
+- id: t10-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [aggregat, "null"]
+  front: "Wie behandeln SUM, AVG, MIN und MAX NULL-Werte, und was liefern sie bei leerer Eingabe?"
+  back: |-
+    Sie übergehen NULL. `AVG` teilt deshalb durch die Zahl der **Werte**, nicht der Zeilen.
+
+    Bei leerer Eingabe oder nur NULL liefern sie NULL, `COUNT` dagegen 0. Für „0 statt NULL“: `COALESCE(SUM(x), 0)`.
+- id: t10-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [group-by]
+  front: "Welche Spalten dürfen in der SELECT-Liste einer gruppierten Abfrage stehen?"
+  back: |-
+    Nur Spalten, die im GROUP BY stehen, und Aggregatausdrücke.
+
+    Firebird verlangt das streng. PostgreSQL erlaubt zusätzlich Spalten, die funktional vom Primärschlüssel einer gruppierten Tabelle abhängen. Für Lösungen, die in beiden Systemen laufen: alle nicht aggregierten Spalten ins GROUP BY.
+- id: t10-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [where-vs-having]
+  front: "Wann gehört eine Bedingung ins WHERE, wann ins HAVING?"
+  back: |-
+    - WHERE: Bedingung an **einzelne Zeilen**, vor dem Gruppieren, keine Aggregate.
+    - HAVING: Bedingung an **Gruppen**, nach dem Gruppieren, meist mit Aggregat, z. B. `HAVING COUNT(*) >= 5`.
+
+    Was in beiden ginge, gehört ins WHERE; dort fallen Zeilen früher weg.
+- id: t10-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [group-by, "null"]
+  front: "Wie werden NULL-Werte beim GROUP BY behandelt?"
+  back: |-
+    Alle NULL-Werte der Gruppierungsspalte bilden **eine gemeinsame** Gruppe, obwohl `NULL = NULL` nicht TRUE ist. Für GROUP BY, DISTINCT und UNION gelten NULL-Werte als „nicht verschieden“.
+- id: t10-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [order-by, "null", dialekt]
+  front: "Wo landen NULL-Werte bei ORDER BY in Firebird 3 und in PostgreSQL?"
+  back: |-
+    - Firebird 3: aufsteigend zuerst, absteigend zuletzt
+    - PostgreSQL: aufsteigend zuletzt, absteigend zuerst (NULL gilt als größer als jeder Wert)
+
+    Portabel: `ORDER BY budget ASC NULLS LAST` (bzw. `NULLS FIRST`) ausdrücklich angeben.
+- id: t10-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ergebnisbegrenzung, dialekt]
+  front: "Wie gibt man die Zeilen 11 bis 20 einer sortierten Liste in Firebird 3, PostgreSQL und im SQL-Standard aus?"
+  back: |-
+    - Firebird: `SELECT FIRST 10 SKIP 10 … ORDER BY …` oder `ROWS 11 TO 20`
+    - PostgreSQL: `… ORDER BY … LIMIT 10 OFFSET 10`
+    - Standard (beide): `… ORDER BY … OFFSET 10 ROWS FETCH NEXT 10 ROWS ONLY`
+
+    Ohne eindeutiges ORDER BY ist nicht festgelegt, welche Zeilen kommen.
+- id: t10-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, inner-join]
+  front: "Was liefert ein INNER JOIN?"
+  back: |-
+    Alle Kombinationen aus Zeilen beider Tabellen, für die die ON-Bedingung TRUE ist. Zeilen ohne Partner fallen weg.
+
+    `JOIN` ohne Zusatz bedeutet `INNER JOIN`.
+- id: t10-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, outer-join]
+  front: "Was unterscheidet LEFT, RIGHT und FULL OUTER JOIN?"
+  back: |-
+    Alle drei liefern zuerst das Ergebnis des inneren Joins. Dazu kommen Zeilen ohne Partner, aufgefüllt mit NULL:
+    - LEFT: alle Zeilen der linken Tabelle
+    - RIGHT: alle Zeilen der rechten Tabelle
+    - FULL: aus beiden Tabellen
+
+    `A RIGHT JOIN B` = `B LEFT JOIN A`.
+- id: t10-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, outer-join, anti-join]
+  front: "Wie findet man mit einem LEFT JOIN alle Zeilen ohne Partner, z. B. Kurse ohne Belegung?"
+  back: |-
+    ```sql
+    SELECT k.titel
+    FROM kurs k
+    LEFT JOIN belegung b ON b.kurs_id = k.kurs_id
+    WHERE b.kurs_id IS NULL;
+    ```
+    Geprüft wird eine Spalte der rechten Tabelle, die in echten Partnerzeilen nie NULL ist (z. B. ein Schlüssel).
+- id: t10-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, outer-join, on-vs-where]
+  front: "Warum macht eine Bedingung auf die rechte Tabelle im WHERE einen LEFT JOIN oft zum inneren Join?"
+  back: |-
+    Zeilen ohne Partner haben rechts NULL. Eine Bedingung wie `WHERE b.rabatt_prozent > 0` ist dafür UNKNOWN und entfernt sie.
+
+    Soll die Bedingung nur die Partner auswählen und die linken Zeilen behalten, gehört sie ins ON: `LEFT JOIN belegung b ON b.kurs_id = k.kurs_id AND b.rabatt_prozent > 0`.
+- id: t10-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, natural-join, using]
+  front: "Was machen NATURAL JOIN und JOIN … USING, und warum ist NATURAL riskant?"
+  back: |-
+    - `USING (kurs_id)`: Gleichheit über die genannten gleichnamigen Spalten, die nur einmal ausgegeben werden.
+    - `NATURAL JOIN`: wie USING über **alle** gleichnamigen Spalten.
+
+    Risiko: `kurs NATURAL JOIN termin` vergleicht auch `raum_id`. Kommt später eine gleichnamige Spalte dazu, ändert sich das Ergebnis unbemerkt. Ohne gemeinsame Spalte entsteht ein kartesisches Produkt.
+- id: t10-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, cross-join, komma-syntax]
+  front: "Was liefert `FROM a, b` ohne Bedingung, und wie hängt das mit CROSS JOIN zusammen?"
+  back: |-
+    Das kartesische Produkt: jede Zeile von a mit jeder Zeile von b (|a| · |b| Zeilen). Das ist dasselbe wie `a CROSS JOIN b`.
+
+    Die alte Komma-Syntax mit Join-Bedingung im WHERE (`FROM a, b WHERE a.id = b.a_id`) entspricht einem INNER JOIN. Vergisst man die Bedingung, entsteht unbemerkt ein Produkt.
+- id: t10-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, self-join]
+  front: "Was ist ein Self-Join, und wofür braucht man ihn?"
+  back: |-
+    Eine Tabelle wird mit sich selbst verbunden, unter zwei Aliasen in zwei Rollen. Typisch bei rekursiven Beziehungen, z. B. Lehrgang und Vorstufe:
+    ```sql
+    SELECT l.titel, v.titel AS vorstufe
+    FROM lehrgang l
+    LEFT JOIN lehrgang v ON v.lehrgang_id = l.vorstufe_id;
+    ```
+    Auch Paare aus derselben Tabelle (gleicher Raum, gleicher Ort) findet man so.
+- id: t10-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen, union]
+  front: "Was ist der Unterschied zwischen UNION und UNION ALL, und welche Bedingungen müssen beide Teilabfragen erfüllen?"
+  back: |-
+    - `UNION` entfernt doppelte Zeilen, `UNION ALL` behält sie (und ist schneller).
+    - Beide Teile brauchen gleich viele Spalten mit verträglichen Typen; die Namen kommen aus dem ersten Teil.
+    - ORDER BY steht einmal am Ende. Sicher und portabel sind Spaltennummern (`ORDER BY 1, 2`); Firebird 3 nimmt dort nur Spaltennummern an, keine Namen.
+- id: t10-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen, dialekt]
+  front: "Wie ersetzt man INTERSECT und EXCEPT in Firebird 3?"
+  back: |-
+    Firebird 3 kennt beide nicht.
+    - A ∩ B: `WHERE EXISTS (… korreliert …)` oder `WHERE x IN (SELECT …)`
+    - A − B: `WHERE NOT EXISTS (… korreliert …)`
+
+    Unterschied: INTERSECT/EXCEPT behandeln zwei NULL als gleich und entfernen Duplikate, die Ersatzformen nicht (ggf. `DISTINCT` ergänzen).
+- id: t10-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, skalar]
+  front: "Was ist eine skalare Unterabfrage, und was passiert, wenn sie keine oder mehrere Zeilen liefert?"
+  back: |-
+    Eine Unterabfrage, die genau einen Wert liefert, z. B. `WHERE gebuehr_monat > (SELECT AVG(gebuehr_monat) FROM kurs)`.
+
+    Keine Zeile: Ergebnis NULL (Vergleich wird UNKNOWN). Mehrere Zeilen: Laufzeitfehler.
+- id: t10-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, exists]
+  front: "Wann ist `EXISTS (Unterabfrage)` wahr, und spielt die SELECT-Liste der Unterabfrage eine Rolle?"
+  back: |-
+    Wahr, sobald die Unterabfrage mindestens eine Zeile liefert, sonst falsch. EXISTS wird nie UNKNOWN.
+
+    Die SELECT-Liste ist egal; üblich ist `SELECT 1`. Meist ist die Unterabfrage korreliert.
+- id: t10-c031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, any, all]
+  front: "Was bedeuten `x > ANY (…)` und `x > ALL (…)`, und was gilt bei leerer Unterabfrage?"
+  back: |-
+    - `> ANY` (= `SOME`): größer als **mindestens ein** Wert
+    - `> ALL`: größer als **jeder** Wert
+
+    Nach ANY/ALL steht immer eine Unterabfrage, keine Werteliste. Leere Unterabfrage: ANY ist FALSE, ALL ist TRUE. Liefert sie NULL und entscheidet kein Einzelvergleich, ist das Ergebnis UNKNOWN. `= ANY` entspricht `IN`, `<> ALL` entspricht `NOT IN`.
+- id: t10-c032
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, not-in, "null"]
+  front: "Warum liefert `WHERE id NOT IN (SELECT fk FROM t)` ein leeres Ergebnis, sobald `fk` einmal NULL ist?"
+  back: |-
+    `id NOT IN (1, 2, NULL)` bedeutet `id <> 1 AND id <> 2 AND id <> NULL`. Der letzte Vergleich ist immer UNKNOWN, die UND-Verknüpfung also höchstens UNKNOWN.
+
+    Abhilfe: `NOT EXISTS` oder in der Unterabfrage `WHERE fk IS NOT NULL`.
+- id: t10-c033
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, korreliert]
+  front: "Was ist eine korrelierte Unterabfrage?"
+  back: |-
+    Eine Unterabfrage, die eine Spalte der äußeren Abfrage verwendet und deshalb allein nicht ausführbar ist. Gedanklich wird sie für jede äußere Zeile neu ausgewertet.
+
+    Beispiel: `WHERE i.leihgebuehr > (SELECT AVG(i2.leihgebuehr) FROM instrument i2 WHERE i2.familie = i.familie)`.
+- id: t10-c034
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [funktionen, datum, dialekt]
+  front: "Wie rechnet man mit Datumswerten in Firebird 3 und PostgreSQL?"
+  back: |-
+    - Heute/jetzt: `CURRENT_DATE`, `CURRENT_TIME`, `CURRENT_TIMESTAMP` (beide)
+    - Tage dazwischen: `b - a` (beide); Firebird auch `DATEDIFF(DAY FROM a TO b)` = `DATEDIFF(DAY, a, b)`
+    - Addieren: `d + 7` (beide); Firebird `DATEADD(7 DAY TO d)` = `DATEADD(DAY, 7, d)`; PostgreSQL `d + INTERVAL '1 month'`
+    - Tag im Jahr: Firebird `YEARDAY` (1. Januar = 0), PostgreSQL `DOY` (= 1)
+- id: t10-c035
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [funktionen, string]
+  front: "Welche Zeichenkettenfunktionen funktionieren in Firebird 3 und PostgreSQL gleich?"
+  back: |-
+    `||`, `UPPER`/`LOWER`, `SUBSTRING(x FROM a FOR n)`, `LEFT(x, n)`, `RIGHT(x, n)`, `LPAD`/`RPAD(x, n, 'z')`, `TRIM([LEADING | TRAILING | BOTH] 'z' FROM x)`, `CHAR_LENGTH(x)`, `POSITION('@' IN x)` (0 ohne Treffer).
+
+    Unterschiede: `LIST` (Firebird) heißt in PostgreSQL `STRING_AGG`; `ILIKE` nur PostgreSQL. `'x' || NULL` ergibt NULL.
+- id: t10-c036
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [funktionen, cast, coalesce]
+  front: "Wofür braucht man CAST und COALESCE?"
+  back: |-
+    - `CAST(x AS typ)` wandelt den Typ um, z. B. `CAST('2025-03-01' AS DATE)` oder `CAST(AVG(x) AS NUMERIC(10,2))`.
+    - `COALESCE(a, b, …)` liefert den ersten Wert ungleich NULL, z. B. `COALESCE(telefon, 'unbekannt')`.
+- id: t10-c037
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [case]
+  front: "Wie ist ein gesuchtes CASE aufgebaut, und was liefert es ohne ELSE?"
+  back: |-
+    ```sql
+    CASE WHEN plaetze >= 10 THEN 'groß'
+         WHEN plaetze >= 4  THEN 'mittel'
+         ELSE 'klein' END
+    ```
+    Der erste Zweig mit TRUE gewinnt. Ohne ELSE liefert CASE NULL, wenn kein Zweig zutrifft. UNKNOWN zählt wie FALSE.
+- id: t10-c038
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [aggregat, dialekt, avg]
+  front: "Warum kann `AVG` über eine INTEGER-Spalte in Firebird 3 und PostgreSQL verschieden ausfallen, und wie formuliert man neutral?"
+  back: |-
+    Firebird behält Typ und Skala der Spalte: `AVG` von 1, 2, 4 ergibt 2 (abgeschnitten). PostgreSQL liefert 2,333…
+
+    Neutral: `AVG(CAST(x AS DOUBLE PRECISION))` oder auf eine größere NUMERIC-Skala casten und danach runden.
+- id: t10-c039
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [funktionen, mathematik]
+  front: "Was liefern ROUND, TRUNC, CEILING und FLOOR bei negativen Zahlen und negativer Stellenzahl?"
+  back: |-
+    - `ROUND(-2.5)` = −3 (genaue 5 vom Nullpunkt weg)
+    - `TRUNC(-2.7)` = −2 (Richtung null)
+    - `CEILING(-2.7)` = −2 (Richtung +∞)
+    - `FLOOR(-2.1)` = −3 (Richtung −∞)
+    - `ROUND(1234.5, -2)` = 1200
+
+    Dazu: `MOD(17, 5)` = 2, `ABS(-4)` = 4, `SQRT(16)` = 4, `POWER(2, 10)` = 1024.
+- id: t10-c040
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, equi-join, theta-join]
+  front: "Was unterscheidet einen Equi-Join von einem Non-Equi-Join, und wie hängt der Theta-Join damit zusammen?"
+  back: |-
+    - Equi-Join: Bedingung nur mit `=`, meist Fremdschlüssel = Primärschlüssel.
+    - Non-Equi-Join: andere Vergleiche, z. B. `JOIN stufe s ON k.gebuehr_monat BETWEEN s.von AND s.bis`.
+
+    Theta-Join: in der Algebra der allgemeine Verbund mit beliebigem Vergleich θ (Equi-Join = Spezialfall θ = „=“); im SQL-Sprachgebrauch oft gleichbedeutend mit Non-Equi-Join.
+- id: t10-c041
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, klassifikation, korreliert]
+  front: "Welche drei Arten von Unterabfragen unterscheidet man nach der Form des Ergebnisses, und was heißt „korreliert“?"
+  back: |-
+    - Skalar: genau ein Wert, für Vergleiche oder als Spalte
+    - Liste (Spalte): eine Spalte, viele Zeilen, für `IN`, `ANY`, `ALL`
+    - Tabelle: Zeilen und Spalten, im `FROM` oder mit `EXISTS`
+
+    Korreliert: verweist auf die äußere Abfrage und ist allein nicht ausführbar.
+- id: t10-c042
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, select-liste, abgeleitete-tabelle]
+  front: "Wie verwendet man eine Unterabfrage in der SELECT-Liste und im FROM?"
+  back: |-
+    - SELECT-Liste: skalar, meist korreliert, z. B. `(SELECT COUNT(*) FROM kurs k WHERE k.lehrkraft_id = l.person_id) AS kurse`. Liefert auch 0.
+    - FROM: abgeleitete Tabelle (*derived table*) mit Alias (nach Standard nötig, in Firebird 3 und PostgreSQL ab 16 optional, aber empfohlen), z. B. `FROM (SELECT kurs_id, COUNT(*) AS n FROM belegung GROUP BY kurs_id) t`. So sind Aggregate über Aggregate möglich.
+- id: t10-c043
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, in, any, all, "null"]
+  front: "Die Unterabfrage `(SELECT x FROM t)` liefert 3, 8 und NULL. Was ergeben `5 IN (…)`, `3 IN (…)`, `10 > ALL (…)` und `1 > ALL (…)` mit dieser Unterabfrage?"
+  back: |-
+    - `5 IN (…)`: UNKNOWN (F OR F OR U)
+    - `3 IN (…)`: TRUE (ein Treffer genügt)
+    - `10 > ALL (…)`: UNKNOWN (T AND T AND U)
+    - `1 > ALL (…)`: FALSE (1 > 3 entscheidet)
+
+    Regel: IN/ANY wie OR-Kette, ALL wie AND-Kette. Eine Werteliste in Klammern ist nur bei IN erlaubt, nicht bei ANY/ALL.
+- id: t10-c044
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dreiwertige-logik, xor]
+  front: "Wie lassen sich AND, OR und NOT der dreiwertigen Logik mit Zahlen berechnen, und was ergibt XOR mit UNKNOWN?"
+  back: |-
+    T = 1, U = ½, F = 0:
+    - AND = Minimum, OR = Maximum, NOT a = 1 − a
+
+    XOR = `(a OR b) AND NOT (a AND b)`: T XOR F = T, T XOR T = F; ist ein Operand U, ist das Ergebnis immer U. Ein XOR-Schlüsselwort für Wahrheitswerte haben Firebird 3 und PostgreSQL nicht.
+- id: t10-c045
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [extremwert, unterabfrage, first-skip]
+  front: "Wie findet man den Datensatz mit dem höchsten Wert, und was passiert bei Gleichstand?"
+  back: |-
+    - `WHERE preis = (SELECT MAX(preis) FROM t)`: liefert **alle** Zeilen mit dem Höchstwert.
+    - `SELECT FIRST 1 … ORDER BY preis DESC, id`: liefert genau **eine** Zeile; welche, entscheidet die zweite Sortierspalte.
+
+    Ohne zweite Sortierspalte ist bei Gleichstand nicht festgelegt, welche Zeile kommt.
+- id: t10-c046
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datum, literal, dialekt]
+  front: "Wie schreibt man Datumswerte in Bedingungen, damit sie in Firebird 3 und PostgreSQL gleich wirken?"
+  back: |-
+    Portabel: `DATE '2025-03-01'` oder `'2025-03-01'` (ISO 8601).
+
+    Firebird wandelt auch `'01.03.2025'` (Tag.Monat.Jahr) implizit um. In PostgreSQL hängt die Deutung solcher Zeichenketten von der Einstellung `DateStyle` ab; dort nur ISO verwenden.
+- id: t10-c047
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [auswertungsreihenfolge, darstellungsvarianten]
+  front: "Warum setzen manche Darstellungen SELECT vor GROUP BY oder ganz ans Ende, und was bleibt in jeder Darstellung gleich?"
+  back: |-
+    SELECT wird verschieden aufgefasst: Standard = Werte berechnen (nach HAVING), vor GROUP BY = Spalten auswählen, am Ende = Projektion nach dem Sortieren.
+
+    Gleich bleibt: FROM zuerst, WHERE vor Gruppierung und SELECT (Alias dort unbekannt), GROUP BY vor HAVING, ORDER BY nach HAVING. Das Ergebnis ist identisch.
+- id: t10-c048
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [literal, bezeichner, like]
+  front: "Was bedeuten einfache und doppelte Anführungszeichen in SQL, und welche LIKE-Platzhalter gelten?"
+  back: |-
+    - `'Talhausen'`: Zeichenkette
+    - `"Talhausen"`: Bezeichner (Tabellen- oder Spaltenname), führt hier zum Fehler
+    - Platzhalter: nur `%` und `_`
+
+    `*` und `?` als Platzhalter oder Text in doppelten Anführungszeichen sind Konventionen einzelner Desktop-Datenbanken (z. B. Access), nicht von Firebird, PostgreSQL oder dem Standard.

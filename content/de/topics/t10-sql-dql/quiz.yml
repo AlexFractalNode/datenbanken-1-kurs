@@ -1,0 +1,447 @@
+- id: t10-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dreiwertige-logik]
+  type: single
+  question: "Welchen Wert hat in SQL der Ausdruck `FALSE OR UNKNOWN`?"
+  options:
+    - text: "UNKNOWN"
+      correct: true
+      explain: "FALSE entscheidet ein OR nicht. Das Ergebnis hängt vom unbekannten Operanden ab und bleibt deshalb UNKNOWN."
+    - text: "FALSE"
+      correct: false
+      explain: "Das gilt für `FALSE AND UNKNOWN`. Beim OR entscheidet nur TRUE das Ergebnis sicher."
+    - text: "TRUE"
+      correct: false
+      explain: "TRUE ergäbe sich nur, wenn einer der Operanden TRUE wäre."
+    - text: "NULL wird als FALSE behandelt, also FALSE."
+      correct: false
+      explain: "SQL setzt UNKNOWN nicht mit FALSE gleich. Erst WHERE verwirft Zeilen mit UNKNOWN, im Ausdruck selbst bleibt es UNKNOWN."
+- id: t10-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: ["null", where]
+  type: single
+  question: |-
+    Die Tabelle `artikel(id, farbe)` enthält die Zeilen (1, 'rot'), (2, 'blau'), (3, NULL). Wie viele Zeilen liefert `SELECT id FROM artikel WHERE farbe <> 'rot'`?
+  options:
+    - text: "1"
+      correct: true
+      explain: "Nur Zeile 2. Für Zeile 3 ist `NULL <> 'rot'` UNKNOWN, und WHERE behält nur TRUE."
+    - text: "2"
+      correct: false
+      explain: "Hier wäre Zeile 3 mitgezählt. NULL ist aber nicht „ungleich rot“, sondern unbekannt."
+    - text: "0"
+      correct: false
+      explain: "Zeile 2 erfüllt die Bedingung eindeutig: `'blau' <> 'rot'` ist TRUE."
+    - text: "3"
+      correct: false
+      explain: "Zeile 1 hat genau die Farbe rot und fällt sicher heraus."
+- id: t10-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [aggregat, count, "null"]
+  type: single
+  question: |-
+    Die Spalte `note` einer Tabelle mit fünf Zeilen enthält die Werte 2, NULL, 4, 4, NULL. Welche Werte liefern `COUNT(*)`, `COUNT(note)` und `COUNT(DISTINCT note)`?
+  options:
+    - text: "5, 3, 2"
+      correct: true
+      explain: "COUNT(*) zählt Zeilen, COUNT(note) nur Werte ungleich NULL (2, 4, 4), DISTINCT davon die verschiedenen (2, 4)."
+    - text: "5, 5, 3"
+      correct: false
+      explain: "COUNT(spalte) übergeht NULL, und NULL wird auch bei COUNT(DISTINCT …) nicht als eigener Wert gezählt."
+    - text: "3, 3, 2"
+      correct: false
+      explain: "COUNT(*) zählt alle Zeilen, unabhängig von NULL-Werten."
+    - text: "5, 3, 3"
+      correct: false
+      explain: "Die verschiedenen Werte ungleich NULL sind nur 2 und 4. NULL zählt bei COUNT(DISTINCT …) nicht mit."
+- id: t10-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [aggregat, avg, "null"]
+  type: single
+  question: |-
+    Die Spalte `punkte` enthält 10, 20, NULL, 30. Was liefert `AVG(punkte)` (bei exakter Rechnung)?
+  options:
+    - text: "20"
+      correct: true
+      explain: "AVG übergeht NULL: (10 + 20 + 30) / 3 = 20."
+    - text: "15"
+      correct: false
+      explain: "Das wäre 60 / 4, also NULL als Zeile mitgezählt. AVG teilt durch die Zahl der Werte ungleich NULL."
+    - text: "NULL"
+      correct: false
+      explain: "Ein einzelner NULL-Wert macht das Aggregat nicht NULL. NULL kommt nur heraus, wenn alle Werte NULL sind oder keine Zeile da ist."
+    - text: "Fehler, weil NULL nicht addiert werden kann"
+      correct: false
+      explain: "Aggregatfunktionen sind gerade dafür gebaut, NULL-Werte zu übergehen."
+- id: t10-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [where-vs-having]
+  type: multi
+  question: "Welche Aussagen zu WHERE und HAVING sind richtig?"
+  options:
+    - text: "WHERE filtert einzelne Zeilen vor dem Gruppieren."
+      correct: true
+      explain: "WHERE wird logisch direkt nach FROM ausgewertet, also vor GROUP BY."
+    - text: "HAVING filtert Gruppen und darf Aggregatfunktionen enthalten."
+      correct: true
+      explain: "Nach GROUP BY gibt es je Gruppe Aggregatwerte; genau darauf prüft HAVING."
+    - text: "`WHERE COUNT(*) > 3` ist erlaubt, wenn die Abfrage ein GROUP BY hat."
+      correct: false
+      explain: "Aggregate sind im WHERE nie erlaubt, weil dort noch nicht gruppiert ist. Richtig: `HAVING COUNT(*) > 3`."
+    - text: "Im HAVING darf man in Firebird den Alias einer Aggregatspalte aus der SELECT-Liste verwenden."
+      correct: false
+      explain: "Firebird und PostgreSQL verlangen im HAVING den Ausdruck, z. B. `HAVING SUM(menge) > 50`. In der Standardsicht liegt das daran, dass HAVING logisch vor SELECT ausgewertet wird. In Darstellungen mit SELECT vor GROUP BY gilt das Verbot trotzdem, dort ist es eine Regel der Systeme."
+- id: t10-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [auswertungsreihenfolge]
+  type: single
+  question: "In welcher logischen Reihenfolge wertet SQL diese Klauseln **nach dem SQL-Standard** aus (so beschreibt es auch PostgreSQL), wenn der SELECT-Schritt das Berechnen der Ausgabewerte bedeutet?"
+  options:
+    - text: "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY"
+      correct: true
+      explain: "Erst wird die Zwischentabelle gebildet und gefiltert, dann gruppiert, dann die Ausgabe berechnet und zuletzt sortiert. Hinweis: Manche Lehrmaterialien setzen SELECT als Spaltenauswahl schon vor GROUP BY (FROM → WHERE → SELECT → GROUP BY → HAVING → ORDER BY) oder als abschließende Projektion ganz ans Ende, nach ORDER BY. Das sind andere Darstellungen derselben Abfrage, kein anderes Ergebnis. Gefragt war hier die Standardsicht."
+    - text: "SELECT → FROM → WHERE → GROUP BY → HAVING → ORDER BY"
+      correct: false
+      explain: "Das ist die Schreibreihenfolge. Logisch kann nichts berechnet werden, bevor FROM die Zwischentabelle liefert; deshalb kennt WHERE auch keine Aliase."
+    - text: "FROM → GROUP BY → WHERE → HAVING → SELECT → ORDER BY"
+      correct: false
+      explain: "WHERE filtert Zeilen vor dem Gruppieren, sonst bräuchte man HAVING nicht."
+    - text: "FROM → WHERE → HAVING → GROUP BY → SELECT → ORDER BY"
+      correct: false
+      explain: "HAVING prüft Bedingungen an Gruppen, meist mit Aggregaten. Dafür müssen die Gruppen schon gebildet sein; HAVING kommt deshalb in jeder Darstellung nach GROUP BY."
+- id: t10-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [order-by, "null", dialekt]
+  type: single
+  question: |-
+    Die Spalte `budget` enthält 100, NULL und 50. Welche Reihenfolge liefert `ORDER BY budget` (ohne weitere Angabe) in **Firebird 3**?
+  options:
+    - text: "NULL, 50, 100"
+      correct: true
+      explain: "Firebird 3 stellt NULL bei aufsteigender Sortierung an den Anfang."
+    - text: "50, 100, NULL"
+      correct: false
+      explain: "So sortiert PostgreSQL, das NULL als größer als jeden Wert behandelt. Portabel wird es erst mit `NULLS FIRST`/`NULLS LAST`."
+    - text: "100, 50, NULL"
+      correct: false
+      explain: "Ohne DESC wird aufsteigend sortiert."
+    - text: "Fehler, weil NULL nicht verglichen werden kann"
+      correct: false
+      explain: "Sortieren mit NULL ist erlaubt; die Systeme legen nur unterschiedlich fest, wo NULL landet."
+- id: t10-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ergebnisbegrenzung, dialekt]
+  type: multi
+  question: "Welche Formulierungen liefern in **Firebird 3** die Zeilen 6 bis 10 einer nach `id` sortierten Tabelle `t`?"
+  options:
+    - text: "`SELECT FIRST 5 SKIP 5 * FROM t ORDER BY id`"
+      correct: true
+      explain: "SKIP 5 überspringt die ersten fünf, FIRST 5 nimmt die nächsten fünf."
+    - text: "`SELECT * FROM t ORDER BY id OFFSET 5 ROWS FETCH NEXT 5 ROWS ONLY`"
+      correct: true
+      explain: "Die Standardsyntax gibt es ab Firebird 3; sie läuft auch in PostgreSQL."
+    - text: "`SELECT * FROM t ORDER BY id ROWS 6 TO 10`"
+      correct: true
+      explain: "ROWS ist eine Firebird-Erweiterung, die Zeilennummern beginnen bei 1."
+    - text: "`SELECT * FROM t ORDER BY id LIMIT 5 OFFSET 5`"
+      correct: false
+      explain: "LIMIT ist PostgreSQL-, MySQL- und SQLite-Syntax; Firebird 3 kennt es nicht."
+- id: t10-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, outer-join, count]
+  type: single
+  question: |-
+    `team(tid)` hat die Zeilen 1, 2, 3; `spiel(sid, tid)` hat (10, 1), (11, 1), (12, 2). Was liefert `SELECT t.tid, COUNT(*) FROM team t LEFT JOIN spiel s ON s.tid = t.tid GROUP BY t.tid` für Team 3?
+  options:
+    - text: "1"
+      correct: true
+      explain: "Der LEFT JOIN erzeugt für Team 3 eine Zeile mit NULL in `s`. COUNT(*) zählt diese Zeile. Richtig für „Anzahl Spiele“ wäre `COUNT(s.sid)` mit Ergebnis 0."
+    - text: "0"
+      correct: false
+      explain: "Das liefert `COUNT(s.sid)`, weil es NULL übergeht. COUNT(*) zählt dagegen die Zeile selbst."
+    - text: "NULL"
+      correct: false
+      explain: "COUNT liefert nie NULL, sondern mindestens 0."
+    - text: "Team 3 erscheint nicht."
+      correct: false
+      explain: "Das wäre beim inneren Join so. Der LEFT JOIN behält jede Zeile der linken Tabelle."
+- id: t10-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, outer-join, on-vs-where]
+  type: single
+  question: |-
+    Was ist der Unterschied zwischen
+    (A) `FROM kurs k LEFT JOIN belegung b ON b.kurs_id = k.kurs_id AND b.rabatt_prozent > 0` und
+    (B) `FROM kurs k LEFT JOIN belegung b ON b.kurs_id = k.kurs_id WHERE b.rabatt_prozent > 0`?
+  options:
+    - text: "A behält alle Kurse, B nur Kurse mit mindestens einer rabattierten Belegung."
+      correct: true
+      explain: "In A wählt die Bedingung nur die Partner aus, Kurse ohne passenden Partner bleiben mit NULL. In B ist `NULL > 0` für sie UNKNOWN, WHERE entfernt sie."
+    - text: "Kein Unterschied, ON und WHERE sind austauschbar."
+      correct: false
+      explain: "Das gilt nur beim inneren Join. Beim äußeren Join entscheidet die Stelle, ob linke Zeilen erhalten bleiben."
+    - text: "B behält alle Kurse, A nur Kurse mit Rabatt."
+      correct: false
+      explain: "Genau umgekehrt: Das ON eines LEFT JOIN entfernt nie linke Zeilen."
+    - text: "A ist ein Syntaxfehler, weil ON nur Gleichheitsbedingungen erlaubt."
+      correct: false
+      explain: "Im ON darf jede Bedingung stehen, auch mit AND und anderen Vergleichen."
+- id: t10-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, natural-join]
+  type: truefalse
+  question: |-
+    Wahr oder falsch: `kurs NATURAL JOIN termin` verbindet die Tabellen nur über `kurs_id`, wenn beide Tabellen die Spalten `kurs_id` **und** `raum_id` enthalten.
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "NATURAL JOIN vergleicht alle gleichnamigen Spalten, hier also auch `raum_id`. Termine in einem anderen Raum oder mit NULL fallen heraus."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig. Für einen Join nur über `kurs_id` schreibt man `JOIN termin USING (kurs_id)` oder `ON`."
+- id: t10-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen, union]
+  type: single
+  question: |-
+    `a(x)` enthält 1, 2, 2 und `b(x)` enthält 2, 3. Wie viele Zeilen liefern `SELECT x FROM a UNION SELECT x FROM b` und `… UNION ALL …`?
+  options:
+    - text: "3 und 5"
+      correct: true
+      explain: "UNION entfernt alle Duplikate, auch die innerhalb von a: {1, 2, 3}. UNION ALL hängt einfach alle 3 + 2 Zeilen aneinander."
+    - text: "4 und 5"
+      correct: false
+      explain: "UNION entfernt Duplikate im Gesamtergebnis, nicht nur zwischen den beiden Teilen. Die doppelte 2 aus a bleibt also nicht stehen."
+    - text: "3 und 3"
+      correct: false
+      explain: "UNION ALL entfernt keine Duplikate."
+    - text: "1 und 5"
+      correct: false
+      explain: "Eine Zeile wäre die Schnittmenge {2} (INTERSECT), nicht die Vereinigung."
+- id: t10-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen, dialekt]
+  type: single
+  question: "Wie formuliert man „Kunden-IDs aus `bestellung`, die nicht in `reklamation` vorkommen“ in Firebird 3 am sichersten?"
+  options:
+    - text: "`SELECT DISTINCT b.kunde_id FROM bestellung b WHERE NOT EXISTS (SELECT 1 FROM reklamation r WHERE r.kunde_id = b.kunde_id)`"
+      correct: true
+      explain: "NOT EXISTS ersetzt EXCEPT und ist unempfindlich gegen NULL in `reklamation`. DISTINCT bildet die Duplikatentfernung von EXCEPT nach."
+    - text: "`SELECT kunde_id FROM bestellung EXCEPT SELECT kunde_id FROM reklamation`"
+      correct: false
+      explain: "EXCEPT gibt es in PostgreSQL, Firebird 3 meldet einen Syntaxfehler."
+    - text: "`SELECT DISTINCT kunde_id FROM bestellung WHERE kunde_id NOT IN (SELECT kunde_id FROM reklamation)`"
+      correct: false
+      explain: "Läuft zwar, liefert aber ein leeres Ergebnis, sobald `reklamation.kunde_id` einmal NULL ist."
+    - text: "`SELECT b.kunde_id FROM bestellung b JOIN reklamation r ON r.kunde_id <> b.kunde_id`"
+      correct: false
+      explain: "Dieser Join liefert alle Paare mit verschiedenen IDs, also fast jede Kunden-ID, die auch selbst reklamiert haben kann."
+- id: t10-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, all, any]
+  type: multi
+  question: |-
+    Ein Zoo hat die Tabellen `ticket(ticket_id, preis)` und `aktion(saison, preis)`. In `SELECT * FROM ticket t WHERE …` wird die Unterabfrage `(SELECT a.preis FROM aktion a WHERE a.saison = 'Winter')` verwendet. Sie liefert **keine** Zeile, und `ticket.preis` ist nie NULL. Welche Aussagen gelten für jede Zeile von `ticket`?
+  options:
+    - text: "`t.preis > ALL (…)` ist TRUE."
+      correct: true
+      explain: "ALL über eine leere Menge ist wahr: Es gibt keinen Wert, der die Bedingung verletzt."
+    - text: "`t.preis > ANY (…)` ist FALSE."
+      correct: true
+      explain: "ANY verlangt mindestens einen passenden Wert; bei leerer Menge gibt es keinen."
+    - text: "`t.preis > (SELECT MAX(a.preis) FROM aktion a WHERE a.saison = 'Winter')` ist TRUE."
+      correct: false
+      explain: "MAX über keine Zeile ist NULL, der Vergleich also UNKNOWN. ALL und MAX sind bei leerer Menge nicht gleichwertig, ebenso wenig bei NULL-Werten in der Unterabfrage: MAX übergeht NULL, ALL wird dadurch höchstens UNKNOWN."
+    - text: "`EXISTS (…)` ist UNKNOWN."
+      correct: false
+      explain: "EXISTS ist nie UNKNOWN. Bei leerer Unterabfrage ist es FALSE."
+- id: t10-q015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, korreliert]
+  type: single
+  question: "Woran erkennt man eine korrelierte Unterabfrage?"
+  options:
+    - text: "Sie verwendet eine Spalte einer Tabelle aus der äußeren Abfrage."
+      correct: true
+      explain: "Durch diesen Bezug hängt ihr Ergebnis von der gerade geprüften äußeren Zeile ab."
+    - text: "Sie steht im FROM und hat einen Alias."
+      correct: false
+      explain: "Das ist eine abgeleitete Tabelle (Derived Table). Sie ist in der Regel nicht korreliert."
+    - text: "Sie enthält eine Aggregatfunktion."
+      correct: false
+      explain: "`(SELECT AVG(preis) FROM kurs)` enthält ein Aggregat, ist aber unkorreliert und liefert für alle Zeilen denselben Wert."
+    - text: "Sie liefert genau einen Wert."
+      correct: false
+      explain: "Das macht eine Unterabfrage skalar, nicht korreliert. Beides kann zusammen vorkommen, muss aber nicht."
+- id: t10-q016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [group-by]
+  type: truefalse
+  question: |-
+    Wahr oder falsch: In Firebird 3 ist `SELECT a.abteilung_id, a.bezeichnung, COUNT(*) FROM abteilung a JOIN mitarbeiter m ON m.abteilung_id = a.abteilung_id GROUP BY a.abteilung_id` zulässig, weil `bezeichnung` vom Primärschlüssel abhängt.
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Das erlaubt PostgreSQL. Firebird verlangt, dass jede nicht aggregierte Spalte der SELECT-Liste im GROUP BY steht."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig. In Firebird muss `a.bezeichnung` zusätzlich ins GROUP BY; so läuft die Abfrage auch in PostgreSQL."
+- id: t10-q017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [funktionen, "null", string]
+  type: single
+  question: "Was liefert `vorname || ' ' || telefon`, wenn `telefon` NULL ist?"
+  options:
+    - text: "NULL"
+      correct: true
+      explain: "Verkettung mit NULL ergibt NULL. Abhilfe: `COALESCE(telefon, '')` oder `COALESCE(telefon, 'ohne Telefon')`."
+    - text: "Den Vornamen und ein Leerzeichen"
+      correct: false
+      explain: "So verhält sich die PostgreSQL-Funktion `concat(…)`, die NULL-Argumente übergeht. Der Operator `||` liefert dagegen in Firebird und PostgreSQL NULL."
+    - text: "Den Vornamen gefolgt von „NULL“"
+      correct: false
+      explain: "NULL ist kein Text, sondern das Fehlen eines Werts; es wird nicht als Wort eingefügt."
+    - text: "Einen Fehler"
+      correct: false
+      explain: "Die Verkettung ist erlaubt, nur das Ergebnis ist NULL."
+- id: t10-q018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [case, "null"]
+  type: single
+  question: |-
+    `rabatt` ist NULL. Was liefert `CASE WHEN rabatt > 0 THEN 'mit' WHEN rabatt = 0 THEN 'ohne' END`?
+  options:
+    - text: "NULL"
+      correct: true
+      explain: "Beide Bedingungen sind UNKNOWN und zählen wie FALSE. Ohne ELSE liefert CASE dann NULL."
+    - text: "'ohne'"
+      correct: false
+      explain: "NULL ist nicht 0. `NULL = 0` ist UNKNOWN, der Zweig greift nicht."
+    - text: "'mit'"
+      correct: false
+      explain: "`NULL > 0` ist UNKNOWN, nicht TRUE."
+    - text: "Einen Fehler, weil ELSE fehlt"
+      correct: false
+      explain: "ELSE ist optional; fehlt es, ist der Standardwert NULL."
+- id: t10-q019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, cross-join, komma-syntax]
+  type: single
+  question: |-
+    `a` hat 4 Zeilen, `b` hat 3 Zeilen. Wie viele Zeilen liefert `SELECT * FROM a, b`?
+  options:
+    - text: "12"
+      correct: true
+      explain: "Die Komma-Schreibweise ohne Bedingung bildet das kartesische Produkt (CROSS JOIN): 4 · 3."
+    - text: "7"
+      correct: false
+      explain: "Das wäre UNION ALL zweier verträglicher Tabellen, nicht ein Produkt."
+    - text: "4"
+      correct: false
+      explain: "Die Zeilen von a werden nicht nur behalten, sondern mit jeder Zeile von b kombiniert."
+    - text: "Fehler, weil die Join-Bedingung fehlt"
+      correct: false
+      explain: "Die Abfrage ist erlaubt. Gerade deshalb ist eine vergessene Bedingung in der alten Syntax tückisch."
+- id: t10-q020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, in, any, all, "null"]
+  type: multi
+  question: |-
+    Eine Unterabfrage liefert die drei Werte 3, 8 und NULL. Welche Aussagen sind richtig?
+  options:
+    - text: "`5 IN (…)` ist UNKNOWN."
+      correct: true
+      explain: "IN entspricht `5 = 3 OR 5 = 8 OR 5 = NULL`, also FALSE OR FALSE OR UNKNOWN = UNKNOWN. Das Ergebnis ist nicht FALSE."
+    - text: "`3 IN (…)` ist TRUE."
+      correct: true
+      explain: "Ein Treffer genügt: `3 = 3` ist TRUE, und TRUE entscheidet die OR-Kette."
+    - text: "`10 > ALL (…)` ist TRUE, weil 10 größer als 3 und 8 ist."
+      correct: false
+      explain: "ALL entspricht einer AND-Kette: TRUE AND TRUE AND `10 > NULL` (UNKNOWN) = UNKNOWN. Im WHERE fiele die Zeile heraus."
+    - text: "`1 > ALL (…)` ist FALSE."
+      correct: true
+      explain: "`1 > 3` ist FALSE, und FALSE entscheidet eine AND-Kette, egal was der NULL-Vergleich ergibt."
+    - text: "`5 > ANY (…)` ist UNKNOWN, weil die Liste NULL enthält."
+      correct: false
+      explain: "`5 > 3` ist TRUE und entscheidet die OR-Kette. UNKNOWN entsteht nur, wenn kein Einzelvergleich entscheidet."
+- id: t10-q021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [funktionen, mathematik]
+  type: single
+  question: "Was liefern `ROUND(-2.5)`, `CEILING(-2.3)` und `FLOOR(-2.3)` (in dieser Reihenfolge) in Firebird 3?"
+  options:
+    - text: "−3, −2, −3"
+      correct: true
+      explain: "ROUND rundet eine genaue 5 vom Nullpunkt weg. CEILING geht zur nächsten ganzen Zahl Richtung +∞ (−2), FLOOR Richtung −∞ (−3)."
+    - text: "−2, −3, −2"
+      correct: false
+      explain: "Hier wurden CEILING und FLOOR nach dem Betrag gedeutet. Bei negativen Zahlen ist −2 größer als −2,3, also das Ergebnis von CEILING."
+    - text: "−2, −2, −3"
+      correct: false
+      explain: "CEILING und FLOOR stimmen, aber ROUND rundet −2,5 nicht Richtung +∞, sondern vom Nullpunkt weg auf −3."
+    - text: "−3, −3, −2"
+      correct: false
+      explain: "Das vertauscht CEILING und FLOOR. CEILING liefert die kleinste ganze Zahl, die größer oder gleich dem Argument ist."
+- id: t10-q022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [like, literal, bezeichner]
+  type: single
+  question: "Welche Bedingung findet in Firebird 3 alle Zeilen, deren Spalte `ort` mit „Tal“ beginnt?"
+  options:
+    - text: "`ort LIKE 'Tal%'`"
+      correct: true
+      explain: "Zeichenketten stehen in einfachen Anführungszeichen, `%` steht für beliebig viele Zeichen."
+    - text: "`ort LIKE \"Tal%\"`"
+      correct: false
+      explain: "Doppelte Anführungszeichen markieren in Firebird und PostgreSQL einen Bezeichner. Gesucht würde eine Spalte namens Tal%, und die Abfrage bricht mit einem Fehler ab."
+    - text: "`ort LIKE 'Tal*'`"
+      correct: false
+      explain: "`*` ist in Firebird kein Platzhalter. Gefunden würde nur der Text „Tal*“ wörtlich. Der Stern als Platzhalter ist eine Konvention einzelner Desktop-Datenbanken."
+    - text: "`ort = 'Tal%'`"
+      correct: false
+      explain: "Mit `=` gibt es keine Platzhalter; verglichen wird mit dem Text „Tal%“ wörtlich."
+- id: t10-q023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [extremwert, unterabfrage, first-skip]
+  type: single
+  question: |-
+    Die Tabelle `produkt(name, preis)` enthält (Apfelsaft, 2.50), (Birnensaft, 3.10) und (Kirschsaft, 3.10). Verglichen werden
+    (A) `SELECT name FROM produkt WHERE preis = (SELECT MAX(preis) FROM produkt)` und
+    (B) `SELECT FIRST 1 name FROM produkt ORDER BY preis DESC`.
+    Welche Aussage ist richtig?
+  options:
+    - text: "A liefert Birnensaft und Kirschsaft; B liefert nur eine der beiden Zeilen, und welche, ist nicht festgelegt."
+      correct: true
+      explain: "A gibt alle Zeilen mit dem Höchstwert aus. B schneidet nach einer Zeile ab; bei Gleichstand entscheidet nur eine weitere Sortierspalte, und die fehlt."
+    - text: "Beide liefern Birnensaft und Kirschsaft."
+      correct: false
+      explain: "FIRST 1 begrenzt das Ergebnis auf genau eine Zeile, auch bei Gleichstand."
+    - text: "Beide liefern nur Birnensaft, weil er zuerst eingefügt wurde."
+      correct: false
+      explain: "Die Einfügereihenfolge ist keine Sortierung. Ohne eindeutiges ORDER BY ist die Reihenfolge gleichwertiger Zeilen nicht festgelegt."
+    - text: "A ist ein Fehler, weil MAX im WHERE verboten ist."
+      correct: false
+      explain: "Verboten ist ein Aggregat direkt im WHERE. In einer Unterabfrage ist MAX erlaubt; sie liefert hier den einzelnen Wert 3.10."

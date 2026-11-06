@@ -1,0 +1,733 @@
+- id: t10-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, group-by, having, count-distinct, where-vs-having]
+  type: sql-write
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Eine Kletterhalle speichert ihre Mitglieder, Routen und Begehungen:
+
+    - `mitglied(mitglied_id, name, tarif)`
+    - `route(route_id, name, sektor, grad)` (`grad` ist eine ganze Zahl von 4 bis 9)
+    - `begehung(mitglied_id, route_id, datum)` (`datum` ist vom Typ `DATE`; Fremdschlüssel auf `mitglied` und `route`; eine Route kann mehrfach begangen werden)
+
+    a) Schreibe eine SQL-Abfrage (Firebird 3), die für jedes Mitglied, das **im Jahr 2025** mindestens **drei verschiedene** Routen im Sektor `'Nordwand'` begangen hat, den Namen, die Anzahl verschiedener Routen (`routen`) und den höchsten dabei gekletterten Grad (`hoechster_grad`) ausgibt. Sortiere nach `routen` absteigend, dann nach Name. (6 P)
+
+    b) Begründe, warum die Bedingung zum Sektor ins `WHERE` gehört, die Bedingung „mindestens drei“ aber ins `HAVING`. (2 P)
+  solution: |-
+    a)
+
+    ```sql
+    SELECT m.name,
+           COUNT(DISTINCT b.route_id) AS routen,
+           MAX(r.grad) AS hoechster_grad
+    FROM mitglied m
+    JOIN begehung b ON b.mitglied_id = m.mitglied_id
+    JOIN route r ON r.route_id = b.route_id
+    WHERE r.sektor = 'Nordwand'
+      AND b.datum BETWEEN DATE '2025-01-01' AND DATE '2025-12-31'
+    GROUP BY m.mitglied_id, m.name
+    HAVING COUNT(DISTINCT b.route_id) >= 3
+    ORDER BY routen DESC, m.name;
+    ```
+
+    Gleichwertig: `EXTRACT(YEAR FROM b.datum) = 2025` statt `BETWEEN`, ebenso die Komma-Schreibweise `FROM mitglied m, begehung b, route r WHERE b.mitglied_id = m.mitglied_id AND r.route_id = b.route_id AND …`. Ohne `DISTINCT` würden mehrfache Begehungen derselben Route mehrfach gezählt. `m.mitglied_id` gehört ins `GROUP BY`, damit zwei Mitglieder mit gleichem Namen nicht zusammenfallen.
+
+    b) `WHERE` filtert **einzelne Zeilen**, bevor gruppiert wird. Ob eine Begehung im Sektor Nordwand liegt, lässt sich an jeder Zeile allein ablesen. „Mindestens drei Routen“ ist dagegen eine Eigenschaft einer **ganzen Gruppe** und braucht ein Aggregat. Aggregate gibt es erst nach dem `GROUP BY`, deshalb sind sie im `WHERE` verboten und gehören ins `HAVING`.
+  rubric:
+    - criterion: "Beide Joins über die richtigen Schlüsselspalten (mitglied–begehung–route); Komma-Schreibweise mit Bedingungen im WHERE gleichwertig"
+      points: 2
+    - criterion: "WHERE filtert Sektor und Jahr 2025 mit korrekten Grenzen"
+      points: 1
+    - criterion: "GROUP BY enthält m.mitglied_id und m.name (nur m.name allein: 0 P)"
+      points: 1
+    - criterion: "COUNT(DISTINCT route_id) und MAX(grad) korrekt verwendet"
+      points: 1
+    - criterion: "HAVING COUNT(DISTINCT …) >= 3"
+      points: 0.5
+    - criterion: "ORDER BY routen DESC, dann Name"
+      points: 0.5
+    - criterion: "b) Zeilenbedingung vor dem Gruppieren vs. Gruppenbedingung mit Aggregat danach; Aggregat im WHERE unzulässig"
+      points: 2
+  space: lines:22
+- id: t10-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, korreliert, not-exists, having]
+  type: sql-write
+  difficulty: 3
+  points: 9
+  minutes: 10
+  prompt: |-
+    Eine Schulmensa verwaltet ihre Gerichte und Bestellungen:
+
+    - `gericht(gericht_id, name, kategorie, preis)` (`kategorie` z. B. `'Hauptgericht'`, `'Dessert'`, `'Suppe'`)
+    - `bestellung(bestellung_id, gericht_id, datum, menge)` (Fremdschlüssel `gericht_id`)
+
+    Schreibe jeweils eine SQL-Abfrage (Firebird 3):
+
+    a) Alle Gerichte, die **teurer sind als der Durchschnittspreis ihrer eigenen Kategorie**. Ausgabe: Name, Kategorie, Preis. (3 P)
+
+    b) Alle Gerichte, die **im März 2025 kein einziges Mal** bestellt wurden. Verwende `NOT EXISTS`. Ausgabe: Name. (3 P)
+
+    c) Alle Kategorien, in denen **jedes** Gericht mindestens 3,00 € kostet. Erkläre außerdem in einem Satz, warum `SELECT kategorie FROM gericht WHERE preis >= 3.00 GROUP BY kategorie` falsch ist. (3 P)
+  solution: |-
+    a) korrelierte Unterabfrage:
+
+    ```sql
+    SELECT g.name, g.kategorie, g.preis
+    FROM gericht g
+    WHERE g.preis > (SELECT AVG(g2.preis)
+                     FROM gericht g2
+                     WHERE g2.kategorie = g.kategorie);
+    ```
+
+    b) Die Datumsbedingung muss **in** der Unterabfrage stehen:
+
+    ```sql
+    SELECT g.name
+    FROM gericht g
+    WHERE NOT EXISTS (SELECT 1
+                      FROM bestellung b
+                      WHERE b.gericht_id = g.gericht_id
+                        AND b.datum BETWEEN DATE '2025-03-01' AND DATE '2025-03-31');
+    ```
+
+    c)
+
+    ```sql
+    SELECT kategorie
+    FROM gericht
+    GROUP BY kategorie
+    HAVING MIN(preis) >= 3.00;
+    ```
+
+    Gleichwertig: `SELECT DISTINCT g.kategorie FROM gericht g WHERE NOT EXISTS (SELECT 1 FROM gericht x WHERE x.kategorie = g.kategorie AND x.preis < 3.00)`.
+
+    Die WHERE-Variante ist falsch, weil sie nur die billigen Gerichte entfernt. Jede Kategorie mit mindestens einem Gericht ab 3,00 € bleibt übrig, auch wenn sie daneben billigere Gerichte hat.
+  rubric:
+    - criterion: "a) Unterabfrage berechnet AVG und ist über die Kategorie mit der äußeren Zeile verknüpft"
+      points: 2
+    - criterion: "a) Vergleich mit > und verlangte Ausgabespalten"
+      points: 1
+    - criterion: "b) NOT EXISTS korreliert über gericht_id"
+      points: 2
+    - criterion: "b) Zeitraum März 2025 innerhalb der Unterabfrage mit korrekten Grenzen"
+      points: 1
+    - criterion: "c) Gruppierung nach Kategorie mit HAVING MIN(preis) >= 3.00 oder gleichwertiger NOT-EXISTS-Lösung"
+      points: 2
+    - criterion: "c) Begründung: WHERE entfernt nur einzelne billige Zeilen, nicht die ganze Kategorie"
+      points: 1
+  space: lines:28
+- id: t10-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ergebnis-vorhersagen, left-join, count, null-in-aggregaten, group-by-null]
+  type: sql-predict
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Ein Lauftreff erfasst Läuferinnen, Läufer und ihre Läufe. `zeit_min` ist NULL, wenn ein Lauf abgebrochen wurde.
+
+    `laeufer`
+
+    | lid | name | verein |
+    | --- | --- | --- |
+    | 1 | Anna | TSV |
+    | 2 | Bodo | NULL |
+    | 3 | Cleo | TSV |
+    | 4 | Dana | LG Nord |
+
+    `lauf`
+
+    | lid | strecke_km | zeit_min |
+    | --- | --- | --- |
+    | 1 | 10 | 52 |
+    | 1 | 5 | 24 |
+    | 3 | 10 | NULL |
+    | 4 | 21 | 118 |
+    | 4 | 10 | 49 |
+
+    Gib das vollständige Ergebnis jeder Abfrage als Tabelle an.
+
+    **A** (4 P)
+
+    ```sql
+    SELECT l.name, COUNT(*) AS n_alle, COUNT(x.zeit_min) AS n_zeit,
+           SUM(x.strecke_km) AS km
+    FROM laeufer l
+    LEFT JOIN lauf x ON x.lid = l.lid
+    GROUP BY l.lid, l.name
+    ORDER BY l.lid;
+    ```
+
+    **B** (2 P)
+
+    ```sql
+    SELECT verein, COUNT(*) AS anzahl
+    FROM laeufer
+    GROUP BY verein
+    ORDER BY verein NULLS LAST;
+    ```
+
+    **C** (2 P) Gib das Ergebnis an und begründe, warum Bodo fehlt oder nicht fehlt.
+
+    ```sql
+    SELECT name FROM laeufer WHERE verein <> 'TSV';
+    ```
+  solution: |-
+    **A**
+
+    | name | n_alle | n_zeit | km |
+    | --- | --- | --- | --- |
+    | Anna | 2 | 2 | 15 |
+    | Bodo | 1 | 0 | NULL |
+    | Cleo | 1 | 0 | 10 |
+    | Dana | 2 | 2 | 31 |
+
+    Bodo hat keinen Lauf. Der LEFT JOIN erzeugt trotzdem **eine** Zeile mit NULL in allen `lauf`-Spalten. `COUNT(*)` zählt diese Zeile (1), `COUNT(x.zeit_min)` nicht (0), und `SUM` über nur NULL ergibt NULL, nicht 0. Cleos Lauf hat eine Strecke, aber keine Zeit.
+
+    **B**
+
+    | verein | anzahl |
+    | --- | --- |
+    | LG Nord | 1 |
+    | TSV | 2 |
+    | NULL | 1 |
+
+    Beim Gruppieren bilden alle NULL-Werte **eine** gemeinsame Gruppe, obwohl `NULL = NULL` nicht wahr ist.
+
+    **C**
+
+    | name |
+    | --- |
+    | Dana |
+
+    Für Bodo ergibt `NULL <> 'TSV'` UNKNOWN. `WHERE` behält nur Zeilen mit TRUE, Bodo fehlt also. Soll Bodo erscheinen: `WHERE verein <> 'TSV' OR verein IS NULL`.
+  rubric:
+    - criterion: "A: Zeile Anna korrekt (2, 2, 15)"
+      points: 1
+    - criterion: "A: Zeile Bodo korrekt (1, 0, NULL)"
+      points: 1
+    - criterion: "A: Zeile Cleo korrekt (1, 0, 10)"
+      points: 1
+    - criterion: "A: Zeile Dana korrekt (2, 2, 31)"
+      points: 1
+    - criterion: "B: Gruppenbildung korrekt, drei Gruppen inkl. NULL-Gruppe, alle Anzahlen richtig"
+      points: 1
+    - criterion: "B: Reihenfolge korrekt (LG Nord, TSV, NULL zuletzt)"
+      points: 1
+    - criterion: "C: Ergebnis nur Dana"
+      points: 1
+    - criterion: "C: Begründung über UNKNOWN, WHERE behält nur TRUE"
+      points: 1
+  space: lines:24
+- id: t10-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ergebnis-vorhersagen, join, not-exists, union, cross-join]
+  type: sql-predict
+  difficulty: 2
+  points: 9
+  minutes: 9
+  prompt: |-
+    Die Schach-AG einer Schule speichert Spielerinnen, Spieler und Partien. `ergebnis` ist `'W'` (Weiß gewinnt), `'S'` (Schwarz gewinnt) oder `'R'` (Remis).
+
+    `spieler`
+
+    | sid | name | jahrgang |
+    | --- | --- | --- |
+    | 1 | Ole | 2011 |
+    | 2 | Pia | 2012 |
+    | 3 | Rafi | 2011 |
+    | 4 | Sina | 2013 |
+
+    `partie`
+
+    | pid | weiss | schwarz | ergebnis |
+    | --- | --- | --- | --- |
+    | 1 | 1 | 2 | W |
+    | 2 | 2 | 3 | S |
+    | 3 | 3 | 1 | R |
+    | 4 | 1 | 3 | W |
+
+    `weiss` und `schwarz` sind Fremdschlüssel auf `spieler.sid`. Bestimme die Ergebnisse; wo verlangt, begründe sie.
+
+    a) (3 P)
+
+    ```sql
+    SELECT w.name AS weiss, s.name AS schwarz, p.ergebnis
+    FROM partie p
+    JOIN spieler w ON w.sid = p.weiss
+    JOIN spieler s ON s.sid = p.schwarz
+    WHERE p.ergebnis <> 'R'
+    ORDER BY p.pid;
+    ```
+
+    b) Gib das Ergebnis an und begründe es in einem Satz. (2 P)
+
+    ```sql
+    SELECT sp.name
+    FROM spieler sp
+    WHERE NOT EXISTS (SELECT 1 FROM partie p WHERE p.weiss = sp.sid);
+    ```
+
+    c) Wie viele Zeilen liefert die folgende Abfrage, und wie viele wären es mit `UNION ALL`? (2 P)
+
+    ```sql
+    SELECT weiss AS sid FROM partie
+    UNION
+    SELECT schwarz FROM partie;
+    ```
+
+    d) Welche Zahl liefern die beiden Abfragen? (2 P)
+
+    ```sql
+    SELECT COUNT(*) FROM spieler, partie;
+    SELECT COUNT(*) FROM spieler s, partie p WHERE s.jahrgang = 2011;
+    ```
+  solution: |-
+    a)
+
+    | weiss | schwarz | ergebnis |
+    | --- | --- | --- |
+    | Ole | Pia | W |
+    | Pia | Rafi | S |
+    | Ole | Rafi | W |
+
+    Partie 3 ist ein Remis und fällt heraus. `spieler` wird zweimal mit verschiedenen Aliasen verbunden, einmal für Weiß, einmal für Schwarz.
+
+    b) Nur **Sina**. Ole, Pia und Rafi haben mindestens einmal mit Weiß gespielt.
+
+    c) `UNION` liefert **3** Zeilen (1, 2, 3), weil doppelte Zeilen entfernt werden. Sina (4) kommt in keiner Partie vor. Mit `UNION ALL` sind es **8** Zeilen (4 + 4).
+
+    d) **16**: Die Komma-Schreibweise ohne Join-Bedingung ist ein kartesisches Produkt (4 · 4). **8**: Zwei Spieler haben Jahrgang 2011, jeder wird mit allen 4 Partien kombiniert. Die Bedingung verknüpft die Tabellen nicht miteinander.
+  rubric:
+    - criterion: "a) drei Zeilen, Remis-Partie fehlt"
+      points: 1
+    - criterion: "a) Namen für Weiß und Schwarz jeweils richtig zugeordnet, Reihenfolge nach pid"
+      points: 2
+    - criterion: "b) Ergebnis Sina"
+      points: 1
+    - criterion: "b) Begründung: alle anderen kommen als weiss vor"
+      points: 1
+    - criterion: "c) 3 Zeilen bei UNION"
+      points: 1
+    - criterion: "c) 8 Zeilen bei UNION ALL"
+      points: 1
+    - criterion: "d) 16 (kartesisches Produkt)"
+      points: 1
+    - criterion: "d) 8 (Filter ohne Verknüpfung)"
+      points: 1
+  space: lines:22
+- id: t10-p005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dreiwertige-logik, "null", unknown, where, xor]
+  type: 3vl
+  difficulty: 2
+  points: 10
+  minutes: 10
+  prompt: |-
+    a) Vervollständige die Wahrheitstabellen der dreiwertigen Logik in SQL (T = TRUE, F = FALSE, U = UNKNOWN). XOR ist das exklusive Oder, definiert als `(a OR b) AND NOT (a AND b)`. (4 P)
+
+    | AND | T | F | U |
+    | --- | --- | --- | --- |
+    | **T** | | | |
+    | **F** | | | |
+    | **U** | | | |
+
+    | OR | T | F | U |
+    | --- | --- | --- | --- |
+    | **T** | | | |
+    | **F** | | | |
+    | **U** | | | |
+
+    | XOR | T | F | U |
+    | --- | --- | --- | --- |
+    | **T** | | | |
+    | **F** | | | |
+    | **U** | | | |
+
+    NOT T = ?, NOT F = ?, NOT U = ?
+
+    b) Ein Gewächshaus speichert Messwerte. NULL bedeutet „kein Wert übertragen“.
+
+    `sensor`
+
+    | id | temp | status |
+    | --- | --- | --- |
+    | 1 | 18 | ok |
+    | 2 | NULL | ok |
+    | 3 | 25 | NULL |
+    | 4 | NULL | NULL |
+    | 5 | 31 | defekt |
+
+    Welche `id`-Werte liefert `SELECT id FROM sensor WHERE …` mit der jeweiligen Bedingung? (4 P)
+
+    1. `temp > 20 OR status = 'ok'`
+    2. `NOT (temp > 20)`
+    3. `temp > 20 AND status <> 'defekt'`
+    4. `status IS NULL OR temp <= 20`
+
+    c) Jemand behauptet: „`WHERE temp > 20` und `WHERE NOT (temp > 20)` liefern zusammen immer alle Zeilen.“ Nimm Stellung. Gib außerdem eine **dritte** WHERE-Bedingung an, die genau die Zeilen liefert, die in beiden Ergebnissen fehlen, und nenne deren `id`-Werte. (2 P)
+  solution: |-
+    a)
+
+    | AND | T | F | U |
+    | --- | --- | --- | --- |
+    | **T** | T | F | U |
+    | **F** | F | F | F |
+    | **U** | U | F | U |
+
+    | OR | T | F | U |
+    | --- | --- | --- | --- |
+    | **T** | T | T | T |
+    | **F** | T | F | U |
+    | **U** | T | U | U |
+
+    | XOR | T | F | U |
+    | --- | --- | --- | --- |
+    | **T** | F | T | U |
+    | **F** | T | F | U |
+    | **U** | U | U | U |
+
+    NOT T = F, NOT F = T, NOT U = U. Merkregel: F entscheidet AND, T entscheidet OR; sonst bleibt U ansteckend. Mit T = 1, U = ½, F = 0 ist AND das Minimum, OR das Maximum und NOT a = 1 − a. XOR ergibt sich durch Einsetzen in die Definition, z. B. U XOR T = (U OR T) AND NOT (U AND T) = T AND NOT U = T AND U = U. Sobald ein Operand U ist, bleibt XOR U.
+
+    b) `WHERE` behält nur Zeilen, deren Bedingung **TRUE** ist; FALSE und UNKNOWN fallen heraus.
+
+    1. id 1: F OR T = T; id 2: U OR T = T; id 3: T OR U = T; id 4: U OR U = U; id 5: T OR F = T → **1, 2, 3, 5**
+    2. id 1: NOT F = T; ids 2 und 4: NOT U = U; ids 3 und 5: NOT T = F → **1**
+    3. id 1: F; id 2: U AND T = U; id 3: T AND U = U; id 4: U; id 5: T AND F = F → **leeres Ergebnis**
+    4. id 1: F OR T = T; id 2: F OR U = U; id 3: T; id 4: T; id 5: F OR F = F → **1, 3, 4**
+
+    c) Falsch. Bei `temp` NULL sind beide Bedingungen UNKNOWN; die Zeilen 2 und 4 erscheinen in keinem der beiden Ergebnisse. Das Prinzip „p oder nicht p ist immer wahr“ gilt in der dreiwertigen Logik nicht. Die dritte Bedingung lautet `WHERE temp IS NULL` und liefert die `id`-Werte **2 und 4**. Erst alle drei Abfragen zusammen decken jede Zeile ab.
+  rubric:
+    - criterion: "a) AND-Tabelle: alle 9 Felder richtig 1 P, genau ein Fehler 0,5 P"
+      points: 1
+    - criterion: "a) OR-Tabelle: alle 9 Felder richtig 1 P, genau ein Fehler 0,5 P"
+      points: 1
+    - criterion: "a) XOR-Tabelle: alle 9 Felder richtig 1 P, genau ein Fehler 0,5 P"
+      points: 1
+    - criterion: "a) NOT-Werte richtig, insbesondere NOT U = U"
+      points: 1
+    - criterion: "b1) 1, 2, 3, 5"
+      points: 1
+    - criterion: "b2) nur 1"
+      points: 1
+    - criterion: "b3) leeres Ergebnis"
+      points: 1
+    - criterion: "b4) 1, 3, 4"
+      points: 1
+    - criterion: "c) Behauptung widerlegt mit Begründung über UNKNOWN bei NULL"
+      points: 1
+    - criterion: "c) dritte Bedingung `temp IS NULL` mit den id-Werten 2 und 4"
+      points: 1
+  space: lines:30
+- id: t10-p006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [auswertungsreihenfolge, alias, having, ergebnisbegrenzung, darstellungsvarianten]
+  type: explain
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Gegeben ist folgende Abfrage auf die Mensa-Tabellen `gericht(gericht_id, name, kategorie, preis)` und `bestellung(bestellung_id, gericht_id, datum, menge)`:
+
+    ```sql
+    SELECT g.kategorie, SUM(b.menge) AS portionen
+    FROM bestellung b
+    JOIN gericht g ON g.gericht_id = b.gericht_id
+    WHERE b.datum >= DATE '2025-03-01'
+    GROUP BY g.kategorie
+    HAVING SUM(b.menge) > 50
+    ORDER BY portionen DESC;
+    ```
+
+    a) Bringe die Klauseln in die **logische Auswertungsreihenfolge** und beschreibe in je einem Halbsatz, was nach jedem Schritt vorliegt. Verwendest du eine andere Darstellung als die Standardsicht (SELECT direkt nach HAVING, danach ORDER BY), begründe kurz, was der Schritt SELECT in deiner Darstellung bedeutet. (4 P)
+
+    b) Warum führt `WHERE portionen > 50` zu einem Fehler, `ORDER BY portionen` aber nicht? (2 P)
+
+    c) Die Abfrage soll nur die **zwei** Kategorien mit den meisten Portionen liefern, z. B. mit `FETCH FIRST 2 ROWS ONLY` am Ende. An welcher Stelle der Auswertung wirkt diese Begrenzung, und warum ist das für das Ergebnis wichtig? (1 P)
+
+    d) „Die Datenbank führt die Abfrage genau in dieser Reihenfolge aus.“ Stimmt das? (1 P)
+  solution: |-
+    a) Standardsicht (SQL-Standard, PostgreSQL):
+
+    1. `FROM … JOIN`: Alle Bestellungen werden mit ihrem Gericht verbunden; es entsteht eine breite Zwischentabelle.
+    2. `WHERE`: Nur Zeilen ab dem 1. März 2025 bleiben übrig.
+    3. `GROUP BY`: Die verbliebenen Zeilen werden nach Kategorie zu Gruppen zusammengefasst.
+    4. `HAVING`: Nur Gruppen mit mehr als 50 Portionen bleiben.
+    5. `SELECT`: Je Gruppe werden Kategorie und Summe berechnet; erst jetzt entsteht der Alias `portionen`.
+    6. `ORDER BY`: Das Ergebnis wird nach `portionen` absteigend sortiert.
+
+    (Danach folgen ggf. `DISTINCT` direkt nach `SELECT` sowie die Ergebnisbegrenzung mit `FETCH`/`FIRST`.)
+
+    Ebenfalls voll richtig sind, jeweils mit Begründung:
+    - SELECT vor der Gruppierung (FROM → WHERE → SELECT → GROUP BY → HAVING → ORDER BY): SELECT steht dort für die Auswahl der Ausgabespalten; die Summe selbst kann erst nach dem Gruppieren berechnet werden.
+    - SELECT ganz am Ende (FROM → WHERE → GROUP BY → HAVING → ORDER BY → SELECT): SELECT steht dort für die abschließende Projektion; sortiert wird auf der noch vollständigen Zwischentabelle.
+
+    Das Ergebnis der Abfrage ist in allen Darstellungen dasselbe.
+
+    b) `WHERE` wird in jeder Darstellung vor der SELECT-Liste ausgewertet und kennt den Alias `portionen` deshalb noch nicht. Im `ORDER BY` ist der Alias erlaubt: In der Standardsicht, weil ORDER BY nach SELECT kommt und der Alias dann existiert. In einer Darstellung mit SELECT am Ende, weil Firebird und PostgreSQL Aliase der SELECT-Liste im ORDER BY ausdrücklich zulassen.
+
+    c) Nach `ORDER BY`, in der Standardsicht als letzter Schritt. Erst wird nach Portionen sortiert, dann werden die ersten zwei Zeilen genommen. Wirkte die Begrenzung vor dem Sortieren, käme irgendein Paar von Kategorien heraus und würde danach nur noch sortiert.
+
+    d) Nein. Die Reihenfolge beschreibt nur die **Bedeutung** der Abfrage. Der Optimierer darf anders vorgehen (z. B. erst filtern, dann verbinden, oder einen Index nutzen), solange das Ergebnis gleich bleibt.
+  rubric:
+    - criterion: "a) FROM/JOIN zuerst, danach WHERE"
+      points: 1
+    - criterion: "a) GROUP BY vor HAVING, beide nach WHERE; ORDER BY nach HAVING"
+      points: 1
+    - criterion: "a) SELECT direkt nach HAVING (Standardsicht) oder eine andere Stelle mit passender Begründung (vor GROUP BY: Spaltenauswahl; am Ende: abschließende Projektion); ohne Begründung bei abweichender Darstellung 0 P"
+      points: 1
+    - criterion: "a) Zwischenergebnis je Schritt sinnvoll beschrieben"
+      points: 1
+    - criterion: "b) WHERE wird vor der SELECT-Liste ausgewertet, der Alias ist dort unbekannt"
+      points: 1
+    - criterion: "b) Alias im ORDER BY erlaubt, begründet passend zur eigenen Darstellung (ORDER BY nach SELECT oder ausdrückliche Erlaubnis der Systeme)"
+      points: 1
+    - criterion: "c) Begrenzung nach ORDER BY, mit Begründung"
+      points: 1
+    - criterion: "d) logische Bedeutung, nicht physischer Ablauf; Optimierer darf umordnen"
+      points: 1
+  space: lines:22
+- id: t10-p007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [inner-join, left-join, full-join, eigenes-beispiel]
+  type: define-example
+  difficulty: 1
+  points: 8
+  minutes: 8
+  prompt: |-
+    Erkläre den Unterschied zwischen **INNER JOIN** und **LEFT OUTER JOIN**. Lege dazu zwei **eigene** kleine Tabellen mit je drei Zeilen an (nicht aus dem Kurstext), bei denen mindestens eine Zeile links keinen Partner rechts hat. Gib für beide Join-Arten die Abfrage und das Ergebnis an. Nenne außerdem in einem Satz, wofür ein FULL OUTER JOIN zusätzlich gut ist.
+  solution: |-
+    Musterlösung (andere passende Beispiele gleichwertig): Sportverein
+
+    `trainer(tid, name)`: (1, Ada), (2, Ben), (3, Cem)
+
+    `gruppe(gid, bezeichnung, tid)`: (10, Bambini, 1), (11, Jugend, 1), (12, Senioren, NULL)
+
+    ```sql
+    SELECT t.name, g.bezeichnung
+    FROM trainer t
+    JOIN gruppe g ON g.tid = t.tid;
+    ```
+
+    INNER JOIN: (Ada, Bambini), (Ada, Jugend). Nur Paare mit erfüllter Bedingung; Ben und Cem fehlen, ebenso die Senioren.
+
+    ```sql
+    SELECT t.name, g.bezeichnung
+    FROM trainer t
+    LEFT JOIN gruppe g ON g.tid = t.tid;
+    ```
+
+    LEFT JOIN: (Ada, Bambini), (Ada, Jugend), (Ben, NULL), (Cem, NULL). Jede Zeile der linken Tabelle bleibt erhalten; fehlt ein Partner, werden die rechten Spalten mit NULL aufgefüllt.
+
+    FULL OUTER JOIN behält zusätzlich die Zeilen der rechten Tabelle ohne Partner, hier also (NULL, Senioren).
+  rubric:
+    - criterion: "INNER JOIN korrekt erklärt (nur Paare mit erfüllter Bedingung)"
+      points: 1
+    - criterion: "LEFT JOIN korrekt erklärt (alle linken Zeilen, fehlender Partner mit NULL)"
+      points: 1
+    - criterion: "Eigene Tabellen mit je drei Zeilen, mindestens eine linke Zeile ohne Partner"
+      points: 1
+    - criterion: "INNER-JOIN-Abfrage syntaktisch korrekt, Join-Bedingung über den Fremdschlüssel"
+      points: 1
+    - criterion: "LEFT-JOIN-Abfrage syntaktisch korrekt, linke Tabelle richtig gewählt"
+      points: 1
+    - criterion: "Ergebnis des INNER JOIN zum eigenen Beispiel korrekt"
+      points: 1
+    - criterion: "Ergebnis des LEFT JOIN korrekt, inkl. NULL beim fehlenden Partner"
+      points: 1
+    - criterion: "FULL OUTER JOIN: zusätzlich rechte Zeilen ohne Partner"
+      points: 1
+  space: lines:28
+- id: t10-p008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen, intersect-ersatz, except-ersatz, not-in, dialekt]
+  type: sql-write
+  difficulty: 3
+  points: 8
+  minutes: 8
+  prompt: |-
+    Eine Musikschule speichert unter anderem:
+
+    - `belegung(schueler_id, kurs_id, angemeldet_am, …)` mit dem Primärschlüssel (`schueler_id`, `kurs_id`); eine Person kann mehrere Kurse belegen,
+    - `ausleihe(ausleihe_id, instrument_id, schueler_id, ausgabe, rueckgabe)`; eine Person kann mehrmals ausleihen,
+    - `lehrkraft(person_id, …)` und `vertretung(vertretung_id, lehrkraft_id, vertreter_id, von, bis)`; `vertreter_id` ist NOT NULL,
+    - `instrument(instrument_id, bezeichnung, …)`; in `lehrkraft` gibt es zusätzlich die Spalte `hauptinstrument_id` (Fremdschlüssel auf `instrument`), die NULL ist, wenn eine Lehrkraft kein Hauptinstrument hat.
+
+    Die beiden folgenden Abfragen laufen in PostgreSQL, aber **nicht in Firebird 3**:
+
+    ```sql
+    -- (1) Schülerinnen und Schüler, die einen Kurs belegt UND ein Instrument ausgeliehen haben
+    SELECT schueler_id FROM belegung
+    INTERSECT
+    SELECT schueler_id FROM ausleihe;
+
+    -- (2) Lehrkräfte, die noch nie jemanden vertreten haben
+    SELECT person_id FROM lehrkraft
+    EXCEPT
+    SELECT vertreter_id FROM vertretung;
+    ```
+
+    a) Formuliere (1) gleichwertig ohne `INTERSECT`. Achte darauf, dass das Ergebnis genau dieselben Zeilen enthält. (3 P)
+
+    b) Formuliere (2) gleichwertig ohne `EXCEPT` mit `NOT EXISTS`. (3 P)
+
+    c) In (2) würde auch `WHERE person_id NOT IN (SELECT vertreter_id FROM vertretung)` funktionieren. Warum ist das hier unbedenklich? Nenne eine Abfrage auf den oben genannten Tabellen, bei der `NOT IN` ein falsches (leeres) Ergebnis liefern würde, und begründe. (2 P)
+  solution: |-
+    a)
+
+    ```sql
+    SELECT DISTINCT b.schueler_id
+    FROM belegung b
+    WHERE EXISTS (SELECT 1 FROM ausleihe a
+                  WHERE a.schueler_id = b.schueler_id);
+    ```
+
+    Gleichwertig: `SELECT DISTINCT schueler_id FROM belegung WHERE schueler_id IN (SELECT schueler_id FROM ausleihe)`. Das `DISTINCT` ist hier nötig: `INTERSECT` entfernt Duplikate, und wer zwei Kurse belegt, steht zweimal in `belegung`. Ohne `DISTINCT` erschiene diese Person doppelt. Ein Join `belegung JOIN ausleihe` bräuchte ebenfalls `DISTINCT`, weil er Kurse und Ausleihen miteinander kombiniert.
+
+    b)
+
+    ```sql
+    SELECT l.person_id
+    FROM lehrkraft l
+    WHERE NOT EXISTS (SELECT 1 FROM vertretung v
+                      WHERE v.vertreter_id = l.person_id);
+    ```
+
+    `DISTINCT` ist hier nicht nötig, weil `person_id` in `lehrkraft` Primärschlüssel ist.
+
+    c) `vertreter_id` ist NOT NULL, die Unterabfrage enthält also nie NULL. Falsch wäre z. B. „Instrumente, die niemandes Hauptinstrument sind“ mit `SELECT i.bezeichnung FROM instrument i WHERE i.instrument_id NOT IN (SELECT hauptinstrument_id FROM lehrkraft)`: Eine Lehrkraft ohne Hauptinstrument liefert NULL in der Liste. Dann ist `x <> NULL` für jedes Instrument UNKNOWN, die UND-Verknüpfung höchstens UNKNOWN, und das Ergebnis ist leer, obwohl es solche Instrumente gibt. Richtig: `NOT EXISTS` oder `WHERE hauptinstrument_id IS NOT NULL` in der Unterabfrage.
+  rubric:
+    - criterion: "a) EXISTS bzw. IN prüft dieselbe Person in ausleihe (korrekt verknüpft)"
+      points: 2
+    - criterion: "a) Duplikate ausgeschlossen: DISTINCT ergänzt oder die äußere Abfrage läuft über eine Tabelle mit eindeutiger Personen-ID (z. B. `schueler` mit zwei EXISTS)"
+      points: 1
+    - criterion: "b) NOT EXISTS mit korrekter Korrelation vertreter_id = person_id"
+      points: 2
+    - criterion: "b) äußere Abfrage auf lehrkraft, Ausgabe person_id"
+      points: 1
+    - criterion: "c) hier unbedenklich, weil vertreter_id NOT NULL ist"
+      points: 1
+    - criterion: "c) Beispiel mit einer NULL-fähigen Spalte aus den genannten Tabellen (z. B. lehrkraft.hauptinstrument_id) und Begründung über UNKNOWN → leeres Ergebnis"
+      points: 1
+  space: lines:26
+- id: t10-p009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ergebnis-vorhersagen, extremwert, unterabfrage, korreliert, select-liste, first]
+  type: sql-predict
+  difficulty: 2
+  points: 10
+  minutes: 10
+  prompt: |-
+    Eine Eisdiele führt ihre Sorten in einer Tabelle:
+
+    `sorte`
+
+    | sid | name | art | preis |
+    | --- | --- | --- | --- |
+    | 1 | Vanille | Milch | 1.80 |
+    | 2 | Mango | Frucht | 2.20 |
+    | 3 | Maracuja | Frucht | 2.20 |
+    | 4 | Zitrone | Frucht | 1.60 |
+    | 5 | Mokka | Milch | 2.00 |
+
+    Gib das Ergebnis jeder Abfrage an (Firebird 3).
+
+    **A** (2 P)
+
+    ```sql
+    SELECT name FROM sorte
+    WHERE preis = (SELECT MAX(preis) FROM sorte);
+    ```
+
+    **B** (1 P)
+
+    ```sql
+    SELECT FIRST 1 name FROM sorte
+    ORDER BY preis DESC, sid;
+    ```
+
+    **C** (2 P) Gib das Ergebnis an und begründe, warum es sich nicht eindeutig angeben lässt.
+
+    ```sql
+    SELECT FIRST 1 name FROM sorte
+    ORDER BY preis DESC;
+    ```
+
+    **D** (2 P)
+
+    ```sql
+    SELECT s.art, s.name
+    FROM sorte s
+    WHERE s.preis = (SELECT MAX(x.preis) FROM sorte x
+                     WHERE x.art = s.art)
+    ORDER BY s.art, s.sid;
+    ```
+
+    **E** (3 P)
+
+    ```sql
+    SELECT s.name,
+           (SELECT COUNT(*) FROM sorte x WHERE x.preis > s.preis) + 1 AS rang
+    FROM sorte s
+    ORDER BY rang, s.sid;
+    ```
+  solution: |-
+    **A** Mango und Maracuja (2 Zeilen). Die Unterabfrage liefert 2.20; beide Sorten haben diesen Preis.
+
+    **B** Mango. Bei Gleichstand entscheidet `sid`, und Mango hat die kleinere.
+
+    **C** Mango **oder** Maracuja, eine einzige Zeile. Beide haben den höchsten Preis, und ohne zweite Sortierspalte ist die Reihenfolge gleichwertiger Zeilen nicht festgelegt. `FIRST 1` nimmt dann irgendeine davon.
+
+    **D**
+
+    | art | name |
+    | --- | --- |
+    | Frucht | Mango |
+    | Frucht | Maracuja |
+    | Milch | Mokka |
+
+    Die Unterabfrage ist korreliert: Für jede Zeile wird das Maximum der **eigenen** Art bestimmt (Frucht 2.20, Milch 2.00). Wer stattdessen mit dem Gesamtmaximum 2.20 vergleicht, verliert Mokka.
+
+    **E**
+
+    | name | rang |
+    | --- | --- |
+    | Mango | 1 |
+    | Maracuja | 1 |
+    | Mokka | 3 |
+    | Vanille | 4 |
+    | Zitrone | 5 |
+
+    Die Unterabfrage in der SELECT-Liste zählt je Sorte, wie viele Sorten teurer sind. Gleich teure Sorten teilen sich den Rang, danach wird ein Rang übersprungen (kein Rang 2).
+  rubric:
+    - criterion: "A: beide Sorten Mango und Maracuja"
+      points: 2
+    - criterion: "B: Mango"
+      points: 1
+    - criterion: "C: eine Zeile, Mango oder Maracuja"
+      points: 1
+    - criterion: "C: Begründung: Gleichstand ohne weitere Sortierspalte, Reihenfolge nicht festgelegt"
+      points: 1
+    - criterion: "D: Frucht mit beiden Sorten Mango und Maracuja"
+      points: 1
+    - criterion: "D: Milch mit Mokka (Maximum der eigenen Art, nicht des Gesamtmaximums)"
+      points: 1
+    - criterion: "E: Ränge 1, 1 für Mango und Maracuja"
+      points: 1
+    - criterion: "E: Ränge 3, 4, 5 für Mokka, Vanille, Zitrone"
+      points: 1
+    - criterion: "E: Reihenfolge der Zeilen korrekt (Mango vor Maracuja über sid)"
+      points: 1
+  space: lines:26

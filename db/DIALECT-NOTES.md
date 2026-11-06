@@ -37,6 +37,8 @@ Mengenoperationen bei NULL: In PostgreSQL behandelt `EXCEPT` zwei NULL-Werte als
 | `MOD(7.5, 2)` | 0 (Argumente werden auf ganze Zahlen gerundet) | 1.5 | `MOD` nur mit ganzen Zahlen |
 | `EXTRACT(YEARDAY …)` / `EXTRACT(DOY …)` | YEARDAY, 1. Januar = **0** | DOY, 1. Januar = 1 | nicht in Auto-Checks vergleichen |
 | `HAVING` ohne `GROUP BY` | erlaubt (ganze Tabelle = eine Gruppe) | erlaubt | gleich |
+| Abgeleitete Tabelle ohne Alias `FROM (SELECT …)` | erlaubt | erlaubt ab PG 16 (Standard verlangt Alias) | Alias immer angeben |
+| `x = ANY (1, 3)` (Werteliste) | **Fehler** | **Fehler** (nur Array oder Unterabfrage) | `IN (1, 3)` bzw. `ANY (SELECT …)` |
 | Datumsliteral `'24.12.2025'` | gültig | von `DateStyle` abhängig | `DATE '2025-12-24'` |
 
 Geprüft am FB-3.0.14-Container (2026-11-06). Ebenfalls am Container bestätigt (2026-11-06): UPDATE `SET a = b, b = a` tauscht in FB3; `DEFAULT` als Wert in VALUES und `TRUNCATE` gibt es in FB3 nicht. Ebenfalls dort bestätigt: `ALTER TABLE … ALTER COLUMN x TO y` scheitert in Firebird 3, wenn `x` in einem Constraint vorkommt (PK, UNIQUE, FK, CHECK): „Column … is referenced in …“. PostgreSQL benennt in diesem Fall um und passt den Constraint an.

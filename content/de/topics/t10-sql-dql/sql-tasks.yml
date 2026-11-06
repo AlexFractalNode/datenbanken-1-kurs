@@ -1,0 +1,736 @@
+- id: t10-s001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [projektion, alias, berechnete-spalte]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Die Schulleitung möchte die Kosten eines ganzen Jahres sehen. Gib für **alle** Kurse den Titel, die Monatsgebühr und die Gebühr für zwölf Monate aus. Die berechnete Spalte soll `jahresgebuehr` heißen.
+
+    Spalten: `titel`, `gebuehr_monat`, `jahresgebuehr`.
+  solution: |-
+    SELECT titel, gebuehr_monat, gebuehr_monat * 12 AS jahresgebuehr
+    FROM kurs;
+  ordered: false
+  hints:
+    - "In der SELECT-Liste dürfen Ausdrücke stehen, nicht nur Spaltennamen."
+    - "Mit `AS name` gibst du einer berechneten Spalte einen Namen (Alias)."
+  paper_mode: write
+- id: t10-s002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [distinct, order-by]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Aus welchen Orten kommen die Personen der Musikschule? Jeder Ort soll **nur einmal** erscheinen, alphabetisch aufsteigend sortiert.
+
+    Spalte: `ort`.
+  solution: |-
+    SELECT DISTINCT ort
+    FROM person
+    ORDER BY ort;
+  ordered: true
+  hints:
+    - "Ohne Zusatz liefert SELECT jede Zeile, also jeden Ort so oft, wie dort Personen wohnen."
+    - "`DISTINCT` direkt hinter `SELECT` entfernt doppelte Ergebniszeilen."
+  paper_mode: write
+- id: t10-s003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [where, in, vergleich, "null"]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Gesucht sind günstige Leihinstrumente für Saiteninstrumente: alle Instrumente der Familien `'Streich'` oder `'Zupf'`, deren monatliche Leihgebühr **unter 15 €** liegt.
+
+    Spalten: `bezeichnung`, `familie`, `leihgebuehr`.
+  solution: |-
+    SELECT bezeichnung, familie, leihgebuehr
+    FROM instrument
+    WHERE familie IN ('Streich', 'Zupf')
+      AND leihgebuehr < 15;
+  ordered: false
+  hints:
+    - "`familie IN ('Streich', 'Zupf')` ist eine Kurzform für zwei mit OR verbundene Gleichheiten."
+    - "„Unter 15 €“ heißt `< 15`, nicht `<= 15`. Ein Instrument mit genau 15,00 € gehört nicht dazu."
+  paper_mode: write
+- id: t10-s004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [where, like, platzhalter]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Für ein Namensschild-Layout werden kurze Vornamen gesucht: alle Personen, deren Vorname mit **L** beginnt und **genau vier Zeichen** lang ist. Löse die Aufgabe nur mit `LIKE`, ohne Längenfunktion.
+
+    Spalten: `person_id`, `vorname`, `nachname`.
+  solution: |-
+    SELECT person_id, vorname, nachname
+    FROM person
+    WHERE vorname LIKE 'L___';
+  ordered: false
+  hints:
+    - "`%` steht für beliebig viele Zeichen (auch keins), `_` für genau ein Zeichen."
+    - "Nach dem L fehlen noch genau drei Zeichen."
+  paper_mode: write
+- id: t10-s005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [where, is-null]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Für eine Rundmail fehlen Adressen. Gib alle Personen aus, die **keine E-Mail-Adresse**, aber **eine Telefonnummer** hinterlegt haben, damit das Büro sie anrufen kann.
+
+    Spalten: `vorname`, `nachname`, `telefon`.
+  solution: |-
+    SELECT vorname, nachname, telefon
+    FROM person
+    WHERE email IS NULL
+      AND telefon IS NOT NULL;
+  ordered: false
+  hints:
+    - "`email = NULL` ist nie wahr. Für fehlende Werte gibt es ein eigenes Prädikat."
+    - "Das Gegenstück zu `IS NULL` heißt `IS NOT NULL`."
+  paper_mode: write
+- id: t10-s006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [where, between, datum]
+  db: firma
+  kind: query
+  prompt: |-
+    Die Personalabteilung plant Jubiläen. Gib alle Mitarbeitenden aus, die **im Jahr 2017** eingetreten sind (1. Januar bis einschließlich 31. Dezember). Verwende `BETWEEN` mit Datumsliteralen.
+
+    Spalten: `mitarbeiter_id`, `vorname`, `nachname`, `eintritt`.
+  solution: |-
+    SELECT mitarbeiter_id, vorname, nachname, eintritt
+    FROM mitarbeiter
+    WHERE eintritt BETWEEN DATE '2017-01-01' AND DATE '2017-12-31';
+  ordered: false
+  dialect_note: "Firebird wandelt auch Zeichenketten wie `'01.01.2017'` (Tag.Monat.Jahr) implizit in ein Datum um; `BETWEEN '01.01.2017' AND '31.12.2017'` liefert dort dasselbe. In PostgreSQL hängt die Deutung solcher Zeichenketten von der Einstellung DateStyle ab. `DATE 'JJJJ-MM-TT'` ist in beiden Systemen eindeutig."
+  hints:
+    - "`BETWEEN a AND b` schließt beide Grenzen ein."
+    - "Datumsliterale schreibst du portabel als `DATE 'JJJJ-MM-TT'`."
+  paper_mode: write
+- id: t10-s007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [case, berechnete-spalte, order-by]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Ordne jeden Raum einer Kategorie zu: ab 10 Plätzen `'Saal'`, ab 4 Plätzen `'Gruppenraum'`, sonst `'Einzelraum'`. Sortiere nach `raum_id`.
+
+    Spalten: `bezeichnung`, `plaetze`, `kategorie`.
+
+    Für die Vorhersage auf Papier: Die Tabelle `raum` enthält genau diese sechs Zeilen (ohne die Spalten `etage` und `hat_klavier`).
+
+    | raum_id | bezeichnung | plaetze |
+    | --- | --- | --- |
+    | 1 | R101 | 4 |
+    | 2 | R102 | 2 |
+    | 3 | R201 | 6 |
+    | 4 | R202 | 3 |
+    | 5 | Saal | 30 |
+    | 6 | Keller | 5 |
+  solution: |-
+    SELECT bezeichnung, plaetze,
+           CASE
+             WHEN plaetze >= 10 THEN 'Saal'
+             WHEN plaetze >= 4 THEN 'Gruppenraum'
+             ELSE 'Einzelraum'
+           END AS kategorie
+    FROM raum
+    ORDER BY raum_id;
+  ordered: true
+  hints:
+    - "Ein gesuchtes `CASE` prüft die `WHEN`-Zweige von oben nach unten und nimmt den ersten wahren."
+    - "Prüfe deshalb die größte Schwelle zuerst."
+    - "Nach einer Spalte, die nicht ausgegeben wird, darfst du trotzdem sortieren."
+  paper_mode: predict
+- id: t10-s008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [order-by, nulls-last, "null"]
+  db: firma
+  kind: query
+  prompt: |-
+    Liste alle Projekte nach Budget **aufsteigend**. Projekte ohne festgelegtes Budget sollen **am Ende** stehen, in jedem Datenbanksystem. Bei gleichem Budget entscheidet die `projekt_id`.
+
+    Spalten: `projekt_id`, `titel`, `budget`.
+  solution: |-
+    SELECT projekt_id, titel, budget
+    FROM projekt
+    ORDER BY budget ASC NULLS LAST, projekt_id;
+  ordered: true
+  dialect_note: "Ohne `NULLS LAST` stellt Firebird 3 NULL bei aufsteigender Sortierung an den Anfang, PostgreSQL ans Ende. Die explizite Angabe gilt in beiden Systemen."
+  hints:
+    - "Wo NULL ohne Angabe landet, hängt vom Datenbanksystem ab."
+    - "Hinter `ASC` oder `DESC` darf `NULLS FIRST` bzw. `NULLS LAST` stehen."
+  paper_mode: write
+- id: t10-s009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [order-by, first-skip, ergebnisbegrenzung, dialekt]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Der teuerste Kurs nach Monatsgebühr ist ein neu geplanter Kurs. Für einen Flyer werden die **drei folgenden** Plätze der Preisliste gebraucht, also die Plätze 2 bis 4 nach Monatsgebühr absteigend. Bei gleicher Gebühr entscheidet die kleinere `kurs_id`. Schreibe die Lösung mit `FIRST`/`SKIP` (Firebird).
+
+    Spalten: `kurs_id`, `titel`, `gebuehr_monat`.
+  solution: |-
+    SELECT FIRST 3 SKIP 1 kurs_id, titel, gebuehr_monat
+    FROM kurs
+    ORDER BY gebuehr_monat DESC, kurs_id;
+  solution_pg: |-
+    SELECT kurs_id, titel, gebuehr_monat
+    FROM kurs
+    ORDER BY gebuehr_monat DESC, kurs_id
+    LIMIT 3 OFFSET 1;
+  ordered: true
+  dialect_note: "`FIRST n SKIP m` steht in Firebird direkt hinter `SELECT`, `LIMIT n OFFSET m` in PostgreSQL am Ende. Die Standardform `OFFSET 1 ROWS FETCH NEXT 3 ROWS ONLY` am Ende der Abfrage läuft in beiden Systemen."
+  hints:
+    - "Ohne `ORDER BY` ist nicht festgelegt, welche Zeilen „die ersten“ sind."
+    - "`SKIP 1` überspringt eine Zeile, `FIRST 3` nimmt danach drei."
+  paper_mode: write
+- id: t10-s010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [stringfunktionen, substring, position, konkatenation]
+  db: firma
+  kind: query
+  prompt: |-
+    Für neue Türschilder der Abteilung mit `abteilung_id = 4` werden zwei Texte gebraucht:
+    - `kuerzel`: erster Buchstabe des Vornamens, dann Punkt und Leerzeichen, dann der Nachname in Großbuchstaben (z. B. `X. MUSTER`),
+    - `benutzer`: der Teil der E-Mail-Adresse **vor** dem `@`.
+
+    Sortiere nach `mitarbeiter_id`. Spalten: `mitarbeiter_id`, `kuerzel`, `benutzer`.
+  solution: |-
+    SELECT mitarbeiter_id,
+           SUBSTRING(vorname FROM 1 FOR 1) || '. ' || UPPER(nachname) AS kuerzel,
+           SUBSTRING(email FROM 1 FOR POSITION('@' IN email) - 1) AS benutzer
+    FROM mitarbeiter
+    WHERE abteilung_id = 4
+    ORDER BY mitarbeiter_id;
+  ordered: true
+  hints:
+    - "`||` hängt Zeichenketten aneinander."
+    - "`POSITION('@' IN email)` liefert die Stelle des @-Zeichens; davor liegen eine Stelle weniger Zeichen. Fehlt das `@`, liefert POSITION 0, die Länge wäre −1 und die Abfrage bräche ab. Hier hat jede Adresse ein `@`."
+    - "`SUBSTRING(x FROM start FOR laenge)` funktioniert in Firebird und PostgreSQL gleich."
+  paper_mode: write
+- id: t10-s011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datumsfunktionen, extract, join, order-by]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Welche **abgeschlossenen** Ausleihen dauerten **mehr als 100 Tage**? Gib die Ausleih-ID, die Instrumentbezeichnung, die Inventarnummer ohne Leerzeichen am Ende, die Dauer in Tagen (`rueckgabe` minus `ausgabe`) als `tage` und das Rückgabejahr als `rueckgabe_jahr` aus. Längste Ausleihe zuerst, bei Gleichstand nach Ausleih-ID.
+
+    Spalten: `ausleihe_id`, `bezeichnung`, `inventar_nr`, `tage`, `rueckgabe_jahr`.
+  solution: |-
+    SELECT a.ausleihe_id, i.bezeichnung, TRIM(a.inventar_nr) AS inventar_nr,
+           a.rueckgabe - a.ausgabe AS tage,
+           EXTRACT(YEAR FROM a.rueckgabe) AS rueckgabe_jahr
+    FROM ausleihe a
+    JOIN instrument i ON i.instrument_id = a.instrument_id
+    WHERE a.rueckgabe IS NOT NULL
+      AND a.rueckgabe - a.ausgabe > 100
+    ORDER BY tage DESC, a.ausleihe_id;
+  ordered: true
+  dialect_note: "Die Differenz zweier DATE-Werte ergibt in beiden Systemen die Zahl der Tage. Firebird kennt zusätzlich `DATEDIFF(DAY FROM a TO b)`, PostgreSQL nicht."
+  hints:
+    - "Datum minus Datum ergibt die Anzahl der Tage."
+    - "Im WHERE ist der Alias `tage` noch unbekannt; schreibe den Ausdruck dort aus. Im ORDER BY darfst du den Alias verwenden."
+    - "`inventar_nr` ist `CHAR(8)` und wird mit Leerzeichen aufgefüllt; `TRIM` entfernt sie."
+  paper_mode: write
+- id: t10-s012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [group-by, having, where-vs-having, count]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Welche Kurse haben mindestens **fünf aktive** Belegungen? Aktiv ist eine Belegung ohne Abmeldedatum. Gib Kurs-ID, Titel und die Anzahl aktiver Belegungen als `aktive` aus.
+
+    Spalten: `kurs_id`, `titel`, `aktive`.
+  solution: |-
+    SELECT k.kurs_id, k.titel, COUNT(*) AS aktive
+    FROM kurs k
+    JOIN belegung b ON b.kurs_id = k.kurs_id
+    WHERE b.abgemeldet_am IS NULL
+    GROUP BY k.kurs_id, k.titel
+    HAVING COUNT(*) >= 5;
+  ordered: false
+  hints:
+    - "Die Bedingung „ohne Abmeldung“ betrifft einzelne Zeilen und gehört deshalb ins WHERE."
+    - "Die Bedingung „mindestens fünf“ betrifft Gruppen und gehört ins HAVING."
+    - "Jede nicht aggregierte Spalte der SELECT-Liste muss im GROUP BY stehen."
+  paper_mode: write
+- id: t10-s013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [group-by, having, avg, min, null-in-aggregaten, dialekt]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Erstelle eine Kursübersicht je **Instrumentenfamilie**, aber nur für Familien mit **mindestens zwei** Kursen. Berücksichtigt werden nur Kurse mit Instrument. Gib aus:
+    - `familie`,
+    - `kurse`: Anzahl der Kurse,
+    - `durchschnitt`: durchschnittliche Monatsgebühr dieser Kurse, auf **zwei Nachkommastellen gerundet**,
+    - `guenstigste_leihe`: die niedrigste Leihgebühr unter den Instrumenten dieser Kurse. Ist keines davon ausleihbar (Leihgebühr NULL), **soll hier NULL stehen, nicht 0**.
+
+    Spalten: `familie`, `kurse`, `durchschnitt`, `guenstigste_leihe`.
+  solution: |-
+    SELECT i.familie,
+           COUNT(*) AS kurse,
+           CAST(AVG(CAST(k.gebuehr_monat AS NUMERIC(12,4))) AS NUMERIC(12,2)) AS durchschnitt,
+           MIN(i.leihgebuehr) AS guenstigste_leihe
+    FROM kurs k
+    JOIN instrument i ON i.instrument_id = k.instrument_id
+    GROUP BY i.familie
+    HAVING COUNT(*) >= 2;
+  ordered: false
+  dialect_note: "Firebird schneidet `AVG` über `NUMERIC(8,2)` auf zwei Stellen ab, PostgreSQL rechnet genau. Erst auf vier Stellen rechnen und dann auf `NUMERIC(12,2)` umwandeln liefert in beiden Systemen denselben gerundeten Wert. Gleichwertig ist `ROUND(AVG(k.gebuehr_monat * 1.0000), 2)`. Nicht gleichwertig sind in Firebird `ROUND(AVG(k.gebuehr_monat), 2)` oder ein einfacher CAST: AVG hat dort schon auf zwei Stellen abgeschnitten, und Runden danach ändert nichts mehr (Familie Blas: 54.66 statt 54.67). In PostgreSQL wären beide Formen richtig."
+  hints:
+    - "`MIN`, `SUM` und `AVG` übergehen NULL-Werte; besteht eine Gruppe nur aus NULL, ist das Ergebnis NULL. Genau das ist hier verlangt, also kein `COALESCE`."
+    - "Kurse ohne Instrument (Musiktheorie, Chor) fallen durch den inneren Join heraus."
+    - "„Mindestens zwei Kurse“ ist eine Bedingung an die Gruppe und gehört ins HAVING."
+  paper_mode: write
+- id: t10-s014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [inner-join, mehrfach-join, alias]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Teilnehmerliste für den Kurs mit dem Titel `'Violine Grundkurs'`: Gib für jede Belegung Vor- und Nachname der Schülerin bzw. des Schülers, den Kurstitel und den Nachnamen der unterrichtenden Lehrkraft (`lehrkraft_name`) aus. Sortiere nach Nachname der Schülerin bzw. des Schülers, bei Gleichstand nach Personen-ID.
+
+    Spalten: `vorname`, `nachname`, `titel`, `lehrkraft_name`.
+  solution: |-
+    SELECT ps.vorname, ps.nachname, k.titel, pl.nachname AS lehrkraft_name
+    FROM belegung b
+    JOIN kurs k ON k.kurs_id = b.kurs_id
+    JOIN person ps ON ps.person_id = b.schueler_id
+    JOIN person pl ON pl.person_id = k.lehrkraft_id
+    WHERE k.titel = 'Violine Grundkurs'
+    ORDER BY ps.nachname, ps.person_id;
+  ordered: true
+  hints:
+    - "Die Namen stehen in `person`, sowohl für Schüler als auch für Lehrkräfte."
+    - "Du brauchst `person` deshalb zweimal, mit zwei verschiedenen Aliasen."
+  paper_mode: write
+- id: t10-s015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [left-join, anti-join, ohne-partner]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Welche Kurse haben **noch keine einzige Belegung**? Löse die Aufgabe mit einem `LEFT JOIN`.
+
+    Spalten: `kurs_id`, `titel`, `startdatum`.
+  solution: |-
+    SELECT k.kurs_id, k.titel, k.startdatum
+    FROM kurs k
+    LEFT JOIN belegung b ON b.kurs_id = k.kurs_id
+    WHERE b.kurs_id IS NULL;
+  ordered: false
+  hints:
+    - "Ein LEFT JOIN behält jeden Kurs, auch ohne passende Belegung; deren Spalten sind dann NULL."
+    - "Prüfe im WHERE eine Spalte der rechten Tabelle, die in echten Belegungen nie NULL ist."
+  paper_mode: write
+- id: t10-s016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [left-join, count, coalesce, group-by]
+  db: firma
+  kind: query
+  prompt: |-
+    Gib für **jedes** Projekt, auch für Projekte ohne Team, die Teamgröße (`teamgroesse`) und die Summe der gebuchten Stunden (`stunden`) aus. Projekte ohne Mitarbeit sollen 0 Personen und 0 Stunden zeigen. Sortiere nach `projekt_id`.
+
+    Spalten: `projekt_id`, `titel`, `teamgroesse`, `stunden`.
+  solution: |-
+    SELECT p.projekt_id, p.titel,
+           COUNT(ma.mitarbeiter_id) AS teamgroesse,
+           COALESCE(SUM(ma.stunden), 0) AS stunden
+    FROM projekt p
+    LEFT JOIN mitarbeit ma ON ma.projekt_id = p.projekt_id
+    GROUP BY p.projekt_id, p.titel
+    ORDER BY p.projekt_id;
+  ordered: true
+  hints:
+    - "`COUNT(*)` würde beim Projekt ohne Team 1 zählen, weil der LEFT JOIN eine Zeile mit NULL erzeugt."
+    - "`COUNT(spalte)` zählt nur Werte ungleich NULL."
+    - "`SUM` über nur NULL ergibt NULL; `COALESCE` ersetzt es durch 0."
+  paper_mode: write
+- id: t10-s017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [self-join, theta-join, paare]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Für die Raumplanung werden alle **Paare verschiedener Kurse** gesucht, die demselben festen Raum zugeordnet sind. Jedes Paar soll **nur einmal** erscheinen, also nicht zusätzlich in umgekehrter Reihenfolge, und kein Kurs mit sich selbst. Als `kurs_1` steht jeweils der Kurs mit der **kleineren** `kurs_id`, als `kurs_2` der mit der größeren. Gib die Raum-ID und die Titel beider Kurse aus. Sortiere nach der ID des ersten, dann des zweiten Kurses.
+
+    Spalten: `raum_id`, `kurs_1`, `kurs_2`.
+  solution: |-
+    SELECT k1.raum_id, k1.titel AS kurs_1, k2.titel AS kurs_2
+    FROM kurs k1
+    JOIN kurs k2 ON k2.raum_id = k1.raum_id
+                AND k2.kurs_id > k1.kurs_id
+    ORDER BY k1.kurs_id, k2.kurs_id;
+  ordered: true
+  hints:
+    - "Die Tabelle `kurs` wird mit sich selbst verbunden: zwei Aliase, z. B. `k1` und `k2`."
+    - "Mit `k2.kurs_id <> k1.kurs_id` käme jedes Paar zweimal vor. Ein Vergleich mit `>` lässt nur eine Richtung zu (Theta-Join)."
+    - "Kurse ohne festen Raum (`raum_id` NULL) fallen von selbst heraus, weil `NULL = NULL` nicht TRUE ist."
+  paper_mode: write
+- id: t10-s018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [self-join, vertretung]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Vertretungsketten: Finde alle Paare von Vertretungen, bei denen die **vertretende** Lehrkraft der ersten Vertretung in einer **zweiten** Vertretung selbst vertreten wurde. Der Zeitraum spielt dabei keine Rolle: Die zweite Vertretung darf auch früher liegen als die erste. Gib die vertretene Lehrkraft der ersten Vertretung, deren Vertreter und den Vertreter des Vertreters aus. Sortiere nach der ID der ersten, dann der zweiten Vertretung.
+
+    Spalten: `lehrkraft_id`, `vertreter_id`, `zweiter_vertreter_id`.
+
+    Für die Vorhersage auf Papier: Die Tabelle `vertretung` enthält genau diese sechs Zeilen (ohne die Spalten `von`, `bis` und `grund`).
+
+    | vertretung_id | lehrkraft_id | vertreter_id |
+    | --- | --- | --- |
+    | 1 | 1 | 2 |
+    | 2 | 2 | 3 |
+    | 3 | 4 | 7 |
+    | 4 | 6 | 3 |
+    | 5 | 8 | 1 |
+    | 6 | 5 | 2 |
+  solution: |-
+    SELECT v1.lehrkraft_id, v1.vertreter_id, v2.vertreter_id AS zweiter_vertreter_id
+    FROM vertretung v1
+    JOIN vertretung v2 ON v2.lehrkraft_id = v1.vertreter_id
+    ORDER BY v1.vertretung_id, v2.vertretung_id;
+  ordered: true
+  hints:
+    - "Verbinde `vertretung` mit sich selbst: zwei Aliase, z. B. `v1` und `v2`."
+    - "Die Verbindung lautet: Vertreter in v1 = vertretene Lehrkraft in v2."
+  paper_mode: predict
+- id: t10-s019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [union, mengenoperationen, order-by]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Erstelle eine Liste aller Personen aus **Talhausen** mit ihrer Rolle: Lehrkräfte mit der Rolle `'Lehrkraft'`, Schülerinnen und Schüler mit der Rolle `'Schüler'`. Wer beides ist, erscheint zweimal. Kombiniere zwei Abfragen mit `UNION` und sortiere nach Nachname, Vorname und Rolle.
+
+    Spalten: `nachname`, `vorname`, `rolle`.
+  solution: |-
+    SELECT p.nachname, p.vorname, 'Lehrkraft' AS rolle
+    FROM person p
+    JOIN lehrkraft l ON l.person_id = p.person_id
+    WHERE p.ort = 'Talhausen'
+    UNION
+    SELECT p.nachname, p.vorname, 'Schüler'
+    FROM person p
+    JOIN schueler s ON s.person_id = p.person_id
+    WHERE p.ort = 'Talhausen'
+    ORDER BY 1, 2, 3;
+  ordered: true
+  dialect_note: "Spaltennummern im ORDER BY einer UNION sind sicher und portabel. PostgreSQL erlaubt auch die Spaltennamen der ersten Teilabfrage. Firebird 3 lehnt Namen und Aliase dort ab und akzeptiert nur Spaltennummern."
+  hints:
+    - "Beide Teilabfragen brauchen gleich viele Spalten mit verträglichen Typen."
+    - "Die Spaltennamen kommen aus der ersten Teilabfrage."
+    - "Das ORDER BY steht einmal ganz am Ende und gilt für das Gesamtergebnis. `UNION` entfernt gleiche Zeilen: Gäbe es zwei verschiedene Personen mit gleichem Namen und gleicher Rolle, erschienen sie nur einmal. Wer das ausschließen will, gibt zusätzlich `person_id` aus."
+  paper_mode: write
+- id: t10-s020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, in]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Wer hat zurzeit ein Instrument ausgeliehen, das **noch nicht zurückgegeben** wurde? Jede Person soll **nur einmal** erscheinen, auch wenn sie mehrere offene Ausleihen hat. Löse die Aufgabe mit einer Unterabfrage und `IN`.
+
+    Spalten: `person_id`, `vorname`, `nachname`.
+  solution: |-
+    SELECT p.person_id, p.vorname, p.nachname
+    FROM person p
+    WHERE p.person_id IN (SELECT a.schueler_id
+                          FROM ausleihe a
+                          WHERE a.rueckgabe IS NULL);
+  ordered: false
+  hints:
+    - "Eine offene Ausleihe hat kein Rückgabedatum."
+    - "`IN` prüft nur, ob die ID in der Liste vorkommt; Duplikate in der Liste vervielfachen die Person nicht."
+  paper_mode: write
+- id: t10-s021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, not-exists, korreliert]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Welche Instrumente werden **weder in einem Kurs unterrichtet noch wurden sie je ausgeliehen**? Verwende `NOT EXISTS`.
+
+    Spalte: `bezeichnung`.
+  solution: |-
+    SELECT i.bezeichnung
+    FROM instrument i
+    WHERE NOT EXISTS (SELECT 1 FROM kurs k WHERE k.instrument_id = i.instrument_id)
+      AND NOT EXISTS (SELECT 1 FROM ausleihe a WHERE a.instrument_id = i.instrument_id);
+  ordered: false
+  hints:
+    - "`EXISTS` ist wahr, sobald die Unterabfrage mindestens eine Zeile liefert; was sie auswählt, ist egal."
+    - "Die Unterabfrage bezieht sich auf das Instrument der äußeren Abfrage (korreliert)."
+  paper_mode: write
+- id: t10-s022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, not-in, "null", dreiwertige-logik]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Eine Kollegin will die Instrumente finden, zu denen es keinen Kurs gibt, und schreibt:
+
+    ```sql
+    SELECT bezeichnung
+    FROM instrument
+    WHERE instrument_id NOT IN (SELECT instrument_id FROM kurs);
+    ```
+
+    a) Sage das Ergebnis dieser Abfrage **vorher**, bevor du sie ausführst. Beachte: In `kurs` ist `instrument_id` bei Musiktheorie und Chor NULL. Begründe das Ergebnis mit der dreiwertigen Logik.
+
+    b) Schreibe eine korrigierte Abfrage mit `NOT EXISTS`, die wirklich alle Instrumente ohne Kurs liefert. (Die automatische Prüfung vergleicht diese korrigierte Abfrage.)
+
+    Spalte: `bezeichnung`.
+  solution: |-
+    -- a) Die Abfrage der Kollegin liefert KEINE Zeile (leeres Ergebnis).
+    --    Die Unterabfrage enthält NULL. x NOT IN (1, 2, NULL) bedeutet
+    --    x <> 1 AND x <> 2 AND x <> NULL. Der letzte Vergleich ist UNKNOWN,
+    --    die UND-Kette also hoechstens UNKNOWN und nie TRUE.
+    --    WHERE behaelt nur TRUE, daher faellt jede Zeile heraus.
+    -- b) Korrektur mit NOT EXISTS:
+    SELECT i.bezeichnung
+    FROM instrument i
+    WHERE NOT EXISTS (SELECT 1
+                      FROM kurs k
+                      WHERE k.instrument_id = i.instrument_id);
+  ordered: false
+  hints:
+    - "`x NOT IN (a, b, NULL)` bedeutet `x <> a AND x <> b AND x <> NULL`."
+    - "`x <> NULL` ist UNKNOWN. TRUE AND UNKNOWN ergibt UNKNOWN, und WHERE behält nur TRUE."
+    - "Für b): `NOT EXISTS` fragt nur, ob es eine passende Zeile gibt. NULL in `kurs.instrument_id` passt zu keinem Instrument und stört deshalb nicht."
+  paper_mode: write
+- id: t10-s023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, all]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Welche Kurse kosten im Monat **mehr als jeder einzelne Kurs** des Niveaus `'Anfaenger'`? Verwende `ALL`.
+
+    Spalten: `kurs_id`, `titel`, `gebuehr_monat`.
+  solution: |-
+    SELECT kurs_id, titel, gebuehr_monat
+    FROM kurs
+    WHERE gebuehr_monat > ALL (SELECT k2.gebuehr_monat
+                               FROM kurs k2
+                               WHERE k2.niveau = 'Anfaenger');
+  ordered: false
+  hints:
+    - "`> ALL (...)` ist wahr, wenn der Wert größer ist als jeder Wert der Unterabfrage."
+    - "Hier liefert `> (SELECT MAX(...) ...)` dasselbe, weil die Unterabfrage Zeilen hat und `gebuehr_monat` nie NULL ist. Allgemein sind beide nicht gleichwertig: Bei leerer Unterabfrage ist ALL TRUE, der MAX-Vergleich UNKNOWN. Bei einem NULL-Wert in der Unterabfrage ist ALL höchstens UNKNOWN, während MAX den NULL-Wert übergeht."
+  paper_mode: write
+- id: t10-s024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, skalar, avg, dialekt]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Welche Kurse sind **teurer als der Durchschnitt** aller Kurse (bezogen auf die Monatsgebühr)?
+
+    Spalten: `kurs_id`, `titel`, `gebuehr_monat`.
+  solution: |-
+    SELECT kurs_id, titel, gebuehr_monat
+    FROM kurs
+    WHERE gebuehr_monat > (SELECT AVG(CAST(gebuehr_monat AS DOUBLE PRECISION))
+                           FROM kurs);
+  ordered: false
+  dialect_note: "Firebird schneidet `AVG` über `NUMERIC(8,2)` auf zwei Stellen ab. Für dieses Ergebnis ist der Cast trotzdem nicht nötig: Bei Werten mit zwei Nachkommastellen ist `x > abgeschnittener Durchschnitt` gleichbedeutend mit `x > genauer Durchschnitt`. Die Lösung ohne Cast zählt auf Papier voll; der Cast zeigt nur die neutrale Schreibweise für Fälle, in denen der Durchschnitt selbst ausgegeben wird."
+  hints:
+    - "Aggregatfunktionen sind im WHERE verboten, in einer Unterabfrage aber erlaubt."
+    - "Die Unterabfrage liefert genau einen Wert (skalare Unterabfrage)."
+  paper_mode: write
+- id: t10-s025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, korreliert, avg, "null"]
+  db: firma
+  kind: query
+  prompt: |-
+    Wer verdient **mehr als der Durchschnitt der eigenen Abteilung**? Verwende eine korrelierte Unterabfrage.
+
+    Spalten: `mitarbeiter_id`, `nachname`, `abteilung_id`, `gehalt`.
+  solution: |-
+    SELECT m.mitarbeiter_id, m.nachname, m.abteilung_id, m.gehalt
+    FROM mitarbeiter m
+    WHERE m.gehalt > (SELECT AVG(CAST(m2.gehalt AS DOUBLE PRECISION))
+                      FROM mitarbeiter m2
+                      WHERE m2.abteilung_id = m.abteilung_id);
+  ordered: false
+  dialect_note: "Firebird schneidet `AVG` über `NUMERIC(9,2)` auf zwei Stellen ab. Für dieses Ergebnis ist der Cast nicht nötig: Bei Gehältern mit zwei Nachkommastellen ist `x > abgeschnittener Durchschnitt` gleichbedeutend mit `x > genauer Durchschnitt`. Die Lösung ohne Cast zählt auf Papier voll."
+  hints:
+    - "Die Unterabfrage wird gedanklich für jede Zeile der äußeren Abfrage neu ausgewertet."
+    - "Verbinde innen und außen über die Abteilung: `m2.abteilung_id = m.abteilung_id`."
+    - "Der Werkstudent ohne Abteilung: `m2.abteilung_id = NULL` trifft nie zu, der Durchschnitt ist NULL, der Vergleich UNKNOWN."
+  paper_mode: write
+- id: t10-s026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen, intersect-ersatz, exists, dialekt]
+  db: firma
+  kind: query
+  prompt: |-
+    Wer arbeitet **sowohl** im Projekt 2 **als auch** im Projekt 4 mit? In PostgreSQL ginge das mit `INTERSECT`, Firebird 3 kennt `INTERSECT` aber nicht. Formuliere die Schnittmenge mit `EXISTS`.
+
+    Spalte: `mitarbeiter_id`.
+  solution: |-
+    SELECT m1.mitarbeiter_id
+    FROM mitarbeit m1
+    WHERE m1.projekt_id = 2
+      AND EXISTS (SELECT 1
+                  FROM mitarbeit m2
+                  WHERE m2.mitarbeiter_id = m1.mitarbeiter_id
+                    AND m2.projekt_id = 4);
+  solution_pg: |-
+    SELECT mitarbeiter_id FROM mitarbeit WHERE projekt_id = 2
+    INTERSECT
+    SELECT mitarbeiter_id FROM mitarbeit WHERE projekt_id = 4;
+  ordered: false
+  dialect_note: "Die EXISTS-Form läuft in beiden Systemen. `INTERSECT` gibt es nur in PostgreSQL. Duplikate entstehen hier nicht, weil (`mitarbeiter_id`, `projekt_id`) Primärschlüssel ist; sonst bräuchte die EXISTS-Form ein `DISTINCT`."
+  hints:
+    - "`WHERE projekt_id = 2 AND projekt_id = 4` ist für jede einzelne Zeile falsch."
+    - "Prüfe für jede Zeile aus Projekt 2, ob es zur selben Person eine Zeile aus Projekt 4 gibt."
+  paper_mode: write
+- id: t10-s027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen, except-ersatz, not-exists, dialekt]
+  db: firma
+  kind: query
+  prompt: |-
+    Welche Mitarbeitenden arbeiten in **keinem** Projekt mit? In PostgreSQL ginge das mit `EXCEPT`. Formuliere die Differenz Firebird-tauglich mit `NOT EXISTS` und gib zusätzlich den Nachnamen aus.
+
+    Spalten: `mitarbeiter_id`, `nachname`.
+  solution: |-
+    SELECT m.mitarbeiter_id, m.nachname
+    FROM mitarbeiter m
+    WHERE NOT EXISTS (SELECT 1
+                      FROM mitarbeit ma
+                      WHERE ma.mitarbeiter_id = m.mitarbeiter_id);
+  ordered: false
+  dialect_note: "In PostgreSQL wäre `SELECT mitarbeiter_id FROM mitarbeiter EXCEPT SELECT mitarbeiter_id FROM mitarbeit` möglich, liefert aber nur die ID. Firebird 3 kennt `EXCEPT` nicht."
+  hints:
+    - "Eine Differenz A − B entspricht: Zeilen aus A, zu denen es in B keinen Partner gibt."
+    - "Alternativ ginge ein LEFT JOIN mit `WHERE ma.mitarbeiter_id IS NULL`."
+  paper_mode: write
+- id: t10-s028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [extremwert, unterabfrage, skalar, max, gleichstand]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Welches **Blasinstrument** hat die höchste Leihgebühr? Teilen sich mehrere Blasinstrumente den Höchstwert, sollen **alle** erscheinen. Verwende eine Unterabfrage mit `MAX`.
+
+    Spalten: `bezeichnung`, `leihgebuehr`.
+  solution: |-
+    SELECT bezeichnung, leihgebuehr
+    FROM instrument
+    WHERE familie = 'Blas'
+      AND leihgebuehr = (SELECT MAX(i2.leihgebuehr)
+                         FROM instrument i2
+                         WHERE i2.familie = 'Blas');
+  ordered: false
+  dialect_note: "`SELECT FIRST 1 … ORDER BY leihgebuehr DESC` (PostgreSQL: `LIMIT 1`) liefert immer genau eine Zeile und verliert bei Gleichstand die übrigen. Der Vergleich mit der MAX-Unterabfrage läuft in beiden Systemen gleich."
+  hints:
+    - "Ein Aggregat darf nicht direkt im WHERE stehen, wohl aber in einer Unterabfrage."
+    - "Die Familie muss außen **und** in der Unterabfrage gefiltert werden; sonst vergleichst du mit dem Höchstwert aller Instrumente."
+    - "Mit `FIRST 1` und `ORDER BY` bekämst du bei Gleichstand nur eine Zeile."
+  paper_mode: write
+- id: t10-s029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, select-liste, korreliert, count]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Gib für **jede** Lehrkraft an, wie viele Vertretungen sie **übernommen** hat, also wie oft sie als Vertreter eingetragen ist. Lehrkräfte ohne übernommene Vertretung sollen 0 zeigen. Löse die Aufgabe mit einer **Unterabfrage in der SELECT-Liste**, ohne GROUP BY. Sortiere nach `person_id`.
+
+    Spalten: `person_id`, `nachname`, `vertretungen`.
+  solution: |-
+    SELECT l.person_id, p.nachname,
+           (SELECT COUNT(*)
+            FROM vertretung v
+            WHERE v.vertreter_id = l.person_id) AS vertretungen
+    FROM lehrkraft l
+    JOIN person p ON p.person_id = l.person_id
+    ORDER BY l.person_id;
+  ordered: true
+  hints:
+    - "Der Nachname steht in `person`, die Rolle Lehrkraft in `lehrkraft`."
+    - "Die Unterabfrage ist skalar und korreliert: Sie zählt für die gerade betrachtete Lehrkraft."
+    - "`COUNT(*)` über keine Zeile ergibt 0, nicht NULL."
+  paper_mode: write
+- id: t10-s030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, abgeleitete-tabelle, aggregat, dialekt]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Wie viele Kurse gibt eine Lehrkraft **höchstens** (`hoechstens`), und wie viele **im Durchschnitt** (`durchschnitt`)? Gezählt werden nur Lehrkräfte, die mindestens einen Kurs geben. Zähle zuerst die Kurse je Lehrkraft in einer **abgeleiteten Tabelle** im FROM und werte diese dann aus.
+
+    Spalten: `hoechstens`, `durchschnitt`.
+  solution: |-
+    SELECT MAX(t.anzahl) AS hoechstens,
+           AVG(CAST(t.anzahl AS DOUBLE PRECISION)) AS durchschnitt
+    FROM (SELECT lehrkraft_id, COUNT(*) AS anzahl
+          FROM kurs
+          GROUP BY lehrkraft_id) t;
+  ordered: false
+  dialect_note: "Firebird würde den Durchschnitt über die ganzzahlige Spalte `anzahl` abschneiden, deshalb der Cast auf DOUBLE PRECISION. Auf Papier genügt `AVG(t.anzahl)` mit dem Hinweis, dass ein genauer Wert gemeint ist."
+  hints:
+    - "`MAX(COUNT(*))` ist nicht erlaubt: Ein Aggregat darf kein Aggregat enthalten."
+    - "In den Beispieldaten gibt jede Lehrkraft mindestens einen Kurs. Die Einschränkung ändert hier also nichts; mit `COUNT(*)` über `kurs` gruppiert erfüllst du sie in jedem Fall."
+    - "Gib der Unterabfrage im FROM einen Alias, z. B. `t`, und sprich ihre Spalten als `t.anzahl` an. Der SQL-Standard verlangt den Alias; Firebird 3 und PostgreSQL ab Version 16 kämen auch ohne aus."
+  paper_mode: write
+- id: t10-s031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [unterabfrage, any, "null"]
+  db: musikschule
+  kind: query
+  prompt: |-
+    Gesucht sind alle Instrumente, deren Leihgebühr **niedriger ist als mindestens eine** Leihgebühr der Familie `'Blas'`. Verwende `ANY`.
+
+    Spalten: `bezeichnung`, `familie`, `leihgebuehr`.
+  solution: |-
+    SELECT bezeichnung, familie, leihgebuehr
+    FROM instrument
+    WHERE leihgebuehr < ANY (SELECT i2.leihgebuehr
+                             FROM instrument i2
+                             WHERE i2.familie = 'Blas');
+  ordered: false
+  hints:
+    - "`< ANY (...)` ist wahr, sobald der Wert kleiner ist als wenigstens ein Wert der Unterabfrage. Hier entspricht das „kleiner als das Maximum“."
+    - "Auch Blasinstrumente selbst können dazugehören, wenn ein anderes Blasinstrument teurer ist."
+    - "Instrumente ohne Leihgebühr fallen heraus: `NULL < x` ist UNKNOWN."
+  paper_mode: write
