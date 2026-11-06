@@ -39,9 +39,11 @@ Mengenoperationen bei NULL: In PostgreSQL behandelt `EXCEPT` zwei NULL-Werte als
 | `HAVING` ohne `GROUP BY` | erlaubt (ganze Tabelle = eine Gruppe) | erlaubt | gleich |
 | Abgeleitete Tabelle ohne Alias `FROM (SELECT …)` | erlaubt | erlaubt ab PG 16 (Standard verlangt Alias) | Alias immer angeben |
 | `x = ANY (1, 3)` (Werteliste) | **Fehler** | **Fehler** (nur Array oder Unterabfrage) | `IN (1, 3)` bzw. `ANY (SELECT …)` |
+| `ON DELETE SET DEFAULT` nach späterem `ALTER COLUMN … SET DEFAULT` | setzt den Default **vom Zeitpunkt der FK-Definition** (alter Wert) | setzt den aktuellen Default | Default vor dem FK festlegen; Aufgaben nicht auf geänderte Defaults stützen |
+| `CREATE SCHEMA 'datei.fdb'` | laut Referenz Synonym zu `CREATE DATABASE`, in **isql nicht** erkannt | Schema = Namensraum in einer DB | in isql/Aufgaben `CREATE DATABASE` schreiben |
 | Datumsliteral `'24.12.2025'` | gültig | von `DateStyle` abhängig | `DATE '2025-12-24'` |
 
-Geprüft am FB-3.0.14-Container (2026-11-06). Ebenfalls am Container bestätigt (2026-11-06): UPDATE `SET a = b, b = a` tauscht in FB3; `DEFAULT` als Wert in VALUES und `TRUNCATE` gibt es in FB3 nicht. Ebenfalls dort bestätigt: `ALTER TABLE … ALTER COLUMN x TO y` scheitert in Firebird 3, wenn `x` in einem Constraint vorkommt (PK, UNIQUE, FK, CHECK): „Column … is referenced in …“. PostgreSQL benennt in diesem Fall um und passt den Constraint an.
+Geprüft am FB-3.0.14-Container (2026-11-06). Ebenfalls am Container bestätigt (2026-11-06): UPDATE `SET a = b, b = a` tauscht in FB3; ein ALTER TABLE mit mehreren Teilbefehlen (ADD CONSTRAINT PK, ALTER COLUMN … TO, ADD … DEFAULT … NOT NULL, ADD CONSTRAINT CHECK, ALTER COLUMN … SET NOT NULL) läuft auf einer gefüllten Tabelle; `DEFAULT` als Wert in VALUES und `TRUNCATE` gibt es in FB3 nicht. Ebenfalls dort bestätigt: `ALTER TABLE … ALTER COLUMN x TO y` scheitert in Firebird 3, wenn `x` in einem Constraint vorkommt (PK, UNIQUE, FK, CHECK): „Column … is referenced in …“. PostgreSQL benennt in diesem Fall um und passt den Constraint an.
 
 Vergleiche wie `c = 'ab'` auf einer `CHAR(5)`-Spalte sind in beiden Systemen wahr. Der Ergebnisvergleich entfernt das Auffüllen ohnehin.
 

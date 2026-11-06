@@ -1,0 +1,469 @@
+- id: t09-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sprachklassen]
+  type: single
+  question: "Zu welcher Sprachklasse gehört `ALTER TABLE kunde ADD geburtstag DATE`?"
+  options:
+    - text: "DDL"
+      correct: true
+      explain: "Die Anweisung ändert die Struktur der Tabelle, nicht ihren Inhalt. Strukturänderungen mit CREATE, ALTER und DROP sind DDL."
+    - text: "DML"
+      correct: false
+      explain: "DML ändert Zeilen (INSERT, UPDATE, DELETE). Hier entsteht eine neue Spalte, also eine Schemaänderung."
+    - text: "DCL"
+      correct: false
+      explain: "DCL vergibt und entzieht Rechte (GRANT, REVOKE)."
+    - text: "TCL"
+      correct: false
+      explain: "TCL steuert Transaktionen (COMMIT, ROLLBACK)."
+- id: t09-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sprachklassen]
+  type: multi
+  question: "Welche der folgenden Anweisungen gehören zur DML (Data Manipulation Language)?"
+  options:
+    - text: "`INSERT INTO tier (name) VALUES ('Luna')`"
+      correct: true
+      explain: "INSERT fügt Zeilen ein und ändert damit den Inhalt."
+    - text: "`DELETE FROM tier WHERE tier_id = 4`"
+      correct: true
+      explain: "DELETE entfernt Zeilen, also DML."
+    - text: "`DROP TABLE tier`"
+      correct: false
+      explain: "DROP entfernt das Objekt selbst samt Struktur. Das ist DDL, auch wenn dabei alle Daten verloren gehen."
+    - text: "`GRANT SELECT ON tier TO praktikant`"
+      correct: false
+      explain: "GRANT vergibt Rechte und gehört zur DCL."
+    - text: "`UPDATE tier SET gewicht = 4.2 WHERE tier_id = 1`"
+      correct: true
+      explain: "UPDATE ändert Werte vorhandener Zeilen, also DML."
+- id: t09-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, numeric]
+  type: single
+  question: "Welcher Wert ist laut Deklaration (SQL-Standard, PostgreSQL) der größte, den eine Spalte vom Typ `NUMERIC(5,2)` aufnehmen kann?"
+  options:
+    - text: "999,99"
+      correct: true
+      explain: "5 Stellen insgesamt, davon 2 Nachkommastellen, also bleiben 3 Stellen vor dem Komma. Achtung: Firebird 3 erzwingt die Präzision nicht. Es speichert den Wert intern als ganze Zahl und nimmt auch größere Werte an. Eine echte Obergrenze sichert dort nur ein CHECK."
+    - text: "99 999,99"
+      correct: false
+      explain: "Hier wurde die 5 als Zahl der Vorkommastellen gelesen. Die erste Zahl ist aber die Gesamtzahl der Stellen."
+    - text: "99,999"
+      correct: false
+      explain: "Die zweite Zahl (2) gibt die Nachkommastellen an, nicht die Vorkommastellen."
+    - text: "9 999 999,99"
+      correct: false
+      explain: "So viele Stellen erlaubt die Angabe (5,2) nicht."
+- id: t09-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, boolean, firebird]
+  type: truefalse
+  question: "In Firebird 3 gibt es keinen Datentyp BOOLEAN, man muss dafür `SMALLINT` oder `CHAR(1)` verwenden."
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Das galt für ältere Versionen. Seit Firebird 3.0 gibt es BOOLEAN mit TRUE, FALSE und UNKNOWN."
+    - text: "Falsch"
+      correct: true
+      explain: "Firebird 3 kennt BOOLEAN. Eine Spalte wie `aktiv BOOLEAN DEFAULT TRUE NOT NULL` ist gültig."
+- id: t09-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, zeichenketten]
+  type: single
+  question: "In eine Spalte `kuerzel CHAR(5)` wird der Wert `'AB'` eingefügt. Was steht danach gespeichert?"
+  options:
+    - text: "`'AB'` mit drei angehängten Leerzeichen"
+      correct: true
+      explain: "CHAR hat feste Länge, kürzere Werte werden mit Leerzeichen bis zur angegebenen Länge aufgefüllt."
+    - text: "`'AB'` ohne Leerzeichen"
+      correct: false
+      explain: "So verhält sich VARCHAR. Bei CHAR wird aufgefüllt. Vergleiche wie `kuerzel = 'AB'` sind trotzdem wahr."
+    - text: "Fehler, weil der Wert zu kurz ist"
+      correct: false
+      explain: "Zu kurz ist nie ein Fehler. Fehler gibt es nur, wenn ein Wert länger als die Spalte ist."
+    - text: "`'AB'` mit drei vorangestellten Leerzeichen"
+      correct: false
+      explain: "Das Auffüllen geschieht rechts, nicht links."
+- id: t09-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, unique, "null"]
+  type: single
+  question: "Die Spalte `email` einer Tabelle hat einen UNIQUE-Constraint, aber kein NOT NULL. Wie viele Zeilen dürfen in Firebird 3 und PostgreSQL `email = NULL` haben?"
+  options:
+    - text: "Beliebig viele"
+      correct: true
+      explain: "Für UNIQUE gelten zwei NULL-Werte nicht als gleich. Es gibt also keinen Konflikt zwischen ihnen. Das gilt hier, weil der Constraint nur eine Spalte hat. Bei mehrspaltigem UNIQUE mit teilweise NULL verhält sich Firebird 3 anders als PostgreSQL."
+    - text: "Höchstens eine"
+      correct: false
+      explain: "Das wäre der Fall, wenn NULL wie ein normaler Wert verglichen würde. So verhält sich UNIQUE in Firebird 3 und PostgreSQL standardmäßig nicht."
+    - text: "Keine, weil UNIQUE NULL verbietet"
+      correct: false
+      explain: "NULL verbietet nur NOT NULL bzw. der PRIMARY KEY. UNIQUE allein erlaubt NULL."
+    - text: "Keine Zeile, sobald eine andere E-Mail doppelt vorkommt"
+      correct: false
+      explain: "Doppelte echte E-Mails werden schon beim Einfügen abgewiesen. Mit NULL-Werten hat das nichts zu tun."
+- id: t09-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, check, "null"]
+  type: single
+  question: "Eine Spalte ist als `rabatt SMALLINT CHECK (rabatt BETWEEN 0 AND 30)` definiert. Was passiert bei `INSERT`, wenn `rabatt` NULL ist?"
+  options:
+    - text: "Die Zeile wird angenommen."
+      correct: true
+      explain: "`NULL BETWEEN 0 AND 30` ergibt UNKNOWN. Ein CHECK weist nur ab, wenn die Bedingung FALSE ist."
+    - text: "Die Zeile wird abgewiesen, weil NULL nicht zwischen 0 und 30 liegt."
+      correct: false
+      explain: "Typischer Irrtum. Für ein Verbot von NULL braucht die Spalte zusätzlich NOT NULL."
+    - text: "Das DBMS setzt automatisch 0 ein."
+      correct: false
+      explain: "Das täte nur ein DEFAULT 0, und auch nur, wenn die Spalte im INSERT nicht genannt wird."
+    - text: "Die Anweisung ist ungültig, weil CHECK nur mit NOT NULL erlaubt ist."
+      correct: false
+      explain: "CHECK und NOT NULL sind unabhängig voneinander."
+- id: t09-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, firebird]
+  type: single
+  question: "Welche referenzielle Aktion akzeptiert Firebird 3 in `ON DELETE …` **nicht**?"
+  options:
+    - text: "`RESTRICT`"
+      correct: true
+      explain: "Firebird 3 kennt NO ACTION, CASCADE, SET NULL und SET DEFAULT. RESTRICT gibt es z. B. in PostgreSQL. In Firebird schreibt man NO ACTION oder lässt die Klausel weg."
+    - text: "`NO ACTION`"
+      correct: false
+      explain: "NO ACTION ist in Firebird erlaubt und sogar der Standard ohne Angabe."
+    - text: "`SET DEFAULT`"
+      correct: false
+      explain: "SET DEFAULT ist in Firebird 3 erlaubt."
+    - text: "`CASCADE`"
+      correct: false
+      explain: "CASCADE ist in Firebird 3 erlaubt, bei ON DELETE und bei ON UPDATE."
+- id: t09-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, set-null]
+  type: single
+  question: |-
+    Gegeben ist `spieler(spieler_id, name, team_id)` mit `team_id` NULL-fähig und `FOREIGN KEY (team_id) REFERENCES team (team_id) ON DELETE SET NULL`. Team 3 hat zwei Spieler. Was bewirkt `DELETE FROM team WHERE team_id = 3`?
+  options:
+    - text: "Team 3 wird gelöscht, die zwei Spieler bleiben mit `team_id = NULL` erhalten."
+      correct: true
+      explain: "SET NULL löst die Verbindung, statt die Kindzeilen zu löschen."
+    - text: "Team 3 und die beiden Spieler werden gelöscht."
+      correct: false
+      explain: "Das wäre ON DELETE CASCADE."
+    - text: "Das DELETE wird abgewiesen, weil noch Spieler auf Team 3 verweisen."
+      correct: false
+      explain: "Das wäre NO ACTION, also das Verhalten ohne Klausel."
+    - text: "Team 3 wird gelöscht, die Spieler behalten `team_id = 3`."
+      correct: false
+      explain: "Das würde die referenzielle Integrität verletzen. Ein DBMS mit aktiver Fremdschlüsselprüfung lässt solche verwaisten Werte nicht zu. (Ist die Prüfung abgeschaltet, etwa in SQLite ohne `PRAGMA foreign_keys = ON`, entstehen sie tatsächlich.)"
+- id: t09-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, set-null, not-null]
+  type: single
+  question: "Eine FK-Spalte ist `NOT NULL` und hat `ON DELETE SET NULL`. Die Elternzeile mit Kindzeilen wird gelöscht. Was passiert?"
+  options:
+    - text: "Das DELETE scheitert mit Fehler, nichts wird geändert."
+      correct: true
+      explain: "SET NULL würde NOT NULL verletzen. Das DBMS weist deshalb die ganze Anweisung ab."
+    - text: "Die Kindzeilen werden stattdessen gelöscht."
+      correct: false
+      explain: "Das DBMS wechselt nie selbst auf eine andere Aktion wie CASCADE."
+    - text: "Die Kindzeilen erhalten trotzdem NULL, NOT NULL wird ignoriert."
+      correct: false
+      explain: "Referenzielle Aktionen setzen andere Constraints nicht außer Kraft."
+    - text: "Die Tabelle lässt sich gar nicht erst so anlegen."
+      correct: false
+      explain: "Firebird und PostgreSQL nehmen die Definition an. Der Widerspruch zeigt sich erst beim Löschen."
+- id: t09-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [identity, firebird, dialekt]
+  type: single
+  question: "In Firebird 3 wird `id INTEGER GENERATED BY DEFAULT AS IDENTITY (START WITH 100) PRIMARY KEY` angelegt. Welche ID bekommt die erste Zeile, die ohne `id` eingefügt wird?"
+  options:
+    - text: "101"
+      correct: true
+      explain: "In Firebird 3 legt START WITH den Wert vor der ersten Nummer fest. Der Zähler steht auf 100, die erste ID ist 101."
+    - text: "100"
+      correct: false
+      explain: "So verhält sich PostgreSQL (und der SQL-Standard). Firebird 3 weicht hier ab."
+    - text: "1"
+      correct: false
+      explain: "1 wäre die erste ID ohne START WITH."
+    - text: "0"
+      correct: false
+      explain: "0 ist der Anfangszustand einer Sequenz ohne START WITH. Vergeben wird erst der nächste Wert."
+- id: t09-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sequenz, generator, firebird]
+  type: multi
+  question: "Mit welchen Ausdrücken holst du in Firebird 3 den nächsten Wert der Sequenz `seq_ticket` (Schrittweite 1)?"
+  options:
+    - text: "`NEXT VALUE FOR seq_ticket`"
+      correct: true
+      explain: "Die Form aus dem SQL-Standard, in Firebird empfohlen."
+    - text: "`GEN_ID(seq_ticket, 1)`"
+      correct: true
+      explain: "Die klassische Firebird-Funktion. Der zweite Parameter ist die Schrittweite."
+    - text: "`nextval('seq_ticket')`"
+      correct: false
+      explain: "Das ist die PostgreSQL-Funktion. Firebird kennt sie nicht."
+    - text: "`GEN_ID(seq_ticket, 0)`"
+      correct: false
+      explain: "Mit Schritt 0 liest man nur den aktuellen Wert, ohne ihn zu erhöhen."
+    - text: "`seq_ticket.NEXTVAL`"
+      correct: false
+      explain: "Diese Schreibweise stammt aus Oracle."
+- id: t09-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, not-null, firebird]
+  type: single
+  question: "Die Tabelle `artikel` enthält 500 Zeilen. In Firebird 3 wird `ALTER TABLE artikel ADD gewicht_g INTEGER NOT NULL` ausgeführt. Was passiert?"
+  options:
+    - text: "Die Anweisung scheitert, weil die vorhandenen Zeilen keinen Wert hätten."
+      correct: true
+      explain: "Seit Firebird 3.0 lässt sich eine NOT-NULL-Spalte ohne DEFAULT nicht zu einer gefüllten Tabelle hinzufügen."
+    - text: "Die Spalte wird angelegt, alle Zeilen erhalten 0."
+      correct: false
+      explain: "Ohne DEFAULT gibt es keinen Wert, den das DBMS einsetzen könnte. 0 wird nie automatisch angenommen."
+    - text: "Die Spalte wird angelegt, die vorhandenen Zeilen enthalten NULL."
+      correct: false
+      explain: "Das würde NOT NULL verletzen. Firebird 3 weist die Anweisung deshalb ab."
+    - text: "Die vorhandenen Zeilen werden gelöscht."
+      correct: false
+      explain: "DDL löscht nie stillschweigend Daten."
+- id: t09-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [drop, reihenfolge]
+  type: single
+  question: "`sitzplatz` verweist per FK auf `saal`, `saal` auf `theater`. In welcher Reihenfolge lassen sich die drei Tabellen mit `DROP TABLE` löschen?"
+  options:
+    - text: "sitzplatz, saal, theater"
+      correct: true
+      explain: "Erst die Tabellen, auf die nichts mehr verweist. Jedes DROP entfernt auch die FKs der gelöschten Tabelle."
+    - text: "theater, saal, sitzplatz"
+      correct: false
+      explain: "Das ist die Anlage-Reihenfolge. Beim Löschen scheitert `DROP TABLE theater`, solange `saal` darauf verweist."
+    - text: "saal, sitzplatz, theater"
+      correct: false
+      explain: "`saal` wird noch von `sitzplatz` referenziert und lässt sich deshalb nicht zuerst löschen."
+    - text: "Beliebig, DROP TABLE ignoriert Fremdschlüssel."
+      correct: false
+      explain: "Firebird weist DROP TABLE bei bestehenden Abhängigkeiten ab. PostgreSQL ohne CASCADE ebenso."
+- id: t09-q015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [domain]
+  type: truefalse
+  question: "In `CREATE DOMAIN d_menge AS INTEGER CHECK (VALUE > 0)` steht `VALUE` für den Wert der Spalte bzw. Variablen, die die Domäne nutzt."
+  options:
+    - text: "Wahr"
+      correct: true
+      explain: "Die Domäne kennt den Spaltennamen nicht. VALUE ist deshalb der Platzhalter für den zu prüfenden Wert."
+    - text: "Falsch"
+      correct: false
+      explain: "Doch: VALUE ist genau dieser Platzhalter, in Firebird wie in PostgreSQL."
+- id: t09-q016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [default, firebird, syntax]
+  type: single
+  question: "Welche Spaltendefinition ist in Firebird 3 gültig?"
+  options:
+    - text: "`zustand VARCHAR(10) DEFAULT 'neu' NOT NULL`"
+      correct: true
+      explain: "In Firebird steht DEFAULT vor den Constraints wie NOT NULL."
+    - text: "`zustand VARCHAR(10) NOT NULL DEFAULT 'neu'`"
+      correct: false
+      explain: "In PostgreSQL gültig, in Firebird ein Syntaxfehler: DEFAULT muss vor NOT NULL stehen."
+    - text: "`zustand VARCHAR DEFAULT 'neu' NOT NULL`"
+      correct: false
+      explain: "In Firebird ist die Längenangabe bei VARCHAR Pflicht."
+    - text: "`zustand VARCHAR(10) DEFAULT neu NOT NULL`"
+      correct: false
+      explain: "Ein Text-Default muss in einfachen Anführungszeichen stehen, sonst wird `neu` als Bezeichner gelesen."
+- id: t09-q017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [default, firebird]
+  type: multi
+  question: "Welche Angaben sind in Firebird 3 als `DEFAULT` einer Spalte erlaubt?"
+  options:
+    - text: "`DEFAULT 0`"
+      correct: true
+      explain: "Ein Literal ist immer erlaubt."
+    - text: "`DEFAULT CURRENT_DATE`"
+      correct: true
+      explain: "CURRENT_DATE ist eine Kontextvariable und damit erlaubt."
+    - text: "`DEFAULT NULL`"
+      correct: true
+      explain: "NULL ist ausdrücklich erlaubt (und ohnehin der Standard)."
+    - text: "`DEFAULT NEXT VALUE FOR seq_nr`"
+      correct: false
+      explain: "Firebird lässt als Default nur Literal, NULL oder Kontextvariable zu. Für Sequenzwerte nimmt man Identity oder einen Trigger. PostgreSQL erlaubt dagegen `DEFAULT nextval('seq_nr')`."
+    - text: "`DEFAULT (SELECT MAX(nr) + 1 FROM beleg)`"
+      correct: false
+      explain: "Unterabfragen sind als Default nicht erlaubt, auch nicht in PostgreSQL. Bei gleichzeitigen Zugriffen gäbe es ohnehin doppelte Nummern."
+- id: t09-q018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, primary-key, zusammengesetzter-schluessel]
+  type: single
+  question: "Eine Tabelle `einsatz` soll den Primärschlüssel aus `helfer_id` und `schicht_id` bekommen. Welche Formulierung ist richtig?"
+  options:
+    - text: "Ein Tabellen-Constraint `CONSTRAINT pk_einsatz PRIMARY KEY (helfer_id, schicht_id)`"
+      correct: true
+      explain: "Ein zusammengesetzter Schlüssel nennt mehrere Spalten und geht deshalb nur als Tabellen-Constraint."
+    - text: "`PRIMARY KEY` hinter beiden Spaltendefinitionen"
+      correct: false
+      explain: "Das wären zwei Primärschlüssel. Die Tabelle wird abgewiesen, weil es höchstens einen PK gibt."
+    - text: "`UNIQUE` hinter beiden Spalten"
+      correct: false
+      explain: "Das macht jede Spalte für sich eindeutig. Ein Helfer könnte dann nur eine einzige Schicht haben."
+    - text: "`PRIMARY KEY` nur hinter `helfer_id`"
+      correct: false
+      explain: "Dann wäre jeder Helfer nur einmal erlaubt. Gemeint ist aber die Eindeutigkeit der Kombination."
+- id: t09-q019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, alter-column, firebird]
+  type: single
+  question: "In Firebird 3 soll die Spalte `email VARCHAR(60) UNIQUE` auf `VARCHAR(100)` verlängert werden. Was passiert bei `ALTER TABLE kunde ALTER COLUMN email TYPE VARCHAR(100)`?"
+  options:
+    - text: "Firebird lehnt die Änderung ab, weil die Spalte in einem UNIQUE-Constraint steckt."
+      correct: true
+      explain: "Firebird ändert den Typ von Spalten in PRIMARY KEY-, UNIQUE- oder FOREIGN KEY-Constraints nicht. Man muss den Constraint vorher entfernen und danach neu anlegen."
+    - text: "Die Spalte wird verlängert, weil kein Datenverlust droht."
+      correct: false
+      explain: "Für eine Spalte ohne solchen Constraint wäre das richtig. Die UNIQUE-Bindung verhindert hier die Änderung."
+    - text: "Die Spalte wird verlängert und der UNIQUE-Constraint automatisch entfernt."
+      correct: false
+      explain: "DDL entfernt Constraints nie stillschweigend."
+    - text: "Fehler, weil Firebird `TYPE` nicht kennt und `MODIFY` verlangt."
+      correct: false
+      explain: "`ALTER COLUMN … TYPE …` ist die richtige Firebird-Syntax. `MODIFY` stammt aus MySQL/Oracle."
+- id: t09-q020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, unique, "null", dialekt]
+  type: single
+  question: |-
+    Eine Tabelle `einteilung(helfer_id, schicht_id, posten)` hat `CONSTRAINT uq_einteilung UNIQUE (schicht_id, posten)`, `posten` ist NULL-fähig. Sie enthält schon die Zeile `(1, 5, NULL)`. Nun wird `(2, 5, NULL)` eingefügt. Was passiert in Firebird 3 und in PostgreSQL?
+  options:
+    - text: "Firebird 3 weist die Zeile ab, PostgreSQL nimmt sie an."
+      correct: true
+      explain: "Firebird 3 sieht ein Duplikat, wenn in beiden Zeilen dieselben Schlüsselspalten NULL sind und die übrigen gleiche Werte haben (hier `schicht_id = 5`). PostgreSQL wertet jede Kombination mit einer NULL als verschieden."
+    - text: "Beide nehmen die Zeile an, weil NULL nie gleich NULL ist."
+      correct: false
+      explain: "Das gilt bei einspaltigem UNIQUE. Bei mehrspaltigem UNIQUE mit teilweise NULL weicht Firebird 3 ab."
+    - text: "Beide weisen die Zeile ab."
+      correct: false
+      explain: "PostgreSQL nimmt sie an. Nur mit `UNIQUE NULLS NOT DISTINCT` würde PostgreSQL sie abweisen."
+    - text: "PostgreSQL weist die Zeile ab, Firebird 3 nimmt sie an."
+      correct: false
+      explain: "Genau umgekehrt. In Firebird 3 sind nur vollständig leere Schlüssel mehrfach erlaubt."
+- id: t09-q021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, numeric, firebird, dialekt]
+  type: truefalse
+  question: "In Firebird 3 genügt `preis NUMERIC(5,2)`, um Preise über 999,99 sicher abzuweisen."
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Firebird 3 erzwingt die Präzision nicht. Intern ist `NUMERIC(5,2)` eine ganze Zahl mit zwei gedachten Nachkommastellen, und auch 5000,00 wird angenommen."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig. Die Obergrenze sichert man mit einem CHECK ab, z. B. `CHECK (preis BETWEEN 0 AND 999.99)`. PostgreSQL würde 5000,00 schon wegen der Präzision abweisen."
+- id: t09-q022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, umbenennen, firebird]
+  type: single
+  question: "In Firebird 3 gibt es eine Sicht `v_freie_zimmer`, deren Abfrage die Spalte `zimmer.betten` liest. Was passiert bei `ALTER TABLE zimmer ALTER COLUMN betten TO bettenzahl`?"
+  options:
+    - text: "Die Anweisung scheitert, weil die Spalte in einer Sicht verwendet wird."
+      correct: true
+      explain: "Firebird 3 benennt keine Spalte um, die in einer Sicht, einem Trigger, einer Prozedur oder einem Constraint vorkommt. Man entfernt bzw. ändert zuerst das abhängige Objekt, benennt um und legt es danach mit dem neuen Namen wieder an."
+    - text: "Die Spalte wird umbenannt, die Sicht wird automatisch angepasst."
+      correct: false
+      explain: "Firebird 3 passt abhängige Objekte nicht an, es weist die Umbenennung ab."
+    - text: "Die Spalte wird umbenannt, die Sicht wird stillschweigend gelöscht."
+      correct: false
+      explain: "DDL entfernt abhängige Objekte in Firebird nie stillschweigend."
+    - text: "Syntaxfehler, Firebird kennt nur `RENAME COLUMN`."
+      correct: false
+      explain: "`ALTER COLUMN alt TO neu` ist die Firebird-Syntax. `RENAME COLUMN` ist die PostgreSQL-Form."
+- id: t09-q023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, set-default]
+  type: single
+  question: |-
+    `artikel.kategorie_id INTEGER DEFAULT 0 NOT NULL` hat `FOREIGN KEY (kategorie_id) REFERENCES kategorie (kategorie_id) ON DELETE SET DEFAULT`. In `kategorie` gibt es **keine** Zeile mit `kategorie_id = 0`. Was passiert bei `DELETE FROM kategorie WHERE kategorie_id = 4`, wenn Artikel zu Kategorie 4 existieren?
+  options:
+    - text: "Das DELETE scheitert, nichts wird geändert."
+      correct: true
+      explain: "SET DEFAULT würde die Artikel auf 0 setzen. Weil es keine Kategorie 0 gibt, verletzt das den Fremdschlüssel, und die ganze Anweisung wird abgewiesen. Abhilfe ist eine Platzhalter-Kategorie 0."
+    - text: "Die Artikel bekommen `kategorie_id = 0`, die Kategorie 4 wird gelöscht."
+      correct: false
+      explain: "Das passiert nur, wenn es die Platzhalter-Zeile mit Schlüssel 0 gibt."
+    - text: "Die Artikel bekommen NULL."
+      correct: false
+      explain: "SET DEFAULT setzt den Default ein, nicht NULL. Außerdem ist die Spalte NOT NULL."
+    - text: "Die Artikel werden mitgelöscht."
+      correct: false
+      explain: "Das wäre CASCADE. Das DBMS wechselt nie selbst die Aktion."
+- id: t09-q024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, check, firebird]
+  type: single
+  question: "In Firebird 3 soll der bestehende Constraint `ck_zimmer_betten CHECK (betten BETWEEN 1 AND 4)` künftig bis 6 Betten erlauben. Welcher Weg ist richtig?"
+  options:
+    - text: "`DROP CONSTRAINT ck_zimmer_betten`, danach `ADD CONSTRAINT ck_zimmer_betten CHECK (betten BETWEEN 1 AND 6)`"
+      correct: true
+      explain: "Eine Bedingung lässt sich nicht direkt ändern. Man löscht den Constraint und legt ihn neu an."
+    - text: "`ALTER CONSTRAINT ck_zimmer_betten CHECK (betten BETWEEN 1 AND 6)`"
+      correct: false
+      explain: "Diese Form gibt es in Firebird 3 nicht. PostgreSQL kennt `ALTER CONSTRAINT` nur für Eigenschaften von Fremdschlüsseln."
+    - text: "Einen zweiten Constraint `ck_zimmer_betten2 CHECK (betten BETWEEN 1 AND 6)` hinzufügen"
+      correct: false
+      explain: "Beide Constraints gelten dann gleichzeitig. 5 und 6 Betten bleiben wegen des alten Constraints verboten."
+    - text: "`ALTER COLUMN betten TYPE SMALLINT CHECK (betten BETWEEN 1 AND 6)`"
+      correct: false
+      explain: "`ALTER COLUMN … TYPE` ändert nur den Datentyp und nimmt keinen CHECK auf."
+- id: t09-q025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, syntax, firebird]
+  type: single
+  question: "Welche Anweisung fügt in Firebird 3 der Tabelle `zimmer` zwei Spalten in **einer** Anweisung hinzu?"
+  options:
+    - text: "`ALTER TABLE zimmer ADD balkon BOOLEAN, ADD etage SMALLINT;`"
+      correct: true
+      explain: "Mehrere Teilbefehle werden mit Komma verbunden, jeder mit eigenem `ADD`, ohne Klammern und ohne `COLUMN`."
+    - text: "`ALTER TABLE zimmer ADD (balkon BOOLEAN, etage SMALLINT);`"
+      correct: false
+      explain: "Die Klammerform stammt aus anderen Dialekten. Firebird lehnt Klammern um die Spaltendefinition ab."
+    - text: "`ALTER TABLE zimmer ADD COLUMN balkon BOOLEAN, ADD COLUMN etage SMALLINT;`"
+      correct: false
+      explain: "In PostgreSQL gültig. Firebird 3 kennt `COLUMN` hinter `ADD` nicht."
+    - text: "`ALTER TABLE zimmer ADD balkon BOOLEAN etage SMALLINT;`"
+      correct: false
+      explain: "Ohne Komma und zweites `ADD` ist das ein Syntaxfehler."

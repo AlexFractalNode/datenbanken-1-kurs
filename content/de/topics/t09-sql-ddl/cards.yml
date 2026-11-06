@@ -1,0 +1,473 @@
+- id: t09-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sprachklassen]
+  front: "In welche Sprachklassen teilt man SQL-Anweisungen ein, und welche Befehle gehören jeweils dazu?"
+  back: |-
+    - **DDL** (*Data Definition Language*): Struktur, `CREATE`, `ALTER`, `DROP`
+    - **DML** (*Data Manipulation Language*): Inhalte ändern, `INSERT`, `UPDATE`, `DELETE`
+    - **DQL** (*Data Query Language*): lesen, `SELECT`
+    - **DCL** (*Data Control Language*): Rechte, `GRANT`, `REVOKE`
+    - **TCL** (*Transaction Control Language*): `COMMIT`, `ROLLBACK`, `SAVEPOINT`
+
+    Varianten: DQL als Teil der DML; TCL als Teil der DCL; DCL in manchen Lehrbüchern weiter gefasst als nur Rechte.
+- id: t09-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sprachklassen, notation]
+  front: "Gehört `SELECT` zur DML oder zur DQL?"
+  back: |-
+    Beides kommt in der Literatur vor. Manche Quellen verstehen DML als Lesen und Ändern von Daten und zählen `SELECT` dazu. Andere führen fürs Lesen eine eigene **DQL**. In der Klausur ist beides richtig, wenn du die Einteilung nennst. Auch TCL wird nicht überall als eigene Klasse geführt, manchmal steht sie unter DCL.
+- id: t09-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sprachklassen]
+  front: "Woran erkennst du, ob eine Anweisung zur DDL oder zur DML gehört? Nenne je ein Beispiel."
+  back: |-
+    DDL ändert das **Schema** (Tabellen, Spalten, Constraints, Domänen), DML ändert die **Daten** darin.
+    - DDL: `ALTER TABLE fahrstunde ADD dauer_min SMALLINT;`
+    - DML: `UPDATE fahrstunde SET dauer_min = 45 WHERE stunde_id = 7;`
+- id: t09-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sprachklassen, transaktion]
+  front: "Was regeln TCL-Befehle, und sind DDL-Anweisungen in Firebird und PostgreSQL transaktional?"
+  back: |-
+    TCL steuert Transaktionen: `COMMIT` macht Änderungen dauerhaft, `ROLLBACK` verwirft sie, `SAVEPOINT` setzt einen Zwischenpunkt.
+    In Firebird und PostgreSQL ist auch DDL transaktional: Ein `ROLLBACK` nimmt ein `CREATE TABLE` wieder zurück. Firebird kann ein neues Objekt aber erst nach dem `COMMIT` benutzen.
+- id: t09-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, ganzzahl]
+  front: "Welche Ganzzahltypen gibt es in Firebird 3, und wie groß sind sie?"
+  back: |-
+    - `SMALLINT`: 16 Bit, −32 768 bis 32 767
+    - `INTEGER`: 32 Bit, etwa ±2,1 Milliarden
+    - `BIGINT`: 64 Bit, etwa ±9,2 · 10¹⁸
+
+    PostgreSQL hat dieselben drei Typen mit denselben Bereichen.
+- id: t09-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, numeric]
+  front: "Was bedeutet `NUMERIC(6,2)`, und welcher Wert ist laut Deklaration der größte? Was gilt in Firebird 3?"
+  back: |-
+    Festkommazahl mit insgesamt 6 Stellen (*precision*), davon 2 nach dem Komma (*scale*). Laut Deklaration und SQL-Standard ist der größte Wert **9999,99**. PostgreSQL weist größere Werte ab.
+    **Firebird 3 erzwingt die Präzision nicht.** Es speichert intern eine ganze Zahl und nimmt auch 99 999,99 an. Eine Obergrenze gehört deshalb in einen CHECK.
+- id: t09-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, numeric]
+  front: "Warum speichert man Geldbeträge als `NUMERIC` und nicht als `DOUBLE PRECISION`?"
+  back: |-
+    `DOUBLE PRECISION` ist eine binäre Gleitkommazahl. Viele Dezimalbrüche wie 0,10 € lassen sich damit nicht exakt darstellen, Summen weichen dann um Rundungsreste ab. `NUMERIC(p,s)` rechnet exakt mit festen Nachkommastellen.
+- id: t09-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, zeichenketten]
+  front: "Worin unterscheiden sich `CHAR(n)` und `VARCHAR(n)`?"
+  back: |-
+    - `CHAR(n)`: feste Länge, kürzere Werte werden mit Leerzeichen auf n aufgefüllt. Gut für immer gleich lange Codes (z. B. Länderkürzel `CHAR(2)`).
+    - `VARCHAR(n)`: variable Länge bis n, kein Auffüllen.
+
+    In Firebird ist die Längenangabe bei `VARCHAR` Pflicht.
+- id: t09-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, blob, dialekt]
+  front: "Wie speicherst du langen Freitext und Binärdaten in Firebird 3, wie in PostgreSQL?"
+  back: |-
+    | Zweck | Firebird 3 | PostgreSQL |
+    | --- | --- | --- |
+    | langer Text | `BLOB SUB_TYPE TEXT` | `TEXT` |
+    | Binärdaten (Bild, PDF) | `BLOB SUB_TYPE BINARY` (Standard-Subtyp 0) | `BYTEA` |
+- id: t09-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, datum]
+  front: "Was speichern `DATE`, `TIME` und `TIMESTAMP`?"
+  back: |-
+    - `DATE`: nur das Datum (z. B. 2025-03-14)
+    - `TIME`: nur die Uhrzeit (z. B. 16:30:00)
+    - `TIMESTAMP`: Datum und Uhrzeit zusammen
+
+    Beispiel: Geburtstag → `DATE`, Kursbeginn am Tag → `TIME`, Zeitpunkt einer Buchung → `TIMESTAMP`.
+- id: t09-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, boolean]
+  front: "Seit wann hat Firebird einen Datentyp `BOOLEAN`, und welche Werte kennt er?"
+  back: |-
+    Seit **Firebird 3.0**. Werte: `TRUE`, `FALSE` und `UNKNOWN` (das ist NULL, sofern die Spalte nicht `NOT NULL` ist). Typische Spalte: `ermaessigt BOOLEAN DEFAULT FALSE NOT NULL`.
+- id: t09-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen]
+  front: "Warum ist `INTEGER` für Postleitzahlen oder Telefonnummern ungeeignet?"
+  back: |-
+    Es sind **Codes**, keine Zahlen: Man rechnet nicht damit, und führende Nullen gingen verloren (PLZ 01067 würde zu 1067). Telefonnummern enthalten oft `+`, Leerzeichen oder Bindestriche. Passend sind `CHAR(5)` für deutsche PLZ und `VARCHAR(20)` für Telefonnummern.
+- id: t09-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, create-table]
+  front: "Was ist der Unterschied zwischen einem Spalten-Constraint und einem Tabellen-Constraint?"
+  back: |-
+    - **Spalten-Constraint** steht direkt in der Spaltendefinition und betrifft nur diese Spalte: `plz CHAR(5) NOT NULL`.
+    - **Tabellen-Constraint** steht als eigener Eintrag in der Liste und kann mehrere Spalten nennen: `CONSTRAINT pk_einsatz PRIMARY KEY (fahrer_id, tour_datum)`.
+
+    Zusammengesetzte Schlüssel und `NOT NULL` haben jeweils nur eine Form: Ersteres nur als Tabellen-, Letzteres nur als Spalten-Constraint.
+- id: t09-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, namen]
+  front: "Warum benennt man Constraints mit `CONSTRAINT name`, und welche Präfixe sind üblich?"
+  back: |-
+    Mit Namen kann man den Constraint später gezielt löschen (`ALTER TABLE … DROP CONSTRAINT name`), und Fehlermeldungen nennen einen sprechenden Namen statt eines Systemnamens wie `INTEG_27`.
+    Übliche Präfixe: `pk_` Primärschlüssel, `fk_` Fremdschlüssel, `uq_` UNIQUE, `ck_` CHECK.
+- id: t09-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, primary-key]
+  front: "Was erzwingt ein PRIMARY KEY-Constraint?"
+  back: |-
+    - Die Schlüsselspalte(n) sind nie NULL.
+    - Keine zwei Zeilen haben dieselbe Wertkombination.
+    - Je Tabelle gibt es höchstens einen Primärschlüssel.
+
+    Er ist das Standardziel für Fremdschlüssel und bekommt automatisch einen Index.
+- id: t09-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, unique, primary-key]
+  front: "Worin unterscheiden sich UNIQUE und PRIMARY KEY?"
+  back: |-
+    | | PRIMARY KEY | UNIQUE |
+    | --- | --- | --- |
+    | Anzahl je Tabelle | höchstens 1 | beliebig viele |
+    | NULL erlaubt | nein | ja, sofern nicht `NOT NULL` |
+    | Ziel eines FK | ja | ja |
+
+    UNIQUE sichert Alternativschlüssel, z. B. die E-Mail-Adresse.
+- id: t09-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, unique, "null"]
+  front: "Wie viele Zeilen dürfen in einer einspaltigen UNIQUE-Spalte NULL enthalten (Firebird 3, PostgreSQL)?"
+  back: |-
+    **Beliebig viele.** Zwei NULL-Werte gelten für UNIQUE nicht als gleich. Wer höchstens einen fehlenden Wert zulassen will, braucht eine andere Lösung. PostgreSQL bietet dafür `UNIQUE NULLS NOT DISTINCT`.
+    Achtung: Bei **mehrspaltigem** UNIQUE mit teilweise NULL weicht Firebird 3 ab (siehe eigene Karte).
+- id: t09-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, check, "null"]
+  front: "Ein CHECK lautet `CHECK (rabatt BETWEEN 0 AND 50)`. Wird eine Zeile mit `rabatt = NULL` abgelehnt?"
+  back: |-
+    **Nein.** Der Vergleich mit NULL ergibt UNKNOWN. Ein CHECK lehnt nur ab, wenn die Bedingung FALSE ist. Soll NULL verboten sein, braucht die Spalte zusätzlich `NOT NULL`.
+- id: t09-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, default, firebird]
+  front: "Wann greift ein DEFAULT, und was ist in Firebird 3 dabei zu beachten?"
+  back: |-
+    Der Default wird eingesetzt, wenn ein `INSERT` die Spalte nicht nennt. Ein ausdrücklich geschriebenes `NULL` überschreibt ihn.
+    Firebird: `DEFAULT` steht **vor** `NOT NULL`, und erlaubt sind nur ein Literal, `NULL` oder eine Kontextvariable wie `CURRENT_DATE`. Ausdrücke oder Sequenzen gehen nicht. PostgreSQL erlaubt beliebige Ausdrücke.
+- id: t09-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel]
+  front: "Welche Voraussetzungen muss ein FOREIGN KEY erfüllen?"
+  back: |-
+    - Die referenzierte Tabelle existiert bereits. Ausnahme ist der Selbstbezug, bei dem der FK im selben `CREATE TABLE` auf die eigene Tabelle zeigt.
+    - Die Zielspalte(n) sind PRIMARY KEY oder UNIQUE.
+    - Anzahl und Typen der Spalten passen zusammen.
+    - Jeder Wert im FK ist NULL oder kommt im Ziel vor.
+- id: t09-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, firebird]
+  front: "Welche referenziellen Aktionen kennt Firebird 3 bei `ON DELETE` und `ON UPDATE`, und welche gilt ohne Angabe?"
+  back: |-
+    `NO ACTION` (Standard), `CASCADE`, `SET NULL`, `SET DEFAULT`.
+    `RESTRICT` gibt es in Firebird 3 **nicht**. PostgreSQL und der SQL-Standard kennen es zusätzlich.
+- id: t09-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, cascade]
+  front: "Was bewirkt `ON DELETE CASCADE`, was `ON UPDATE CASCADE`?"
+  back: |-
+    - `ON DELETE CASCADE`: Wird die Elternzeile gelöscht, löscht das DBMS alle Kindzeilen mit.
+    - `ON UPDATE CASCADE`: Ändert sich der Schlüssel der Elternzeile, übernimmt das DBMS den neuen Wert in alle Kindzeilen.
+
+    Passend bei abhängigen Daten (Positionen einer Bestellung), gefährlich bei eigenständigen Geschäftsdaten.
+- id: t09-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, set-null]
+  front: "Was bewirken `ON DELETE SET NULL` und `ON DELETE SET DEFAULT`, und wann scheitern sie?"
+  back: |-
+    Die Kindzeilen bleiben erhalten. Ihre FK-Spalte wird auf NULL bzw. auf den Default-Wert gesetzt.
+    Sie scheitern, wenn die FK-Spalte `NOT NULL` ist (SET NULL) oder der Default selbst keinen gültigen Elternwert trifft (SET DEFAULT). Dann wird das ganze `DELETE` abgewiesen.
+    Laut Firebird-3-Referenz nimmt SET DEFAULT den Default, der beim Anlegen des FK galt, nicht einen später geänderten.
+- id: t09-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, no-action]
+  front: "Was passiert bei `NO ACTION`, und wie unterscheidet es sich in PostgreSQL von `RESTRICT`?"
+  back: |-
+    Gibt es noch Kindzeilen, wird das `DELETE` bzw. `UPDATE` der Elternzeile mit Fehler abgewiesen, und die ganze Anweisung hat keine Wirkung.
+    PostgreSQL: `NO ACTION` darf als aufschiebbarer Constraint (`DEFERRABLE`) erst am Transaktionsende prüfen, `RESTRICT` prüft immer sofort. Ohne Aufschub verhalten sich beide gleich.
+- id: t09-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [identity, firebird]
+  front: "Wie legst du in Firebird 3 eine Identity-Spalte an, und was bedeutet `START WITH 100`?"
+  back: |-
+    `kunde_id INTEGER GENERATED BY DEFAULT AS IDENTITY (START WITH 100) PRIMARY KEY`
+    In Firebird 3 ist 100 der Wert **vor** der ersten Nummer, die erste vergebene ID ist also **101**. In PostgreSQL wäre sie 100. Firebird 3 kennt nur `BY DEFAULT`, PostgreSQL auch `GENERATED ALWAYS`.
+- id: t09-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sequenz, generator, firebird]
+  front: "Wie legst du in Firebird eine Sequenz an und holst den nächsten Wert? Wie geht das in PostgreSQL?"
+  back: |-
+    Firebird: `CREATE SEQUENCE seq_beleg;` (älteres Synonym: `CREATE GENERATOR`)
+    - nächster Wert: `NEXT VALUE FOR seq_beleg` oder `GEN_ID(seq_beleg, 1)`
+    - aktueller Wert ohne Erhöhen: `GEN_ID(seq_beleg, 0)`
+
+    PostgreSQL: gleiches `CREATE SEQUENCE`, Wert mit `nextval('seq_beleg')`.
+- id: t09-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [identity, sequenz]
+  front: "Worin unterscheidet sich eine Identity-Spalte von einer eigenständigen Sequenz?"
+  back: |-
+    - **Identity** gehört fest zu genau einer Spalte. Das DBMS legt den internen Zähler selbst an und füllt die Spalte beim `INSERT` ohne Wert.
+    - **Sequenz** ist ein eigenes Schemaobjekt, das man ausdrücklich abfragt. Sie kann mehrere Tabellen mit einem gemeinsamen Nummernkreis versorgen (z. B. Rechnungen und Gutschriften).
+
+    In Firebird kann eine Sequenz nicht als `DEFAULT` dienen. Man holt den Wert im INSERT (`VALUES (NEXT VALUE FOR seq_beleg, …)`) oder per Trigger.
+- id: t09-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sequenz, identity, transaktion]
+  front: "Warum entstehen bei Identity-Spalten und Sequenzen Lücken in den Nummern?"
+  back: |-
+    Ein vergebener Wert wird nie zurückgegeben, auch nicht bei `ROLLBACK` oder wenn das `INSERT` an einem Constraint scheitert. Sequenzen laufen außerhalb der Transaktionskontrolle, damit parallele Transaktionen nicht aufeinander warten. Lückenlose Nummern (z. B. Rechnungsnummern) muss man anders sichern.
+- id: t09-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, firebird, dialekt]
+  front: "Welche Teilbefehle hat `ALTER TABLE` in Firebird 3, und wo weicht PostgreSQL ab?"
+  back: |-
+    - `ADD spalte typ` (Firebird **ohne** `COLUMN`), `ADD CONSTRAINT …`
+    - `DROP spalte`, `DROP CONSTRAINT name`
+    - `ALTER [COLUMN] spalte TYPE typ`, `SET DEFAULT …`, `DROP DEFAULT`, `SET NOT NULL`, `DROP NOT NULL`
+    - umbenennen: Firebird `ALTER COLUMN alt TO neu`, PostgreSQL `RENAME COLUMN alt TO neu`. Firebird 3 kann das nicht für Spalten in Constraints, Triggern, Prozeduren oder Sichten.
+    - mehrere Teilbefehle mit Komma in einer Anweisung
+- id: t09-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, not-null]
+  front: "Was passiert in Firebird 3 bei `ALTER TABLE t ADD x INTEGER NOT NULL`, wenn `t` schon Zeilen hat?"
+  back: |-
+    Die Anweisung **scheitert**, weil die vorhandenen Zeilen keinen Wert für `x` hätten. Zwei Wege:
+    - mit Default in einem Schritt: `ADD x INTEGER DEFAULT 0 NOT NULL` (alte Zeilen bekommen 0)
+    - für verschiedene Werte: NULL-fähig hinzufügen, per `UPDATE` füllen, dann `ALTER COLUMN x SET NOT NULL`
+
+    `SET NOT NULL` gibt es in Firebird seit 3.0. Ältere Darstellungen sagen deshalb, das gehe nicht.
+- id: t09-c031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, check, dialekt]
+  front: "Prüft ein nachträglich mit `ALTER TABLE … ADD CONSTRAINT … CHECK` angelegter CHECK die vorhandenen Zeilen?"
+  back: |-
+    - **Firebird 3: nein.** Vorhandene Daten werden nicht getestet, nur neue und geänderte Zeilen.
+    - **PostgreSQL: ja.** Verletzt eine Zeile die Bedingung, scheitert das `ALTER TABLE` (außer mit `NOT VALID`).
+
+    Deshalb vorher mit einem `SELECT` nach Verstößen suchen.
+- id: t09-c032
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [drop, reihenfolge]
+  front: "In welcher Reihenfolge legst du Tabellen mit Fremdschlüsseln an, in welcher löschst du sie?"
+  back: |-
+    - **Anlegen:** referenzierte Tabellen zuerst (Eltern vor Kindern).
+    - **Löschen:** umgekehrt, Kinder zuerst. Firebird lehnt `DROP TABLE` ab, solange ein FK auf die Tabelle zeigt.
+    - **Zyklus:** eine Tabelle zunächst ohne den FK anlegen und ihn später per `ALTER TABLE … ADD CONSTRAINT` ergänzen. Vor dem Löschen den FK per `DROP CONSTRAINT` entfernen.
+- id: t09-c033
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [domain]
+  front: "Wie ist `CREATE DOMAIN` aufgebaut, und wofür steht `VALUE`?"
+  back: |-
+    `CREATE DOMAIN name AS typ [DEFAULT wert] [NOT NULL] [CHECK (bedingung)];`
+    `VALUE` steht im CHECK für den Wert, der gerade geprüft wird. Beispiel: `CREATE DOMAIN d_note AS NUMERIC(2,1) CHECK (VALUE BETWEEN 1.0 AND 5.0);`
+    Firebird 3: nur ein CHECK und ohne Namen. PostgreSQL: mehrere, auch mit `CONSTRAINT name`.
+- id: t09-c034
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [domain]
+  front: "Welchen Vorteil hat eine Domäne gegenüber einem CHECK, den man an jede Spalte schreibt?"
+  back: |-
+    Typ, Default und Regel stehen **an einer Stelle**. Alle Spalten mit dieser Domäne verhalten sich gleich, und eine Änderung (`ALTER DOMAIN`) wirkt überall. Eine Spalte darf einen eigenen Default setzen, der dann den Default der Domäne überschreibt.
+- id: t09-c035
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [drop, domain]
+  front: "Was passiert bei `DROP TABLE` und `DROP DOMAIN`, wenn noch etwas davon abhängt?"
+  back: |-
+    - Firebird: `DROP TABLE` scheitert, solange Abhängigkeiten bestehen (z. B. ein FK einer anderen Tabelle). Eine Domäne lässt sich erst löschen, wenn keine Spalte sie mehr nutzt.
+    - PostgreSQL: ohne Zusatz ebenso Fehler. Mit `DROP TABLE … CASCADE` werden die abhängigen FK-Constraints mit entfernt, nicht die Zeilen der anderen Tabelle.
+- id: t09-c036
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [identity, dialekt]
+  front: "Wie heißen automatisch hochgezählte Schlüssel in anderen DBMS? (nur zur Einordnung)"
+  back: |-
+    - PostgreSQL: `GENERATED … AS IDENTITY`, älter `SERIAL`
+    - MySQL/MariaDB: `AUTO_INCREMENT`
+    - SQL Server: `IDENTITY(1,1)`
+    - SQLite: `INTEGER PRIMARY KEY` (optional `AUTOINCREMENT`)
+
+    Der SQL-Standard und Firebird 3 nutzen `GENERATED BY DEFAULT AS IDENTITY`.
+- id: t09-c037
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [constraints, unique, "null", dialekt]
+  front: "Eine Tabelle hat `UNIQUE (kurs_id, raum_id)`, `raum_id` ist NULL-fähig. Darf `(3, NULL)` zweimal vorkommen?"
+  back: |-
+    Das hängt vom DBMS ab:
+    - **Firebird 3: nein.** Sind in zwei Zeilen dieselben Schlüsselspalten NULL und die übrigen gleich, gilt das als Duplikat. Mehrfach erlaubt ist nur `(NULL, NULL)`.
+    - **PostgreSQL: ja.** Jede Kombination mit mindestens einer NULL gilt als verschieden.
+
+    Einspaltiges UNIQUE erlaubt in beiden beliebig viele NULL.
+- id: t09-c038
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, numeric, check, dialekt]
+  front: "Wie sicherst du in Firebird 3 ab, dass ein Betrag höchstens 9999,99 ist?"
+  back: |-
+    Mit einem **CHECK**, z. B. in einer Domäne:
+    `CREATE DOMAIN d_euro AS NUMERIC(6,2) CHECK (VALUE BETWEEN 0 AND 9999.99);`
+    `NUMERIC(6,2)` allein reicht nicht, weil Firebird 3 die Präzision nicht erzwingt (intern Ganzzahl). PostgreSQL würde größere Werte schon über die Präzision abweisen, der CHECK schadet dort aber nicht.
+- id: t09-c039
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, numeric, gleitkomma]
+  front: "Was unterscheidet exakte von ungefähren numerischen Typen? Nenne je zwei Beispiele."
+  back: |-
+    - **Exakt:** speichern jeden Wert im Bereich genau. `INTEGER`, `NUMERIC(p,s)` (auch `SMALLINT`, `BIGINT`, `DECIMAL`).
+    - **Ungefähr:** binäre Gleitkommazahlen, großer Bereich, in Hardware schnell gerechnet, aber viele Dezimalbrüche nur näherungsweise. `FLOAT` (FB 32 Bit; in PG ist `FLOAT` ohne Angabe 64 Bit, 32 Bit heißt dort `REAL`), `DOUBLE PRECISION`.
+
+    Abwägung: Genauigkeit (Geld) gegen Geschwindigkeit und Wertebereich (Messwerte). Langsam sind vor allem lange Dezimalzahlen, die in Software gerechnet werden (PG `numeric`).
+- id: t09-c040
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datentypen, zeichenketten]
+  front: "Zählt n in `VARCHAR(n)` Zeichen oder Bytes?"
+  back: |-
+    **Zeichen.** `VARCHAR(30)` fasst 30 Zeichen, auch mit UTF8.
+    Bytes zählen nur bei der Obergrenze für n: höchstens 32 765 Bytes (`VARCHAR`) bzw. 32 767 Bytes (`CHAR`) je Wert. Mit UTF8 (bis 4 Bytes je Zeichen) lässt sich deshalb höchstens n = 8 191 deklarieren.
+- id: t09-c041
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, umbenennen, firebird, dialekt]
+  front: "In Firebird 3 hat `preis` einen CHECK-Constraint. Wie benennst du die Spalte in `preis_eur` um?"
+  back: |-
+    Direkt geht es nicht, weil Firebird 3 keine Spalte umbenennt, die in einem Constraint steckt. Die Reihenfolge ist:
+    1. `ALTER TABLE t DROP CONSTRAINT ck_t_preis;`
+    2. `ALTER TABLE t ALTER COLUMN preis TO preis_eur;`
+    3. `ALTER TABLE t ADD CONSTRAINT ck_t_preis CHECK (preis_eur > 0);`
+
+    PostgreSQL (`RENAME COLUMN`) passt den Constraint selbst an.
+- id: t09-c042
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, check, firebird]
+  front: "Wie änderst du die Bedingung eines bestehenden CHECK-Constraints?"
+  back: |-
+    Gar nicht direkt, sondern durch **Löschen und neu Anlegen**:
+    `ALTER TABLE t DROP CONSTRAINT ck_x;` und danach `ALTER TABLE t ADD CONSTRAINT ck_x CHECK (…neue Bedingung…);`
+    Ein `ALTER CONSTRAINT` für CHECKs gibt es in Firebird 3 nicht. PostgreSQL ändert damit nur Eigenschaften von Fremdschlüsseln (z. B. aufschiebbar).
+- id: t09-c043
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, primary-key, not-null, firebird]
+  front: "Was muss in Firebird 3 gelten, bevor du mit `ALTER TABLE … ADD CONSTRAINT … PRIMARY KEY (x)` einen Primärschlüssel nachträglich anlegst?"
+  back: |-
+    - Die Spalte(n) müssen schon **NOT NULL** sein, sonst meldet Firebird einen Fehler. Vorher also `ALTER COLUMN x SET NOT NULL`.
+    - Die vorhandenen Werte müssen eindeutig sein.
+
+    PostgreSQL setzt NOT NULL beim Anlegen des PK selbst, wenn keine NULL-Werte vorhanden sind.
+- id: t09-c044
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [identity, restart, dialekt]
+  front: "Was bewirkt `ALTER TABLE t ALTER COLUMN id RESTART WITH 50` in Firebird 3, was in PostgreSQL?"
+  back: |-
+    Der Zähler der Identity-Spalte wird zurückgesetzt.
+    - **PostgreSQL:** Die nächste vergebene ID ist **50**.
+    - **Firebird 3:** Die nächste ID ist **51**, wie bei `START WITH` (dokumentierter Fehler).
+
+    Ohne `WITH n` springt der Zähler auf den Startwert aus dem `CREATE TABLE`.
+- id: t09-c045
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [domain, dialekt, not-null]
+  front: "Welche Unterschiede gibt es bei `CREATE DOMAIN` zwischen Firebird 3 und PostgreSQL, und warum lässt man Domänen meist NULL-fähig?"
+  back: |-
+    - Firebird 3: genau ein CHECK ohne Namen. PostgreSQL: mehrere, auch benannt (`CONSTRAINT ck_… CHECK (…)`).
+    - Eine `NOT NULL`-Domäne macht jede Spalte zur Pflichtspalte. Firebird 3 kann das an der Spalte nicht lockern.
+
+    Deshalb empfehlen beide Dokus, die Domäne NULL-fähig zu lassen und `NOT NULL` an die Spalte zu schreiben.
+- id: t09-c046
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktionen, set-default]
+  front: "Was braucht `ON DELETE SET DEFAULT`, damit es funktioniert?"
+  back: |-
+    - einen **Default** an der FK-Spalte
+    - eine **Platzhalter-Zeile** in der Elterntabelle mit genau diesem Schlüssel (etwa „noch nicht zugeordnet“)
+
+    Fehlt die Platzhalter-Zeile, verletzt der Default selbst den Fremdschlüssel, und das DELETE scheitert. Vorteil gegenüber SET NULL: Die FK-Spalte darf NOT NULL bleiben.
+- id: t09-c047
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen, syntax]
+  front: "Welche Schreibregeln gelten in SQL für Groß- und Kleinschreibung, Kommentare und das Anweisungsende?"
+  back: |-
+    - Schlüsselwörter und Bezeichner ohne Anführungszeichen: Groß-/Kleinschreibung egal (Firebird speichert groß, PostgreSQL klein). In `"…"` zählt sie.
+    - Textliterale in `'…'`: Bei der üblichen Kollation zählt die Groß-/Kleinschreibung (`'Bar'` ≠ `'bar'`). Unter einer Kollation wie `UNICODE_CI` (Firebird) gelten beide als gleich.
+    - Kommentare: `-- …` bis Zeilenende, `/* … */` mehrzeilig.
+    - Anweisungsende: `;`
+- id: t09-c048
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen, notation]
+  front: "Was bedeuten `[ ]`, `{ | }` und `…` in den Syntaxschablonen dieses Kurses, und welche Variante gibt es?"
+  back: |-
+    - `[ x ]`: optional
+    - `{ a | b }`: genau eine Alternative wählen
+    - `…`: weitere wie davor
+
+    So schreiben es die Dokus von Firebird und PostgreSQL. **Variante:** In EBNF-artigen Grammatiken heißt `{ x }` „beliebig oft wiederholen“. Prüfe immer, welche Konvention gilt.
+- id: t09-c049
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen, sprachklassen]
+  front: "Was heißt es, dass SQL deklarativ und mengenorientiert ist?"
+  back: |-
+    - **Deklarativ (nichtprozedural):** Du beschreibst das gewünschte Ergebnis, nicht den Lösungsweg. Den Zugriffsweg wählt das DBMS.
+    - **Mengenorientiert:** Eine Anweisung verarbeitet alle Zeilen, die die Bedingung erfüllen, auf einmal. Schleifen über einzelne Zeilen braucht es dafür nicht.
+
+    Beispiel: `DELETE FROM termin WHERE ausgefallen = TRUE` löscht alle ausgefallenen Termine mit einem Befehl.
+- id: t09-c050
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sprachklassen, dcl, notation]
+  front: "Welche engere und welche weitere Auffassung von DCL gibt es?"
+  back: |-
+    Deutsch: *Datenkontrollsprache* oder *Datenüberwachungssprache*.
+    - **Eng** (offene Quellen dieses Kurses): DCL vergibt und entzieht Rechte, also `GRANT` und `REVOKE`.
+    - **Weit** (manche Lehrbücher): Zur DCL gehören dann auch Integritätsregeln, Speicher- und Zugriffsstrukturen, Transaktionen (`COMMIT`, `ROLLBACK`) und Datensicherung.
+
+    In der Klausur gibst du an, welche Einteilung du verwendest.
