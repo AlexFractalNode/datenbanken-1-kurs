@@ -290,7 +290,7 @@
   solution: |-
     a) Fünf unterscheidbare Fehler (vier genügen):
     1. **Typ:** `instrument_id VARCHAR(10)` passt nicht zum referenzierten `INTEGER` (Fremdschlüssel braucht gleiche Domäne bzw. kompatiblen Typ). Korrektur: `instrument_id INTEGER NOT NULL`.
-    2. **Primärschlüssel:** `(ausleihe_id, schueler_id)` ist kein minimaler Schlüsselkandidat, denn `ausleihe_id` allein ist schon eindeutig. Außerdem enthält er die NULL-fähige Spalte `schueler_id` (Entitätsintegrität; Firebird verlangt `NOT NULL` für PK-Spalten). Korrektur: `PRIMARY KEY (ausleihe_id)`.
+    2. **Primärschlüssel:** `(ausleihe_id, schueler_id)` ist kein minimaler Schlüsselkandidat, denn `ausleihe_id` allein ist schon eindeutig. Außerdem enthält er die NULL-fähige Spalte `schueler_id` (Entitätsintegrität; Firebird 3 macht PK-Spalten beim `CREATE TABLE` automatisch `NOT NULL`, die Spalte wäre also nicht mehr optional). Korrektur: `PRIMARY KEY (ausleihe_id)`.
     3. **Pflichtbeziehung:** Jede Ausleihe gehört zu genau einer Person, `schueler_id` muss also `NOT NULL` sein, auch wenn die Spalte nicht mehr zum PK gehört. Korrektur: `schueler_id INTEGER NOT NULL`.
     4. **Referenzielle Aktion:** `ON DELETE SET NULL` widerspricht der Pflichtbeziehung. Mit `NOT NULL` würde jedes Löschen einer Schülerin mit Ausleihen scheitern, ohne `NOT NULL` entstünden Ausleihen ohne Person. Korrektur: Klausel weglassen (`NO ACTION`), damit Personen mit Ausleihen nicht gelöscht werden.
     5. **Fachliche Regel:** `rueckgabe > ausgabe` verbietet die Rückgabe am Ausgabetag, erlaubt ist `>=` (benutzerdefinierte Integrität). Korrektur: `CHECK (rueckgabe >= ausgabe)`.

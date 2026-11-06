@@ -151,7 +151,7 @@ Der Primärschlüssel ist die „Adresse“ eines Tupels, über die auch Fremdsc
 
 Die Regel gilt für die **gespeicherten** Relationen (Basistabellen). Ein Abfrageergebnis oder eine Sicht (t12) braucht keinen Primärschlüssel und darf doppelte Zeilen enthalten, etwa nach einer Projektion, die den Schlüssel weglässt.
 
-**In SQL:** `PRIMARY KEY` bedeutet „eindeutig und nicht NULL“. PostgreSQL ergänzt das `NOT NULL` selbst; in Firebird müssen PK-Spalten `NOT NULL` sein, man deklariert es deshalb ausdrücklich (t06). Eine Tabelle hat **höchstens einen** Primärschlüssel. SQL erzwingt ihn nicht: Tabellen ohne `PRIMARY KEY` sind erlaubt, verletzen aber die Entitätsintegrität des Modells (siehe die SQL-Abweichungen oben).
+**In SQL:** `PRIMARY KEY` bedeutet „eindeutig und nicht NULL“. PostgreSQL ergänzt das `NOT NULL` selbst; Firebird 3 tut das bei `CREATE TABLE … PRIMARY KEY` ebenfalls. Nur beim nachträglichen `ALTER TABLE … ADD PRIMARY KEY` müssen die Spalten dort schon `NOT NULL` sein (t09). Ausdrücklich `NOT NULL` zu schreiben schadet nie und macht die Absicht sichtbar (t06). Eine Tabelle hat **höchstens einen** Primärschlüssel. SQL erzwingt ihn nicht: Tabellen ohne `PRIMARY KEY` sind erlaubt, verletzen aber die Entitätsintegrität des Modells (siehe die SQL-Abweichungen oben).
 
 **Weitere Schlüsselkandidaten.** Ein Schlüsselkandidat ist im Modell eindeutig **und** in jedem Tupel definiert, also nie NULL. Das DBMS prüft einen nicht gewählten Schlüsselkandidaten (Alternativschlüssel) nur, wenn er ausdrücklich deklariert ist, in SQL mit `UNIQUE` **und** `NOT NULL`. Beispiel: `raum.bezeichnung NOT NULL UNIQUE`.
 
