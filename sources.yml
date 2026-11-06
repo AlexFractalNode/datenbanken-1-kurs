@@ -10,7 +10,7 @@
   license: "PostgreSQL License"
   accessed: "2026-11-05"
   kind: docs
-  topics: [t05, t08, t09, t10, t11, t12, t13]
+  topics: [t02, t05, t06, t08, t09, t10, t11, t12, t13]
   refs:
     - "Kap. 5 Data Definition: https://www.postgresql.org/docs/17/ddl.html"
     - "5.2 Default Values: https://www.postgresql.org/docs/17/ddl-default.html"
@@ -34,7 +34,7 @@
   license: "PostgreSQL License"
   accessed: "2026-11-05"
   kind: docs
-  topics: [t06, t09, t10, t11, t12, t13]
+  topics: [t05, t06, t09, t10, t11, t12, t13]
   refs:
     - "CREATE TABLE: https://www.postgresql.org/docs/17/sql-createtable.html"
     - "CREATE DOMAIN: https://www.postgresql.org/docs/17/sql-createdomain.html"
@@ -59,7 +59,7 @@
   license: "Public Documentation License Version 1.0"
   accessed: "2026-11-05"
   kind: docs
-  topics: [t05, t08, t09, t10, t11, t12, t13]
+  topics: [t01, t02, t05, t06, t08, t09, t10, t11, t12, t13]
   refs:
     - "Kap. 3 Data Types and Subtypes: …#fblangref30-datatypes"
     - "Kap. 4 Common Language Elements (u. a. Domains, Constraints): …#fblangref30-commons"
@@ -110,10 +110,12 @@
   author: Adrienne Watt, Nelson Eng
   url: "https://opentextbc.ca/dbdesign01/"
   license: "CC BY 4.0"
-  accessed: "2026-11-05"
+  accessed: "2026-11-06"
   kind: oer
   topics: [t01, t02, t03, t04, t05, t06, t07, t09, t11, t13]
   refs:
+    - "Zweit-URL (opentextbc.ca antwortet teils mit HTTP 403): inhaltsgleiche CC-BY-Ausgabe auf LibreTexts, https://eng.libretexts.org/Bookshelves/Computer_Science/Databases_and_Data_Structures/Database_Design_2e_(Watt). Die LibreTexts-Seite nennt „CC BY“ ohne Versionsnummer und Adrienne Watt (BCcampus Open Textbooks) als Autorin; Nelson Eng wird dort nicht genannt. Kap. 5 enthält zudem Material nach Nguyen Kim Anh, Database System Concepts (CC BY 3.0). Version 4.0 und Mitautor laut Katalogseite (siehe unten)."
+    - "Kap. 5 Data Modelling auf LibreTexts: https://eng.libretexts.org/Bookshelves/Computer_Science/Databases_and_Data_Structures/Database_Design_2e_(Watt)/01%3A_Chapters/1.05%3A_Chapter_5_Data_Modelling"
     - "Kap. 2 Fundamental Concepts; Kap. 3 Characteristics and Benefits of a Database"
     - "Kap. 4 Types of Data Models; Kap. 5 Data Modelling; Kap. 6 Classification of DBMS"
     - "Kap. 7 The Relational Data Model"
@@ -132,7 +134,7 @@
   license: "CC BY 4.0"
   accessed: "2026-11-05"
   kind: oer
-  topics: [t01, t04, t05, t06, t07, t09, t10, t11, t12, t13]
+  topics: [t01, t02, t04, t05, t06, t07, t09, t10, t11, t12, t13]
   refs:
     - "DB-Konzepte: https://oer-informatik.de/datenbankkonzepte"
     - "DBMS: https://oer-informatik.de/dbms"
@@ -155,7 +157,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: oer
-  topics: [t03, t04, t06, t10, t13]
+  topics: [t02, t03, t04, t06, t10, t13]
   refs:
     - "Entwurf von Datenbanken (ER-Modelle): https://inf-schule.de/datenbanksysteme/ermodelle"
     - "Zugriff auf Datenbanken: https://inf-schule.de/datenbanksysteme/zugriff"
@@ -209,22 +211,13 @@
   topics: [t01, t02, t13]
   refs: ["Datenbank, DBMS, Datenbanksystem", "Aufgaben/Funktionen eines DBMS", "Datenbankanwendung"]
 
-- id: wp-miniwelt
-  title: "Miniwelt (Wikipedia)"
-  url: "https://de.wikipedia.org/wiki/Miniwelt"
-  license: "CC BY-SA 4.0"
-  accessed: "2026-11-05"
-  kind: wiki
-  topics: [t01, t03]
-  refs: ["Begriff Miniwelt"]
-
 - id: wp-data-dictionary
   title: "Data-Dictionary (Wikipedia)"
   url: "https://de.wikipedia.org/wiki/Data-Dictionary"
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t01]
+  topics: [t01, t03]
   refs: ["Data Dictionary"]
 
 - id: wp-schema-informatik
@@ -233,7 +226,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t01, t02]
+  topics: [t01, t02, t03]
   refs: ["Datenbankschema vs. Ausprägung"]
 
 - id: wp-datenbankadministrator
@@ -249,10 +242,10 @@
   title: "Edgar F. Codd (Wikipedia)"
   url: "https://de.wikipedia.org/wiki/Edgar_F._Codd"
   license: "CC BY-SA 4.0"
-  accessed: "2026-11-05"
+  accessed: "2026-11-06"
   kind: wiki
   topics: [t01, t02]
-  refs: ["Relationales Modell, Codd-Regeln (Kandidat; der Artikel 'Codd'sche Regeln' existiert nicht)"]
+  refs: ["Abschnitt „Leben“: relationales Modell (1970), IBM, System R, Turing Award 1981", "Die im Artikel genannten „zwölf Regeln“ sind laut Artikel Evaluierungsregeln für OLAP-Systeme, nicht die zwölf Regeln für relationale DBMS; diese stehen in wpen-codds-12-rules"]
 
 - id: wp-datenbankmodell
   title: "Datenbankmodell (Wikipedia)"
@@ -278,7 +271,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t02, t05, t06]
+  topics: [t01, t02, t05, t06]
   refs: ["Relationales Modell, Überblick", "Relation, Tupel, Attribut"]
 
 - id: wp-objektdatenbank
@@ -305,7 +298,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t02]
+  topics: [t02, t03]
   refs: ["Drei-Ebenen-Architektur", "Datenunabhängigkeit"]
 
 - id: wp-datenunabhaengigkeit
@@ -314,7 +307,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t02]
+  topics: [t01, t02, t12]
   refs: ["logische und physische Datenunabhängigkeit"]
 
 - id: wp-datenmodellierung
@@ -323,7 +316,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t03, t04]
+  topics: [t01, t02, t03, t04]
   refs: ["konzeptionelles, logisches, physisches Datenmodell (Phasen)"]
 
 - id: wp-entity-relationship-modell
@@ -332,7 +325,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t03, t04, t06]
+  topics: [t01, t03, t04, t06]
   refs: ["Entitätstyp, Attribute, Beziehungstypen", "Notationen (Chen, Min-Max)", "Überführung in das relationale Modell"]
 
 - id: wp-schluessel-datenbank
@@ -368,35 +361,26 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t05, t08]
+  topics: [t01, t05, t08]
   refs: ["Relation, Tupel, Attribut"]
-
-- id: wp-wertemenge
-  title: "Wertemenge (Wikipedia; Weiterleitung von Wertebereich)"
-  url: "https://de.wikipedia.org/wiki/Wertemenge"
-  license: "CC BY-SA 4.0"
-  accessed: "2026-11-05"
-  kind: wiki
-  topics: [t05]
-  refs: ["Domäne/Wertebereich"]
 
 - id: wp-referentielle-integritaet
   title: "Referentielle Integrität (Wikipedia)"
   url: "https://de.wikipedia.org/wiki/Referentielle_Integrität"
   license: "CC BY-SA 4.0"
-  accessed: "2026-11-05"
+  accessed: "2026-11-06"
   kind: wiki
   topics: [t05, t06, t09, t11]
-  refs: ["Fremdschlüssel-Bedingung", "referenzielle Aktionen (CASCADE, SET NULL, RESTRICT)"]
+  refs: ["Abschnitte „Begriffe und ihre Bedeutung“ und „Beispiel“: Fremdschlüssel-Bedingung; Löschen oder Ändern eines referenzierten Datensatzes wird abgelehnt, solange abhängige Datensätze existieren (entspricht RESTRICT/NO ACTION, ohne diese SQL-Schlüsselwörter zu unterscheiden)", "Abschnitt „Erweiterungen / Besonderheiten“: Löschweitergabe und Änderungsweitergabe (entspricht CASCADE, mehrstufig als Kaskadierung)", "SET NULL und SET DEFAULT behandelt der Artikel nicht als referenzielle Aktionen; dafür DBMS-Dokumentation (z. B. postgresql-17-docs-sql, sqlite-documentation, firebird-30-language-reference) heranziehen"]
 
-- id: wp-datenintegritaet
-  title: "Datenintegrität (Wikipedia)"
-  url: "https://de.wikipedia.org/wiki/Datenintegrität"
+- id: wp-integritaetsbedingung
+  title: "Integritätsbedingung (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Integritätsbedingung"
   license: "CC BY-SA 4.0"
-  accessed: "2026-11-05"
+  accessed: "2026-11-06"
   kind: wiki
   topics: [t05, t12]
-  refs: ["Integritätsarten", "deklarative vs. prozedurale Sicherung"]
+  refs: ["Abschnitt „Definition“", "Abschnitt „Beispiele“ › Datenbanken (u. a. Benutzerrechte, Optimierung)"]
 
 - id: wp-normalisierung-datenbank
   title: "Normalisierung (Datenbank) (Wikipedia; enthält BCNF, 4NF)"
@@ -404,7 +388,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t07]
+  topics: [t04, t07]
   refs:
     - "Vorgehen: Ziel Konsistenzerhöhung durch Redundanzvermeidung"
     - "Normalformen: 1NF, 2NF, 3NF, BCNF, 4NF, 5NF"
@@ -451,7 +435,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t09, t10, t11]
+  topics: [t04, t09, t10, t11]
   refs: ["Sprachelemente", "Datentypen", "NULL und dreiwertige Logik"]
 
 - id: wp-data-definition-language
@@ -460,7 +444,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t09]
+  topics: [t01, t09]
   refs: ["CREATE, ALTER, DROP"]
 
 - id: wp-data-manipulation-language
@@ -469,7 +453,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t09, t10, t11]
+  topics: [t01, t09, t10, t11]
   refs: ["INSERT, UPDATE, DELETE", "Abgrenzung DQL"]
 
 - id: wp-data-control-language
@@ -478,7 +462,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t09, t13]
+  topics: [t01, t09, t13]
   refs: ["GRANT, REVOKE"]
 
 - id: wp-datentyp
@@ -523,7 +507,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t11]
+  topics: [t01, t11]
   refs: ["Kontext für DML-Änderungen (COMMIT/ROLLBACK)"]
 
 - id: wp-sicht-datenbank
@@ -541,7 +525,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t12]
+  topics: [t05, t12]
   refs: ["BEFORE/AFTER-Trigger"]
 
 - id: wp-gespeicherte-prozedur
@@ -577,7 +561,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t13]
+  topics: [t01, t13]
   refs: ["ODBC"]
 
 - id: wp-java-database-connectivity
@@ -586,7 +570,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t13]
+  topics: [t01, t13]
   refs: ["JDBC"]
 
 - id: wp-sql-injection
@@ -679,7 +663,7 @@
   license: "CC BY 4.0"
   accessed: "2026-11-05"
   kind: oer
-  topics: [t05, t06]
+  topics: [t04, t05, t06, t07]
   refs:
     - "Vom konzeptuellen ins logische Modell"
     - "Transformationsschritte: Primärschlüssel wählen, Kardinalitäten in Fremdschlüssel transformieren (1:N, M:N, 1:1)"
@@ -728,7 +712,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t07]
+  topics: [t04, t07]
   refs: ["Normal forms", "Update/insertion/deletion anomalies"]
 
 - id: wpen-functional-dependency
@@ -746,7 +730,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-05"
   kind: wiki
-  topics: [t02, t05]
+  topics: [t02, t04, t05, t08]
   refs: ["Relation, tuple, attribute, domain", "Keys and integrity constraints"]
 
 - id: wpen-three-schema-approach
@@ -783,7 +767,7 @@
   license: "CC BY-SA 4.0"
   accessed: "2026-11-06"
   kind: wiki
-  topics: [t06]
+  topics: [t02, t06]
   refs: ["Abbildung von Vererbungshierarchien (Tabelle pro Vererbungshierarchie, pro Unterklasse, pro konkrete Klasse)", "Prinzip", "Grundlegende Techniken"]
 
 - id: wpen-single-table-inheritance
@@ -803,3 +787,100 @@
   kind: wiki
   topics: [t08]
   refs: ["Natural join", "θ-join and equijoin", "Semijoin", "Antijoin (https://en.wikipedia.org/wiki/Join_(relational_algebra)#Antijoin)", "Division"]
+
+# ---------- Nachtrag 2 (author-research) ----------
+- id: wp-modell
+  title: "Modell (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Modell"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t02]
+  refs: ["Abschnitt „Wissenschaftliche Hauptmerkmale“: Abbildungs-, Verkürzungs- und Pragmatismusmerkmal nach Stachowiak (im Artikel „Pragmatismusmerkmal“ genannt)"]
+
+- id: wpen-object-relational-database
+  title: "Object–relational database (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Object%E2%80%93relational_database"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t02]
+  refs: ["Abschnitt „History“: Db2, Oracle Database, PostgreSQL", "Abschnitt „Overview“: Abgrenzung zu object–relational mapping (ORM)"]
+
+- id: wpen-network-model
+  title: "Network model (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Network_model"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t02]
+  refs: ["Abschnitte „Overview“ und „History“ (CODASYL Data Base Task Group, 1969)", "Abschnitt „Database systems“ (u. a. IDMS)"]
+
+- id: wp-netzwerkdatenbankmodell
+  title: "Netzwerkdatenbankmodell (Wikipedia)"
+  url: "https://de.wikipedia.org/wiki/Netzwerkdatenbankmodell"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t02]
+  refs: ["Einleitung und Abschnitt „Datenbanksätze“ (CODASYL)", "Abschnitt „Das Netzwerkdatenbankmodell heute“ (UDS von Siemens); IDMS wird im Artikel nicht genannt, dafür wpen-network-model"]
+
+- id: wpen-schema-matching
+  title: "Schema matching (English Wikipedia)"
+  url: "https://en.wikipedia.org/wiki/Schema_matching"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t03]
+  refs: ["Nur Teildeckung der Sichtenintegration: Abschnitt „Impediments“ (semantische und strukturelle Heterogenität, Synonyme/Homonyme, Einheiten und Genauigkeit), Abschnitt „Schema matching“ › Methodology (Conforming the Schemas). Die Konfliktarten Namens-, Typ-, Wertebereichs-, Bedingungs- und Strukturkonflikt werden dort nicht als solche benannt."]
+
+- id: firebird-30-release-notes
+  title: "Firebird 3.0 Release Notes"
+  author: Firebird Project and all contributing authors
+  url: "https://firebirdsql.org/file/documentation/release_notes/html/en/3_0/rlsnotes30.html"
+  license: "Public Documentation License Version 1.0"
+  accessed: "2026-11-06"
+  kind: docs
+  topics: [t09]
+  refs:
+    - "DDL Enhancements › Manage Nullability in Domains and Columns (ALTER TABLE/ALTER DOMAIN, NOT NULL nachträglich setzen oder aufheben; Anker rnfb30-ddl-managenull; genaue Syntax am Text zu prüfen)"
+    - "Lizenznachweis: Appendix A Licence Notice (am Seitenende)"
+
+- id: firebird-25-release-notes
+  title: "Firebird 2.5 Release Notes"
+  author: Firebird Project and all contributing authors
+  url: "https://firebirdsql.org/file/documentation/release_notes/html/en/2_5/rlsnotes25.html"
+  license: "Public Documentation License Version 1.0"
+  accessed: "2026-11-06"
+  kind: docs
+  topics: [t11]
+  refs:
+    - "Configuration Parameter Additions and Changes › OldSetClauseSemantics (UPDATE ... SET: ab 2.5 nur Ausgangswerte der Spalten sichtbar, nicht bereits zugewiesene neue Werte): https://firebirdsql.org/file/documentation/release_notes/html/en/2_5/rnfb25-fbconf-oldset.html"
+    - "Lizenznachweis: B. Licence Notice: https://firebirdsql.org/file/documentation/release_notes/html/en/2_5/rnfb25-licence.html"
+
+- id: wpes-12-reglas-de-codd
+  title: "12 reglas de Codd (Spanish Wikipedia)"
+  url: "https://es.wikipedia.org/wiki/12_reglas_de_Codd"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t01, t02]
+  refs: ["Abschnitt „Reglas“ (Regla 0 bis 12); unabhängige Zweitquelle zu wpen-codds-12-rules, Spanisch"]
+
+- id: wpit-12-regole-di-codd
+  title: "12 regole di Codd (Italian Wikipedia)"
+  url: "https://it.wikipedia.org/wiki/12_regole_di_Codd"
+  license: "CC BY-SA 4.0"
+  accessed: "2026-11-06"
+  kind: wiki
+  topics: [t01, t02]
+  refs: ["Abschnitt „Le regole“ (Regola 0 bis 12); Zweitquelle zu wpen-codds-12-rules, Italienisch"]
+
+- id: codd-1982-practical-foundation
+  title: "Relational Database: A Practical Foundation for Productivity (Turing Award Lecture)"
+  author: E. F. Codd
+  url: "https://doi.org/10.1145/358396.358400"
+  license: "urheberrechtlich geschützt (ACM), nur Verweis"
+  accessed: "2026-11-06"
+  kind: further-reading
+  refs: ["Communications of the ACM 25(2), Februar 1982, S. 109-117 (Jahresangabe 1982; Vortrag am 9. November 1981). Die Zählung „neun Anforderungen“ ist hier nicht geprüft."]
