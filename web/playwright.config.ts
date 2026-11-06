@@ -11,6 +11,8 @@ const contentRoot = process.env.CONTENT_ROOT ?? 'tests/fixtures/content_ok';
 export default defineConfig({
   testDir: 'tests/e2e',
   fullyParallel: true,
+  // Under CI load (build + preview + two browsers) navigation timeouts made the run flaky: cap the workers.
+  workers: process.env.CI ? 2 : undefined,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? 'github' : 'list',

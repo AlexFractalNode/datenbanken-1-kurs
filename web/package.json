@@ -19,6 +19,13 @@
   },
   "dependencies": {
     "@astrojs/preact": "6.1.1",
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/lang-sql": "6.10.0",
+    "@codemirror/language": "6.13.1",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.15",
+    "@electric-sql/pglite": "0.5.15",
+    "@lezer/highlight": "1.2.5",
     "@viz-js/viz": "3.31.0",
     "astro": "7.4.6",
     "marked": "18.1.3",

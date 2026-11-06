@@ -1,19 +1,36 @@
 ---
-import Placeholder from '../components/Placeholder.astro';
+import '../styles/playground.css';
+import Playground from '../components/Playground';
 import Base from '../layouts/Base.astro';
-import { getOverview } from '../lib/content';
+import { withBase } from '../lib/nav';
+import { playgroundProps } from '../lib/playground-props';
 
-const sql = getOverview().reduce((n, o) => n + o.counts.sqlTasks, 0);
+const { tasks, databases, topics } = await playgroundProps();
 ---
 
-<Base title="Playground" description="SQL im Browser üben." noindex>
+<Base title="SQL-Playground" description="SQL im Browser üben: PostgreSQL läuft lokal in deinem Browser, mit automatischer Prüfung." noindex>
   <header class="page-head">
     <h1>SQL-Playground</h1>
-  </header>
-  <Placeholder unit="playground" heading="Der SQL-Playground folgt" prepared={`${sql} SQL-Aufgaben sind bereits vorbereitet.`}>
-    <p>
-      Hier führst du bald SQL direkt im Browser gegen zwei Beispieldatenbanken aus – mit automatischer Prüfung und Hinweisen
-      zu Unterschieden zwischen Firebird und PostgreSQL.
+    <p class="lead">
+      Übe SQL direkt im Browser. Eine PostgreSQL-Datenbank (PGlite) läuft lokal bei dir, nichts wird an einen Server gesendet.
+      Die Aufgaben zeigen die Firebird-Lösung und, falls nötig, die PostgreSQL-Variante.
     </p>
-  </Placeholder>
+  </header>
+  {
+    databases.length === 0 ? (
+      <section class="empty-state" data-verify-unit="playground" data-verify-state="empty" data-verify-count="0" aria-labelledby="pg-none">
+        <h2 id="pg-none">Keine Beispieldatenbanken gefunden</h2>
+        <p>
+          Die Beispieldatenbanken fehlen im Build. Bis dahin: Übe mit den <a href={withBase('aufgaben/')}>Papier-Aufgaben</a>.
+        </p>
+      </section>
+    ) : (
+      <Playground client:load tasks={tasks} databases={databases} topics={topics} />
+    )
+  }
+  <noscript>
+    <p class="notice notice--warn">
+      Der Playground braucht JavaScript. Ohne JavaScript übst du mit den <a href={withBase('aufgaben/')}>Papier-Aufgaben</a>.
+    </p>
+  </noscript>
 </Base>

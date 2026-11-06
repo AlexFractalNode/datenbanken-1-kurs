@@ -101,7 +101,7 @@ describe('getTopic', () => {
     expect(bundle.cards).toHaveLength(3);
     expect(bundle.quiz).toHaveLength(2);
     expect(bundle.tasks).toHaveLength(2);
-    expect(bundle.sqlTasks).toHaveLength(1);
+    expect(bundle.sqlTasks).toHaveLength(2);
     expect(bundle.cards.map((c) => c.id)).toEqual(['t04-c001', 't04-c002', 't04-c003']);
   });
 
@@ -228,7 +228,7 @@ describe('getOverview', () => {
     const overview = getOverview(OK);
     expect(overview.map((o) => o.topic.id)).toEqual(['t01', 't04']);
     expect(overview[0]).toMatchObject({ hasSummary: false, status: null, counts: { cards: 0, quiz: 0, tasks: 0, sqlTasks: 0 } });
-    expect(overview[1]).toMatchObject({ hasSummary: true, status: 'draft', counts: { cards: 3, quiz: 2, tasks: 2, sqlTasks: 1 }, taskMinutes: 15 });
+    expect(overview[1]).toMatchObject({ hasSummary: true, status: 'draft', counts: { cards: 3, quiz: 2, tasks: 2, sqlTasks: 2 }, taskMinutes: 15 });
   });
 });
 

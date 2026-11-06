@@ -1,0 +1,231 @@
+/*
+ * SQL playground. Mobile first: one column (task, editor, result, schema); from 64rem the task and the
+ * editor sit left and result and schema right, so the answer stays next to the question.
+ * Colours only via tokens; the pairs used here (text, muted, accent, key on surface) are checked by tests/tokens.test.ts.
+ */
+
+.playground {
+  display: grid;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+  align-items: start;
+}
+
+.pg-col {
+  display: grid;
+  gap: var(--sp-4);
+  min-width: 0;
+  align-content: start;
+}
+
+@media (min-width: 64rem) {
+  .playground {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.pg-panel {
+  min-width: 0;
+}
+
+.pg-panel > h2 {
+  margin-top: 0;
+  font-size: var(--fs-lg);
+}
+
+.pg-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--sp-4);
+  align-items: end;
+}
+
+.pg-controls .field {
+  margin: var(--sp-2) 0;
+  min-width: min(100%, 14rem);
+}
+
+.pg-controls .field select {
+  width: 100%;
+}
+
+.pg-controls .segmented {
+  margin: var(--sp-2) 0;
+}
+
+.pg-task {
+  border-top: 1px dashed var(--c-line);
+  margin-top: var(--sp-3);
+  padding-top: var(--sp-3);
+}
+
+.pg-task__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  align-items: center;
+  margin: 0 0 var(--sp-3);
+}
+
+.pg-help {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-3);
+  margin: var(--sp-3) 0;
+}
+
+.pg-hints {
+  margin: 0 0 var(--sp-3);
+  padding-left: var(--sp-5);
+}
+
+.pg-sub {
+  font-size: var(--fs-base);
+  margin: var(--sp-3) 0 var(--sp-1);
+}
+
+.pg-code {
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-3);
+  overflow-x: auto;
+  max-height: 24rem;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  color: var(--c-text);
+  background: var(--c-surface-2);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+}
+
+/* ---------- Editor ---------- */
+
+.sql-editor__plain {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  min-height: 9rem;
+  tab-size: 2;
+}
+
+.sql-editor__cm[hidden] {
+  display: none;
+}
+
+.pg-check {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 2.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pg-check input {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  accent-color: var(--c-accent);
+}
+
+.pg-predict textarea {
+  min-height: 4.5rem;
+}
+
+.pg-predict textarea[readonly] {
+  background: var(--c-surface-2);
+}
+
+/* ---------- Result ---------- */
+
+.pg-verdict:empty {
+  display: none;
+}
+
+.pg-verdict {
+  margin: 0 0 var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--radius);
+  border-left: 4px solid currentColor;
+  font-weight: 600;
+  color: var(--c-text);
+  background: var(--c-accent-soft);
+}
+
+.pg-verdict--correct {
+  color: var(--c-ok-text);
+  background: var(--c-ok-soft);
+}
+
+.pg-verdict--wrong {
+  color: var(--c-warn-text);
+  background: var(--c-warn-soft);
+}
+
+.pg-error {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.pg-scroll {
+  max-width: 100%;
+  max-height: 26rem;
+  overflow: auto;
+  margin: 0 0 var(--sp-3);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius);
+}
+
+.pg-table {
+  margin: 0;
+  width: max-content;
+  min-width: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+}
+
+.pg-table th,
+.pg-table td {
+  padding: var(--sp-1) var(--sp-3);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.pg-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--c-surface-2);
+}
+
+.pg-null {
+  color: var(--c-text-muted);
+  font-style: italic;
+}
+
+.pg-prediction {
+  padding: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-3);
+  border-left: 4px solid var(--c-key);
+  background: var(--c-key-soft);
+  color: var(--c-text);
+  border-radius: var(--radius-sm);
+}
+
+.pg-prediction .pg-sub {
+  margin-top: 0;
+}
+
+.pg-prediction p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* ---------- Schema ---------- */
+
+.pg-schema .diagram__canvas svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.pg-schema details {
+  margin-top: var(--sp-3);
+}

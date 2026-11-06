@@ -14,7 +14,8 @@ function trackErrors(page: Page): string[] {
   return errors;
 }
 
-const PAGES: { path: string; unit: string; state: string }[] = [
+/** `timeout`: islands that load WebAssembly (PGlite) need longer than the default to become `ready`. */
+const PAGES: { path: string; unit: string; state: string; timeout?: number }[] = [
   { path: '', unit: 'dashboard', state: 'ready' },
   { path: 'themen/', unit: 'topic-list', state: 'ready' },
   { path: 'themen/t04/', unit: 'topic-page', state: 'ready' },
@@ -25,18 +26,19 @@ const PAGES: { path: string; unit: string; state: string }[] = [
   { path: 'aufgaben/t04/', unit: 'topic-tasks', state: 'ready' },
   { path: 'klausur/', unit: 'exam', state: 'ready' },
   { path: 'klausur/e01/', unit: 'exam-runner', state: 'ready' },
-  { path: 'playground/', unit: 'playground', state: 'empty' },
+  { path: 'playground/', unit: 'playground', state: 'ready', timeout: 60_000 },
   { path: 'glossar/', unit: 'glossary', state: 'ready' },
   { path: 'downloads/', unit: 'downloads', state: 'ready' },
   { path: 'lernplan/', unit: 'study-plan', state: 'ready' },
   { path: 'einstellungen/', unit: 'progress-transfer', state: 'empty' },
 ];
 
-for (const { path, unit, state } of PAGES) {
+for (const { path, unit, state, timeout } of PAGES) {
   test(`/${path} renders ${unit}=${state} without errors and passes axe (WCAG AA)`, async ({ page }) => {
+    if (timeout) test.setTimeout(timeout + 30_000);
     const errors = trackErrors(page);
     await page.goto(path);
-    await expect(page.locator(`[data-verify-unit="${unit}"]`).first()).toHaveAttribute('data-verify-state', state);
+    await expect(page.locator(`[data-verify-unit="${unit}"]`).first()).toHaveAttribute('data-verify-state', state, { timeout });
     await expect(page.locator('h1')).toHaveCount(1);
     // Page-level units must be unique so tests can address them unambiguously.
     await expect(page.locator('[data-verify-unit="theme-toggle"]')).toHaveCount(1);
