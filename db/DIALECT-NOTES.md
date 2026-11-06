@@ -46,6 +46,10 @@ Mengenoperationen bei NULL: In PostgreSQL behandelt `EXCEPT` zwei NULL-Werte als
 | `GRANT rolle_a TO rolle_b` | läuft **ohne Fehler**, Empfänger wird aber als *Benutzer* `ROLLE_B` gespeichert; keine Rollenhierarchie | echte Rollenhierarchie | Rollen in FB3 nur Benutzern zuweisen |
 | Spaltenrechte `GRANT SELECT (spalte)` | **Fehler**; Spaltenliste nur bei UPDATE/REFERENCES | erlaubt | Sicht als Ersatz |
 | PK-Spalten ohne `NOT NULL` | `CREATE TABLE … PRIMARY KEY (a)`: setzt `a` **automatisch** NOT NULL; `ALTER TABLE … ADD PRIMARY KEY (a)`: **Fehler**, wenn `a` nicht schon NOT NULL ist | setzt in beiden Fällen NOT NULL | in Aufgaben NOT NULL auf PK-Spalten zulassen, aber nicht als Pflicht werten (außer beim nachträglichen PK) |
+| Tabelle ohne PRIMARY KEY | erlaubt | erlaubt | – |
+| `ALTER TABLE … ADD UNIQUE` bei vorhandenen Duplikaten | **Fehler** (Constraint wird nicht angelegt) | Fehler | Duplikate vorher bereinigen |
+| `GRANT … TO ROLE r` | erlaubt (Empfängertyp Rolle) | `TO r` | in FB3 `TO ROLE` eindeutig |
+| korrelierte Unterabfrage in `HAVING` | erlaubt | erlaubt | gleich |
 | Datumsliteral `'24.12.2025'` | gültig | von `DateStyle` abhängig | `DATE '2025-12-24'` |
 
 Geprüft am FB-3.0.14-Container (2026-11-06). Ebenfalls am Container bestätigt (2026-11-06): UPDATE `SET a = b, b = a` tauscht in FB3; ein ALTER TABLE mit mehreren Teilbefehlen (ADD CONSTRAINT PK, ALTER COLUMN … TO, ADD … DEFAULT … NOT NULL, ADD CONSTRAINT CHECK, ALTER COLUMN … SET NOT NULL) läuft auf einer gefüllten Tabelle; `DEFAULT` als Wert in VALUES und `TRUNCATE` gibt es in FB3 nicht. Ebenfalls dort bestätigt: `ALTER TABLE … ALTER COLUMN x TO y` scheitert in Firebird 3, wenn `x` in einem Constraint vorkommt (PK, UNIQUE, FK, CHECK): „Column … is referenced in …“. PostgreSQL benennt in diesem Fall um und passt den Constraint an.
