@@ -1,0 +1,615 @@
+- id: t07-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fd, transitive-abhaengigkeit, 3nf]
+  type: define-example
+  difficulty: 1
+  points: 6
+  minutes: 7
+  prompt: |-
+    Erkläre die Begriffe **funktionale Abhängigkeit** und **transitive Abhängigkeit**.
+    Gib ein **eigenes** Beispiel (nicht aus dem Kurstext) als Relation mit Schlüssel und konkreten FDs an, in dem eine transitive Abhängigkeit vorkommt. Begründe, warum die Relation nicht in 3NF ist, und gib die Zerlegung in 3NF mit Primär- und Fremdschlüsseln an.
+  solution: |-
+    - **Funktionale Abhängigkeit X → Y:** Haben zwei Tupel denselben X-Wert, haben sie auch denselben Y-Wert. Zu jedem X-Wert gibt es also genau einen (gleichwertig: höchstens einen) Y-Wert. Das gilt für alle zulässigen Ausprägungen, nicht nur für die gerade gespeicherten Daten.
+    - **Transitive Abhängigkeit:** Z hängt transitiv von X ab, wenn X → Y und Y → Z gelten und das Zwischenglied Y kein Schlüssel(teil) ist, im einfachsten Fall ein Nichtschlüsselattribut. Die strengere Fassung verlangt zusätzlich ausdrücklich Y ↛ X und Z ∉ X ∪ Y. Beide Fassungen sind richtig.
+
+    Beispiel (Musterlösung, andere passende Beispiele gleichwertig): Ein Instrumentenverleih speichert Leihvertrag(<u>VertragNr</u>, Beginn, InstrumentNr, Instrumentart).
+    - VertragNr → Beginn, InstrumentNr (jeder Vertrag betrifft genau ein Instrument)
+    - InstrumentNr → Instrumentart (Inventarnummer 88 ist immer ein Cello)
+    - InstrumentNr ist Nichtschlüsselattribut; InstrumentNr ↛ VertragNr, denn dasselbe Instrument wird nacheinander oft verliehen.
+
+    Begründung (eine der beiden Formulierungen genügt):
+    - Das Nichtschlüsselattribut Instrumentart hängt über InstrumentNr transitiv vom Schlüssel VertragNr ab.
+    - Für die FD InstrumentNr → Instrumentart ist InstrumentNr kein Superschlüssel und Instrumentart kein Primattribut.
+
+    Folge: Die Instrumentart steht in jedem Vertrag erneut (Änderungsanomalie).
+
+    3NF-Zerlegung:
+    - Instrument(<u>InstrumentNr</u>, Instrumentart)
+    - Leihvertrag(<u>VertragNr</u>, Beginn, InstrumentNr → Instrument)
+  rubric:
+    - criterion: "Funktionale Abhängigkeit korrekt erklärt (gleiche X-Werte erzwingen gleiche Y-Werte; „genau ein“ oder „höchstens ein“ Y-Wert je X-Wert gleichwertig)"
+      points: 1
+    - criterion: "Transitive Abhängigkeit korrekt definiert: Kette X → Y → Z über ein Zwischenglied Y, das kein Schlüssel(teil) ist; die Fassung mit zusätzlicher Bedingung Y ↛ X ist ebenso voll richtig"
+      points: 1
+    - criterion: "Eigenes Beispiel (nicht aus dem Kurstext) als Relation mit Schlüssel und konkreten, durch eine Geschäftsregel begründeten FDs"
+      points: 1.5
+    - criterion: "Das Beispiel enthält tatsächlich eine transitive Abhängigkeit (Zwischenattribut ist Nichtschlüsselattribut)"
+      points: 0.5
+    - criterion: "3NF-Verstoß begründet, entweder über „Nichtschlüsselattribut hängt transitiv vom Schlüssel ab“ oder über „Determinante kein Superschlüssel und abhängiges Attribut kein Primattribut“"
+      points: 1
+    - criterion: "Korrekte Zerlegung mit Primär- und Fremdschlüssel"
+      points: 1
+  space: lines:16
+- id: t07-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zerlegung, verlustfrei, abhaengigkeitserhaltung]
+  type: define-example
+  difficulty: 2
+  points: 9
+  minutes: 10
+  prompt: |-
+    Erkläre die Begriffe **verlustfreie Zerlegung** und **abhängigkeitserhaltende Zerlegung**.
+    a) Zeige an einem **eigenen** Beispiel mit mindestens zwei konkreten Datenzeilen eine Zerlegung, die **nicht** verlustfrei ist. Gib alle entstehenden Scheintupel an und nenne eine verlustfreie Alternative.
+    b) Nenne ein Kriterium, mit dem man bei einer Zerlegung in zwei Teile ohne Berechnung des Verbunds prüfen kann, ob sie verlustfrei ist. Wende es auf deine Alternative aus a) an.
+    c) Zeige an einem eigenen Beispiel eine Zerlegung, die zwar verlustfrei, aber **nicht** abhängigkeitserhaltend ist. Erkläre, welches Problem dadurch entsteht.
+  solution: |-
+    - **Verlustfreie Zerlegung:** Der natürliche Verbund der Teilrelationen ergibt für jede zulässige Ausprägung wieder genau die Ausgangsrelation. Bei einer verlustbehafteten Zerlegung fehlen keine Tupel, sondern es entstehen zusätzliche Scheintupel (unechte Tupel).
+    - **Abhängigkeitserhaltende Zerlegung:** Jede FD der Ausgangsrelation lässt sich nach der Zerlegung innerhalb der Teilrelationen prüfen, d. h. aus den FDs der Teile ist die ganze ursprüngliche FD-Menge herleitbar. (Die einfachere Fassung „jede FD liegt vollständig in einer Teilrelation“ ist ebenfalls richtig.)
+
+    a) Beispiel (Musterlösung): Kurs(<u>KursNr</u>, Lehrer, Becken) mit KursNr → Lehrer, Becken. Ein Lehrer leitet mehrere Kurse.
+
+    | KursNr | Lehrer | Becken |
+    |---|---|---|
+    | K4 | Berg | Becken 1 |
+    | K9 | Berg | Becken 2 |
+
+    Zerlegung in R1(KursNr, Lehrer) und R2(Lehrer, Becken): R1 ⋈ R2 liefert vier statt zwei Tupel, die Scheintupel sind (K4, Berg, Becken 2) und (K9, Berg, Becken 1). Welcher Kurs in welchem Becken stattfindet, ist nicht mehr erkennbar.
+    Verlustfreie Alternative: R1(KursNr, Lehrer) und R2(KursNr, Becken).
+
+    b) Kriterium: Die gemeinsamen Attribute R1 ∩ R2 müssen Superschlüssel mindestens eines der beiden Teile sein (sie bestimmen R1 oder R2 funktional). In der Alternative ist das gemeinsame Attribut KursNr, und KursNr ist Schlüssel beider Teile, also verlustfrei. In der falschen Zerlegung ist das gemeinsame Attribut Lehrer in keinem Teil Schlüssel.
+
+    c) Beispiel (Musterlösung): Taucher(<u>TaucherNr</u>, Brevet, MaxTiefe) mit TaucherNr → Brevet und Brevet → MaxTiefe.
+    Zerlegung in (TaucherNr, Brevet) und (TaucherNr, MaxTiefe): verlustfrei, weil TaucherNr Schlüssel beider Teile ist. Die FD Brevet → MaxTiefe liegt aber in keinem Teil und lässt sich aus den FDs der Teile nicht herleiten. Das DBMS kann nicht mehr verhindern, dass zwei Taucher:innen mit Brevet „1 Stern“ verschiedene Maximaltiefen erhalten.
+    Richtig: (TaucherNr, Brevet) und (Brevet, MaxTiefe). Das ist verlustfrei und abhängigkeitserhaltend.
+  rubric:
+    - criterion: "Verlustfreie Zerlegung korrekt definiert (Verbund ergibt genau die Ausgangsrelation; Verlust bedeutet zusätzliche Scheintupel, nicht fehlende Tupel)"
+      points: 1.5
+    - criterion: "Abhängigkeitserhaltung korrekt definiert (jede FD in einer Teilrelation prüfbar bzw. aus den FDs der Teile herleitbar; beide Fassungen gleichwertig)"
+      points: 1
+    - criterion: "a) Eigenes Beispiel mit Ausgangsrelation, konkreten Zeilen und verlustbehafteter Zerlegung"
+      points: 1
+    - criterion: "a) Scheintupel vollständig und korrekt angegeben"
+      points: 1.5
+    - criterion: "a) Korrekte verlustfreie Alternative"
+      points: 0.5
+    - criterion: "b) Kriterium genannt (gemeinsame Attribute sind Superschlüssel mindestens eines Teils) und auf die Alternative angewandt"
+      points: 1
+    - criterion: "c) Eigenes verlustfreies Beispiel, in dem eine FD in keinem Teil mehr liegt; die verlorene FD ist benannt"
+      points: 1.5
+    - criterion: "c) Folge erklärt (Regel nicht mehr über Schlüssel durchsetzbar, Inkonsistenz möglich)"
+      points: 1
+  space: box:160
+- id: t07-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attributhuelle, schluessel, fd, vertiefung]
+  type: normalize
+  difficulty: 3
+  points: 11
+  minutes: 11
+  prompt: |-
+    **Vertiefung:** Attributhülle und systematische Schlüsselsuche gehen über das Minimum hinaus. Die Aufgabe trainiert sie gezielt; in den meisten Normalisierungsaufgaben lässt sich der Schlüssel direkt aus den Geschäftsregeln ablesen.
+
+    Gegeben ist die Relation R(A, B, C, D, E, G) mit der FD-Menge
+    F = { A B → C,  C → D,  D → A,  D E → B,  C → G }.
+
+    a) Berechne die Attributhülle {C, E}⁺ schrittweise. Gib bei jedem Schritt die verwendete FD an.
+    b) Bestimme **alle** Schlüsselkandidaten von R. Begründe, warum deine Liste vollständig ist und jeder Kandidat minimal ist.
+    c) Gib alle Primattribute und alle Nichtschlüsselattribute an.
+    d) Ist {A, B, C, E} ein Superschlüssel? Ist es ein Schlüsselkandidat? Begründe kurz.
+    e) In welcher höchsten Normalform (1NF, 2NF oder 3NF) ist R? Atomare Werte darfst du voraussetzen. Begründe mit einer konkreten FD.
+  solution: |-
+    a) Start {C, E}.
+    - C → D: {C, D, E}
+    - C → G: {C, D, E, G}
+    - D → A: {A, C, D, E, G}
+    - D E → B: {A, B, C, D, E, G}
+    - A B → C bringt nichts Neues. Ergebnis: {C, E}⁺ = {A, B, C, D, E, G}, alle Attribute.
+
+    b) E steht auf keiner rechten Seite und muss daher in **jedem** Schlüssel enthalten sein. G steht nur rechts und nie links, gehört also zu keinem Schlüssel. {E}⁺ = {E} reicht nicht.
+    Zweiermengen mit E:
+    - {A, E}⁺ = {A, E} und {B, E}⁺ = {B, E}: nein
+    - {C, E}⁺ = alle (siehe a): **Schlüsselkandidat**
+    - {D, E}⁺: D → A ergibt {A, D, E}, D E → B ergibt {A, B, D, E}, A B → C ergibt {A, B, C, D, E}, C → G ergibt alle: **Schlüsselkandidat**
+
+    Dreiermengen, die weder C noch D enthalten (sonst Obermenge eines gefundenen Schlüssels), bleiben nur {A, B, E}: A B → C, C → D, C → G ergibt alle Attribute. {A, E} und {B, E} reichen nicht, also ist {A, B, E} minimal und **Schlüsselkandidat**. Größere Mengen ohne C und D enthalten {A, B, E} und sind nicht minimal.
+    Schlüsselkandidaten: **{C, E}, {D, E}, {A, B, E}**. {C, E} und {D, E} sind minimal, weil {C}, {D} und {E} allein nicht alles bestimmen.
+
+    c) Primattribute: A, B, C, D, E. Nichtschlüsselattribut: G.
+
+    d) {A, B, C, E} ist Superschlüssel, weil es {C, E} enthält und damit alles bestimmt. Es ist kein Schlüsselkandidat, weil man A und B weglassen kann (nicht minimal).
+
+    e) Höchste Normalform ist die **1NF**. Die FD C → G zeigt, dass das Nichtschlüsselattribut G schon von C abhängt, einem echten Teil des Schlüsselkandidaten {C, E}. Diese partielle Abhängigkeit verletzt die 2NF.
+  rubric:
+    - criterion: "a) Hülle {C, E}⁺ vollständig und mit angegebenen FDs schrittweise berechnet"
+      points: 2
+    - criterion: "b) Begründung, dass E in jedem Schlüssel liegen muss (und G in keinem)"
+      points: 1
+    - criterion: "b) Alle drei Schlüsselkandidaten {C, E}, {D, E}, {A, B, E} gefunden und jeweils per Hülle belegt (je 1 Punkt)"
+      points: 3
+    - criterion: "b) Vollständigkeit und Minimalität nachvollziehbar begründet"
+      points: 1
+    - criterion: "c) Primattribute und Nichtschlüsselattribut korrekt"
+      points: 1
+    - criterion: "d) Superschlüssel ja, Schlüsselkandidat nein, mit Begründung"
+      points: 1
+    - criterion: "e) 1NF mit Verweis auf die partielle Abhängigkeit C → G von {C, E}"
+      points: 2
+  space: lines:22
+- id: t07-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anomalien, 1nf, 2nf, 3nf]
+  type: normalize
+  difficulty: 2
+  points: 15
+  minutes: 15
+  prompt: |-
+    Eine Tauchschule verwaltet ihre Kursbuchungen bisher in einer Tabelle:
+
+    | TaucherNr | Name | Brevet | MaxTiefe | Kurse |
+    |---|---|---|---|---|
+    | 301 | Kern, Mia | 1 Stern | 20 m | K4 Nachttauchen (TB Tom Berg), bezahlt; K7 Wracktauchen (SA Sina Arslan), offen |
+    | 302 | Vogt, Ilias | 2 Sterne | 30 m | K7 Wracktauchen (SA Sina Arslan), bezahlt |
+    | 303 | Haas, Rena | 1 Stern | 20 m | K4 Nachttauchen (TB Tom Berg), bezahlt; K9 Strömungstauchen (TB Tom Berg), offen |
+
+    Geschäftsregeln:
+    - Jede:r Taucher:in hat genau eine aktuelle Brevetstufe. Die Stufe legt die erlaubte Maximaltiefe fest.
+    - Jeder Kurs wird von genau einer Lehrkraft geleitet. Eine Lehrkraft (Kürzel eindeutig) kann mehrere Kurse leiten.
+    - Der Zahlstatus (bezahlt/offen) gilt je Taucher:in und Kurs.
+    - Taucher:innen sollen nach Nachname sortiert werden können.
+
+    a) Nenne je ein **konkretes** Beispiel aus dieser Tabelle für eine Einfüge-, eine Änderungs- und eine Löschanomalie.
+    b) Begründe, warum die Tabelle nicht in 1NF ist, und gib die Attribute der 1NF-Relation an.
+    c) Gib eine vollständige Menge nicht-trivialer FDs mit minimaler linker Seite an, aus der sich alle weiteren FDs herleiten lassen, und bestimme den Schlüssel der 1NF-Relation.
+    d) Überführe in die 2NF und begründe den Schritt.
+    e) Überführe in die 3NF, begründe den Schritt und gib das Endergebnis mit Primär- und Fremdschlüsseln an.
+  solution: |-
+    a) Anomalien (je ein Beispiel genügt, andere passende gleichwertig):
+    - Einfügeanomalie: Ein neuer Kurs K12 „Eistauchen“ mit Lehrkraft TB kann nicht gespeichert werden, solange niemand ihn gebucht hat. Ebenso lässt sich eine neue Stufe „3 Sterne, 40 m“ ohne passende:n Taucher:in nicht erfassen.
+    - Änderungsanomalie: Tom Berg heißt künftig Tom Berg-Lind. Sein Name steht dreimal (301/K4, 303/K4, 303/K9). Wird eine Stelle vergessen, ist der Bestand inkonsistent.
+    - Löschanomalie: Wird Ilias Vogt (302) gelöscht, geht die einzige Angabe verloren, dass „2 Sterne“ 30 m erlaubt.
+
+    b) Die Spalte Kurse ist eine Wiederholungsgruppe (mehrere Kurse in einer Zelle). Außerdem sind die Kursangaben nicht atomar, und Name muss wegen der Sortierregel in Nachname und Vorname zerlegt werden. 1NF-Relation mit einer Zeile je Taucher:in und Kurs (fünf Zeilen):
+    Buchung(TaucherNr, Nachname, Vorname, Brevet, MaxTiefe, KursNr, Kursbezeichnung, LehrerKürzel, Lehrername, Zahlstatus)
+
+    c) FDs:
+    - TaucherNr → Nachname, Vorname, Brevet
+    - Brevet → MaxTiefe
+    - KursNr → Kursbezeichnung, LehrerKürzel
+    - LehrerKürzel → Lehrername
+    - TaucherNr, KursNr → Zahlstatus
+
+    Schlüssel: {TaucherNr, KursNr}. Beide stehen auf keiner rechten Seite, müssen also in jedem Schlüssel liegen. Ihre Hülle umfasst alle Attribute, sie sind damit der einzige Schlüsselkandidat.
+
+    d) 2NF: Nachname, Vorname, Brevet und MaxTiefe hängen schon von TaucherNr allein ab, Kursbezeichnung, LehrerKürzel und Lehrername schon von KursNr allein. Das sind partielle Abhängigkeiten vom Schlüssel. Die Schlüsselteile werden mit ihren abhängigen Attributen ausgelagert:
+    - Taucher(<u>TaucherNr</u>, Nachname, Vorname, Brevet, MaxTiefe)
+    - Kurs(<u>KursNr</u>, Kursbezeichnung, LehrerKürzel, Lehrername)
+    - Buchung(<u>TaucherNr → Taucher, KursNr → Kurs</u>, Zahlstatus)
+
+    e) 3NF: In Taucher gilt TaucherNr → Brevet → MaxTiefe, in Kurs gilt KursNr → LehrerKürzel → Lehrername. Brevet und LehrerKürzel sind Nichtschlüsselattribute, die Abhängigkeiten sind transitiv. Auslagern:
+    - Brevetstufe(<u>Brevet</u>, MaxTiefe)
+    - Taucher(<u>TaucherNr</u>, Nachname, Vorname, Brevet → Brevetstufe)
+    - Lehrkraft(<u>LehrerKürzel</u>, Lehrername)
+    - Kurs(<u>KursNr</u>, Kursbezeichnung, LehrerKürzel → Lehrkraft)
+    - Buchung(<u>TaucherNr → Taucher, KursNr → Kurs</u>, Zahlstatus)
+  rubric:
+    - criterion: "a) Je ein konkretes, zutreffendes Beispiel für Einfüge-, Änderungs- und Löschanomalie (je 1 Punkt)"
+      points: 3
+    - criterion: "b) Wiederholungsgruppe bzw. nicht atomare Werte als Grund genannt"
+      points: 0.5
+    - criterion: "b) Name mit Verweis auf die Sortierregel in Nachname und Vorname zerlegt"
+      points: 0.5
+    - criterion: "b) Vollständige, flache Attributliste der 1NF-Relation"
+      points: 1
+    - criterion: "c) FDs: je korrekte FD mit minimaler linker Seite 0,5 Punkte (höchstens 2,5); je falsche FD 0,5 Punkte Abzug, nicht unter 0"
+      points: 2.5
+    - criterion: "c) Schlüssel {TaucherNr, KursNr} korrekt (1 Punkt) und begründet, z. B. per Hülle oder „steht nie rechts“ (0,5 Punkte)"
+      points: 1.5
+    - criterion: "d) Partielle Abhängigkeiten von TaucherNr und von KursNr benannt"
+      points: 1
+    - criterion: "d) Korrekte Zerlegung in drei Relationen mit Schlüsseln"
+      points: 2
+    - criterion: "e) Beide transitiven Abhängigkeiten benannt (je 0,5 Punkte)"
+      points: 1
+    - criterion: "e) Korrektes Endergebnis (fünf Relationen) mit Primär- und Fremdschlüsseln"
+      points: 2
+  space: lines:32
+- id: t07-p005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anomalien, 1nf, 2nf, 3nf]
+  type: normalize
+  difficulty: 2
+  points: 16
+  minutes: 16
+  prompt: |-
+    Ein Fahrradkurierdienst hat seine Touren bisher so notiert. Leere Zellen bedeuten „wie in der Zeile darüber“:
+
+    | TourNr | Datum | KurierNr | Kuriername | RadNr | Radtyp | StoppNr | Empfänger | Zone | Zuschlag |
+    |---|---|---|---|---|---|---|---|---|---|
+    | T81 | 02.06.2027 | K3 | Jana Pohl | R12 | Lastenrad | 1 | Blumen Kaya | Z1 | 0,00 € |
+    |  |  |  |  |  |  | 2 | Kanzlei Röder | Z2 | 1,50 € |
+    |  |  |  |  |  |  | 3 | Blumen Kaya | Z3 | 3,00 € |
+    | T82 | 02.06.2027 | K5 | Emil Sauer | R07 | Rennrad | 1 | Apotheke am Tor | Z2 | 1,50 € |
+    | T83 | 03.06.2027 | K3 | Jana Pohl | R07 | Rennrad | 1 | Kanzlei Röder | Z2 | 1,50 € |
+    |  |  |  |  |  |  | 2 | Apotheke am Tor | Z2 | 1,50 € |
+
+    Geschäftsregeln:
+    - Jede Kurier:in hat eine eindeutige KurierNr und genau einen Namen. Jedes Rad hat eine eindeutige RadNr und einen festen Radtyp.
+    - Eine Tour hat ein Datum und wird von genau einer Kurier:in mit genau einem Rad gefahren. Das Rad wird je Tour festgelegt: Eine Kurier:in kann auch am selben Tag auf verschiedenen Touren verschiedene Räder fahren.
+    - Stopps werden je Tour ab 1 nummeriert.
+    - Jeder Stopp hat einen Empfänger und liegt in einer Tarifzone. Der Zuschlag hängt nur von der Zone ab.
+    - Ein Empfänger kann mehrere Filialen in verschiedenen Zonen haben.
+
+    a) Nenne je ein konkretes Beispiel für eine Einfüge-, eine Änderungs- und eine Löschanomalie.
+    b) Begründe, warum die Tabelle in dieser Form nicht in 1NF ist, und beschreibe die Überführung.
+    c) Gib eine vollständige Menge nicht-trivialer FDs mit minimaler linker Seite an, aus der sich alle weiteren FDs herleiten lassen.
+    d) Bestimme den Schlüssel der 1NF-Relation und belege ihn mit der Attributhülle.
+    e) Überführe in die 2NF und begründe.
+    f) Überführe in die 3NF, begründe und gib das Endergebnis mit Primär- und Fremdschlüsseln an.
+  solution: |-
+    a) Anomalien (andere passende Beispiele gleichwertig):
+    - Einfügeanomalie: Eine neue Zone Z4 mit 4,50 € Zuschlag lässt sich erst eintragen, wenn ein Stopp dort liegt. Ebenso kann eine neue Kurier:in ohne Tour nicht erfasst werden.
+    - Änderungsanomalie: Der Zuschlag für Z2 steigt auf 2,00 €. Er steht in vier Zeilen und muss überall geändert werden, sonst hat Z2 zwei Zuschläge.
+    - Löschanomalie: Wird Tour T82 gelöscht, verschwindet auch jede Information über Kurier K5 Emil Sauer.
+
+    b) Die Tourdaten stehen nur in der ersten Zeile einer Tour. Die Stopps bilden eine Wiederholungsgruppe zu jeder Tour, und die Folgezeilen sind ohne die Zeile darüber nicht interpretierbar. Überführung: Die leeren Zellen werden mit den Tourdaten aufgefüllt, sodass jede Zeile einen vollständigen Stopp beschreibt (sechs Zeilen).
+
+    c) FDs:
+    - TourNr → Datum, KurierNr, RadNr
+    - KurierNr → Kuriername
+    - RadNr → Radtyp
+    - TourNr, StoppNr → Empfänger, Zone
+    - Zone → Zuschlag
+
+    Nicht gültig sind z. B. Empfänger → Zone (Filialen in mehreren Zonen), KurierNr → RadNr und auch KurierNr, Datum → RadNr (das Rad wird je Tour festgelegt).
+
+    d) Schlüssel {TourNr, StoppNr}. Hülle: Start {TourNr, StoppNr}. TourNr → Datum, KurierNr, RadNr. KurierNr → Kuriername. RadNr → Radtyp. TourNr, StoppNr → Empfänger, Zone. Zone → Zuschlag. Ergebnis: alle zehn Attribute. TourNr⁺ = {TourNr, Datum, KurierNr, RadNr, Kuriername, Radtyp} und StoppNr⁺ = {StoppNr} reichen nicht, also ist der Schlüssel minimal. Beide Attribute stehen nie rechts, deshalb ist er der einzige Schlüsselkandidat.
+
+    e) 2NF: Datum, KurierNr, Kuriername, RadNr und Radtyp hängen schon von TourNr allein ab (partiell). Zerlegung:
+    - Tour(<u>TourNr</u>, Datum, KurierNr, Kuriername, RadNr, Radtyp)
+    - Stopp(<u>TourNr → Tour, StoppNr</u>, Empfänger, Zone, Zuschlag)
+
+    f) 3NF: In Tour gelten TourNr → KurierNr → Kuriername und TourNr → RadNr → Radtyp, beide transitiv. In Stopp gilt {TourNr, StoppNr} → Zone → Zuschlag. Auch die Relation mit dem vollen Schlüssel enthält also eine transitive Abhängigkeit. Endergebnis:
+    - Kurier(<u>KurierNr</u>, Kuriername)
+    - Rad(<u>RadNr</u>, Radtyp)
+    - Tour(<u>TourNr</u>, Datum, KurierNr → Kurier, RadNr → Rad)
+    - Tarifzone(<u>Zone</u>, Zuschlag)
+    - Stopp(<u>TourNr → Tour, StoppNr</u>, Empfänger, Zone → Tarifzone)
+  rubric:
+    - criterion: "a) Je ein konkretes, zutreffendes Beispiel für Einfüge-, Änderungs- und Löschanomalie (je 1 Punkt)"
+      points: 3
+    - criterion: "b) Wiederholungsgruppe bzw. unvollständige Folgezeilen als Grund erkannt (1 Punkt) und Überführung durch Auffüllen beschrieben (1 Punkt)"
+      points: 2
+    - criterion: "c) FDs: je korrekte FD 0,5 Punkte (höchstens 2,5); je falsche FD (z. B. KurierNr → RadNr, KurierNr, Datum → RadNr, Empfänger → Zone) 0,5 Punkte Abzug, nicht unter 0"
+      points: 2.5
+    - criterion: "d) Schlüssel {TourNr, StoppNr} mit Hülle belegt (1,5 Punkte) und Minimalität gezeigt (0,5 Punkte)"
+      points: 2
+    - criterion: "e) Partielle Abhängigkeit von TourNr benannt"
+      points: 1
+    - criterion: "e) Korrekte Zerlegung in Tour und Stopp mit Schlüsseln"
+      points: 2
+    - criterion: "f) Alle drei transitiven Abhängigkeiten erkannt, inkl. Zone → Zuschlag in Stopp (je 0,5 Punkte)"
+      points: 1.5
+    - criterion: "f) Korrektes Endergebnis (fünf Relationen) mit Primär- und Fremdschlüsseln"
+      points: 2
+  space: lines:34
+- id: t07-p006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anomalien, schluessel, 2nf, 3nf, notationsvariante]
+  type: normalize
+  difficulty: 3
+  points: 22
+  minutes: 23
+  prompt: |-
+    Die Kasse eines Clubs mit einem Konzertsaal führt diese Verkaufsliste:
+
+    | TicketNr | KonzertNr | Veranstaltung | Reihe | Platz | Kategorie | Preis | Kundenmail |
+    |---|---|---|---|---|---|---|---|
+    | 9001 | K12 | Nachtfalter, 14.03.2027 | 1 | 4 | A | 48 € | lena@example.org |
+    | 9002 | K12 | Nachtfalter, 14.03.2027 | 1 | 5 | A | 48 € | lena@example.org |
+    | 9003 | K12 | Nachtfalter, 14.03.2027 | 6 | 2 | B | 32 € | jo@example.org |
+    | 9004 | K15 | Die Brausepulver, 21.03.2027 | 1 | 4 | A | 48 € | jo@example.org |
+    | 9005 | K15 | Die Brausepulver, 21.03.2027 | 9 | 11 | C | 22 € | ali@example.org |
+
+    Geschäftsregeln:
+    - Ein Ticket gilt für genau einen Platz (Reihe, Platz) bei genau einem Konzert und wird an genau eine Kundenmail verkauft.
+    - Jeder Platz kann je Konzert nur einmal verkauft werden.
+    - Ein Konzert hat eine Band und ein Datum. An einem Tag kann es mehrere Konzerte geben (Früh- und Spätshow); auch dieselbe Band kann am selben Tag zweimal spielen.
+    - Die Kategorie hängt nur von der Reihe ab. Eine Kategorie umfasst mehrere Reihen (z. B. gehören die Reihen 1 bis 3 zu A). Jede Kategorie hat in der Saison einen festen Preis.
+    - Die Kasse wertet die Verkäufe getrennt nach Band und nach Datum aus.
+
+    a) Begründe, warum die Tabelle nicht in 1NF ist, und gib die Attribute der 1NF-Relation an.
+    b) Nenne je ein konkretes Beispiel für eine Einfüge-, eine Änderungs- und eine Löschanomalie.
+    c) Gib eine vollständige Menge nicht-trivialer FDs mit minimaler linker Seite an, aus der sich alle weiteren FDs herleiten lassen.
+    d) Bestimme **alle** Schlüsselkandidaten mit Attributhülle und gib Primattribute und Nichtschlüsselattribute an.
+    e) Ein Kollege meint: „TicketNr ist der Primärschlüssel und besteht nur aus einem Attribut, also ist die Tabelle nach der 1NF automatisch in 2NF.“ Ordne die Aussage ein: Unter welcher Voraussetzung bzw. nach welcher Fassung der 2NF-Definition stimmt sie, und was gilt hier nach der Definition über alle Schlüsselkandidaten? Überführe die Relation anschließend nach dieser Definition in die 2NF.
+    f) Überführe in die 3NF und gib das Endergebnis mit Primärschlüsseln, Fremdschlüsseln und Alternativschlüssel an.
+  solution: |-
+    a) Die Spalte Veranstaltung ist nicht atomar, sie enthält Band und Datum. Weil die Kasse getrennt nach Band und nach Datum auswertet, müssen beide eigene Attribute sein. 1NF-Relation:
+    Ticket(TicketNr, KonzertNr, Band, Datum, Reihe, Platz, Kategorie, Preis, Kundenmail)
+
+    b) Anomalien (andere passende Beispiele gleichwertig):
+    - Einfügeanomalie: Konzert K18 ist geplant, aber noch ist kein Ticket verkauft. Ohne TicketNr kann das Konzert nicht erfasst werden.
+    - Änderungsanomalie: Der Preis der Kategorie A steigt auf 52 €. Er muss in drei Zeilen (9001, 9002, 9004) geändert werden.
+    - Löschanomalie: Ticket 9005 wird storniert und gelöscht. Damit ist die einzige Angabe verloren, dass Reihe 9 zur Kategorie C gehört und C 22 € kostet.
+
+    c) FDs:
+    - TicketNr → KonzertNr, Reihe, Platz, Kundenmail
+    - KonzertNr, Reihe, Platz → TicketNr
+    - KonzertNr → Band, Datum
+    - Reihe → Kategorie
+    - Kategorie → Preis
+
+    Nicht gültig sind z. B. Datum → KonzertNr und Band, Datum → KonzertNr (mehrere Konzerte am Tag, auch von derselben Band).
+
+    d) TicketNr⁺: TicketNr → KonzertNr, Reihe, Platz, Kundenmail. KonzertNr → Band, Datum. Reihe → Kategorie. Kategorie → Preis. Ergebnis: alle Attribute.
+    {KonzertNr, Reihe, Platz}⁺: zuerst TicketNr, danach wie oben alle Attribute. Kein Teil reicht: {KonzertNr, Reihe}⁺ = {KonzertNr, Reihe, Band, Datum, Kategorie, Preis} ohne Platz, TicketNr und Kundenmail, die übrigen Zweierkombinationen bestimmen noch weniger.
+    Vollständigkeit: TicketNr lässt sich nur über {KonzertNr, Reihe, Platz} herleiten, und KonzertNr, Reihe und Platz lassen sich nur über TicketNr herleiten. Jeder Superschlüssel enthält also TicketNr oder alle drei.
+    Schlüsselkandidaten: **{TicketNr}** und **{KonzertNr, Reihe, Platz}**.
+    Primattribute: TicketNr, KonzertNr, Reihe, Platz. Nichtschlüsselattribute: Band, Datum, Kategorie, Preis, Kundenmail.
+
+    e) Einordnung:
+    - Die Aussage gibt eine verbreitete Faustregel wieder, die aus der Fassung der 2NF über den **Primärschlüssel** folgt. Sie stimmt, wenn der einattributige Primärschlüssel der **einzige** Schlüsselkandidat ist.
+    - Hier gibt es aber einen zweiten, zusammengesetzten Schlüsselkandidaten {KonzertNr, Reihe, Platz}. Nach der Definition über **alle** Schlüsselkandidaten hängen Band und Datum schon von KonzertNr ab, Kategorie und Preis schon von Reihe, also jeweils von einem echten Teil dieses Kandidaten. Die Relation ist damit nicht in 2NF.
+    - Wer die Primärschlüssel-Fassung verwendet, stuft die Relation als 2NF ein. Dieselben Abhängigkeiten erscheinen dann als transitive Abhängigkeiten (TicketNr → KonzertNr → Band, TicketNr → Reihe → Kategorie) und werden bei der 3NF ausgelagert. Das Endergebnis in f) ist in beiden Fassungen gleich.
+
+    2NF nach der Definition über alle Schlüsselkandidaten:
+    - Konzert(<u>KonzertNr</u>, Band, Datum)
+    - Sitzreihe(<u>Reihe</u>, Kategorie, Preis)
+    - Ticket(<u>TicketNr</u>, KonzertNr → Konzert, Reihe → Sitzreihe, Platz, Kundenmail)
+
+    f) In Sitzreihe gilt Reihe → Kategorie → Preis, und laut Geschäftsregel Kategorie ↛ Reihe (eine Kategorie umfasst mehrere Reihen; die Beispieldaten allein könnten das nicht belegen). Kategorie ist Nichtschlüsselattribut, die Abhängigkeit ist transitiv. Konzert und Ticket sind bereits in 3NF: Ihre Determinanten sind Schlüsselkandidaten. Endergebnis:
+    - Konzert(<u>KonzertNr</u>, Band, Datum)
+    - Preisklasse(<u>Kategorie</u>, Preis)
+    - Sitzreihe(<u>Reihe</u>, Kategorie → Preisklasse)
+    - Ticket(<u>TicketNr</u>, KonzertNr → Konzert, Reihe → Sitzreihe, Platz, Kundenmail) mit Alternativschlüssel (KonzertNr, Reihe, Platz), z. B. als UNIQUE-Bedingung
+  rubric:
+    - criterion: "a) Nicht atomares Attribut Veranstaltung erkannt und mit der Auswertungsregel begründet"
+      points: 1
+    - criterion: "a) Veranstaltung in Band und Datum zerlegt, vollständige Attributliste"
+      points: 1
+    - criterion: "b) Je ein konkretes, zutreffendes Beispiel für Einfüge-, Änderungs- und Löschanomalie (je 1 Punkt)"
+      points: 3
+    - criterion: "c) FD KonzertNr, Reihe, Platz → TicketNr angegeben"
+      points: 1
+    - criterion: "c) Übrige vier FDs je 0,5 Punkte; je falsche FD (z. B. Band, Datum → KonzertNr) 0,5 Punkte Abzug, nicht unter 0"
+      points: 2
+    - criterion: "d) Beide Schlüsselkandidaten mit Hülle belegt"
+      points: 2
+    - criterion: "d) Vollständigkeit (keine weiteren Kandidaten) und Minimalität begründet"
+      points: 1
+    - criterion: "d) Primattribute und Nichtschlüsselattribute korrekt"
+      points: 1
+    - criterion: "e) Gültigkeitsbereich der Faustregel genannt (Primärschlüssel-Fassung bzw. Primärschlüssel einziger Schlüsselkandidat)"
+      points: 1
+    - criterion: "e) Nach der Definition über alle Schlüsselkandidaten: zweiter Kandidat und partielle Abhängigkeiten konkret benannt"
+      points: 1
+    - criterion: "e) Korrekte 2NF-Zerlegung (Konzert, Sitzreihe, Ticket je 1 Punkt)"
+      points: 3
+    - criterion: "f) Transitive Abhängigkeit Reihe → Kategorie → Preis benannt (1 Punkt) und mit der Regel Kategorie ↛ Reihe begründet (1 Punkt)"
+      points: 2
+    - criterion: "f) Endergebnis mit Primär- und Fremdschlüsseln (2 Punkte) und Alternativschlüssel (KonzertNr, Reihe, Platz) (1 Punkt)"
+      points: 3
+  space: lines:40
+- id: t07-p007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [2nf, 3nf, bcnf, schluessel, ausblick]
+  type: explain
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Bestimme für jede Relation die Schlüsselkandidaten und die **höchste** erfüllte Normalform (1NF, 2NF oder 3NF). Atomare Werte darfst du voraussetzen. Begründe jeweils mit einer konkreten FD. Bei Relation 4 beantwortest du zusätzlich eine Ausblick-Frage zur BCNF.
+
+    1. Röstung(ChargeNr, Röstdatum, SortenNr, Sortenname) mit ChargeNr → Röstdatum, SortenNr und SortenNr → Sortenname
+    2. Lagerbestand(LagerNr, SortenNr, Menge_kg, Lagerort) mit LagerNr, SortenNr → Menge_kg und LagerNr → Lagerort
+    3. Rad(RadNr, Rahmennummer, Radtyp, Wartungsintervall) mit RadNr → Rahmennummer, Radtyp und Rahmennummer → RadNr und Radtyp → Wartungsintervall
+    4. Einlass(KonzertNr, Tor, Ordner) mit KonzertNr, Tor → Ordner und KonzertNr, Ordner → Tor (je Konzert steht eine Ordner:in an genau einem Tor, bei anderen Konzerten auch an anderen). Ausblick: Ist die Relation auch in BCNF?
+  solution: |-
+    1. Schlüssel {ChargeNr}. Einattributig und einziger Kandidat, also 2NF. ChargeNr → SortenNr → Sortenname ist transitiv (SortenNr ist Nichtschlüsselattribut, SortenNr ↛ ChargeNr, weil eine Sorte oft geröstet wird). **Höchste Normalform: 2NF.**
+    2. Schlüssel {LagerNr, SortenNr}. Lagerort hängt schon von LagerNr ab, einem echten Teil des Schlüssels (partiell). **Höchste Normalform: 1NF.**
+    3. Schlüsselkandidaten {RadNr} und {Rahmennummer}. Beide einattributig, also 2NF. Rahmennummer → RadNr ist unproblematisch, weil Rahmennummer Schlüsselkandidat ist. Radtyp → Wartungsintervall verletzt aber die 3NF: Radtyp ist kein Superschlüssel, Wartungsintervall kein Primattribut (transitiv: RadNr → Radtyp → Wartungsintervall). **Höchste Normalform: 2NF.**
+    4. Schlüsselkandidaten {KonzertNr, Tor} und {KonzertNr, Ordner}. Alle Attribute sind Primattribute, also **3NF**. Ausblick BCNF: Beide Determinanten sind Schlüsselkandidaten, also ist die Relation auch in **BCNF**. (Ordner → Tor gilt nicht, weil eine Ordner:in bei verschiedenen Konzerten an verschiedenen Toren stehen kann.)
+  rubric:
+    - criterion: "1. Schlüssel und 2NF mit transitiver Abhängigkeit über SortenNr begründet"
+      points: 2
+    - criterion: "2. Schlüssel und 1NF mit partieller Abhängigkeit LagerNr → Lagerort begründet"
+      points: 2
+    - criterion: "3. Beide Schlüsselkandidaten erkannt (0,5 Punkte), 2NF wegen einattributiger Kandidaten (0,5 Punkte), 3NF-Verstoß durch Radtyp → Wartungsintervall (1 Punkt)"
+      points: 2
+    - criterion: "4. Beide Schlüsselkandidaten erkannt und 3NF begründet (alle Attribute prim)"
+      points: 1.5
+    - criterion: "4. Ausblick: BCNF, weil beide Determinanten Schlüsselkandidaten sind"
+      points: 0.5
+  space: lines:16
+- id: t07-p008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anomalien]
+  type: define-example
+  difficulty: 1
+  points: 7
+  minutes: 7
+  prompt: |-
+    Erläutere **Einfüge-, Änderungs- und Löschanomalie** an einem **selbst gewählten** Beispiel (nicht aus dem Kurstext).
+    a) Skizziere eine nicht normalisierte Tabelle (Spaltenköpfe und mindestens drei Datenzeilen), in der Redundanz auftritt.
+    b) Beschreibe jede der drei Anomalien allgemein in einem Satz und zeige sie an einer konkreten Zeile oder einem konkreten Wert deiner Tabelle.
+    c) Nenne die gemeinsame Ursache der Anomalien und gib an, in welche Relationen du die Tabelle zerlegen würdest.
+  solution: |-
+    Beispiel (Musterlösung, andere passende Szenarien gleichwertig): Eine Probenraumvermietung speichert alle Buchungen in einer Tabelle, Schlüssel ist BuchungNr.
+
+    | BuchungNr | Datum | RaumNr | Raumgröße | BandNr | Bandname |
+    |---|---|---|---|---|---|
+    | 701 | 10.05.2027 | P1 | 20 m² | B4 | Funkenflug |
+    | 702 | 11.05.2027 | P2 | 35 m² | B4 | Funkenflug |
+    | 703 | 11.05.2027 | P1 | 20 m² | B9 | Mondschaukel |
+
+    b) Anomalien:
+    - **Einfügeanomalie:** Ein Sachverhalt lässt sich nicht speichern, solange ein anderer fehlt. Der neue Raum P3 (50 m²) kann nicht eingetragen werden, solange er nicht gebucht ist, denn ohne Buchung fehlt der Schlüsselwert BuchungNr.
+    - **Änderungsanomalie:** Eine mehrfach gespeicherte Tatsache muss an allen Stellen geändert werden. Benennt sich B4 in „Funkenregen“ um, müssen die Zeilen 701 und 702 geändert werden; wird eine vergessen, hat B4 zwei Namen.
+    - **Löschanomalie:** Beim Löschen gehen ungewollt andere Informationen verloren. Wird Buchung 702 storniert und gelöscht, ist die einzige Angabe verloren, dass P2 35 m² groß ist.
+
+    c) Ursache: In einer Tabelle stecken mehrere voneinander unabhängige Sachverhalte (Buchung, Raum, Band). Dadurch werden Raum- und Banddaten redundant gespeichert. Zerlegung:
+    - Raum(<u>RaumNr</u>, Raumgröße)
+    - Band(<u>BandNr</u>, Bandname)
+    - Buchung(<u>BuchungNr</u>, Datum, RaumNr → Raum, BandNr → Band)
+  rubric:
+    - criterion: "a) Eigene Tabelle mit mindestens drei Zeilen, in der dieselbe Tatsache mehrfach gespeichert ist"
+      points: 1
+    - criterion: "b) Einfügeanomalie allgemein beschrieben (0,5 Punkte) und an der eigenen Tabelle konkret gezeigt (1 Punkt)"
+      points: 1.5
+    - criterion: "b) Änderungsanomalie allgemein beschrieben (0,5 Punkte) und an der eigenen Tabelle konkret gezeigt (1 Punkt)"
+      points: 1.5
+    - criterion: "b) Löschanomalie allgemein beschrieben (0,5 Punkte) und an der eigenen Tabelle konkret gezeigt (1 Punkt)"
+      points: 1.5
+    - criterion: "c) Ursache genannt (mehrere unabhängige Sachverhalte in einer Tabelle, Redundanz)"
+      points: 0.5
+    - criterion: "c) Sinnvolle Zerlegung mit Primär- und Fremdschlüsseln"
+      points: 1
+  space: lines:18
+- id: t07-p009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [denormalisierung]
+  type: define-example
+  difficulty: 2
+  points: 6
+  minutes: 6
+  prompt: |-
+    Erläutere den Begriff **Denormalisierung**.
+    a) Nenne zwei Gründe für eine Denormalisierung und zeige an einem **eigenen** Beispiel eine sinnvolle Denormalisierung (Schema vorher und nachher).
+    b) Nenne drei Risiken bzw. Nachteile.
+    c) Nenne eine Alternative, die Lesezugriffe beschleunigt, ohne das Schema redundant zu machen.
+    d) In einer Rechnungsposition wird der Einzelpreis zum Kaufzeitpunkt gespeichert. Ist das eine Denormalisierung? Begründe kurz.
+  solution: |-
+    **Denormalisierung** ist die bewusste, begründete Rücknahme einer Normalisierung: Nachdem der Entwurf vollständig normalisiert ist, werden im physischen Entwurf an ausgewählten Stellen Daten wieder redundant gespeichert.
+
+    a) Gründe (zwei genügen): schnellere Lesezugriffe, weil häufige Abfragen weniger Verbunde brauchen; vorberechnete Summen oder Zählwerte für Berichte und Auswertungen; einfachere Abfragen für reine Lese-Auswertungen.
+    Beispiel (Musterlösung): Ein Kurierdienst hat normalisiert Tour(<u>TourNr</u>, Datum, KurierNr → Kurier) und Stopp(<u>TourNr → Tour, StoppNr</u>, Empfänger, Zone → Tarifzone). Die Disposition zeigt ständig die Zahl der Stopps je Tour. Nachher: Tour(<u>TourNr</u>, Datum, KurierNr → Kurier, AnzahlStopps). AnzahlStopps ist redundant, weil es sich aus Stopp zählen lässt.
+
+    b) Risiken (drei genügen): Anomalien kehren zurück (AnzahlStopps passt nicht mehr zu den Stopps, wenn eine Anpassung vergessen wird); die Kopie muss synchron gehalten werden, z. B. per Trigger; Schreibzugriffe und Massenänderungen werden langsamer; mehr Speicherbedarf; zusätzlicher Dokumentationsaufwand.
+
+    c) Ein Index auf Stopp(TourNr) oder eine materialisierte Sicht mit der Stoppzahl je Tour.
+
+    d) Nein. Der Preis zum Kaufzeitpunkt ist eine eigene Tatsache: ArtikelNr → Kaufpreis gilt nicht, weil sich der Listenpreis später ändern kann. Es wird keine Normalform verletzt, auch wenn manche Darstellungen das als bewusste Abweichung bezeichnen.
+  rubric:
+    - criterion: "Definition: bewusste Rücknahme nach vollständiger Normalisierung, gezielte Redundanz"
+      points: 1
+    - criterion: "a) Zwei plausible Gründe (je 0,5 Punkte)"
+      points: 1
+    - criterion: "a) Eigenes Beispiel mit Schema vorher und nachher, redundantes Attribut erkennbar"
+      points: 1.5
+    - criterion: "b) Drei zutreffende Risiken (je 0,5 Punkte)"
+      points: 1.5
+    - criterion: "c) Index oder materialisierte Sicht genannt"
+      points: 0.5
+    - criterion: "d) Nein, weil der Preis zum Kaufzeitpunkt eine eigene Tatsache ist (FD zum aktuellen Preis gilt nicht)"
+      points: 0.5
+  space: lines:14
+- id: t07-p010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [volle-abhaengigkeit, partielle-abhaengigkeit, 2nf]
+  type: define-example
+  difficulty: 1
+  points: 6
+  minutes: 6
+  prompt: |-
+    Erkläre die Begriffe **voll funktionale Abhängigkeit** und **partielle Abhängigkeit**.
+    Gib eine **eigene** Relation (nicht aus dem Kurstext) mit zusammengesetztem Schlüssel an, in der beide Arten vorkommen. Nenne je eine FD und begründe die Einstufung mit einer Geschäftsregel. Gib an, welche Normalform verletzt ist, und zerlege die Relation so, dass die partielle Abhängigkeit verschwindet.
+  solution: |-
+    - **Voll funktionale Abhängigkeit:** Y ist voll funktional abhängig von X, wenn X → Y gilt und keine echte Teilmenge von X schon Y bestimmt. (Manche Texte schreiben dafür einen Doppelpfeil X ⇒ Y; jede erklärte Schreibweise ist in Ordnung.)
+    - **Partielle Abhängigkeit:** X → Y gilt, aber schon ein echter Teil von X bestimmt Y. Das setzt eine Determinante aus mindestens zwei Attributen voraus.
+
+    Beispiel (Musterlösung, andere passende Beispiele gleichwertig): Ein Chor erfasst Probenbesuch(<u>SängerNr, ProbeNr</u>, Stimmlage, Probendatum, Anwesenheit).
+    - SängerNr, ProbeNr → Anwesenheit ist **voll**: Eine Person besucht viele Proben, eine Probe hat viele Teilnehmende; erst beide zusammen legen fest, ob die Person bei dieser Probe da war.
+    - SängerNr, ProbeNr → Stimmlage ist **partiell**: Jede Person singt in einer festen Stimmlage, also gilt schon SängerNr → Stimmlage. (Ebenso ProbeNr → Probendatum.)
+
+    Verletzt ist die **2NF**: Ein Nichtschlüsselattribut hängt von einem echten Teil des Schlüssels ab.
+
+    Zerlegung:
+    - Sänger(<u>SängerNr</u>, Stimmlage)
+    - Probe(<u>ProbeNr</u>, Probendatum)
+    - Probenbesuch(<u>SängerNr → Sänger, ProbeNr → Probe</u>, Anwesenheit)
+  rubric:
+    - criterion: "Voll funktionale Abhängigkeit korrekt definiert (X → Y, keine echte Teilmenge von X bestimmt Y)"
+      points: 1
+    - criterion: "Partielle Abhängigkeit korrekt definiert (schon ein echter Teil der Determinante bestimmt Y)"
+      points: 1
+    - criterion: "Eigene Relation mit zusammengesetztem Schlüssel und konkreten FDs"
+      points: 1
+    - criterion: "Volle Abhängigkeit an einer FD begründet (warum kein Teil des Schlüssels reicht)"
+      points: 0.5
+    - criterion: "Partielle Abhängigkeit an einer FD begründet (welcher Teil reicht)"
+      points: 0.5
+    - criterion: "2NF als verletzte Normalform genannt"
+      points: 0.5
+    - criterion: "Korrekte Zerlegung mit Primär- und Fremdschlüsseln"
+      points: 1.5
+  space: lines:14
+- id: t07-p011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [2nf, 3nf, kurzaufgabe]
+  type: normalize
+  difficulty: 1
+  points: 8
+  minutes: 8
+  prompt: |-
+    Zwei Kurzaufgaben: jeweils Normalform definieren und eine kleine Tabelle in diese Normalform bringen.
+
+    a) Definiere die **2NF**. Bringe die folgende Relation in die 2NF. Schlüssel ist {SortenNr, PrüferNr}. Jede Kaffeesorte hat einen festen Namen, und jede:r Prüfer:in vergibt je Sorte genau eine Note.
+
+    | SortenNr | PrüferNr | Sortenname | Note |
+    |---|---|---|---|
+    | S12 | P1 | Bergnebel | 2 |
+    | S12 | P2 | Bergnebel | 1 |
+    | S15 | P1 | Rotblüte | 3 |
+
+    b) Definiere die **3NF**. Bringe die folgende Relation in die 3NF. Schlüssel ist KurierNr. Jede Kurier:in ist genau einem Bezirk zugeteilt, und jeder Bezirk hat genau eine Bezirksleitung.
+
+    | KurierNr | Kuriername | Bezirk | Bezirksleitung |
+    |---|---|---|---|
+    | K3 | Jana Pohl | Nord | Ruth Lenz |
+    | K5 | Emil Sauer | Süd | Can Öztürk |
+    | K8 | Lio Brandt | Nord | Ruth Lenz |
+  solution: |-
+    a) **2NF:** Die Relation ist in 1NF, und jedes Nichtschlüsselattribut hängt voll von jedem Schlüsselkandidaten ab, also nicht schon von einem echten Teil davon. (Die Fassung über den Primärschlüssel ist hier gleichwertig, weil {SortenNr, PrüferNr} der einzige Schlüsselkandidat ist.)
+    Sortenname hängt schon von SortenNr allein ab (partiell), Note voll vom ganzen Schlüssel. Zerlegung:
+    - Sorte(<u>SortenNr</u>, Sortenname) mit den Zeilen (S12, Bergnebel), (S15, Rotblüte)
+    - Verkostung(<u>SortenNr → Sorte, PrüferNr</u>, Note) mit den Zeilen (S12, P1, 2), (S12, P2, 1), (S15, P1, 3)
+
+    b) **3NF:** Die Relation ist in 2NF, und kein Nichtschlüsselattribut hängt transitiv von einem Schlüsselkandidaten ab. Gleichwertig: Für jede nicht-triviale FD X → A ist X Superschlüssel oder A Primattribut.
+    Die Relation ist in 2NF (einattributiger, einziger Schlüssel). Es gilt KurierNr → Bezirk → Bezirksleitung; Bezirk ist Nichtschlüsselattribut, und Bezirk ↛ KurierNr (in Nord fahren K3 und K8). Bezirksleitung hängt also transitiv vom Schlüssel ab. Zerlegung:
+    - Zustellbezirk(<u>Bezirk</u>, Bezirksleitung) mit den Zeilen (Nord, Ruth Lenz), (Süd, Can Öztürk)
+    - Kurier(<u>KurierNr</u>, Kuriername, Bezirk → Zustellbezirk)
+  rubric:
+    - criterion: "a) 2NF korrekt definiert (1NF und volle Abhängigkeit jedes Nichtschlüsselattributs vom Schlüssel; Fassung über alle Schlüsselkandidaten oder über den Primärschlüssel)"
+      points: 1.5
+    - criterion: "a) Partielle Abhängigkeit SortenNr → Sortenname benannt"
+      points: 1
+    - criterion: "a) Korrekte Zerlegung mit Primär- und Fremdschlüssel"
+      points: 1.5
+    - criterion: "b) 3NF korrekt definiert (2NF und keine transitive Abhängigkeit eines Nichtschlüsselattributs, oder Test über Superschlüssel und Primattribut)"
+      points: 1.5
+    - criterion: "b) Transitive Abhängigkeit KurierNr → Bezirk → Bezirksleitung benannt, Bezirk als Nichtschlüsselattribut erkannt"
+      points: 1
+    - criterion: "b) Korrekte Zerlegung mit Primär- und Fremdschlüssel"
+      points: 1.5
+  space: lines:20

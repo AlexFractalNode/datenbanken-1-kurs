@@ -1,0 +1,331 @@
+- id: t07-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anomalien]
+  type: single
+  question: |-
+    Eine Tauchschule speichert alles in Buchung(TaucherNr, KursNr, Kursbezeichnung, LehrerKürzel, Lehrername, Zahlstatus) mit Schlüssel {TaucherNr, KursNr}. Die neue Lehrerin Lea Wolf (Kürzel LW) soll erfasst werden, hat aber noch keinen Kurs mit Teilnehmenden. Welche Anomalie liegt vor?
+  options:
+    - text: "Einfügeanomalie"
+      correct: true
+      explain: "Ohne Buchung fehlen TaucherNr und KursNr, also der Schlüssel. Die Lehrerin lässt sich nicht unabhängig speichern."
+    - text: "Änderungsanomalie"
+      correct: false
+      explain: "Eine Änderungsanomalie betrifft das Aktualisieren mehrfach gespeicherter Werte, hier soll aber etwas Neues eingetragen werden."
+    - text: "Löschanomalie"
+      correct: false
+      explain: "Es wird nichts gelöscht. Eine Löschanomalie läge vor, wenn mit der letzten Buchung eines Kurses auch die Lehrkraft verschwände."
+    - text: "Keine Anomalie, man trägt einfach NULL für TaucherNr und KursNr ein."
+      correct: false
+      explain: "Schlüsselattribute dürfen nicht NULL sein (Entitätsintegrität). Gerade dieses Ausweichen zeigt die Einfügeanomalie."
+- id: t07-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fd]
+  type: multi
+  question: |-
+    Welche Aussagen über funktionale Abhängigkeiten sind richtig?
+  options:
+    - text: "X → Y bedeutet: Zwei Tupel mit gleichem X-Wert haben auch denselben Y-Wert."
+      correct: true
+      explain: "Das ist genau die Definition t₁[X] = t₂[X] ⇒ t₁[Y] = t₂[Y]."
+    - text: "X → Y bedeutet: Zwei Tupel mit gleichem Y-Wert haben auch denselben X-Wert."
+      correct: false
+      explain: "Das wäre Y → X. Die Richtung ist entscheidend: Ein Brevet (Y) kann zu vielen Taucher:innen (X) gehören."
+    - text: "Aus X → A und X → B folgt X → A, B."
+      correct: true
+      explain: "Vereinigungsregel, sie folgt aus den Armstrong-Axiomen."
+    - text: "Aus X, Z → A folgt immer X → A."
+      correct: false
+      explain: "Das Verkleinern der linken Seite ist nicht erlaubt. Gerade dadurch unterscheiden sich volle und partielle Abhängigkeit."
+    - text: "Aus X → Y und Y → Z folgt X → Z."
+      correct: true
+      explain: "Transitivität, eines der drei Armstrong-Axiome."
+- id: t07-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fd]
+  type: truefalse
+  question: |-
+    In allen sechs Beispielzeilen einer Kuriertabelle gehört zu jedem Datum genau eine KurierNr. Also gilt die funktionale Abhängigkeit Datum → KurierNr.
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Beispieldaten können eine FD nur widerlegen, nicht beweisen. Ob sie gilt, entscheiden die Regeln der Miniwelt, z. B. ob an einem Tag mehrere Kurier:innen fahren dürfen."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig. FDs müssen für alle zulässigen Ausprägungen gelten, also aus den Geschäftsregeln stammen."
+- id: t07-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attributhuelle]
+  type: single
+  question: |-
+    (Vertiefung) Gegeben ist R(A, B, C, D, E) mit F = {A → B, B → C, C D → E}. Was ist {A, D}⁺?
+  options:
+    - text: "{A, B, C, D, E}"
+      correct: true
+      explain: "Start {A, D}. A → B ergänzt B, B → C ergänzt C. Jetzt liegt C D in der Hülle, also ergänzt C D → E das E."
+    - text: "{A, B, C, D}"
+      correct: false
+      explain: "Die Berechnung wurde zu früh beendet. Nach dem Hinzufügen von C ist auch C D → E anwendbar."
+    - text: "{A, B, D}"
+      correct: false
+      explain: "Die Kette über B → C wurde nicht weiterverfolgt. Die Schritte werden wiederholt, bis sich nichts mehr ändert."
+    - text: "{A, D, E}"
+      correct: false
+      explain: "C D → E ist erst anwendbar, wenn C in der Hülle liegt. C kommt nur über A → B → C hinein."
+- id: t07-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fd, triviale-fd]
+  type: single
+  question: |-
+    Welche funktionale Abhängigkeit ist trivial?
+  options:
+    - text: "{TourNr, StoppNr} → TourNr"
+      correct: true
+      explain: "Die rechte Seite ist Teilmenge der linken. Eine solche FD gilt immer (Reflexivität)."
+    - text: "TourNr → TourNr, Datum"
+      correct: false
+      explain: "Datum liegt nicht in der linken Seite. Die FD ist nur teilweise trivial und sagt etwas über die Miniwelt aus."
+    - text: "{TourNr, StoppNr} → Empfänger"
+      correct: false
+      explain: "Empfänger ist nicht Teil der linken Seite. Ob die FD gilt, hängt von den Regeln ab."
+    - text: "StoppNr → TourNr"
+      correct: false
+      explain: "TourNr ist nicht in der linken Seite enthalten, die FD ist also nicht trivial. Sie gilt hier nicht einmal, weil jede Tour einen Stopp 1 hat."
+- id: t07-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [partielle-abhaengigkeit, 2nf]
+  type: single
+  question: |-
+    Relation Stopp(TourNr, StoppNr, Empfänger, Datum) mit dem einzigen Schlüsselkandidaten {TourNr, StoppNr}. Es gelten {TourNr, StoppNr} → Empfänger und TourNr → Datum. Welche Aussage stimmt?
+  options:
+    - text: "Datum hängt partiell vom Schlüssel ab, die Relation ist nicht in 2NF."
+      correct: true
+      explain: "Datum wird schon von TourNr, einem echten Teil des Schlüssels, bestimmt."
+    - text: "Datum hängt transitiv vom Schlüssel ab, die Relation ist in 2NF, aber nicht in 3NF."
+      correct: false
+      explain: "TourNr ist Teil des Schlüssels, kein Nichtschlüsselattribut. Die Abhängigkeit vom Schlüsselteil ist partiell und verletzt schon die 2NF."
+    - text: "Empfänger hängt partiell vom Schlüssel ab."
+      correct: false
+      explain: "Für Empfänger ist laut Angabe der ganze Schlüssel nötig, die Abhängigkeit ist voll."
+    - text: "Die Relation ist in 3NF, weil sie einen Primärschlüssel hat."
+      correct: false
+      explain: "Ein Schlüssel allein sagt nichts über die Normalform. Entscheidend sind die FDs der Nichtschlüsselattribute."
+- id: t07-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [transitive-abhaengigkeit]
+  type: multi
+  question: |-
+    Z hängt transitiv von X ab. Welche Bedingungen gehören zur (strengen) Definition?
+  options:
+    - text: "X → Y und Y → Z"
+      correct: true
+      explain: "Die Kette über ein Zwischenattribut Y ist der Kern der transitiven Abhängigkeit."
+    - text: "Y → X gilt nicht."
+      correct: true
+      explain: "Sonst bestimmen X und Y sich gegenseitig. Ist X ein Schlüssel, wäre Y dann ein Superschlüssel, und die Kette erzeugt keine Redundanz. Viele Texte lassen die Bedingung weg, weil sie bei Schlüssel X aus der nächsten folgt."
+    - text: "Y ist in keinem Schlüsselkandidaten enthalten (im einfachsten Fall ein Nichtschlüsselattribut)."
+      correct: true
+      explain: "Ist Y ein Schlüsselteil, liegt eine partielle Abhängigkeit vor, keine transitive. Diese Bedingung trennt die Verletzung der 2NF von der der 3NF."
+    - text: "Z liegt weder in X noch in Y."
+      correct: true
+      explain: "Sonst wäre die FD Y → Z bzw. X → Z trivial."
+    - text: "X besteht aus mindestens zwei Attributen."
+      correct: false
+      explain: "Das ist die Voraussetzung für partielle, nicht für transitive Abhängigkeiten. Transitive Ketten gibt es auch bei einattributigem Schlüssel."
+- id: t07-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel, attributhuelle]
+  type: single
+  question: |-
+    (Vertiefung) Gegeben ist R(A, B, C, D) mit F = {A B → C, C → D, D → A}. Welche Menge enthält genau alle Schlüsselkandidaten?
+  options:
+    - text: "{A, B}, {B, C}, {B, D}"
+      correct: true
+      explain: "B steht nie rechts, ist also in jedem Schlüssel. {B}⁺ = {B}. {A, B}⁺, {B, C}⁺ und {B, D}⁺ ergeben jeweils alle Attribute und sind minimal."
+    - text: "nur {A, B}"
+      correct: false
+      explain: "Auch {B, C}⁺ = {B, C, D, A} und {B, D}⁺ = {B, D, A, C} sind vollständig. Man muss alle Kombinationen prüfen."
+    - text: "{A, B, C, D}"
+      correct: false
+      explain: "Das ist ein Superschlüssel, aber nicht minimal."
+    - text: "{B}"
+      correct: false
+      explain: "B muss zwar in jedem Schlüssel stecken, aber {B}⁺ = {B} bestimmt nichts weiter."
+- id: t07-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1nf, 0nf]
+  type: single
+  question: |-
+    Eine Kurier-Tabelle enthält die Spalte „Telefonnummern“ mit Werten wie „0151 2233; 0176 8899“. Was ist richtig?
+  options:
+    - text: "Die Tabelle ist nicht in 1NF, weil eine Zelle mehrere gleichartige Werte enthält."
+      correct: true
+      explain: "Das ist eine Wiederholungsgruppe in einer Zelle. Die Werte sind nicht atomar."
+    - text: "Die Tabelle ist in 1NF, aber nicht in 2NF."
+      correct: false
+      explain: "Die 2NF wird erst geprüft, wenn die 1NF erfüllt ist. Mehrere Werte in einer Zelle verletzen bereits die 1NF."
+    - text: "Die Tabelle ist in 1NF, solange die Nummern durch Semikolon getrennt sind."
+      correct: false
+      explain: "Das Trennzeichen ändert nichts daran, dass mehrere Werte in einer Zelle stehen."
+    - text: "Richtig wäre es, die Spalten Telefon1, Telefon2 und Telefon3 anzulegen."
+      correct: false
+      explain: "Nummerierte Spalten sind ebenfalls eine Wiederholungsgruppe. Richtig ist eine eigene Relation Telefon(KurierNr, Nummer)."
+- id: t07-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [2nf, notationsvariante]
+  type: truefalse
+  question: |-
+    Eine Relation in 1NF, deren Schlüsselkandidaten **alle** aus genau einem Attribut bestehen, ist automatisch in 2NF.
+  options:
+    - text: "Wahr"
+      correct: true
+      explain: "Ein einattributiger Schlüssel hat keinen echten nichtleeren Teil, von dem etwas partiell abhängen könnte. Die verbreitete Faustregel über den einattributigen Primärschlüssel stimmt, wenn er der einzige Schlüsselkandidat ist; gibt es einen zusammengesetzten Alternativschlüssel, muss man nach der Fassung über alle Schlüsselkandidaten genauer prüfen."
+    - text: "Falsch"
+      correct: false
+      explain: "Partielle Abhängigkeiten setzen eine zusammengesetzte Determinante voraus. Ohne zusammengesetzten Schlüsselkandidaten gibt es sie nicht."
+- id: t07-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [3nf, bcnf, transitive-abhaengigkeit]
+  type: single
+  question: |-
+    (Ausblick BCNF) Kurier(KurierNr, Name, Handynummer). Jede Handynummer gehört zu genau einer Kurier:in und umgekehrt. Es gelten KurierNr → Name, Handynummer und Handynummer → KurierNr. Welche Aussage stimmt?
+  options:
+    - text: "Die Relation ist in BCNF."
+      correct: true
+      explain: "{KurierNr} und {Handynummer} sind beide Schlüsselkandidaten. Jede Determinante ist also ein Superschlüssel."
+    - text: "Die Relation verletzt die 3NF, weil KurierNr → Handynummer → Name transitiv ist."
+      correct: false
+      explain: "Keine transitive Abhängigkeit, denn Handynummer → KurierNr gilt. Handynummer ist selbst Schlüsselkandidat."
+    - text: "Die Relation ist nur in 2NF, weil Name von Handynummer abhängt und Handynummer kein Primärschlüssel ist."
+      correct: false
+      explain: "Es zählen alle Schlüsselkandidaten, nicht nur der gewählte Primärschlüssel. Handynummer ist ein Alternativschlüssel."
+    - text: "Die Relation ist nicht in 1NF, weil sie zwei Schlüssel hat."
+      correct: false
+      explain: "Mehrere Schlüsselkandidaten sind erlaubt und häufig. Die 1NF betrifft atomare Werte und Wiederholungsgruppen."
+- id: t07-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zerlegung, verlustfrei]
+  type: single
+  question: |-
+    Tour(TourNr, Datum, KurierNr) mit TourNr → Datum, KurierNr. An einem Tag fahren mehrere Kurier:innen. Welche Zerlegung ist verlustfrei?
+  options:
+    - text: "(TourNr, Datum) und (TourNr, KurierNr)"
+      correct: true
+      explain: "Das gemeinsame Attribut TourNr ist Schlüssel beider Teile. Der Verbund liefert genau die Originaltupel."
+    - text: "(TourNr, Datum) und (Datum, KurierNr)"
+      correct: false
+      explain: "Datum ist in keinem Teil Schlüssel. Bei zwei Touren am selben Tag entstehen Scheintupel."
+    - text: "(TourNr, Datum) und (KurierNr)"
+      correct: false
+      explain: "Ohne gemeinsames Attribut wird der Verbund zum kartesischen Produkt, und jede Tour wird mit jeder Kurier:in kombiniert."
+    - text: "(TourNr) und (Datum, KurierNr)"
+      correct: false
+      explain: "Wieder kein gemeinsames Attribut. Die Zuordnung Tour ↔ Kurier:in geht verloren."
+- id: t07-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zerlegung, verlustfrei]
+  type: truefalse
+  question: |-
+    Bei einer verlustbehafteten Zerlegung fehlen im Verbund der Teilrelationen einige Tupel der Ausgangsrelation.
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Der Verbund der Projektionen enthält immer alle Originaltupel. Das Problem sind zusätzliche Scheintupel, durch die die echten Kombinationen nicht mehr erkennbar sind."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig. „Verlust“ meint Informationsverlust durch zu viele, nicht durch zu wenige Tupel."
+- id: t07-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [3nf]
+  type: multi
+  question: |-
+    Welche Aussagen zur 3NF sind richtig?
+  options:
+    - text: "Eine Relation ist in 3NF, wenn für jede nicht-triviale FD X → A gilt: X ist Superschlüssel oder A ist Primattribut."
+      correct: true
+      explain: "Das ist die gleichwertige Formulierung über Superschlüssel und Primattribute."
+    - text: "Jede Relation in 3NF ist auch in 2NF."
+      correct: true
+      explain: "Die Normalformen bauen aufeinander auf."
+    - text: "Eine Relation, in der alle Attribute Primattribute sind, ist automatisch in 3NF."
+      correct: true
+      explain: "Dann ist jede rechte Seite A ein Primattribut, die Bedingung ist also stets erfüllt. In BCNF muss sie deshalb noch nicht sein."
+    - text: "Die 3NF verbietet jede FD zwischen zwei Attributen, die nicht der Primärschlüssel sind."
+      correct: false
+      explain: "Eine FD wie Handynummer → Name ist erlaubt, wenn Handynummer ein Alternativschlüssel ist. Es kommt auf alle Schlüsselkandidaten an."
+- id: t07-q015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [denormalisierung]
+  type: multi
+  question: |-
+    Welche Aussagen zur Denormalisierung treffen zu?
+  options:
+    - text: "Man denormalisiert gezielt, nachdem der Entwurf vollständig normalisiert wurde."
+      correct: true
+      explain: "Erst normalisieren, dann an begründeten Stellen im physischen Entwurf Redundanz zulassen."
+    - text: "Typischer Grund ist schnelleres Lesen durch weniger Verbunde."
+      correct: true
+      explain: "Häufige Auswertungen sparen sich Joins oder Aggregationen."
+    - text: "Denormalisierte Daten können keine Anomalien mehr verursachen, weil das DBMS sie synchron hält."
+      correct: false
+      explain: "Redundanz bringt die Anomalien zurück. Die Synchronisation muss eigens umgesetzt werden, z. B. per Trigger."
+    - text: "Ein Index oder eine materialisierte Sicht kann eine Alternative sein."
+      correct: true
+      explain: "Beide beschleunigen Lesezugriffe, ohne das logische Schema redundant zu machen."
+    - text: "Denormalisierung beschleunigt immer auch das Schreiben."
+      correct: false
+      explain: "Meist ist das Gegenteil der Fall: Jede Kopie muss mitgeändert werden."
+- id: t07-q016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [bcnf]
+  type: single
+  question: |-
+    (Ausblick BCNF) Bootseinsatz(Tag, Boot, Skipper). An einem Tag fährt ein Boot genau eine Skipper:in (Tag, Boot → Skipper). Jede Skipper:in fährt immer dasselbe Boot (Skipper → Boot). In welcher höchsten Normalform ist die Relation?
+  options:
+    - text: "3NF, aber nicht BCNF"
+      correct: true
+      explain: "Schlüsselkandidaten sind {Tag, Boot} und {Tag, Skipper}. Alle Attribute sind prim, also 3NF. Skipper → Boot hat aber keinen Superschlüssel links."
+    - text: "BCNF"
+      correct: false
+      explain: "In BCNF müsste jede Determinante Superschlüssel sein. Skipper allein bestimmt den Tag nicht."
+    - text: "2NF, aber nicht 3NF"
+      correct: false
+      explain: "Boot ist Primattribut (Teil von {Tag, Boot}). Die 3NF-Ausnahme „A ist Primattribut“ greift."
+    - text: "1NF, weil Boot partiell von {Tag, Skipper} abhängt"
+      correct: false
+      explain: "Die 2NF betrifft nur Nichtschlüsselattribute. Boot ist ein Primattribut."
+- id: t07-q017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [4nf]
+  type: single
+  question: |-
+    (Ausblick 4NF) Lehrkraft(Kürzel, Sprache, Spezialkurs). Sprachen und Spezialkurse einer Lehrkraft sind voneinander unabhängig, alle drei Attribute bilden zusammen den Schlüssel. Was trifft zu?
+  options:
+    - text: "Die Relation ist in BCNF, aber nicht in 4NF. Man zerlegt in (Kürzel, Sprache) und (Kürzel, Spezialkurs)."
+      correct: true
+      explain: "Es gelten die mehrwertigen Abhängigkeiten Kürzel ↠ Sprache und Kürzel ↠ Spezialkurs, und Kürzel ist kein Superschlüssel."
+    - text: "Die Relation ist nicht in 2NF, weil Sprache partiell vom Schlüssel abhängt."
+      correct: false
+      explain: "Sprache ist Teil des Schlüssels, also Primattribut. Es gibt keine nicht-triviale FD."
+    - text: "Die Relation ist in 4NF, weil sie keine funktionalen Abhängigkeiten hat."
+      correct: false
+      explain: "Die 4NF betrifft mehrwertige Abhängigkeiten. Ohne FDs ist nur die BCNF garantiert."
+    - text: "Man sollte die Sprachen kommagetrennt in einer Spalte speichern."
+      correct: false
+      explain: "Das verletzt die 1NF (Wiederholungsgruppe in einer Zelle)."

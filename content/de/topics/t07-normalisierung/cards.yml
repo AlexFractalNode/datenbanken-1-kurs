@@ -1,0 +1,318 @@
+- id: t07-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundbegriffe]
+  front: Was ist Normalisierung und welches Ziel verfolgt sie?
+  back: |-
+    **Normalisierung** (*normalization*) zerlegt Relationen schrittweise anhand ihrer funktionalen Abhängigkeiten, bis jede Tatsache nur an einer Stelle steht.
+    Ziel: Redundanz vermeiden, damit keine Anomalien entstehen und der Bestand konsistent bleibt. Die Normalformen (1NF, 2NF, 3NF, …) sind aufeinander aufbauende Prüfkriterien.
+- id: t07-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anomalien]
+  front: Was ist eine Änderungsanomalie? Nenne ein Beispiel.
+  back: |-
+    Eine Tatsache ist mehrfach gespeichert. Bei einer Änderung müssen alle Kopien angepasst werden, sonst wird der Bestand inkonsistent (*update anomaly*).
+    Beispiel: Der Kursname „Wracktauchen“ steht in jeder Buchungszeile. Wird er nur in einer Zeile geändert, hat Kurs K7 zwei Namen.
+- id: t07-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anomalien]
+  front: Was ist eine Einfügeanomalie? Nenne ein Beispiel.
+  back: |-
+    Ein Sachverhalt lässt sich nicht speichern, solange ein anderer, unabhängiger Sachverhalt fehlt (*insertion anomaly*). Meist fehlt ein Teil des Schlüssels.
+    Beispiel: In einer Tabelle Buchung(TaucherNr, KursNr, Kursname, …) kann ein neuer Kurs erst erfasst werden, wenn jemand ihn gebucht hat.
+- id: t07-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anomalien]
+  front: Was ist eine Löschanomalie? Nenne ein Beispiel.
+  back: |-
+    Beim Löschen eines Sachverhalts gehen ungewollt andere Informationen mit verloren (*deletion anomaly*).
+    Beispiel: Wird die einzige Tour von Kurier K5 gelöscht, ist auch die Information verschwunden, dass es K5 mit diesem Namen gibt.
+- id: t07-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fd]
+  front: Wie lautet die formale Definition der funktionalen Abhängigkeit X → Y?
+  back: |-
+    X → Y gilt in R, wenn in jeder zulässigen Ausprägung für je zwei Tupel t₁, t₂ gilt:
+    t₁[X] = t₂[X] ⇒ t₁[Y] = t₂[Y] (⇒ heißt hier „daraus folgt“).
+    Anschaulich: Zu jedem X-Wert gibt es genau einen Y-Wert. Variante: „höchstens ein“, weil Y auch leer (NULL) sein kann. X heißt **Determinante**.
+- id: t07-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fd]
+  front: Kann man eine funktionale Abhängigkeit aus den Beispieldaten einer Tabelle ablesen?
+  back: |-
+    Nein. FDs sind Regeln der Miniwelt und gelten für **alle** zulässigen Ausprägungen. Beispieldaten können eine FD nur **widerlegen** (zwei Zeilen mit gleichem X, aber verschiedenem Y).
+    Dass in fünf Beispielzeilen zu jedem Datum nur ein Kurier vorkommt, beweist kein Datum → KurierNr.
+- id: t07-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fd]
+  front: Was ist eine triviale funktionale Abhängigkeit?
+  back: |-
+    X → Y ist trivial, wenn Y ⊆ X, z. B. {TourNr, StoppNr} → StoppNr.
+    Sie gilt in jeder Relation und sagt nichts über die Miniwelt aus. Bei der Prüfung von Normalformen werden nur nicht-triviale FDs betrachtet.
+- id: t07-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fd, armstrong]
+  front: Welche drei Armstrong-Axiome gibt es? (Vertiefung)
+  back: |-
+    - **Reflexivität:** Ist Y ⊆ X, gilt X → Y.
+    - **Verstärkung:** Aus X → Y folgt XZ → YZ.
+    - **Transitivität:** Aus X → Y und Y → Z folgt X → Z.
+
+    Abgeleitet: Vereinigung (aus X → Y und X → Z folgt X → YZ), Zerlegung (aus X → YZ folgt X → Y), Pseudotransitivität (aus X → Y und WY → Z folgt WX → Z).
+- id: t07-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [volle-abhaengigkeit]
+  front: Wann ist Y voll funktional abhängig von X?
+  back: |-
+    Wenn X → Y gilt und keine echte Teilmenge von X schon Y bestimmt.
+    Beispiel: Zahlstatus hängt voll von {TaucherNr, KursNr} ab. Eine Taucherin bucht mehrere Kurse, ein Kurs hat mehrere Teilnehmende, und erst beide zusammen legen den Status fest.
+    Schreibweise: Manche Texte notieren die volle FD als X ⇒ Y; im Kurs steht ⇒ für „daraus folgt“.
+- id: t07-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [partielle-abhaengigkeit]
+  front: Was ist eine partielle Abhängigkeit und wann kann sie überhaupt auftreten?
+  back: |-
+    X → Y gilt, aber schon ein **echter Teil** von X bestimmt Y. Beispiel: {TaucherNr, KursNr} → Kursbezeichnung, obwohl KursNr → Kursbezeichnung reicht.
+    Sie setzt eine Determinante mit mindestens zwei Attributen voraus, typischerweise einen zusammengesetzten Schlüsselkandidaten.
+- id: t07-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [transitive-abhaengigkeit]
+  front: Wann hängt Z transitiv von X ab?
+  back: |-
+    Wenn X → Y und Y → Z gelten, **nicht** aber Y → X, Y in keinem Schlüsselkandidaten enthalten ist (meist ein Nichtschlüsselattribut) und Z weder in X noch in Y liegt.
+    Beispiel: TaucherNr → Brevet → MaxTiefe; Brevet ist Nichtschlüsselattribut und gehört zu vielen Taucher:innen.
+    Ist Y ein Schlüsselteil, ist die Abhängigkeit partiell, nicht transitiv.
+- id: t07-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [transitive-abhaengigkeit]
+  front: Warum verlangt die strenge Definition der transitiven Abhängigkeit „nicht Y → X“?
+  back: |-
+    Gilt auch Y → X, bestimmen X und Y sich gegenseitig. Ist X ein Schlüssel, ist Y dann ein Superschlüssel, und es entsteht keine Redundanz.
+    Beispiel: Kurier(KurierNr, Name, Handynummer) mit eindeutiger Handynummer: KurierNr → Handynummer → Name ist nicht transitiv.
+    Variante: Viele Texte verlangen nur „Y ist Nichtschlüsselattribut“; bei Schlüssel X folgt Y ↛ X daraus.
+- id: t07-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attributhuelle]
+  front: (Vertiefung) Wie berechnet man die Attributhülle X⁺?
+  back: |-
+    1. X⁺ := X
+    2. Für jede FD A → B mit A ⊆ X⁺: B zu X⁺ hinzufügen.
+    3. Schritt 2 wiederholen, bis sich X⁺ nicht mehr ändert.
+
+    X⁺ enthält genau die Attribute, die X funktional bestimmt.
+- id: t07-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attributhuelle, schluessel]
+  front: Wofür nutzt man die Attributhülle?
+  back: |-
+    - FD prüfen: X → Y gilt genau dann, wenn Y ⊆ X⁺.
+    - Superschlüssel: X⁺ enthält alle Attribute der Relation.
+    - Schlüsselkandidat: X ist Superschlüssel, aber für jedes weggelassene Attribut ist die Hülle nicht mehr vollständig (Minimalität).
+- id: t07-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel, attributhuelle]
+  front: (Vertiefung) Welche zwei Faustregeln helfen beim Finden aller Schlüsselkandidaten?
+  back: |-
+    - Ein Attribut, das auf **keiner rechten Seite** vorkommt, steckt in **jedem** Schlüsselkandidaten.
+    - Ein Attribut, das nur rechts und **nie links** vorkommt, gehört zu **keinem** Schlüsselkandidaten.
+
+    Dann mit den Pflichtattributen starten und schrittweise um je ein Attribut erweitern, bis die Hülle vollständig ist.
+- id: t07-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schluessel]
+  front: Was ist ein Primattribut, was ein Nichtschlüsselattribut?
+  back: |-
+    - **Primattribut** (*prime attribute*): in **mindestens einem** Schlüsselkandidaten enthalten.
+    - **Nichtschlüsselattribut** (*non-prime attribute*, auch Nichtprimattribut): in **keinem** Schlüsselkandidaten enthalten.
+
+    Achtung: Es zählen alle Schlüsselkandidaten, nicht nur der gewählte Primärschlüssel.
+- id: t07-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [0nf, notationsvariante]
+  front: Woran erkennt man eine unnormalisierte Tabelle (0NF)?
+  back: |-
+    - **Wiederholungsgruppen** (*repeating groups*): mehrere gleichartige Werte(gruppen) in einer Zelle oder nummerierte Spalten (Kurs1, Kurs2, …)
+    - nicht atomare Werte, z. B. „K3 Jana Pohl“ in einer Zelle
+
+    Bezeichnungen: 0NF (deutsche Lehrtexte), *unnormalized form* (UNF), NF². Achtung: NF² bezeichnet auch bewusst geschachtelte Relationen (objektrelational), nicht nur Entwurfsfehler.
+- id: t07-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1nf]
+  front: Wann ist eine Relation in 1NF und wie überführt man eine 0NF-Tabelle?
+  back: |-
+    **1NF:** Jede Spalte hat einen festen, einheitlichen Wertebereich (ein Datentyp); dieser ist unstrukturiert, d. h. jeder Wert ist atomar (keine Menge, Liste, Aufzählung, kein zusammengesetzter Wert); keine Wiederholungsgruppen.
+    **Schritt:** Wiederholungsgruppe auflösen (je Element eine Zeile, Kopfdaten wiederholen) oder in eine eigene Relation auslagern. Zusammengesetzte Zellen in Einzelattribute zerlegen. Danach den Schlüssel neu bestimmen, er ist oft zusammengesetzt.
+- id: t07-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [2nf]
+  front: Wann ist eine Relation in 2NF?
+  back: |-
+    Sie ist in 1NF, und jedes **Nichtschlüsselattribut** ist von **jedem Schlüsselkandidaten voll** funktional abhängig.
+    Kurz: Kein Nichtschlüsselattribut hängt schon von einem echten Teil eines Schlüsselkandidaten ab.
+- id: t07-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [2nf, notationsvariante]
+  front: „Einattributiger Primärschlüssel, also automatisch 2NF.“ Wann gilt diese Faustregel?
+  back: |-
+    Sie folgt aus der verbreiteten 2NF-Fassung über den Primärschlüssel und gilt, wenn der Primärschlüssel der **einzige** Schlüsselkandidat ist.
+    Nach der Fassung über **alle** Schlüsselkandidaten (Kurs) kann bei einem zusammengesetzten Alternativschlüssel trotzdem eine partielle Abhängigkeit vorliegen.
+    Sicher in beiden Fassungen: Alle Schlüsselkandidaten einattributig ⇒ 2NF.
+- id: t07-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [2nf, zerlegung]
+  front: Wie beseitigt man eine partielle Abhängigkeit (Schritt zur 2NF)?
+  back: |-
+    Die Determinante (der Schlüsselteil) wird mit allen von ihr abhängigen Nichtschlüsselattributen in eine neue Relation ausgelagert, dort ist sie Primärschlüssel.
+    In der Ausgangsrelation bleibt die Determinante als Fremdschlüssel stehen. Die abhängigen Attribute werden dort entfernt.
+- id: t07-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [3nf]
+  front: Wann ist eine Relation in 3NF? Nenne beide üblichen Formulierungen.
+  back: |-
+    1. In 2NF, und kein Nichtschlüsselattribut hängt **transitiv** von einem Schlüsselkandidaten ab.
+    2. Für jede nicht-triviale FD X → A gilt: X ist **Superschlüssel** oder A ist **Primattribut**.
+
+    Variante 2 ist oft schneller zu prüfen: jede FD einzeln ansehen.
+- id: t07-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [3nf, notationsvariante]
+  front: Was ist die Schwäche der Kurzform „Kein Nichtschlüsselattribut hängt von einem anderen Nichtschlüsselattribut ab“?
+  back: |-
+    Sie erfasst nicht jeden Fall. Besteht eine Determinante aus einem Schlüsselteil **und** einem Nichtschlüsselattribut, ist sie nach der Kurzform unauffällig, kann die 3NF aber verletzen.
+    Sicher ist der Test: Für jede nicht-triviale FD X → A ist X Superschlüssel oder A Primattribut.
+- id: t07-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zerlegung, verlustfrei]
+  front: Was bedeutet verlustfreie Zerlegung (Verbundtreue)?
+  back: |-
+    Der natürliche Verbund der Teilrelationen ergibt für jede zulässige Ausprägung wieder genau die Ausgangsrelation: π_{R1}(r) ⋈ π_{R2}(r) = r.
+    „Verlust“ heißt: Der Verbund liefert **zusätzliche Scheintupel** (*spurious tuples*), sodass die echten Kombinationen nicht mehr erkennbar sind. Originaltupel fehlen nie.
+- id: t07-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zerlegung, verlustfrei]
+  front: Wie prüfst du, ob die Zerlegung von R in R1 und R2 verlustfrei ist?
+  back: |-
+    Die gemeinsamen Attribute R1 ∩ R2 müssen R1 oder R2 funktional bestimmen, also Superschlüssel eines der beiden Teile sein.
+    Beispiel: (TourNr, Datum) und (TourNr, KurierNr) ist verlustfrei, weil TourNr Schlüssel beider Teile ist. (TourNr, Datum) und (Datum, KurierNr) ist es nicht.
+- id: t07-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zerlegung, abhaengigkeitserhaltung]
+  front: Was bedeutet Abhängigkeitserhaltung bei einer Zerlegung?
+  back: |-
+    Jede ursprüngliche FD lässt sich nach der Zerlegung innerhalb der Teilrelationen prüfen. Genauer: Aus den FDs der Teile ist die ganze FD-Menge herleitbar. Einfachere, hinreichende Fassung: Jede FD liegt vollständig in einem Teil.
+    Fehlt sie, kann das DBMS eine Regel nicht mehr über Schlüssel durchsetzen, z. B. Brevet → MaxTiefe nach der Zerlegung in (TaucherNr, Brevet) und (TaucherNr, MaxTiefe).
+- id: t07-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zerlegung, bcnf]
+  front: Welche Garantien gelten für Zerlegungen in 3NF bzw. BCNF?
+  back: |-
+    - **3NF:** immer verlustfrei **und** abhängigkeitserhaltend erreichbar.
+    - **BCNF:** immer verlustfrei erreichbar, aber **nicht immer** abhängigkeitserhaltend.
+
+    Deshalb begnügt man sich in der Praxis manchmal mit der 3NF.
+- id: t07-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [denormalisierung]
+  front: Was ist Denormalisierung, wann und warum setzt man sie ein?
+  back: |-
+    Bewusstes Zurücknehmen der Normalisierung, also gezielte Redundanz (*denormalization*).
+    Wann: erst nach vollständig normalisiertem Entwurf, im physischen Entwurf.
+    Warum: vor allem schnelleres Lesen (weniger Verbunde), z. B. vorberechnete Summen oder ein zurückgeholter Name für häufige Berichte.
+- id: t07-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [denormalisierung]
+  front: Welche Risiken hat Denormalisierung und welche Alternativen gibt es?
+  back: |-
+    **Risiken:** Anomalien kehren zurück, Kopien müssen synchron gehalten werden (z. B. per Trigger), Schreibzugriffe und Massenänderungen werden langsamer, mehr Speicher.
+    **Alternativen:** Index, materialisierte Sicht.
+    Immer dokumentieren und die Konsistenzsicherung festlegen.
+- id: t07-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [bcnf]
+  front: (Ausblick) Wann ist eine Relation in BCNF und wie unterscheidet sie sich von der 3NF?
+  back: |-
+    **BCNF:** Für jede nicht-triviale FD X → A ist X ein Superschlüssel (jede Determinante ist Schlüssel).
+    Gegenüber der 3NF fällt die Ausnahme „A ist Primattribut“ weg; ein Unterschied entsteht nur bei sich überlappenden zusammengesetzten Schlüsselkandidaten.
+    Achtung: Manche Texte nennen die BCNF „3NF nach Boyce-Codd“ und meinen mit „3NF“ dann die BCNF.
+- id: t07-c031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [4nf]
+  front: (Ausblick) Was ist eine mehrwertige Abhängigkeit und was verlangt die 4NF?
+  back: |-
+    **Mehrwertige Abhängigkeit** X ↠ Y (*multivalued dependency*, MVD): Zu einem X-Wert gehört eine Menge von Y-Werten, unabhängig von den übrigen Attributen.
+    **4NF:** BCNF, und jede nicht-triviale MVD hat einen Superschlüssel links. Unabhängige Mengen (z. B. Sprachen und Spezialkurse einer Lehrkraft) kommen in getrennte Relationen.
+- id: t07-c032
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [bcnf, 4nf, schluessel]
+  front: In welcher Normalform ist eine schlüsselvolle Relation (alle Attribute zusammen bilden den einzigen Schlüssel) mindestens?
+  back: |-
+    Mindestens in **BCNF**. Gäbe es eine nicht-triviale FD X → A, wäre schon „alle Attribute ohne A“ ein Superschlüssel, und die Gesamtmenge wäre nicht minimal.
+    Die **4NF** ist dagegen nicht garantiert. Unabhängige mehrwertige Fakten können trotzdem Redundanz erzeugen.
+- id: t07-c033
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [3nf, vorgehen]
+  front: Wie begründest du in einer Aufgabe, dass eine Relation die 3NF verletzt?
+  back: |-
+    Konkrete FD nennen, z. B. Zone → Zuschlag, und eine der beiden gleichwertigen Begründungen geben:
+    - Kette Schlüssel → Zone → Zuschlag: Das Nichtschlüsselattribut Zuschlag hängt über das Nichtschlüsselattribut Zone transitiv vom Schlüssel ab.
+    - Test: Zone ist kein Superschlüssel, Zuschlag kein Primattribut.
+- id: t07-c034
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, schluessel]
+  front: Wie werden Primär- und Fremdschlüssel in den Relationenschemata des Kurses gekennzeichnet?
+  back: |-
+    Primärschlüssel <u>unterstrichen</u>, Fremdschlüssel mit nachgestelltem Pfeil auf die Zielrelation: Lieferung(<u>LiefNr</u>, Datum, CafeNr → Cafe).
+    Hinter dem Schema-Pfeil steht immer ein Relationsname; eine FD verbindet dagegen Attribute und steht außerhalb des Schemas.
+    Varianten: ↑CafeNr↑, Zusätze (PK)/(FK).
+- id: t07-c035
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundbegriffe, notationsvariante]
+  front: Welche gleichbedeutenden Bezeichnungen gibt es für Zerlegung, verlustfrei und Scheintupel?
+  back: |-
+    - Zerlegung = Dekomposition (*decomposition*)
+    - verlustfrei = verlustlos = verbundtreu (*lossless join*)
+    - Scheintupel = unechte Tupel (*spurious tuples*)
+    - Normalformenlehre: Oberbegriff für Normalformen und Verfahren
+    - 1NF = 1.NF = 1. Normalform
+- id: t07-c036
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [5nf, ausblick]
+  front: (Ausblick) Wie geht die Reihe der Normalformen nach der 4NF weiter?
+  back: |-
+    Die **5NF** betrifft Verbundabhängigkeiten (*join dependencies*): Manche Relationen lassen sich nur in drei oder mehr Teile verlustfrei zerlegen, nicht in zwei.
+    Jede Relation in 5NF ist auch in 4NF, BCNF, 3NF usw. In der Praxis endet der Entwurf meist bei 3NF oder BCNF.
