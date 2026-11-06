@@ -1,0 +1,394 @@
+- id: t08-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [projektion, multimenge]
+  type: single
+  question: |-
+    Gegeben ist `Sitzung(mnr, tnr, objekt)` mit den Tupeln (1, T2, Saturn), (1, T3, Orionnebel), (2, T2, Mond), (3, T2, Saturn).
+    Wie viele Tupel hat `π_{objekt}(Sitzung)`?
+  options:
+    - text: "3"
+      correct: true
+      explain: "Die Projektion liefert eine Menge. „Saturn“ entsteht zweimal, bleibt aber nur einmal: Saturn, Orionnebel, Mond."
+    - text: "4"
+      correct: false
+      explain: "So viele Zeilen liefert `SELECT objekt FROM sitzung` in SQL ohne DISTINCT. In der Algebra werden Duplikate entfernt."
+    - text: "1"
+      correct: false
+      explain: "Die Projektion reduziert die Spalten, nicht die Zeilen auf eine. Es bleiben alle verschiedenen Werte."
+    - text: "2"
+      correct: false
+      explain: "Typischer Fehler: Der doppelte Wert Saturn wurde ganz gestrichen, statt ihn einmal zu behalten. Es bleiben aber alle drei verschiedenen Objekte."
+- id: t08-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [natural-join, equi-join]
+  type: single
+  question: |-
+    `Mitglied(mnr, name, stufe)` und `Sitzung(mnr, tnr, objekt)` werden mit dem **natürlichen Join** `Mitglied ⋈ Sitzung` verbunden. Welchen Grad (Anzahl der Attribute) hat das Ergebnis?
+  options:
+    - text: "5"
+      correct: true
+      explain: "Das gemeinsame Attribut mnr erscheint im natürlichen Join nur einmal: mnr, name, stufe, tnr, objekt."
+    - text: "6"
+      correct: false
+      explain: "Das wäre der Grad eines Equi-Joins oder des Produkts mit Bedingung. Dort bleiben Mitglied.mnr und Sitzung.mnr beide erhalten."
+    - text: "3"
+      correct: false
+      explain: "Der Join fügt die Attribute beider Relationen zusammen, er behält nicht nur die einer Seite (das wäre ein Semi-Join)."
+    - text: "4"
+      correct: false
+      explain: "Zu wenig: Nur das gemeinsame Attribut fällt einmal weg, alle übrigen bleiben."
+- id: t08-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [outer-join, "null"]
+  type: multi
+  question: |-
+    Flohmarkt: `Stand(platz, betreiber)` enthält (A1, Kai), (A2, Rosa), (A3, Udo). `Anschluss(platz, watt)` enthält (A2, 500), (A3, 1000), (A4, 2000).
+    Welche Aussagen über die natürlichen äußeren Joins über `platz` sind richtig?
+  options:
+    - text: "`Stand ⟕ Anschluss` hat 3 Tupel, darunter (A1, Kai, NULL)."
+      correct: true
+      explain: "A2 und A3 haben einen Partner, A1 bleibt als linkes partnerloses Tupel mit watt = NULL erhalten."
+    - text: "`Stand ⟖ Anschluss` enthält das Tupel (A4, NULL, 2000)."
+      correct: true
+      explain: "A4 hat keinen Stand. Der Right Outer Join behält es; platz kommt aus Anschluss, betreiber wird mit NULL aufgefüllt."
+    - text: "`Stand ⟗ Anschluss` hat 6 Tupel, weil beide Relationen je 3 Tupel haben."
+      correct: false
+      explain: "A2 und A3 werden zu je einem Tupel verbunden. Dazu kommen A1 und A4 als partnerlose Tupel: insgesamt 4."
+    - text: "`Stand ⟕ Anschluss` und `Stand ⟖ Anschluss` sind gleich, weil beide 3 Tupel haben."
+      correct: false
+      explain: "Gleiche Kardinalität heißt nicht gleicher Inhalt: Links steht A1 mit NULL, rechts A4 mit NULL."
+- id: t08-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [semi-join]
+  type: single
+  question: |-
+    Verlag: `Autorin(anr, name)` enthält (1, Ilse), (2, Jana), (3, Kim). `Buch(isbn, anr)` enthält (B1, 2), (B2, 2), (B3, 3), (B4, 5).
+    Was liefert der Semi-Join `Autorin ⋉ Buch`?
+  options:
+    - text: "2 Tupel mit den Attributen anr, name: (2, Jana), (3, Kim)"
+      correct: true
+      explain: "Behalten werden die Autorinnen mit mindestens einem Buch, nur mit ihren eigenen Attributen. Jana steht trotz zweier Bücher nur einmal da."
+    - text: "3 Tupel mit den Attributen anr, name, isbn"
+      correct: false
+      explain: "Das ist der natürliche Join. Der Semi-Join behält nur die Attribute der linken Relation."
+    - text: "3 Tupel mit den Attributen anr, name, Jana doppelt"
+      correct: false
+      explain: "Nach dem Wegprojizieren von isbn sind beide Jana-Tupel gleich und fallen zu einem zusammen."
+    - text: "1 Tupel: (1, Ilse)"
+      correct: false
+      explain: "Das wäre der Anti-Join `Autorin ▷ Buch`, also die Autorinnen **ohne** Buch."
+    - text: "3 Tupel mit den Attributen isbn, anr: B1, B2, B3"
+      correct: false
+      explain: "Das ist der rechte Semi-Join `Autorin ⋊ Buch`. ⋉ gibt Tupel der linken Relation aus."
+- id: t08-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [vereinigungsvertraeglichkeit, mengenoperationen]
+  type: truefalse
+  question: |-
+    Der Ausdruck `π_{mnr, name}(Mitglied) ∪ π_{mnr}(Sitzung)` ist zulässig.
+  options:
+    - text: "wahr"
+      correct: false
+      explain: "Die Vereinigung verlangt Vereinigungsverträglichkeit. Hier hat die linke Seite Grad 2, die rechte Grad 1."
+    - text: "falsch"
+      correct: true
+      explain: "Richtig: Unterschiedlicher Grad, also nicht vereinigungsverträglich. Zulässig wäre z. B. `π_{mnr}(Mitglied) ∪ π_{mnr}(Sitzung)`."
+- id: t08-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [differenz, anfrage-formulieren]
+  type: single
+  question: |-
+    Welcher Ausdruck liefert die Nummern der Mitglieder, die noch **nie** eine Sitzung hatten?
+  options:
+    - text: "`π_{mnr}(Mitglied) − π_{mnr}(Sitzung)`"
+      correct: true
+      explain: "Alle Mitgliedsnummern minus die, die in Sitzung vorkommen. Beide Seiten haben nur das Attribut mnr und sind damit vereinigungsverträglich."
+    - text: "`π_{mnr}(Sitzung) − π_{mnr}(Mitglied)`"
+      correct: false
+      explain: "Die Differenz ist nicht kommutativ. So entstünden die Mitgliedsnummern aus Sitzung, zu denen kein Mitglied existiert. Bei korrekten Fremdschlüsseln ist das die leere Menge."
+    - text: "`π_{mnr}(σ_{tnr=NULL}(Mitglied ⋈ Sitzung))`"
+      correct: false
+      explain: "Im inneren Join fehlen partnerlose Mitglieder ganz. Außerdem ist ein Vergleich `= NULL` nie wahr."
+    - text: "`Mitglied − Sitzung`"
+      correct: false
+      explain: "Die beiden Relationen haben verschiedene Attribute und sind nicht vereinigungsverträglich."
+- id: t08-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [selektion, anfrage-formulieren]
+  type: single
+  question: |-
+    Gegeben ist `Sitzung(mnr, tnr, objekt)` mit den Tupeln (1, T2, Saturn), (1, T3, Orionnebel), (2, T2, Mond), (3, T2, Saturn). Mitglied 1 heißt Ada.
+    Was liefert `σ_{tnr='T2' ∧ tnr='T3'}(Sitzung)`?
+  options:
+    - text: "Die leere Relation"
+      correct: true
+      explain: "Die Bedingung prüft jedes Tupel einzeln. Ein Tupel kann nicht gleichzeitig T2 und T3 enthalten."
+    - text: "Die Sitzungen von Ada, weil sie beide Teleskope benutzt hat"
+      correct: false
+      explain: "„Hat beide benutzt“ betrifft zwei verschiedene Tupel. Das formuliert man mit ∩ über zwei Projektionen oder mit Division."
+    - text: "Alle Sitzungen mit T2 oder T3"
+      correct: false
+      explain: "Das wäre die Bedingung mit ∨ statt ∧."
+    - text: "Der Ausdruck ist ungültig."
+      correct: false
+      explain: "Er ist syntaktisch korrekt, nur ist die Bedingung für jedes Tupel falsch."
+- id: t08-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [optimierung, umformung, vertiefung]
+  type: multi
+  question: |-
+    (Vertiefung) Welche Umformungen sind **immer** äquivalent? (R, S beliebig, Bedingungen passend zu den Attributen; `Mitglied(mnr, name, stufe)`, `Sitzung(mnr, tnr, objekt)`)
+  options:
+    - text: "`σ_{a ∧ b}(R) = σ_{a}(σ_{b}(R))`"
+      correct: true
+      explain: "Kaskade der Selektion: Eine Konjunktion darf in hintereinander ausgeführte Selektionen zerlegt werden."
+    - text: "`σ_{stufe='Profi'}(Mitglied ⋈ Sitzung) = σ_{stufe='Profi'}(Mitglied) ⋈ Sitzung`"
+      correct: true
+      explain: "Die Bedingung verwendet nur Attribute von Mitglied. Deshalb darf die Selektion vor den Join geschoben werden."
+    - text: "`π_{X}(R − S) = π_{X}(R) − π_{X}(S)`"
+      correct: false
+      explain: "Gegenbeispiel R = {(a, 1)}, S = {(a, 2)}: links {(a)}, rechts ∅. π verteilt sich über ∪, nicht über −."
+    - text: "`π_{name}(σ_{stufe='Profi'}(Mitglied)) = σ_{stufe='Profi'}(π_{name}(Mitglied))`"
+      correct: false
+      explain: "Rechts ist stufe nach der Projektion nicht mehr vorhanden, die Selektion ist dort nicht definiert. Tauschen darf man nur, wenn die Bedingungsattribute in der Projektionsliste stehen."
+    - text: "`R ⋈ S = S ⋈ R`"
+      correct: true
+      explain: "Der natürliche Join ist kommutativ. Bei benannten Attributen spielt die Spaltenreihenfolge keine Rolle."
+- id: t08-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql, uebersetzung]
+  type: single
+  question: |-
+    Musikschul-Datenbank, Tabelle `kurs(kurs_id, titel, niveau, …)`. Welche SQL-Anweisung entspricht **genau** `π_{titel}(σ_{niveau='Anfaenger'}(kurs))`?
+  options:
+    - text: "`SELECT DISTINCT titel FROM kurs WHERE niveau = 'Anfaenger';`"
+      correct: true
+      explain: "WHERE entspricht σ, die Spaltenliste π. DISTINCT sorgt für die Mengensemantik der Projektion."
+    - text: "`SELECT titel FROM kurs WHERE niveau = 'Anfaenger';`"
+      correct: false
+      explain: "Ohne DISTINCT können gleiche Titel mehrfach erscheinen, denn titel ist kein Schlüssel. Das Ergebnis ist dann eine Multimenge."
+    - text: "`SELECT * FROM kurs WHERE niveau = 'Anfaenger';`"
+      correct: false
+      explain: "Das ist nur die Selektion. Die Projektion auf titel fehlt."
+    - text: "`SELECT DISTINCT niveau FROM kurs WHERE titel = 'Anfaenger';`"
+      correct: false
+      explain: "Index von σ und π vertauscht: Gefiltert wird nach niveau, ausgegeben wird titel."
+- id: t08-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [natural-join, sql]
+  type: single
+  question: |-
+    In der Musikschul-Datenbank haben `kurs` und `termin` beide die Spalten `kurs_id` **und** `raum_id`. In `termin` bedeutet `raum_id` NULL „Raum des Kurses“. Was passiert bei `kurs ⋈ termin` (natürlicher Join)?
+  options:
+    - text: "Es werden nur Termine verbunden, deren raum_id mit der des Kurses übereinstimmt. Termine mit abweichendem oder fehlendem Raum gehen verloren."
+      correct: true
+      explain: "Der natürliche Join vergleicht alle gleichnamigen Attribute. raum_id wird ungewollt mitverglichen, und NULL = NULL ist nie wahr."
+    - text: "kurs_id erscheint im Ergebnis doppelt."
+      correct: false
+      explain: "Beim natürlichen Join erscheinen gemeinsame Attribute nur einmal."
+    - text: "Das Ergebnis ist das kartesische Produkt."
+      correct: false
+      explain: "Das gilt nur, wenn es **kein** gemeinsames Attribut gibt."
+    - text: "Es werden alle Termine korrekt ihrem Kurs zugeordnet."
+      correct: false
+      explain: "Richtig wäre nur ein Join über kurs_id allein, z. B. `kurs ⋈_{kurs.kurs_id=termin.kurs_id} termin` bzw. `JOIN termin USING (kurs_id)`."
+- id: t08-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql, durchschnitt, firebird]
+  type: multi
+  question: |-
+    Musikschul-Datenbank: Gesucht sind die Instrumentnummern, die sowohl in `kurs` als auch in `ausleihe` vorkommen, also `π_{instrument_id}(kurs) ∩ π_{instrument_id}(ausleihe)`. Mehrere Kurse können dasselbe Instrument haben; `ausleihe.instrument_id` ist NOT NULL. Welche Anweisungen liefern in **Firebird 3** genau dieses Ergebnis?
+  options:
+    - text: "`SELECT DISTINCT k.instrument_id FROM kurs k WHERE EXISTS (SELECT 1 FROM ausleihe a WHERE a.instrument_id = k.instrument_id);`"
+      correct: true
+      explain: "Der Durchschnitt als Semi-Join: Kurs-Instrumente mit mindestens einer Ausleihe. DISTINCT stellt die Mengensemantik her."
+    - text: "`SELECT DISTINCT k.instrument_id FROM kurs k WHERE k.instrument_id IN (SELECT a.instrument_id FROM ausleihe a);`"
+      correct: true
+      explain: "IN ist die zweite übliche Ausweichform für ∩ in Firebird 3. Kurse ohne Instrument (NULL) fallen heraus. Das deckt sich mit ∩ nur, weil `ausleihe.instrument_id` NOT NULL ist; enthalten beide Seiten NULL, weichen INTERSECT und die Ausweichformen ab."
+    - text: "`SELECT instrument_id FROM kurs INTERSECT SELECT instrument_id FROM ausleihe;`"
+      correct: false
+      explain: "In PostgreSQL korrekt. Firebird 3 kennt INTERSECT nicht und meldet einen Syntaxfehler."
+    - text: "`SELECT instrument_id FROM kurs UNION SELECT instrument_id FROM ausleihe;`"
+      correct: false
+      explain: "Das ist die Vereinigung (∪): Instrumente, die unterrichtet **oder** ausgeliehen werden."
+- id: t08-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [division, ausblick]
+  type: single
+  question: |-
+    (Ausblick Division) Sternwarte: `π_{mnr, tnr}(Sitzung)` enthält (1, T2), (1, T3), (2, T2), (3, T2). `π_{tnr}(Teleskop)` enthält T1, T2, T3. Was liefert `π_{mnr, tnr}(Sitzung) ÷ π_{tnr}(Teleskop)`?
+  options:
+    - text: "Die leere Relation (mit Attribut mnr)"
+      correct: true
+      explain: "Gesucht sind Mitglieder, die **alle** drei Teleskope benutzt haben. T1 hat niemand benutzt, also erfüllt keiner die Bedingung."
+    - text: "{(1)}"
+      correct: false
+      explain: "Ada hat T2 und T3 benutzt, aber nicht T1. Das wäre das Ergebnis bei einem Divisor {T2, T3}."
+    - text: "{(1), (2), (3)}"
+      correct: false
+      explain: "Das sind alle Mitglieder mit **irgendeiner** Sitzung, also „mindestens eins“ statt „alle“."
+    - text: "{(T2)}"
+      correct: false
+      explain: "Das Ergebnis hat die Attribute des Dividenden, die nicht im Divisor stehen, also mnr und nicht tnr."
+- id: t08-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [natural-join]
+  type: truefalse
+  question: |-
+    Ein natürlicher Join zweier Relationen **ohne** gemeinsame Attribute liefert die leere Relation.
+  options:
+    - text: "wahr"
+      correct: false
+      explain: "Ohne gemeinsame Attribute gibt es keine Gleichheitsbedingung, die etwas ausschließt."
+    - text: "falsch"
+      correct: true
+      explain: "Richtig: Das Ergebnis ist das kartesische Produkt beider Relationen."
+- id: t08-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [produkt]
+  type: single
+  question: |-
+    `Mitglied(mnr, name, stufe)` hat 4 Tupel, `Teleskop(tnr, modell, oeffnung)` hat 3 Tupel. Grad und Kardinalität von `Mitglied × Teleskop`?
+  options:
+    - text: "Grad 6, Kardinalität 12"
+      correct: true
+      explain: "Grade addieren sich (3 + 3), Kardinalitäten multiplizieren sich (4 · 3)."
+    - text: "Grad 6, Kardinalität 7"
+      correct: false
+      explain: "Kardinalitäten werden beim Produkt multipliziert, nicht addiert."
+    - text: "Grad 3, Kardinalität 12"
+      correct: false
+      explain: "Das Produkt enthält die Attribute beider Relationen."
+    - text: "Grad 9, Kardinalität 12"
+      correct: false
+      explain: "Grade werden addiert, nicht multipliziert."
+- id: t08-q015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [semi-join]
+  type: single
+  question: |-
+    Verlag: `Autorin(anr, name)` enthält (1, Ilse), (2, Jana), (3, Kim). `Buch(isbn, anr)` enthält (B1, 2), (B2, 2), (B3, 3), (B4, 5).
+    Was liefert der **rechte** Semi-Join `Autorin ⋊ Buch`?
+  options:
+    - text: "3 Tupel mit den Attributen isbn, anr: (B1, 2), (B2, 2), (B3, 3)"
+      correct: true
+      explain: "⋊ gibt die Tupel der rechten Relation aus, die einen Partner links haben. B4 fehlt, weil es keine Autorin 5 gibt."
+    - text: "2 Tupel mit den Attributen anr, name: (2, Jana), (3, Kim)"
+      correct: false
+      explain: "Das ist der linke Semi-Join `Autorin ⋉ Buch`. Richtung verwechselt: `R ⋊ S = π_{Attribute von S}(R ⋈ S)` projiziert auf die Attribute der rechten Relation."
+    - text: "1 Tupel: (B4, 5)"
+      correct: false
+      explain: "Das sind die Bücher **ohne** Partner, also der Anti-Join `Buch ▷ Autorin`."
+    - text: "2 Tupel mit den Attributen isbn, anr: (B1, 2), (B3, 3), weil Autorin 2 nur einmal zählt"
+      correct: false
+      explain: "Geprüft wird jedes Buch-Tupel einzeln. B1 und B2 sind verschiedene Tupel und bleiben beide erhalten; zusammengefasst werden nur gleiche Tupel."
+- id: t08-q016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [vereinigungsvertraeglichkeit, mengenoperationen, umbenennung]
+  type: multi
+  question: |-
+    Es gilt der Kursstandard: Vereinigungsverträglich heißt gleicher Grad, gleiche Attributnamen, gleiche Wertebereiche und gleiche Reihenfolge.
+    Gegeben sind `Kundin(name, ort)` und `Lieferant(firma, ort)`; name, firma und ort sind jeweils Texte mit demselben Wertebereich. Welche Aussagen sind richtig?
+  options:
+    - text: "`Kundin ∪ Lieferant` ist nach dem Kursstandard nicht zulässig."
+      correct: true
+      explain: "Grad und Wertebereiche passen, aber die Namen name und firma unterscheiden sich."
+    - text: "`Kundin ∪ ρ_{name←firma}(Lieferant)` ist zulässig."
+      correct: true
+      explain: "Nach der Umbenennung haben beide Seiten die Attribute name und ort."
+    - text: "`π_{ort}(Kundin) − π_{ort}(Lieferant)` ist zulässig."
+      correct: true
+      explain: "Beide Seiten haben nur das Attribut ort, also gleicher Grad, Name und Wertebereich."
+    - text: "In SQL scheitert ein `UNION` zweier Tabellen mit diesen Spalten an den verschiedenen Spaltennamen."
+      correct: false
+      explain: "SQL arbeitet positionsbezogen: Es prüft nur Spaltenzahl und verträgliche Typen. Die Namen der Ergebnisspalten kommen aus der ersten Abfrage."
+- id: t08-q017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen, kalkuel]
+  type: single
+  question: |-
+    Welche Aussage grenzt die relationale Algebra richtig vom Relationenkalkül ab?
+  options:
+    - text: "Die Algebra gibt die Rechenschritte vor (prozedural), der Kalkül nur die Ergebnisbedingung (deklarativ)."
+      correct: true
+      explain: "Genau das ist der Unterschied. Beide beschreiben Anfragen an Relationen, aber auf verschiedene Weise."
+    - text: "Der Kalkül gibt die Rechenschritte vor (prozedural), die Algebra nur die Ergebnisbedingung (deklarativ)."
+      correct: false
+      explain: "Vertauscht. Die Algebra schreibt Operatoren in einer Reihenfolge vor, der Kalkül nur eine logische Bedingung."
+    - text: "Die Algebra arbeitet mit Mengen von Tupeln, der Kalkül dagegen wie SQL mit Multimengen."
+      correct: false
+      explain: "Beide arbeiten mit Relationen als Mengen. Multimengen sind eine Eigenschaft von SQL."
+    - text: "Der Kalkül ist die Algebra in anderer Schreibweise, mit Operatornamen statt griechischer Symbole."
+      correct: false
+      explain: "Varianten wie `SEL[…](R)` sind Schreibweisen der Algebra. Der Kalkül beschreibt Anfragen grundsätzlich anders, über logische Formeln."
+- id: t08-q018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [umbenennung, notation]
+  type: multi
+  question: |-
+    In der Relation `Mitglied(mnr, name, stufe)` soll das Attribut mnr in nummer umbenannt werden. Welche Schreibweisen leisten das?
+  options:
+    - text: "`ρ_{nummer←mnr}(Mitglied)`"
+      correct: true
+      explain: "Index-Schreibweise: Der Pfeil zeigt auf den neuen Namen nummer."
+    - text: "`Mitglied[mnr→nummer]`"
+      correct: true
+      explain: "Lineare Form mit altem Namen zuerst. Der Pfeil zeigt auch hier auf den neuen Namen."
+    - text: "`Mitglied[nummer←mnr]`"
+      correct: true
+      explain: "Lineare Form ohne ρ mit neuem Namen zuerst. Der Pfeil zeigt wieder auf den neuen Namen."
+    - text: "`ρ_{mnr←nummer}(Mitglied)`"
+      correct: false
+      explain: "Hier zeigt der Pfeil auf mnr. Gemeint wäre, ein Attribut nummer in mnr umzubenennen, das es gar nicht gibt."
+- id: t08-q019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, join, equi-join]
+  type: single
+  question: |-
+    Ein Ausdruck ist in Funktionsschreibweise gegeben: `JOIN(Mitglied, Mitglied.mnr = Sitzung.mnr, Sitzung)` mit `Mitglied(mnr, name, stufe)` und `Sitzung(mnr, tnr, objekt)`. Welcher Ausdruck in Index-Schreibweise ist gemeint?
+  options:
+    - text: "`Mitglied ⋈_{Mitglied.mnr=Sitzung.mnr} Sitzung` mit 6 Attributen"
+      correct: true
+      explain: "In der Funktionsschreibweise steht die Bedingung zwischen den beiden Relationen. Es ist ein Equi-Join, beide mnr-Spalten bleiben."
+    - text: "`Mitglied ⋈ Sitzung` mit 5 Attributen"
+      correct: false
+      explain: "Der natürliche Join hätte die Funktionsform `NATURALJOIN(Mitglied, Sitzung)` ohne Bedingung und nur eine mnr-Spalte."
+    - text: "`Mitglied ⋉_{Mitglied.mnr=Sitzung.mnr} Sitzung`"
+      correct: false
+      explain: "Ein Semi-Join hätte einen eigenen Funktionsnamen (SEMIJOIN). JOIN behält die Attribute beider Seiten."
+    - text: "`σ_{Mitglied.mnr=Sitzung.mnr}(Mitglied) × Sitzung`"
+      correct: false
+      explain: "Die Bedingung verwendet Attribute beider Relationen und kann nicht auf Mitglied allein angewendet werden."
+- id: t08-q020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql, durchschnitt, firebird, "null"]
+  type: truefalse
+  question: |-
+    Musikschul-Datenbank: `kurs.raum_id` und `termin.raum_id` dürfen beide NULL sein. Die PostgreSQL-Anfrage `SELECT raum_id FROM kurs INTERSECT SELECT raum_id FROM termin;` und die Firebird-Ausweichform `SELECT DISTINCT k.raum_id FROM kurs k WHERE EXISTS (SELECT 1 FROM termin t WHERE t.raum_id = k.raum_id);` liefern **immer** dasselbe Ergebnis.
+  options:
+    - text: "wahr"
+      correct: false
+      explain: "INTERSECT behandelt zwei NULL-Werte als gleich und liefert dann eine NULL-Zeile. Der Vergleich `t.raum_id = k.raum_id` ist bei NULL nie wahr, die EXISTS-Variante liefert diese Zeile nicht."
+    - text: "falsch"
+      correct: true
+      explain: "Richtig: Sobald beide Spalten NULL enthalten, weichen die Ergebnisse um eine NULL-Zeile ab. Ohne NULL-Werte sind beide gleich."

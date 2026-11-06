@@ -1,0 +1,667 @@
+- id: t08-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [selektion, projektion, multimenge]
+  type: define-example
+  difficulty: 1
+  points: 5
+  minutes: 6
+  prompt: |-
+    Erkläre die Operatoren **Selektion** und **Projektion** der relationalen Algebra.
+    Lege dazu eine **eigene** kleine Relation mit 3–4 Tupeln an (nicht aus dem Kurstext), wende je eine Selektion und eine Projektion darauf an und gib beide Ergebnisse an.
+    Wähle die Projektion so, dass sichtbar wird, worin sich die Algebra von einem SQL-`SELECT` ohne `DISTINCT` unterscheidet, und erkläre den Unterschied.
+  solution: |-
+    - **Selektion** `σ_{Bedingung}(R)`: wählt die **Tupel (Zeilen)** von R aus, für die die Bedingung gilt. Alle Attribute bleiben erhalten, die Zahl der Tupel sinkt oder bleibt gleich.
+    - **Projektion** `π_{Attributliste}(R)`: behält nur die genannten **Attribute (Spalten)**. Da das Ergebnis eine Menge ist, bleiben dabei entstehende gleiche Tupel nur einmal.
+
+    Beispiel (Musterlösung, andere passende Beispiele gleichwertig): Schulgarten, `Pflanze(pnr, art, beet)`
+
+    | pnr | art | beet |
+    | --- | --- | --- |
+    | 1 | Tomate | A |
+    | 2 | Basilikum | A |
+    | 3 | Tomate | B |
+    | 4 | Kürbis | C |
+
+    `σ_{beet='A'}(Pflanze)`:
+
+    | pnr | art | beet |
+    | --- | --- | --- |
+    | 1 | Tomate | A |
+    | 2 | Basilikum | A |
+
+    `π_{art}(Pflanze)`: {Tomate, Basilikum, Kürbis}, also **3** Tupel.
+
+    Unterschied zu SQL: `SELECT art FROM pflanze` liefert **4** Zeilen, Tomate zweimal. SQL-Ergebnisse sind Multimengen. Erst `SELECT DISTINCT art FROM pflanze` entspricht der Projektion.
+  rubric:
+    - criterion: "Selektion korrekt erklärt (Tupel nach Bedingung filtern, Attribute bleiben)"
+      points: 1
+    - criterion: "Projektion korrekt erklärt (Attribute auswählen)"
+      points: 1
+    - criterion: "Eigene Relation mit 3–4 Tupeln und korrektem Selektionsergebnis"
+      points: 1
+    - criterion: "Projektionsergebnis korrekt, Duplikat sichtbar entfernt"
+      points: 1
+    - criterion: "Unterschied zu SQL erklärt (Multimenge, Duplikate nur mit DISTINCT entfernt)"
+      points: 1
+  space: lines:20
+- id: t08-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [auswerten, natural-join, outer-join, semi-join, mengenoperationen, datensatz-tafelrunde]
+  type: relalg
+  difficulty: 2
+  points: 13
+  minutes: 13
+  prompt: |-
+    Ein Spieleabend-Verein („Tafelrunde“) erfasst seine Brettspiele, die gespielten Partien und Spielwünsche für den nächsten Abend:
+
+    `Spiel(sid, titel, verlag, dauer)` (Dauer in Minuten)
+
+    | sid | titel | verlag | dauer |
+    | --- | --- | --- | --- |
+    | 1 | Inselsiedler | Würfelwerk | 75 |
+    | 2 | Kartenduell | Kartenhaus | 20 |
+    | 3 | Hafenmeister | Würfelwerk | 90 |
+    | 4 | Wortjagd | Spielraum | 30 |
+    | 5 | Schienenweg | Spielraum | 60 |
+
+    `Partie(sid, abend, gewinner)`
+
+    | sid | abend | gewinner |
+    | --- | --- | --- |
+    | 1 | Mo | Lea |
+    | 2 | Mo | Tom |
+    | 1 | Do | Tom |
+    | 4 | Do | Mia |
+
+    `Wunsch(titel, mitglied)` (auch Spiele, die der Verein noch nicht besitzt)
+
+    | titel | mitglied |
+    | --- | --- |
+    | Hafenmeister | Lea |
+    | Wortjagd | Tom |
+    | Sternfahrt | Mia |
+
+    Alle Joins ohne Index sind natürliche Joins. Bestimme von Hand die Ergebnisrelation (Attribute und alle Tupel):
+
+    a) `π_{verlag}(σ_{dauer≥60}(Spiel))`
+    b) `π_{titel, gewinner}(Spiel ⋈ Partie)`
+    c) `Spiel ⋉ σ_{gewinner='Tom'}(Partie)`
+    d) `σ_{dauer<60}(Spiel) ⋊ Partie`
+    e) Sei `W = π_{titel, verlag}(σ_{verlag='Würfelwerk'}(Spiel))`. Bestimme e1) `W ⟕ Wunsch`, e2) `W ⟖ Wunsch` und e3) `W ⟗ Wunsch`.
+    f) `π_{sid}(Spiel) − π_{sid}(Partie)`
+    g) `π_{gewinner}(σ_{abend='Mo'}(Partie)) ∩ π_{gewinner}(σ_{abend='Do'}(Partie))`
+  solution: |-
+    a) σ liefert sid 1, 3, 5. Die Projektion entfernt das doppelte „Würfelwerk“:
+
+    | verlag |
+    | --- |
+    | Würfelwerk |
+    | Spielraum |
+
+    b) Natürlicher Join über sid, dann Projektion:
+
+    | titel | gewinner |
+    | --- | --- |
+    | Inselsiedler | Lea |
+    | Kartenduell | Tom |
+    | Inselsiedler | Tom |
+    | Wortjagd | Mia |
+
+    c) σ liefert die Partien (2, Mo, Tom) und (1, Do, Tom). Der linke Semi-Join behält die Spiele mit sid 1 oder 2, **nur mit den Attributen von Spiel**:
+
+    | sid | titel | verlag | dauer |
+    | --- | --- | --- | --- |
+    | 1 | Inselsiedler | Würfelwerk | 75 |
+    | 2 | Kartenduell | Kartenhaus | 20 |
+
+    d) `σ_{dauer<60}(Spiel)` enthält sid 2 und 4. Der rechte Semi-Join gibt die **Partien** aus, deren Spiel darunter ist, nur mit den Attributen von Partie:
+
+    | sid | abend | gewinner |
+    | --- | --- | --- |
+    | 2 | Mo | Tom |
+    | 4 | Do | Mia |
+
+    e) W = {(Inselsiedler, Würfelwerk), (Hafenmeister, Würfelwerk)}. Gemeinsames Attribut ist titel; alle Ergebnisse haben die Attribute titel, verlag, mitglied.
+
+    e1) `W ⟕ Wunsch`:
+
+    | titel | verlag | mitglied |
+    | --- | --- | --- |
+    | Inselsiedler | Würfelwerk | NULL |
+    | Hafenmeister | Würfelwerk | Lea |
+
+    e2) `W ⟖ Wunsch`:
+
+    | titel | verlag | mitglied |
+    | --- | --- | --- |
+    | Hafenmeister | Würfelwerk | Lea |
+    | Wortjagd | NULL | Tom |
+    | Sternfahrt | NULL | Mia |
+
+    Wortjagd steht zwar in Spiel, aber nicht in W (anderer Verlag), deshalb ist verlag NULL.
+
+    e3) `W ⟗ Wunsch`: alle Tupel aus e1 und e2, das verbundene Tupel nur einmal:
+
+    | titel | verlag | mitglied |
+    | --- | --- | --- |
+    | Inselsiedler | Würfelwerk | NULL |
+    | Hafenmeister | Würfelwerk | Lea |
+    | Wortjagd | NULL | Tom |
+    | Sternfahrt | NULL | Mia |
+
+    f) {1, 2, 3, 4, 5} − {1, 2, 4}:
+
+    | sid |
+    | --- |
+    | 3 |
+    | 5 |
+
+    g) Montag: {Lea, Tom}, Donnerstag: {Tom, Mia}:
+
+    | gewinner |
+    | --- |
+    | Tom |
+
+    (Zur Kontrolle: ∪ ergäbe {Lea, Tom, Mia}.)
+  rubric:
+    - criterion: "a) Zwei Tupel, Würfelwerk nur einmal (Duplikateliminierung)"
+      points: 2
+    - criterion: "b) Vier korrekte Tupel mit Attributen titel, gewinner"
+      points: 2
+    - criterion: "c) Die richtigen zwei Tupel (sid 1, 2)"
+      points: 1
+    - criterion: "c) Nur die Attribute von Spiel"
+      points: 1
+    - criterion: "d) Die richtigen zwei Partie-Tupel (sid 2, 4)"
+      points: 1
+    - criterion: "d) Nur die Attribute von Partie (sid, abend, gewinner)"
+      points: 1
+    - criterion: "e1) Zwei Tupel, Inselsiedler mit mitglied = NULL"
+      points: 1
+    - criterion: "e2) Drei Tupel, Wortjagd und Sternfahrt mit verlag = NULL"
+      points: 1
+    - criterion: "e3) Vier Tupel, Hafenmeister nur einmal"
+      points: 1
+    - criterion: "f) Ergebnis {3, 5}"
+      points: 1
+    - criterion: "g) Ergebnis {Tom}"
+      points: 1
+  space: box:160
+- id: t08-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anfrage-formulieren, natural-join, differenz, durchschnitt, division, datensatz-festival]
+  type: relalg
+  difficulty: 3
+  points: 10
+  minutes: 11
+  prompt: |-
+    Ein Open-Air-Filmfestival zeigt Filme auf mehreren Bühnen:
+
+    `Film(fid, titel, genre, fsk)`
+
+    | fid | titel | genre | fsk |
+    | --- | --- | --- | --- |
+    | F1 | Nachtfalter | Drama | 12 |
+    | F2 | Wolkenjagd | Komödie | 0 |
+    | F3 | Leuchtturm | Krimi | 16 |
+    | F4 | Sandburg | Komödie | 6 |
+
+    `Buehne(bname, plaetze, ueberdacht)`
+
+    | bname | plaetze | ueberdacht |
+    | --- | --- | --- |
+    | Wiese | 400 | nein |
+    | Zelt | 150 | ja |
+    | Ufer | 250 | nein |
+
+    `Vorfuehrung(fid, bname, tag)`
+
+    | fid | bname | tag |
+    | --- | --- | --- |
+    | F1 | Zelt | Fr |
+    | F2 | Wiese | Fr |
+    | F2 | Zelt | Sa |
+    | F3 | Ufer | Sa |
+    | F2 | Ufer | So |
+
+    Formuliere jede Anfrage als Ausdruck der relationalen Algebra und gib das Ergebnis auf den Beispieldaten an.
+
+    a) Titel aller Filme mit einer Altersfreigabe (fsk) unter 12.
+    b) Titel und Tag aller Vorführungen auf überdachten Bühnen.
+    c) Titel der Filme, die an keinem Tag vorgeführt werden.
+    d) Namen der Bühnen, auf denen sowohl am Freitag als auch am Samstag ein Film läuft.
+
+    Zusatz ohne Punkte (Ausblick Division): e) Titel der Filme, die auf **allen** Bühnen gezeigt werden.
+  solution: |-
+    a) `π_{titel}(σ_{fsk<12}(Film))` → {Wolkenjagd, Sandburg}
+
+    b) `π_{titel, tag}(Film ⋈ Vorfuehrung ⋈ σ_{ueberdacht='ja'}(Buehne))`
+    Nur das Zelt ist überdacht → {(Nachtfalter, Fr), (Wolkenjagd, Sa)}.
+    Gleichwertig: Equi-Joins mit ausgeschriebenen Bedingungen oder die Selektion außen (dann weniger effizient, aber korrekt).
+
+    c) `π_{titel}(Film ⋈ (π_{fid}(Film) − π_{fid}(Vorfuehrung)))`
+    {F1, F2, F3, F4} − {F1, F2, F3} = {F4} → {Sandburg}.
+    Gleichwertig: `π_{titel}(Film ▷ Vorfuehrung)`. Die Variante `π_{titel}(Film) − π_{titel}(Film ⋈ Vorfuehrung)` ist nur korrekt, wenn Titel eindeutig sind. Das ist hier der Fall, gilt aber nicht allgemein: Gäbe es zwei Filme mit demselben Titel, von denen nur einer läuft, fiele der andere fälschlich weg.
+
+    d) `π_{bname}(σ_{tag='Fr'}(Vorfuehrung)) ∩ π_{bname}(σ_{tag='Sa'}(Vorfuehrung))`
+    Freitag {Zelt, Wiese}, Samstag {Zelt, Ufer} → {Zelt}.
+    Falsch wäre `σ_{tag='Fr' ∧ tag='Sa'}(…)`: Ein einzelnes Tupel hat nie zwei Tage, das Ergebnis wäre leer.
+    Gleichwertig ist ein Selbstverbund mit Umbenennung: `π_{bname}(σ_{tag='Fr' ∧ tag2='Sa'}(Vorfuehrung ⋈_{bname=bname2} ρ_{V2(fid2, bname2, tag2)}(Vorfuehrung)))` → {Zelt}.
+
+    e) (Zusatz) `π_{titel}(Film ⋈ (π_{fid, bname}(Vorfuehrung) ÷ π_{bname}(Buehne)))`
+    Divisor {Wiese, Zelt, Ufer}. Nur F2 kommt mit allen drei Bühnen vor → {Wolkenjagd}.
+    Die Projektion `π_{fid, bname}` vor der Division ist nötig, sonst stört das Attribut tag.
+  rubric:
+    - criterion: "a) Ausdruck mit σ und π korrekt, Ergebnis {Wolkenjagd, Sandburg}"
+      points: 2
+    - criterion: "b) Beide Joins korrekt, Selektion auf ueberdacht, Projektion auf titel, tag"
+      points: 2
+    - criterion: "b) Ergebnis mit genau zwei Tupeln korrekt"
+      points: 1
+    - criterion: "c) Differenz in richtiger Reihenfolge über fid (oder Anti-Join): 2 P. Differenz über titel: 2 P nur, wenn die Annahme „Titel sind eindeutig“ ausdrücklich genannt ist, sonst 1 P"
+      points: 2
+    - criterion: "c) Titel korrekt zurückgewonnen (bei der titel-Variante entfällt dieser Schritt) und Ergebnis {Sandburg}"
+      points: 1
+    - criterion: "d) Durchschnitt zweier Projektionen oder gleichwertig, z. B. Selbstverbund mit ρ (nicht ∧ in einer einzigen Selektion über ein Tupel), Ergebnis {Zelt}"
+      points: 2
+  space: box:130
+- id: t08-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql, uebersetzung, semi-join, differenz, firebird]
+  type: relalg
+  difficulty: 2
+  points: 9
+  minutes: 11
+  prompt: |-
+    Verwende die Musikschul-Datenbank mit diesen Tabellen (vollständige Spaltenlisten):
+    `kurs(kurs_id, titel, instrument_id, lehrkraft_id, raum_id, niveau, max_teilnehmer, gebuehr_monat, startdatum, enddatum, beschreibung)`,
+    `raum(raum_id, bezeichnung, etage, plaetze, hat_klavier)`,
+    `instrument(instrument_id, bezeichnung, familie, leihgebuehr)`,
+    `person(person_id, vorname, nachname, geburtsdatum, email, telefon, ort)` und
+    `lehrkraft(person_id, eingestellt_am, stundensatz, hauptinstrument_id)`.
+    Gemeinsame Attribute: instrument und kurs nur `instrument_id`, raum und kurs nur `raum_id`, person und lehrkraft nur `person_id`. `instrument.bezeichnung` ist UNIQUE, `kurs.instrument_id` kann NULL sein.
+
+    **Algebra → SQL** (Firebird 3):
+
+    a) `π_{titel, bezeichnung}(σ_{niveau='Fortgeschritten'}(kurs) ⋈_{kurs.raum_id=raum.raum_id} raum)`
+    b) `π_{bezeichnung}(instrument) − π_{bezeichnung}(instrument ⋈ kurs)`
+       Zusatz ohne Punkte: Gib eine PostgreSQL-Variante mit Mengenoperator an.
+
+    **SQL → Algebra:**
+
+    c)
+    ```sql
+    SELECT DISTINCT p.vorname, p.nachname
+    FROM person p
+    JOIN lehrkraft l ON l.person_id = p.person_id
+    WHERE l.stundensatz > 40;
+    ```
+
+    d)
+    ```sql
+    SELECT r.bezeichnung
+    FROM raum r
+    WHERE r.hat_klavier = TRUE
+      AND EXISTS (SELECT 1
+                  FROM kurs k
+                  WHERE k.raum_id = r.raum_id
+                    AND k.niveau = 'Anfaenger');
+    ```
+  solution: |-
+    a)
+    ```sql
+    SELECT DISTINCT k.titel, r.bezeichnung
+    FROM kurs k
+    JOIN raum r ON k.raum_id = r.raum_id
+    WHERE k.niveau = 'Fortgeschritten';
+    ```
+    Gleichwertig ist die Grundform mit beiden Tabellen im FROM und der Join-Bedingung im WHERE:
+    `SELECT DISTINCT k.titel, r.bezeichnung FROM kurs k, raum r WHERE k.raum_id = r.raum_id AND k.niveau = 'Fortgeschritten';`
+    Beide laufen unverändert auch in PostgreSQL. `DISTINCT` stellt die Mengensemantik der Projektion her, denn ein Titel kann in mehreren Kursen vorkommen.
+
+    b) Firebird 3 kennt kein `EXCEPT`, daher als Anti-Join:
+    ```sql
+    SELECT i.bezeichnung
+    FROM instrument i
+    WHERE NOT EXISTS (SELECT 1
+                      FROM kurs k
+                      WHERE k.instrument_id = i.instrument_id);
+    ```
+    (`bezeichnung` ist UNIQUE, daher ist kein `DISTINCT` nötig, und der Vergleich über `instrument_id` statt über die Bezeichnung ist gleichwertig. Ebenfalls korrekt: `LEFT JOIN kurs k ON … WHERE k.kurs_id IS NULL`.)
+    Zusatz, PostgreSQL mit Mengenoperator:
+    ```sql
+    SELECT bezeichnung FROM instrument
+    EXCEPT
+    SELECT i.bezeichnung
+    FROM instrument i
+    JOIN kurs k ON k.instrument_id = i.instrument_id;
+    ```
+    Ebenfalls korrekt ist `NOT IN`, **wenn die Unterabfrage kein NULL liefern kann**:
+    - als direkte Übersetzung über die Bezeichnung: `WHERE i.bezeichnung NOT IN (SELECT i2.bezeichnung FROM instrument i2 JOIN kurs k ON k.instrument_id = i2.instrument_id)`, denn `bezeichnung` ist NOT NULL,
+    - oder über den Schlüssel mit Filter: `WHERE i.instrument_id NOT IN (SELECT k.instrument_id FROM kurs k WHERE k.instrument_id IS NOT NULL)`.
+
+    Falsch ist dagegen `NOT IN (SELECT instrument_id FROM kurs)` ohne Filter. Weil `kurs.instrument_id` NULL enthält, ist die Bedingung nie wahr und das Ergebnis leer.
+
+    c) `π_{vorname, nachname}(person ⋈ σ_{stundensatz>40}(lehrkraft))`
+    person und lehrkraft haben nur person_id gemeinsam, deshalb passt der natürliche Join. Gleichwertig: `σ` außen oder ein Equi-Join `⋈_{lehrkraft.person_id=person.person_id}`.
+
+    d) `π_{bezeichnung}(σ_{hat_klavier=TRUE}(raum) ⋉ σ_{niveau='Anfaenger'}(kurs))`
+    `EXISTS` mit Korrelation über raum_id entspricht einem Semi-Join: Jeder Raum erscheint höchstens einmal, nur mit seinen eigenen Attributen. raum und kurs haben nur raum_id gemeinsam, der natürliche Semi-Join vergleicht also genau diese Spalte. Gleichwertig: `π_{bezeichnung}(σ_{hat_klavier=TRUE}(raum) ⋈ σ_{niveau='Anfaenger'}(kurs))`, weil die Projektion Duplikate entfernt.
+  rubric:
+    - criterion: "a) Korrekte Join-Bedingung k.raum_id = r.raum_id, wahlweise in ON oder im WHERE"
+      points: 1
+    - criterion: "a) Selektion als WHERE auf niveau"
+      points: 1
+    - criterion: "a) Spaltenliste titel, bezeichnung mit DISTINCT"
+      points: 1
+    - criterion: "b) Firebird-Lösung ohne EXCEPT, korrekt mit NOT EXISTS, LEFT JOIN/IS NULL oder NOT IN; NOT IN nur zulässig, wenn die Unterabfrage kein NULL liefern kann"
+      points: 2
+    - criterion: "c) Join über person_id korrekt notiert"
+      points: 1
+    - criterion: "c) Selektion stundensatz>40 und Projektion auf vorname, nachname"
+      points: 1
+    - criterion: "d) EXISTS als Semi-Join (oder Projektion eines Joins) erkannt"
+      points: 1
+    - criterion: "d) Beide Selektionen und Projektion auf bezeichnung korrekt"
+      points: 1
+  space: box:150
+- id: t08-p005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [operatorbaum, optimierung, umformung, vertiefung, nicht-klausur, datensatz-tafelrunde]
+  type: relalg
+  difficulty: 3
+  points: 8
+  minutes: 10
+  prompt: |-
+    (Vertiefung, nicht für Probeklausuren vorgesehen) Gegeben sind die Relationen des Spieleabend-Vereins:
+
+    `Spiel(sid, titel, verlag, dauer)` mit den Tupeln (1, Inselsiedler, Würfelwerk, 75), (2, Kartenduell, Kartenhaus, 20), (3, Hafenmeister, Würfelwerk, 90), (4, Wortjagd, Spielraum, 30), (5, Schienenweg, Spielraum, 60)
+
+    `Partie(sid, abend, gewinner)` mit den Tupeln (1, Mo, Lea), (2, Mo, Tom), (1, Do, Tom), (4, Do, Mia)
+
+    und der Ausdruck
+
+    `π_{titel}(σ_{Spiel.sid=Partie.sid ∧ verlag='Würfelwerk' ∧ abend='Do'}(Spiel × Partie))`
+
+    a) Zeichne den Operatorbaum des Ausdrucks.
+    b) Forme den Ausdruck äquivalent so um, dass die Selektionen so früh wie möglich ausgeführt werden und statt des Produkts ein Join steht. Gib den neuen Ausdruck und seinen Operatorbaum an und nenne die verwendeten Umformungsregeln exakt.
+    c) Gib für beide Varianten die Anzahl der Tupel in den Zwischenergebnissen sowie das Endergebnis an.
+  solution: |-
+    a) Operatorbaum (Wurzel oben, Auswertung von unten nach oben):
+    ```
+    π_{titel}
+      |
+    σ_{Spiel.sid=Partie.sid ∧ verlag='Würfelwerk' ∧ abend='Do'}
+      |
+      ×
+     / \
+    Spiel  Partie
+    ```
+
+    b) `π_{titel}(σ_{verlag='Würfelwerk'}(Spiel) ⋈_{Spiel.sid=Partie.sid} σ_{abend='Do'}(Partie))`
+    ```
+    π_{titel}
+      |
+    ⋈_{Spiel.sid=Partie.sid}
+     /   \
+    σ_{verlag='Würfelwerk'}   σ_{abend='Do'}
+      |                          |
+    Spiel                      Partie
+    ```
+    Verwendete Regeln:
+    - Kaskade: `σ_{a ∧ b ∧ c}(R) = σ_{a}(σ_{b}(σ_{c}(R)))`
+    - Selektion am Produkt vorbeischieben: `σ_{c}(R × S) = σ_{c}(R) × S`, wenn c nur Attribute von R verwendet (analog für S)
+    - Produkt mit Gleichheitsbedingung = Equi-Join: `σ_{R.sid=S.sid}(R × S) = R ⋈_{R.sid=S.sid} S`. Das Ergebnis hat 4 + 3 = 7 Attribute, beide sid-Spalten bleiben.
+
+    Auch der natürliche Join `σ_{verlag='Würfelwerk'}(Spiel) ⋈ σ_{abend='Do'}(Partie)` ist hier zulässig, aber nur im Gesamtausdruck: Er hat eine sid-Spalte weniger (6 Attribute), und diese Spalte entfernt die äußere Projektion auf titel ohnehin. Als Regel „σ über × mit Gleichheit = natürlicher Join“ ist die Gleichung dagegen falsch.
+
+    c)
+    - Unoptimiert: `Spiel × Partie` hat 5 · 4 = **20** Tupel, nach σ bleibt **1** Tupel (Inselsiedler mit der Partie am Do).
+    - Optimiert: `σ_{verlag='Würfelwerk'}(Spiel)` → **2** Tupel (sid 1, 3), `σ_{abend='Do'}(Partie)` → **2** Tupel (sid 1, 4), der Join liefert **1** Tupel.
+    - Endergebnis in beiden Fällen: {Inselsiedler}
+  rubric:
+    - criterion: "a) Baum korrekt: Blätter Spiel und Partie, darüber ×, dann σ, Wurzel π"
+      points: 2
+    - criterion: "b) Bedingung zerlegt und jede Teilselektion zur passenden Relation geschoben"
+      points: 2
+    - criterion: "b) Produkt plus Join-Bedingung durch ⋈ ersetzt (Equi-Join oder wegen der äußeren Projektion natürlicher Join), Baum passend gezeichnet"
+      points: 1
+    - criterion: "b) Mindestens zwei Umformungsregeln exakt genannt; die Join-Regel nur mit Equi-Join auf der rechten Seite"
+      points: 1
+    - criterion: "c) Zwischengrößen korrekt (20 → 1 bzw. 2 und 2 → 1)"
+      points: 1
+    - criterion: "c) Endergebnis {Inselsiedler}"
+      points: 1
+  space: box:140
+- id: t08-p006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [equi-join, natural-join]
+  type: define-example
+  difficulty: 2
+  points: 6
+  minutes: 6
+  prompt: |-
+    Erkläre den **Equi-Join** und den **natürlichen Join**.
+    Lege zwei **eigene** kleine Relationen (je 2–3 Tupel) mit genau einem gemeinsamen Attribut an. Gib für beide Join-Arten das Ergebnis mit vollständiger Attributliste an und erkläre, warum sich der Grad unterscheidet.
+    Beschreibe außerdem eine Situation, in der ein natürlicher Join unbemerkt ein falsches Ergebnis liefert.
+  solution: |-
+    - **Equi-Join** `R ⋈_{R.a=S.a} S`: Theta-Join, dessen Bedingung nur Gleichheit verwendet. Beide verglichenen Attribute bleiben im Ergebnis.
+    - **Natürlicher Join** `R ⋈ S`: Gleichheit auf **allen** gleichnamigen Attributen, ohne angegebene Bedingung. Jedes gemeinsame Attribut erscheint nur einmal (Equi-Join plus Projektion).
+
+    Beispiel (andere passende Beispiele gleichwertig): Imkerverein, `Imker(inr, name)` mit (1, Pia), (2, Ole) und `Volk(vnr, inr, standort)` mit (V1, 1, Wiese), (V2, 1, Hang), (V3, 2, Wald).
+
+    `Imker ⋈_{Imker.inr=Volk.inr} Volk`, Attribute Imker.inr, name, vnr, Volk.inr, standort (Grad 5):
+
+    | Imker.inr | name | vnr | Volk.inr | standort |
+    | --- | --- | --- | --- | --- |
+    | 1 | Pia | V1 | 1 | Wiese |
+    | 1 | Pia | V2 | 1 | Hang |
+    | 2 | Ole | V3 | 2 | Wald |
+
+    `Imker ⋈ Volk`, Attribute inr, name, vnr, standort (Grad 4):
+
+    | inr | name | vnr | standort |
+    | --- | --- | --- | --- |
+    | 1 | Pia | V1 | Wiese |
+    | 1 | Pia | V2 | Hang |
+    | 2 | Ole | V3 | Wald |
+
+    Der Grad unterscheidet sich um 1, weil der natürliche Join das gemeinsame Attribut inr nur einmal übernimmt.
+
+    Falle: Hätte Volk zusätzlich ein Attribut name (Name des Bienenvolks), würde der natürliche Join auch Imkername = Volksname verlangen und praktisch alle Tupel verlieren. Dann die Bedingung ausschreiben oder vorher mit ρ umbenennen.
+  rubric:
+    - criterion: "Equi-Join korrekt erklärt (nur Gleichheit, beide Vergleichsattribute bleiben)"
+      points: 1
+    - criterion: "Natürlicher Join korrekt erklärt (alle gleichnamigen Attribute, je einmal)"
+      points: 1
+    - criterion: "Eigene Relationen mit genau einem gemeinsamen Attribut, Equi-Join-Ergebnis mit beiden Vergleichsspalten korrekt"
+      points: 1
+    - criterion: "Ergebnis des natürlichen Joins korrekt"
+      points: 1
+    - criterion: "Gradunterschied begründet"
+      points: 1
+    - criterion: "Situation mit ungewolltem gemeinsamem Attribut beschrieben"
+      points: 1
+  space: lines:24
+- id: t08-p007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen, vereinigungsvertraeglichkeit, umbenennung]
+  type: define-example
+  difficulty: 2
+  points: 7
+  minutes: 8
+  prompt: |-
+    Erkläre, wann zwei Relationen **vereinigungsverträglich** sind (Kursstandard).
+    Lege zwei **eigene** vereinigungsverträgliche Relationen mit je 3 Tupeln an, die mindestens ein gemeinsames Tupel haben, und gib `R ∪ S`, `R ∩ S` und `R − S` an.
+    Gib außerdem ein Relationenpaar an, das **nicht** vereinigungsverträglich ist, begründe das und mache es mit ρ oder π verträglich.
+  solution: |-
+    **Vereinigungsverträglich** (Kursstandard): gleicher Grad, gleiche Attributnamen (notfalls nach ρ), gleiche Wertebereiche und gleiche Reihenfolge der Attribute. Nur dann sind ∪, ∩ und − definiert. (Positionsbezogene Variante, auch in SQL: Namen dürfen abweichen.)
+
+    Beispiel (andere passende Beispiele gleichwertig): zwei Chöre, `ChorA(name, stimme)` mit (Eva, Alt), (Finn, Bass), (Gul, Sopran) und `ChorB(name, stimme)` mit (Finn, Bass), (Hana, Alt), (Gul, Alt).
+
+    - `ChorA ∪ ChorB` = {(Eva, Alt), (Finn, Bass), (Gul, Sopran), (Hana, Alt), (Gul, Alt)}, 5 Tupel, Finn nur einmal
+    - `ChorA ∩ ChorB` = {(Finn, Bass)}. Gul ist nicht dabei, weil die Tupel (Gul, Sopran) und (Gul, Alt) verschieden sind.
+    - `ChorA − ChorB` = {(Eva, Alt), (Gul, Sopran)}
+
+    Nicht verträglich: `ChorA(name, stimme)` und `Gast(gastname, stimme)`, weil die Attributnamen name und gastname verschieden sind. Reparatur: `ChorA ∪ ρ_{name←gastname}(Gast)`. Ein Paar mit verschiedenem Grad, etwa `ChorA` und `Probe(name, stimme, datum)`, wird mit `π_{name, stimme}(Probe)` verträglich.
+  rubric:
+    - criterion: "Definition: gleicher Grad und gleiche Attributnamen"
+      points: 1
+    - criterion: "Definition: gleiche Wertebereiche und gleiche Reihenfolge"
+      points: 1
+    - criterion: "Eigene verträgliche Relationen und korrekte Vereinigung (gemeinsames Tupel nur einmal)"
+      points: 1
+    - criterion: "Durchschnitt korrekt"
+      points: 1
+    - criterion: "Differenz korrekt und in der angegebenen Richtung"
+      points: 1
+    - criterion: "Unverträgliches Paar mit zutreffender Begründung"
+      points: 1
+    - criterion: "Korrekte Reparatur mit ρ oder π"
+      points: 1
+  space: lines:24
+- id: t08-p008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [semi-join]
+  type: define-example
+  difficulty: 2
+  points: 5
+  minutes: 5
+  prompt: |-
+    Erkläre den **linken** Semi-Join `R ⋉ S` und den **rechten** Semi-Join `R ⋊ S`.
+    Lege zwei **eigene** Relationen an. Wähle die Daten so, dass auf beiden Seiten mindestens ein Tupel ohne Partner ist und ein Tupel mehrere Partner hat. Gib `R ⋉ S` und `R ⋊ S` an und erkläre an deinem Beispiel den Unterschied zum natürlichen Join.
+  solution: |-
+    - `R ⋉ S`: Tupel von R, die mindestens einen Join-Partner in S haben, nur mit den Attributen von R; `R ⋉ S = π_{Attribute von R}(R ⋈ S)`.
+    - `R ⋊ S`: Tupel von S, die mindestens einen Partner in R haben, nur mit den Attributen von S; `R ⋊ S = S ⋉ R`.
+
+    Beispiel (andere passende Beispiele gleichwertig): Fahrradwerkstatt, `Rad(rnr, modell)` mit (R1, City), (R2, Trekking), (R3, Lasten) und `Auftrag(anr, rnr)` mit (A1, R1), (A2, R1), (A3, R3), (A4, R9).
+
+    `Rad ⋉ Auftrag` (Attribute rnr, modell): (R1, City), (R3, Lasten). R2 hat keinen Auftrag.
+
+    `Rad ⋊ Auftrag` (Attribute anr, rnr): (A1, R1), (A2, R1), (A3, R3). A4 gehört zu keinem erfassten Rad.
+
+    Unterschied zum natürlichen Join: `Rad ⋈ Auftrag` hätte die Attribute rnr, modell, anr und R1 zweimal (mit A1 und A2). Der Semi-Join prüft nur, **ob** es einen Partner gibt; R1 steht in `Rad ⋉ Auftrag` deshalb nur einmal.
+  rubric:
+    - criterion: "Linker Semi-Join korrekt erklärt (Tupel und Attribute von R)"
+      points: 1
+    - criterion: "Rechter Semi-Join korrekt erklärt (Tupel und Attribute von S)"
+      points: 1
+    - criterion: "Eigene Daten erfüllen die Vorgaben (partnerlose Tupel auf beiden Seiten, ein Tupel mit mehreren Partnern)"
+      points: 1
+    - criterion: "Beide Ergebnisse korrekt"
+      points: 1
+    - criterion: "Unterschied zum natürlichen Join am Beispiel erklärt (Attribute, Mehrfachpartner nur einmal)"
+      points: 1
+  space: lines:20
+- id: t08-p009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [umbenennung, theta-join, notation]
+  type: define-example
+  difficulty: 2
+  points: 4
+  minutes: 5
+  prompt: |-
+    Erkläre den Operator **Umbenennung** ρ und nenne zwei Situationen, in denen er nötig ist.
+    Zeige an einer **eigenen** Relation mit 3 Tupeln, wie man mit ρ eine Relation mit sich selbst verbindet, und gib das Ergebnis an. Notiere die Umbenennung zusätzlich in einer linearen Schreibweise ohne ρ.
+  solution: |-
+    ρ ändert Namen, nicht Inhalte: `ρ_{neu←alt}(R)` benennt ein Attribut um, `ρ_{S}(R)` die Relation, `ρ_{S(A, B)}(R)` beides.
+    Nötig z. B. beim Verbinden einer Relation mit sich selbst, bei kollidierenden Attributnamen im Produkt oder zum Angleichen von Namen für ∪, ∩, − bzw. für einen natürlichen Join.
+
+    Beispiel (andere passende Beispiele gleichwertig): Lauftreff, `Laeuferin(name, zeit)` mit (Ana, 41), (Bo, 38), (Cleo, 45), Zeit in Minuten. Gesucht sind Paare, bei denen die erste Person schneller ist:
+
+    `π_{name, name2}(Laeuferin ⋈_{zeit<zeit2} ρ_{name2←name, zeit2←zeit}(Laeuferin))`
+
+    | name | name2 |
+    | --- | --- |
+    | Bo | Ana |
+    | Bo | Cleo |
+    | Ana | Cleo |
+
+    Linear ohne ρ: `Laeuferin[name→name2, zeit→zeit2]` oder `Laeuferin[name2←name, zeit2←zeit]`. Der Pfeil zeigt immer auf den neuen Namen.
+  rubric:
+    - criterion: "Zweck von ρ korrekt erklärt (nur Namen ändern)"
+      points: 1
+    - criterion: "Zwei passende Anlässe genannt"
+      points: 1
+    - criterion: "Selbstverbund mit korrekter Umbenennung, Pfeil zeigt in beiden Schreibweisen auf den neuen Namen"
+      points: 1
+    - criterion: "Ergebnis korrekt"
+      points: 1
+  space: lines:18
+- id: t08-p010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [auswerten, beschreiben, notation, semi-join, mengenoperationen, datensatz-festival]
+  type: relalg
+  difficulty: 2
+  points: 10
+  minutes: 10
+  prompt: |-
+    Gegeben ist das Schema eines Open-Air-Filmfestivals:
+    `Film(fid, titel, genre, fsk)`, `Buehne(bname, plaetze, ueberdacht)`, `Vorfuehrung(fid, bname, tag)`.
+    Joins ohne Index sind natürliche Joins; Film und Vorfuehrung haben nur fid gemeinsam, Buehne und Vorfuehrung nur bname.
+
+    Beschreibe in **einem deutschen Satz**, was jeder Ausdruck liefert (welche Objekte, welche Attribute, welche Bedingung). Rechnen ist nicht nötig.
+
+    a) `π_{titel}(Film ⋉ σ_{tag='So'}(Vorfuehrung))`
+    b) `π_{bname}(Buehne) − π_{bname}(σ_{genre='Krimi'}(Film) ⋈ Vorfuehrung)`
+    c) `π_{fid}(σ_{ueberdacht='ja'}(Buehne) ⋈ Vorfuehrung) ∩ π_{fid}(σ_{ueberdacht='nein'}(Buehne) ⋈ Vorfuehrung)`
+    d) `π_{fid}(σ_{tag≠tag2}(Vorfuehrung ⋈ ρ_{V2(fid, bname2, tag2)}(Vorfuehrung)))`
+    e) Der folgende Ausdruck ist in Präfix- und Funktionsschreibweise notiert. Schreibe ihn in Index-Schreibweise und beschreibe das Ergebnis:
+       `JOIN(SEL[fsk≥16](Film), Film.fid=Vorfuehrung.fid, Vorfuehrung)`
+  solution: |-
+    a) Die Titel der Filme, die **mindestens einmal am Sonntag** vorgeführt werden.
+
+    b) Die Namen der Bühnen, auf denen **kein** Krimi läuft. Bühnen ganz ohne Vorführung gehören dazu.
+
+    c) Die Nummern der Filme, die **sowohl** auf mindestens einer überdachten **als auch** auf mindestens einer nicht überdachten Bühne laufen.
+
+    d) Die Nummern der Filme, die an **mindestens zwei verschiedenen Tagen** vorgeführt werden. Die Umbenennung erzeugt eine zweite Kopie von Vorfuehrung, die nur über fid verbunden wird; die Selektion behält Paare mit verschiedenem Tag.
+
+    e) Index-Schreibweise: `σ_{fsk≥16}(Film) ⋈_{Film.fid=Vorfuehrung.fid} Vorfuehrung`. Ergebnis: alle Vorführungen von Filmen ab 16 Jahren, mit allen Attributen von Film und Vorfuehrung (Equi-Join, fid steht zweimal). In der Funktionsschreibweise steht die Bedingung zwischen den Relationen; `SEL[…](R)` ist die Präfixform von σ.
+  rubric:
+    - criterion: "a) Filmtitel mit Vorführung am Sonntag, „mindestens einmal“ erkennbar"
+      points: 2
+    - criterion: "b) Bühnen ohne Krimi, einschließlich Bühnen ohne Vorführung"
+      points: 2
+    - criterion: "c) Filme auf überdachter und zugleich auf nicht überdachter Bühne (sowohl … als auch)"
+      points: 2
+    - criterion: "d) Filme an mindestens zwei verschiedenen Tagen; Rolle der Umbenennung erkannt"
+      points: 2
+    - criterion: "e) Korrekte Index-Schreibweise (1 P) und zutreffende Beschreibung (1 P)"
+      points: 2
+  space: lines:22
+- id: t08-p011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen, kalkuel]
+  type: explain
+  difficulty: 1
+  points: 4
+  minutes: 4
+  prompt: |-
+    Grenze die relationale Algebra vom Relationenkalkül ab.
+    Formuliere dazu die Anfrage „Titel aller Komödien“ über `Film(fid, titel, genre, fsk)` einmal als Algebra-Ausdruck und einmal deklarativ als Bedingung (in Worten oder in Mengenschreibweise). Ordne SQL kurz ein.
+  solution: |-
+    - **Relationale Algebra: prozedural.** Ein Ausdruck legt die Schritte fest, mit denen das Ergebnis aus den Relationen konstruiert wird: `π_{titel}(σ_{genre='Komödie'}(Film))`, also erst die Komödien auswählen, dann auf titel verkürzen.
+    - **Relationenkalkül: deklarativ.** Er beschreibt nur, welche Bedingung die Ergebnistupel erfüllen, ohne Rechenweg: „alle Titel t, zu denen es in Film ein Tupel mit diesem Titel und dem Genre Komödie gibt“, in Mengenschreibweise etwa `{ f.titel | f ∈ Film ∧ f.genre = 'Komödie' }`.
+    - **SQL** wird überwiegend deklarativ geschrieben (`SELECT … FROM … WHERE` beschreibt das gewünschte Ergebnis). Das Datenbanksystem übersetzt die Anfrage intern in einen Algebra-Ausdruck bzw. Operatorbaum und optimiert ihn.
+  rubric:
+    - criterion: "Algebra als prozedural (schrittweise Konstruktion) gekennzeichnet"
+      points: 1
+    - criterion: "Kalkül als deklarativ (Beschreibung der Ergebnisbedingung) gekennzeichnet"
+      points: 1
+    - criterion: "Beide Formulierungen der Beispielanfrage korrekt"
+      points: 1
+    - criterion: "SQL zutreffend eingeordnet (deklarativ, intern Übersetzung in Algebra)"
+      points: 1
+  space: lines:12

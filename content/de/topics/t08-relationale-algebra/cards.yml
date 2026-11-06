@@ -1,0 +1,298 @@
+- id: t08-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen]
+  front: "Was bedeutet es, dass die relationale Algebra abgeschlossen ist, und warum ist das nützlich?"
+  back: |-
+    Jeder Operator nimmt Relationen als Eingabe und liefert wieder eine Relation. Deshalb kann das Ergebnis eines Operators direkt Eingabe des nächsten sein. Ausdrücke lassen sich so beliebig schachteln, z. B. `π_{name}(σ_{stufe='Profi'}(Mitglied))`.
+- id: t08-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen, multimenge]
+  front: "Eine Relation ist eine Menge von Tupeln. Was folgt daraus, und worin unterscheidet sich SQL?"
+  back: |-
+    - keine Duplikate: Ein Tupel ist enthalten oder nicht.
+    - keine Reihenfolge der Tupel.
+
+    SQL arbeitet mit **Multimengen** (*multisets, bags*): Gleiche Zeilen dürfen mehrfach vorkommen, `SELECT` entfernt sie nur mit `DISTINCT`.
+- id: t08-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [selektion]
+  front: "Was leistet die Selektion σ, und wie verändern sich Grad und Kardinalität?"
+  back: |-
+    `σ_{Bedingung}(R)` behält die Tupel von R, für die die Bedingung gilt (Zeilen filtern). Die Bedingung vergleicht Attribute mit Konstanten oder mit anderen Attributen, verknüpft mit ∧, ∨, ¬.
+    - Grad: unverändert (alle Attribute bleiben)
+    - Kardinalität: ≤ |R|
+- id: t08-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [projektion, multimenge]
+  front: "Was leistet die Projektion π, und warum kann das Ergebnis weniger Tupel haben als die Eingabe?"
+  back: |-
+    `π_{A,B}(R)` behält nur die Attribute A und B (Spalten auswählen). Werden dadurch Tupel gleich, bleibt jedes nur einmal, weil das Ergebnis eine Menge ist.
+    Beispiel: `π_{objekt}(Sitzung)` mit zweimal „Saturn“ liefert „Saturn“ nur einmal.
+- id: t08-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, selektion, projektion]
+  front: "Welche Notationsvarianten gibt es für Selektion und Projektion?"
+  back: |-
+    - Standard (Index): `σ_{preis>10}(R)`, `π_{A,B}(R)`
+    - Postfix mit eckigen Klammern: `R[preis>10]` bzw. `R[A,B]`
+    - Präfix für die Selektion: abgekürzter Operatorname, Bedingung in eckigen, Relation in runden Klammern, z. B. `SEL[preis>10](R)`
+    - Großes Π statt π in manchen englischen Texten; „Restriktion“ als Synonym für Selektion
+    Gemeint ist jeweils dasselbe.
+- id: t08-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [umbenennung, notation]
+  front: "Wozu dient die Umbenennung ρ, und wie wird sie notiert?"
+  back: |-
+    Sie gibt einer Relation oder einem Attribut einen neuen Namen, z. B. um eine Relation mit sich selbst zu verbinden oder Namen für Mengenoperationen anzugleichen.
+    - `ρ_{neu←alt}(R)`: Attribut umbenennen; `ρ_{S}(R)`: Relation heißt S
+    - linear ohne ρ: `R[neu←alt]` oder `R[alt→neu]`; Schrägstrich-Form `ρ_{neu/alt}(R)`
+    Regel: Der Pfeil zeigt **immer auf den neuen Namen**, egal welcher Name zuerst steht.
+- id: t08-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [produkt]
+  front: "R hat 3 Attribute und 4 Tupel, S hat 2 Attribute und 5 Tupel. Grad und Kardinalität von R × S?"
+  back: |-
+    Grad 3 + 2 = **5**, Kardinalität 4 · 5 = **20**. Jedes Tupel von R wird mit jedem Tupel von S kombiniert.
+    Haben R und S ein gleichnamiges Attribut A, unterscheidet man es durch Qualifizieren (`R.A`, `S.A`) oder benennt vorher mit ρ um.
+- id: t08-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, theta-join]
+  front: "Wie ist der Theta-Join definiert?"
+  back: |-
+    `R ⋈_{θ} S = σ_{θ}(R × S)`: ein kartesisches Produkt, gefolgt von einer Selektion mit beliebiger Vergleichsbedingung θ (=, ≠, <, ≤, >, ≥, auch verknüpft).
+    Beispiel: Teleskop-Paare mit kleinerer und größerer Öffnung über `oeffnung < oeffnung2`.
+- id: t08-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [join, equi-join, natural-join]
+  front: "Was unterscheidet Equi-Join und natürlichen Join?"
+  back: |-
+    - **Equi-Join**: Theta-Join nur mit Gleichheit, z. B. `Mitglied ⋈_{Mitglied.mnr=Sitzung.mnr} Sitzung`. Beide Spalten `mnr` bleiben erhalten.
+    - **Natürlicher Join** `Mitglied ⋈ Sitzung`: Gleichheit auf **allen** gleichnamigen Attributen, keine Bedingung angegeben. Jedes gemeinsame Attribut erscheint nur **einmal**.
+- id: t08-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [natural-join]
+  front: "Was liefert ein natürlicher Join, wenn die Relationen kein gemeinsames Attribut haben, und was, wenn sie zwei gemeinsame haben?"
+  back: |-
+    - kein gemeinsames Attribut: das kartesische Produkt
+    - zwei gemeinsame Attribute: Beide müssen gleich sein. Das kann ungewollt Tupel verlieren, z. B. wenn zwei Spalten zufällig gleich heißen, aber Verschiedenes bedeuten.
+- id: t08-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [outer-join, "null"]
+  front: "Was liefert der Left Outer Join R ⟕ S zusätzlich zum inneren Join?"
+  back: |-
+    Alle Tupel von R ohne Join-Partner in S. Ihre S-Attribute werden mit **NULL** aufgefüllt.
+    Beispiel: In `Mitglied ⟕ Sitzung` erscheint Dana (keine Sitzung) mit `tnr = NULL`, `objekt = NULL`. Manche Quellen schreiben ω statt NULL.
+- id: t08-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [outer-join, notation]
+  front: "Welche Symbole haben die drei äußeren Joins, und welche Tupel bleiben jeweils erhalten?"
+  back: |-
+    - `R ⟕ S` (left): alle Tupel von R
+    - `R ⟖ S` (right): alle Tupel von S
+    - `R ⟗ S` (full): alle Tupel beider Seiten
+
+    Merkhilfe: Die verlängerten Striche am ⋈ stehen auf der Seite, die vollständig erhalten bleibt. Fehlende Attributwerte werden mit NULL aufgefüllt.
+- id: t08-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [semi-join]
+  front: "Was ist ein Semi-Join R ⋉ S, und wie unterscheidet er sich vom natürlichen Join?"
+  back: |-
+    Er liefert die Tupel von R, die mindestens einen Join-Partner in S haben, aber **nur mit den Attributen von R**:
+    `R ⋉ S = π_{Attribute von R}(R ⋈ S)`.
+    Ein R-Tupel mit mehreren Partnern erscheint nur einmal. Der rechte Semi-Join `R ⋊ S = S ⋉ R` liefert entsprechend Tupel von S.
+    Richtung: Maßgeblich ist, auf wessen Attribute projiziert wird, bei ⋉ auf die der linken, bei ⋊ auf die der rechten Relation.
+- id: t08-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [anti-join, semi-join]
+  front: "Was ist ein Anti-Join, und wie drückt man ihn mit anderen Operatoren aus?"
+  back: |-
+    Ergänzung, nicht in jeder Darstellung enthalten: die Tupel von R **ohne** Join-Partner in S (Symbol `R ▷ S`, auch ⋉ mit Querstrich darüber):
+    `R ▷ S = R − (R ⋉ S)`.
+    Beispiel: `Mitglied ▷ Sitzung` liefert die Mitglieder, die noch nie beobachtet haben. SQL: `NOT EXISTS`.
+- id: t08-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen, vereinigungsvertraeglichkeit]
+  front: "Wann sind zwei Relationen vereinigungsverträglich?"
+  back: |-
+    **Kursstandard (Klausur):** gleicher Grad, gleiche Attributnamen (notfalls nach ρ), gleiche Wertebereiche, gleiche Reihenfolge.
+    Variante (positionsbezogen, auch SQL): nur gleicher Grad und gleiche Wertebereiche an gleicher Position, Namen egal.
+    Nur dann sind ∪, ∩ und − definiert. Synonym: Typkompatibilität.
+- id: t08-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [mengenoperationen]
+  front: "Was liefern R ∪ S, R ∩ S und R − S, und wie lässt sich ∩ durch − ausdrücken?"
+  back: |-
+    - `R ∪ S`: Tupel, die in R **oder** S liegen (Duplikate nur einmal)
+    - `R ∩ S`: Tupel, die in R **und** S liegen
+    - `R − S`: Tupel aus R, die **nicht** in S liegen (nicht kommutativ)
+
+    `R ∩ S = R − (R − S)`
+- id: t08-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen]
+  front: "Welche Operatoren bilden eine übliche minimale Grundmenge der relationalen Algebra?"
+  back: |-
+    σ, π, ρ, ×, ∪ und −.
+    Alle anderen lassen sich daraus ableiten, z. B. Theta-Join als `σ(R × S)`, Durchschnitt als `R − (R − S)`, Semi-Join als Projektion eines Joins, Division über π, × und −.
+- id: t08-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [division]
+  front: "Für welche Art von Anfragen braucht man die Division R ÷ S, und welche Attribute hat das Ergebnis?"
+  back: |-
+    Für „für alle“-Anfragen, z. B. „Mitglieder, die **alle** großen Teleskope benutzt haben“.
+    Das Ergebnis hat die Attribute von R, die nicht in S vorkommen. Es enthält die Werte, die in R mit **jedem** Tupel von S kombiniert vorkommen.
+- id: t08-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [division]
+  front: "Wie lässt sich R ÷ S mit Grundoperatoren ausdrücken (X = Attribute von R, die nicht in S sind)?"
+  back: |-
+    `R ÷ S = π_{X}(R) − π_{X}((π_{X}(R) × S) − R)`
+
+    Idee: Alle denkbaren Kombinationen bilden, die tatsächlich vorhandenen abziehen. Wer dann noch übrig ist, dem fehlt mindestens ein S-Tupel. Diese Kandidaten werden aus allen Kandidaten entfernt.
+- id: t08-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [operatorbaum]
+  front: "Was ist ein Operatorbaum, und wie wird er gelesen?"
+  back: |-
+    Eine Baumdarstellung eines Ausdrucks: Blätter sind Basisrelationen, innere Knoten Operatoren, die Wurzel ist der zuletzt ausgeführte Operator.
+    Ausgewertet wird **von unten nach oben**. Einstellige Operatoren (σ, π, ρ) haben ein Kind, zweistellige (×, ⋈, ∪ …) zwei.
+- id: t08-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [optimierung]
+  front: "Warum führt man Selektionen möglichst früh aus?"
+  back: |-
+    Sie verkleinern die Relationen, bevor teure Operatoren wie × oder ⋈ laufen. Das Ergebnis bleibt gleich, die Zwischenergebnisse werden kleiner.
+    Beispiel: Statt `σ(Mitglied × Sitzung)` mit 16 Zwischentupeln erst filtern und dann 2 mit 2 Tupeln verbinden.
+- id: t08-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [optimierung, umformung]
+  front: "Unter welcher Voraussetzung gilt σ_{c}(R × S) = σ_{c}(R) × S?"
+  back: |-
+    Wenn die Bedingung c **nur Attribute von R** verwendet. Dasselbe gilt für Joins.
+    Verwandte Regel (Kaskade): `σ_{a ∧ b}(R) = σ_{a}(σ_{b}(R))`. Damit zerlegt man eine Bedingung und schiebt jeden Teil zu „seiner“ Relation.
+- id: t08-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [optimierung, umformung, projektion]
+  front: "Darf man eine Projektion über eine Differenz verteilen, also π_{X}(R − S) = π_{X}(R) − π_{X}(S) setzen?"
+  back: |-
+    **Nein.** Gegenbeispiel mit Attributen (X, Y): R = {(a, 1)}, S = {(a, 2)}.
+    - `π_{X}(R − S) = {(a)}`
+    - `π_{X}(R) − π_{X}(S) = ∅`
+
+    Über ∪ darf π dagegen verteilt werden.
+- id: t08-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql, uebersetzung]
+  front: "Welche SQL-Bestandteile entsprechen σ, π, ρ und ×?"
+  back: |-
+    - σ → `WHERE`
+    - π → `SELECT DISTINCT` mit Spaltenliste (ohne `DISTINCT` bleiben Duplikate)
+    - ρ → `AS` (Spalten- oder Tabellenalias)
+    - × → `CROSS JOIN` oder Komma in `FROM`
+- id: t08-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql, uebersetzung, join]
+  front: "Welche SQL-Formen entsprechen ⋈_{θ}, natürlichem Join, ⟕/⟖/⟗ und ⋉?"
+  back: |-
+    - `R ⋈_{θ} S` → `R JOIN S ON θ`
+    - `R ⋈ S` → `R NATURAL JOIN S` oder `JOIN ... USING (...)`
+    - ⟕/⟖/⟗ → `LEFT`/`RIGHT`/`FULL OUTER JOIN`
+    - `R ⋉ S` → `SELECT ... FROM R WHERE EXISTS (SELECT ... FROM S WHERE ...)` oder `IN`. Grund: EXISTS ist wahr, sobald mindestens ein Partner existiert, und es kommen nur R-Spalten heraus.
+- id: t08-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [sql, uebersetzung, mengenoperationen, firebird]
+  front: "Wie übersetzt man ∪, ∩ und − nach SQL, und was ist in Firebird 3 zu beachten?"
+  back: |-
+    - ∪ → `UNION` (entfernt Duplikate, `UNION ALL` behält sie)
+    - ∩ → `INTERSECT`, − → `EXCEPT` (PostgreSQL)
+
+    Firebird 3 kennt nur `UNION`. Durchschnitt formuliert man dort mit `EXISTS` oder `IN`, Differenz mit `NOT EXISTS`.
+    Achtung: `INTERSECT`/`EXCEPT` behandeln NULL wie gleich, der Vergleich in `EXISTS` nicht. Enthalten beide Spalten NULL, weichen die Ergebnisse ab.
+- id: t08-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen, kalkuel]
+  front: "Wie unterscheiden sich relationale Algebra und Relationenkalkül?"
+  back: |-
+    - **Algebra: prozedural.** Ein Ausdruck gibt die Schritte an, mit denen das Ergebnis gebaut wird, z. B. `π_{name}(σ_{stufe='Profi'}(Mitglied))`.
+    - **Kalkül: deklarativ.** Er beschreibt nur die Bedingung, die die Ergebnistupel erfüllen („alle Namen von Mitgliedern mit Stufe Profi“), ohne Rechenweg.
+- id: t08-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [grundlagen, einteilung]
+  front: "Wie teilt man die Operatoren der relationalen Algebra ein?"
+  back: |-
+    - **unär** (eine Relation): σ, π (ρ ist auch einstellig, wird aber nicht überall mitgezählt); **binär** (zwei): ×, Joins, ∪, ∩, −, ÷
+    - **mengenorientiert**: ∪, ∩, −; **relationenorientiert**: σ, π, ρ, ×, Joins, ÷
+
+    Kursstandard: × ist relationenorientiert. Variante: × zählt zu den mengenorientierten Operatoren.
+- id: t08-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [notation, join]
+  front: "Wie lauten die Funktionsschreibweisen der Joins, und wo steht die Bedingung?"
+  back: |-
+    - `JOIN(R, Bedingung, S)` = `R ⋈_{Bedingung} S`
+    - `NATURALJOIN(R, S)` = `R ⋈ S`
+    - `LEFTOUTERJOIN(R, Bedingung, S)`, analog `RIGHTOUTERJOIN`, `FULLOUTERJOIN`; auch kurz `LEFTJOIN(…)` usw.
+    - `SEMIJOIN(R, Bedingung, S)`, `ANTIJOIN(R, Bedingung, S)`
+
+    Die Bedingung steht **in der Mitte** zwischen den Relationen.
+- id: t08-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [semi-join]
+  front: "Sitzung(mnr, tnr, objekt) enthält nur die Teleskope T2 und T3. Teleskop(tnr, modell, oeffnung) enthält T1, T2, T3. Was liefert Sitzung ⋊ Teleskop?"
+  back: |-
+    Die Teleskop-Tupel mit mindestens einer Sitzung, nur mit den Attributen `tnr, modell, oeffnung`: T2 und T3, jeweils einmal. T1 fehlt.
+    `R ⋊ S` ist dasselbe wie `S ⋉ R`.
+- id: t08-c031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [outer-join, "null"]
+  front: "Wie viele Spalten hat ein äußerer Join mit Gleichheitsbedingung im Index, z. B. R ⟕_{R.a=S.b} S?"
+  back: |-
+    **Kursstandard (Klausur):** Bei Gleichheit wird die Join-Spalte nur **einmal** notiert, wie beim natürlichen äußeren Join; der Wert kommt von der Seite, die das Tupel liefert.
+    **Variante:** wie beim Equi-Join beide Spalten (`R.a`, `S.b`), bei partnerlosen R-Tupeln `S.b` = NULL. Gewählte Form angeben.
+- id: t08-c032
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [optimierung, umformung]
+  front: "Ist σ_{R.a=S.a}(R × S) dasselbe wie der natürliche Join R ⋈ S (a einziges gemeinsames Attribut)?"
+  back: |-
+    **Nicht exakt.** Exakt gleich ist der Equi-Join `R ⋈_{R.a=S.a} S`, der beide a-Spalten behält. Der natürliche Join hat eine Spalte weniger (Equi-Join plus Projektion).
+    Steht außen eine Projektion, die die doppelte Spalte ohnehin entfernt, ist der Gesamtausdruck trotzdem gleichwertig.
+- id: t08-c033
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [optimierung, umformung]
+  front: "Wie lässt sich eine Selektion mit Disjunktion σ_{a ∨ b}(R) umformen, und über welche Operatoren darf man σ nach unten schieben?"
+  back: |-
+    `σ_{a ∨ b}(R) = σ_{a}(R) ∪ σ_{b}(R)`.
+    σ darf über ∪, ∩ und − verteilt werden und an ×, ⋈ vorbei zu der Relation geschoben werden, deren Attribute die Bedingung allein verwendet.

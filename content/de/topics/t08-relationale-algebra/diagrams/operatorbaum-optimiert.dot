@@ -1,0 +1,20 @@
+// Operatorbaum (optimiert): dieselbe Anfrage wie operatorbaum-naiv.dot
+// Selektionen nach unten geschoben, Produkt + Join-Bedingung zu natürlichem Join zusammengefasst.
+// Zwischenergebnisse in Klammern (Beispieldaten der Vereinssternwarte).
+graph operatorbaum_optimiert {
+  rankdir=TB;
+  node [shape=plaintext, fontsize=12];
+
+  proj  [label=<π<sub>name</sub>   (2 Tupel: Ada, Cem)>];
+  join  [label="⋈   (2 Tupel)"];
+  selm  [label=<σ<sub>stufe='Profi'</sub>   (2 Tupel)>];
+  sels  [label=<σ<sub>objekt='Saturn'</sub>   (2 Tupel)>];
+  mitgl [shape=box, label="Mitglied (4 Tupel)"];
+  sitz  [shape=box, label="Sitzung (4 Tupel)"];
+
+  proj -- join;
+  join -- selm;
+  join -- sels;
+  selm -- mitgl;
+  sels -- sitz;
+}

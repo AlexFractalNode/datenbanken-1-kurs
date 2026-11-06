@@ -1,0 +1,18 @@
+// Operatorbaum (unoptimiert): Namen der Profis, die Saturn beobachtet haben
+// Wurzel oben = letzter Operator, Blätter unten = Basisrelationen.
+// Die Daten fließen von unten nach oben.
+graph operatorbaum_naiv {
+  rankdir=TB;
+  node [shape=plaintext, fontsize=12];
+
+  proj  [label=<π<sub>name</sub>>];
+  sel   [label=<σ<sub>stufe='Profi' ∧ objekt='Saturn' ∧ Mitglied.mnr=Sitzung.mnr</sub>>];
+  prod  [label="×   (4 · 4 = 16 Tupel)"];
+  mitgl [shape=box, label="Mitglied (4 Tupel)"];
+  sitz  [shape=box, label="Sitzung (4 Tupel)"];
+
+  proj -- sel;
+  sel  -- prod;
+  prod -- mitgl;
+  prod -- sitz;
+}
