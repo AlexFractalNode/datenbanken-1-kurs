@@ -25,7 +25,8 @@ export default defineConfig({
   // Under CI load (build + preview + two browsers) navigation timeouts made the run flaky: cap the workers.
   workers: process.env.CI ? 2 : undefined,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  // Two retries in CI: cold starts (PGlite, first navigation) occasionally exceed a timeout under load.
+  retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
     baseURL: `http://localhost:${PORT}/datenbanken-1-kurs/`,
