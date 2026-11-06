@@ -30,8 +30,8 @@ describe('flashcardProps', () => {
 });
 
 describe('quizProps', () => {
-  it('renders questions, options and explanations', () => {
-    const { items, topics } = quizProps(ROOT);
+  it('renders questions, options and explanations', async () => {
+    const { items, topics } = await quizProps(ROOT);
     expect(items.map((q) => q.id)).toEqual(['t04-q001', 't04-q002']);
     expect(topics.map((t) => t.id)).toEqual(['t04']);
     const q1 = items[0];
@@ -41,15 +41,15 @@ describe('quizProps', () => {
     expect(q1.options[0]).toEqual({ text: 'Rechteck', correct: true, explain: expect.stringContaining('Rechtecke') });
   });
 
-  it('is empty for content without questions', () => {
-    expect(quizProps(EMPTY)).toEqual({ items: [], topics: [] });
+  it('is empty for content without questions', async () => {
+    expect(await quizProps(EMPTY)).toEqual({ items: [], topics: [] });
   });
 });
 
 describe('taskCardData', () => {
-  it('maps a task with labels and rendered Markdown', () => {
+  it('maps a task with labels and rendered Markdown', async () => {
     const task = getTopic('t04', ROOT).tasks[0];
-    const data = taskCardData(task);
+    const data = await taskCardData(task, 't04', ROOT);
     expect(data).toMatchObject({ id: 't04-p001', typeLabel: 'Definieren & Beispiel', difficultyLabel: 'leicht', points: 4, minutes: 5 });
     expect(data.prompt).toContain('<em>Entitätstyp</em>');
     expect(data.solution).toContain('<code>Kunde</code>');
@@ -61,8 +61,8 @@ describe('taskCardData', () => {
 });
 
 describe('examProps', () => {
-  it('maps exams with rendered tasks', () => {
-    const exams = examProps(ROOT);
+  it('maps exams with rendered tasks', async () => {
+    const exams = await examProps(ROOT);
     expect(exams).toHaveLength(1);
     const [e01] = exams;
     expect(e01).toMatchObject({ id: 'e01', title: 'Probeklausur 1', minutes: 90 });
@@ -71,7 +71,40 @@ describe('examProps', () => {
     expect(e01.tasks[0].solution).toContain('<code>Buch</code>');
   });
 
-  it('is empty without exams', () => {
-    expect(examProps(EMPTY)).toEqual([]);
+  it('is empty without exams', async () => {
+    expect(await examProps(EMPTY)).toEqual([]);
+  });
+});
+
+/** A diagram reference must become an inline SVG figure, never a broken <img src="diagrams/*.dot">. */
+function expectRenderedDiagram(html: string, label: string) {
+  expect(html).not.toMatch(/<img[^>]+diagrams\//);
+  expect(html).not.toContain('.dot"');
+  expect(html).toContain('data-verify-unit="diagram"');
+  expect(html).toContain('<svg');
+  expect(html).toContain(`aria-label="${label}"`);
+}
+
+describe('diagrams in tasks, exams and quiz (same rewrite as on the topic pages)', () => {
+  it('renders diagrams in a task solution', async () => {
+    const task = getTopic('t04', ROOT).tasks[1];
+    expect(task.solution).toContain('diagrams/beziehung.dot');
+    const data = await taskCardData(task, 't04', ROOT);
+    expectRenderedDiagram(data.solution, 'Lösungsdiagramm: Kunde gibt Bestellung auf');
+  });
+
+  it('renders diagrams in an exam task prompt (diagram of the task topic)', async () => {
+    const [e01] = await examProps(ROOT);
+    expectRenderedDiagram(e01.tasks[0].prompt, 'Entwurf: Entitätstyp mit Attribut');
+  });
+
+  it('renders diagrams in a quiz explanation', async () => {
+    const { items } = await quizProps(ROOT);
+    expectRenderedDiagram(items[0].options[0].explain, 'Entitätstyp Kunde als Rechteck');
+  });
+
+  it('fails the build for a reference to a missing diagram', async () => {
+    const task = { ...getTopic('t04', ROOT).tasks[0], prompt: '![Fehlt](diagrams/gibt-es-nicht.dot)' };
+    await expect(taskCardData(task, 't04', ROOT)).rejects.toThrow();
   });
 });

@@ -19,6 +19,7 @@ interface Props {
 
 const { topic } = Astro.props;
 const tasks = getTopic(topic.id).tasks;
+const cards = await Promise.all(tasks.map((task) => taskCardData(task, topic.id)));
 const points = tasks.reduce((n, t) => n + t.points, 0);
 const minutes = tasks.reduce((n, t) => n + t.minutes, 0);
 ---
@@ -38,10 +39,16 @@ const minutes = tasks.reduce((n, t) => n + t.minutes, 0);
     <p class="meta">{tasks.length} Aufgaben · {points} Punkte · ca. {minutes} Minuten</p>
   </header>
 
+  {/*
+    Verify contract: `topic-tasks` is the static frame. It is always `ready` (the page only exists for
+    topics with tasks) and counts the tasks rendered at build time; it does not track hydration.
+    The interactive state lives in the child units `task-card` (loading → ready/empty), which the
+    E2E tests check.
+  */}
   <div class="task-list" data-verify-unit="topic-tasks" data-verify-state="ready" data-verify-count={tasks.length}>
     {
-      tasks.map((task) => (
-        <TaskCard client:visible task={taskCardData(task)}>
+      tasks.map((task, i) => (
+        <TaskCard client:visible task={cards[i]}>
           <SourceNote sources={task.resolvedSources} />
         </TaskCard>
       ))

@@ -9,7 +9,10 @@ tasks:
     difficulty: 2
     points: 90
     minutes: 90
-    prompt: Modelliere eine kleine Bibliothek.
+    prompt: |-
+      Modelliere eine kleine Bibliothek. Ausgangspunkt ist dieser Entwurf:
+
+      ![Entwurf: Entitätstyp mit Attribut](diagrams/entitaet.dot)
     solution: Entitätstypen `Buch`, `Leser`, Beziehungstyp `leiht`.
     rubric:
       - criterion: Modell vollständig

@@ -193,3 +193,64 @@ test.describe('exam simulation', () => {
     expect(exams).toEqual({});
   });
 });
+
+test.describe('diagrams in tasks, exam and quiz', () => {
+  /** No <img> may point at a DOT source; diagrams are inline SVG figures (as on the topic pages). */
+  async function expectNoDotImages(page: Page) {
+    await expect(page.locator('img[src*=".dot"]')).toHaveCount(0);
+  }
+
+  test('static task list and task page render the solution diagram as SVG', async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.goto('aufgaben/');
+    await expectNoDotImages(page);
+    const task = page.locator('#t04-p002');
+    await task.getByText('Lösung und Bewertungsraster anzeigen').click();
+    await expect(task.getByRole('img', { name: 'Lösungsdiagramm: Kunde gibt Bestellung auf' }).locator('svg')).toBeVisible();
+
+    await page.goto('aufgaben/t04/');
+    await expectNoDotImages(page);
+    const card = page.locator('[data-verify-unit="task-card"][data-task="t04-p002"]');
+    await expect(card).toHaveAttribute('data-verify-state', 'ready');
+    await card.getByRole('button', { name: 'Lösung und Bewertungsraster aufdecken' }).click();
+    await expect(card.getByRole('img', { name: 'Lösungsdiagramm: Kunde gibt Bestellung auf' }).locator('svg')).toBeVisible();
+    expect(await axe(page)).toEqual([]);
+    expect(errors).toEqual([]);
+  });
+
+  test('exam prompt and quiz explanation render diagrams as SVG', async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.goto('klausur/e01/');
+    await page.getByRole('button', { name: 'Klausur starten' }).click();
+    await expect(page.getByRole('img', { name: 'Entwurf: Entitätstyp mit Attribut' }).locator('svg')).toBeVisible();
+    await expectNoDotImages(page);
+
+    await page.goto('quiz/?thema=t04');
+    await expect(page.locator('[data-verify-unit="quiz"]')).toHaveAttribute('data-verify-state', 'ready');
+    await page.getByRole('radio', { name: 'Rechteck' }).check();
+    await page.getByRole('button', { name: 'Antwort prüfen' }).click();
+    await expect(page.getByRole('img', { name: 'Entitätstyp Kunde als Rechteck' }).locator('svg')).toBeVisible();
+    await expectNoDotImages(page);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe('focus management of confirmations', () => {
+  test('exam: dismissing a confirmation returns the focus to its trigger', async ({ page }) => {
+    await page.goto('klausur/e01/');
+    await page.getByRole('button', { name: 'Klausur starten' }).click();
+    const submit = page.getByRole('button', { name: 'Abgeben' });
+    await submit.click();
+    await expect(page.getByRole('button', { name: 'Ja, jetzt abgeben' })).toBeFocused();
+    await page.getByRole('button', { name: 'Weiter schreiben' }).click();
+    await expect(submit).toBeFocused();
+  });
+
+  test('settings: cancelling the reset returns the focus to the reset button', async ({ page }) => {
+    await page.goto('einstellungen/');
+    await expect(page.locator('[data-verify-unit="progress-transfer"]')).not.toHaveAttribute('data-verify-state', 'loading');
+    await page.getByRole('button', { name: 'Fortschritt zurücksetzen' }).click();
+    await page.getByRole('button', { name: 'Abbrechen' }).click();
+    await expect(page.getByRole('button', { name: 'Fortschritt zurücksetzen' })).toBeFocused();
+  });
+});

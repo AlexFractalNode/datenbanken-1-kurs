@@ -6,7 +6,10 @@
   options:
     - text: Rechteck
       correct: true
-      explain: Entitätstypen werden als Rechtecke gezeichnet.
+      explain: |-
+        Entitätstypen werden als Rechtecke gezeichnet.
+
+        ![Entitätstyp Kunde als Rechteck](diagrams/entitaet.dot)
     - text: Raute
       correct: false
       explain: Die Raute steht für Beziehungstypen.

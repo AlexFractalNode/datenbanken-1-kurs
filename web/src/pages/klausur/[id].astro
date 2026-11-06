@@ -11,7 +11,7 @@ export function getStaticPaths() {
 }
 
 const { id } = Astro.params;
-const exam = examProps().find((e) => e.id === id);
+const exam = (await examProps()).find((e) => e.id === id);
 if (!exam) throw new Error(`Unknown exam ${id}`);
 ---
 

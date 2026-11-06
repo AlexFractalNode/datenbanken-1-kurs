@@ -4,7 +4,7 @@ import Base from '../layouts/Base.astro';
 import { quizProps } from '../lib/island-props';
 import { withBase } from '../lib/nav';
 
-const { items, topics } = quizProps();
+const { items, topics } = await quizProps();
 ---
 
 <Base title="Quiz" description="Quizfragen mit Sofort-Feedback." noindex>

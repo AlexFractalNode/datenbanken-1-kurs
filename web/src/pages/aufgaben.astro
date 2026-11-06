@@ -1,15 +1,27 @@
 ---
 import SourceNote from '../components/SourceNote.astro';
 import Base from '../layouts/Base.astro';
-import { getTopic, getTopics } from '../lib/content';
+import { getDiagram, getTopic, getTopics } from '../lib/content';
 import { DIFFICULTY_LABEL, TASK_TYPE_LABEL } from '../lib/labels';
-import { renderMarkdown } from '../lib/markdown';
+import { renderMarkdownWithDiagrams } from '../lib/markdown';
 import { withBase } from '../lib/nav';
 
 const groups = getTopics()
   .map((topic) => ({ topic, tasks: getTopic(topic.id).tasks }))
   .filter((g) => g.tasks.length > 0);
 const total = groups.reduce((n, g) => n + g.tasks.length, 0);
+
+// Prompts and solutions may embed `![Alt](diagrams/x.dot)`; they become inline SVG like on the topic pages.
+const html = new Map<string, { prompt: string; solution: string }>();
+for (const { topic, tasks } of groups) {
+  const loadDot = (name: string) => getDiagram(topic.id, name);
+  for (const task of tasks) {
+    html.set(task.id, {
+      prompt: await renderMarkdownWithDiagrams(task.prompt, loadDot, 4),
+      solution: await renderMarkdownWithDiagrams(task.solution, loadDot, 4),
+    });
+  }
+}
 ---
 
 <Base title="Aufgaben" description="Papier-Aufgaben mit Lösung und Bewertungsraster.">
@@ -53,10 +65,10 @@ const total = groups.reduce((n, g) => n + g.tasks.length, 0);
                       <li>ca. {task.minutes} Min.</li>
                     </ul>
                   </div>
-                  <div class="prose" set:html={renderMarkdown(task.prompt, 4)} />
+                  <div class="prose" set:html={html.get(task.id)!.prompt} />
                   <details>
                     <summary>Lösung und Bewertungsraster anzeigen</summary>
-                    <div class="prose" set:html={renderMarkdown(task.solution, 4)} />
+                    <div class="prose" set:html={html.get(task.id)!.solution} />
                     <table class="rubric">
                       <caption class="visually-hidden">Bewertungsraster {task.id}</caption>
                       <thead>

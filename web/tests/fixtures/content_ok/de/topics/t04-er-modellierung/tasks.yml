@@ -21,7 +21,10 @@
   points: 6
   minutes: 10
   prompt: Modelliere Kunden, die Bestellungen aufgeben.
-  solution: Entitätstypen `Kunde` und `Bestellung`, Beziehungstyp `gibt_auf` mit 1:n.
+  solution: |-
+    Entitätstypen `Kunde` und `Bestellung`, Beziehungstyp `gibt_auf` mit 1:n.
+
+    ![Lösungsdiagramm: Kunde gibt Bestellung auf](diagrams/beziehung.dot)
   rubric:
     - criterion: Entitätstypen
       points: 2

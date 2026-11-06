@@ -150,3 +150,10 @@ export async function renderMarkdownWithDiagrams(md: string, loadDot: (name: str
 export function renderInline(md: string): string {
   return createMarked(new Map()).parseInline(md, { async: false }) as string;
 }
+
+/** Like renderInline, but referenced `diagrams/*.dot` files become inline SVG (`role="img"`). */
+export async function renderInlineWithDiagrams(md: string, loadDot: (name: string) => string): Promise<string> {
+  const svgs = new Map<string, string>();
+  for (const name of findDiagramRefs(md)) svgs.set(name, await renderDot(loadDot(name)));
+  return createMarked(svgs).parseInline(md, { async: false }) as string;
+}

@@ -3,6 +3,8 @@
  *
  * All Markdown is rendered here with `renderMarkdown`/`renderInline` (raw HTML escaped, URLs
  * filtered), so the islands only ever receive sanitised HTML and never parse Markdown themselves.
+ * Diagram references (`![Alt](diagrams/x.dot)`) are rendered to inline SVG figures exactly as on the
+ * topic pages, so no <img> ever points at a .dot file.
  */
 import type { ExamData } from '../components/ExamRunner';
 import type { FlashcardItem } from '../components/Flashcards';
@@ -11,13 +13,16 @@ import type { TaskCardData } from '../components/TaskCard';
 import { contentRoot, getDiagram, getExams, getTopic, getTopics, type ExamTask, type Task } from './content';
 import { diagramFigureHtml, renderDot } from './diagram';
 import { DIFFICULTY_LABEL, TASK_TYPE_LABEL } from './labels';
-import { renderInline, renderMarkdown } from './markdown';
+import { renderInlineWithDiagrams, renderMarkdownWithDiagrams } from './markdown';
 import type { TopicOption } from './topic-filter';
 
 /** Graph-level `label="…"` of a DOT source, used as accessible name of the figure. */
 function graphLabel(dot: string): string | undefined {
   return /^\s*label\s*=\s*"([^"]+)"/m.exec(dot)?.[1];
 }
+
+/** Loader for `diagrams/<name>.dot` of one topic (same rewrite as on the topic pages: inline SVG at build time). */
+const dotLoader = (topicId: string, root: string) => (name: string) => getDiagram(topicId, name, root);
 
 export async function flashcardProps(root: string = contentRoot()): Promise<{ cards: FlashcardItem[]; topics: TopicOption[] }> {
   const cards: FlashcardItem[] = [];
@@ -35,8 +40,8 @@ export async function flashcardProps(root: string = contentRoot()): Promise<{ ca
       cards.push({
         id: card.id,
         topic: topic.id,
-        front: renderMarkdown(card.front, 3),
-        back: renderMarkdown(card.back, 3),
+        front: await renderMarkdownWithDiagrams(card.front, dotLoader(topic.id, root), 3),
+        back: await renderMarkdownWithDiagrams(card.back, dotLoader(topic.id, root), 3),
         ...(figure ? { figure } : {}),
       });
     }
@@ -44,45 +49,55 @@ export async function flashcardProps(root: string = contentRoot()): Promise<{ ca
   return { cards, topics };
 }
 
-export function quizProps(root: string = contentRoot()): { items: QuizQuestion[]; topics: TopicOption[] } {
+export async function quizProps(root: string = contentRoot()): Promise<{ items: QuizQuestion[]; topics: TopicOption[] }> {
   const items: QuizQuestion[] = [];
   const topics: TopicOption[] = [];
   for (const topic of getTopics(root)) {
     const { quiz } = getTopic(topic.id, root);
     if (quiz.length === 0) continue;
     topics.push({ id: topic.id, title: topic.title });
+    const loadDot = dotLoader(topic.id, root);
     for (const q of quiz) {
-      items.push({
-        id: q.id,
-        topic: topic.id,
-        type: q.type,
-        question: renderMarkdown(q.question, 3),
-        options: q.options.map((o) => ({ text: renderInline(o.text), correct: o.correct, explain: renderMarkdown(o.explain, 4) })),
-      });
+      const options = [];
+      for (const o of q.options) {
+        options.push({
+          text: await renderInlineWithDiagrams(o.text, loadDot),
+          correct: o.correct,
+          explain: await renderMarkdownWithDiagrams(o.explain, loadDot, 4),
+        });
+      }
+      items.push({ id: q.id, topic: topic.id, type: q.type, question: await renderMarkdownWithDiagrams(q.question, loadDot, 3), options });
     }
   }
   return { items, topics };
 }
 
-/** Paper task (or exam task) for TaskCard/ExamRunner; `headingLevel` is the level of headings inside Markdown. */
-export function taskCardData(task: Task | ExamTask, headingLevel = 4): TaskCardData {
+/**
+ * Paper task (or exam task) for TaskCard/ExamRunner; `headingLevel` is the level of headings inside Markdown.
+ * Diagram references (`![Alt](diagrams/x.dot)`) are resolved in the diagrams folder of `topicId`.
+ */
+export async function taskCardData(task: Task | ExamTask, topicId: string, root: string = contentRoot(), headingLevel = 4): Promise<TaskCardData> {
+  const loadDot = dotLoader(topicId, root);
+  const rubric = [];
+  for (const r of task.rubric) rubric.push({ criterion: await renderInlineWithDiagrams(r.criterion, loadDot), points: r.points });
   return {
     id: task.id,
     typeLabel: TASK_TYPE_LABEL[task.type],
     difficultyLabel: DIFFICULTY_LABEL[task.difficulty],
     points: task.points,
     minutes: task.minutes,
-    prompt: renderMarkdown(task.prompt, headingLevel),
-    solution: renderMarkdown(task.solution, headingLevel),
-    rubric: task.rubric.map((r) => ({ criterion: renderInline(r.criterion), points: r.points })),
+    prompt: await renderMarkdownWithDiagrams(task.prompt, loadDot, headingLevel),
+    solution: await renderMarkdownWithDiagrams(task.solution, loadDot, headingLevel),
+    rubric,
   };
 }
 
-export function examProps(root: string = contentRoot()): ExamData[] {
-  return getExams(root).map((exam) => ({
-    id: exam.id,
-    title: exam.title,
-    minutes: exam.minutes,
-    tasks: exam.tasks.map((task) => ({ ...taskCardData(task), topic: task.topic })),
-  }));
+export async function examProps(root: string = contentRoot()): Promise<ExamData[]> {
+  const exams: ExamData[] = [];
+  for (const exam of getExams(root)) {
+    const tasks = [];
+    for (const task of exam.tasks) tasks.push({ ...(await taskCardData(task, task.topic, root)), topic: task.topic });
+    exams.push({ id: exam.id, title: exam.title, minutes: exam.minutes, tasks });
+  }
+  return exams;
 }
