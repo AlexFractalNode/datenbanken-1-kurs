@@ -1,0 +1,250 @@
+- id: t01-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [daten-information-wissen]
+  type: define-example
+  difficulty: 1
+  points: 6
+  minutes: 6
+  prompt: |-
+    Erkläre die Begriffe **Daten**, **Information** und **Wissen** und grenze sie voneinander ab.
+    Zeige an einem **eigenen** durchgehenden Beispiel, wie aus Daten Information und daraus Wissen wird. Das Wasserzähler-Beispiel aus dem Lerntext zählt nicht als eigenes Beispiel.
+  solution: |-
+    - **Daten:** Zeichen bzw. Zeichenketten, die nach festen Regeln (Syntax) aufgebaut und maschinell verarbeitbar sind. Sie sind die dargestellte Form von Information; ohne Kontext haben sie keine eindeutige Bedeutung.
+    - **Information:** Daten, die in einem Kontext interpretiert werden und dadurch Bedeutung erhalten (Semantik), kurz: interpretierte Daten. Dieselben Daten können in verschiedenen Kontexten verschiedene Informationen tragen.
+    - **Wissen:** Information, die mit weiteren Informationen und Erfahrung vernetzt ist und hilft, ein Problem zu lösen, zu entscheiden oder zu handeln (Pragmatik). Ob Information zu Wissen wird, hängt vom vorhandenen Vorwissen ab.
+
+    Beispiel (Musterlösung, andere passende Beispiele gleichwertig), Schwimmverein:
+    - Daten: `M12;200F;02:41,3`
+    - Information: Das Mitglied Nr. 12 ist die 200 m Freistil in 2:41,3 Minuten geschwommen.
+    - Wissen: Die Trainerin weiß, dass die Qualifikationszeit für die Bezirksmeisterschaft 2:45 Minuten beträgt und Nr. 12 sich in den letzten Wochen stetig verbessert hat. Sie meldet das Mitglied für die Meisterschaft an.
+  rubric:
+    - criterion: "Daten korrekt erklärt (Zeichen nach Syntax bzw. dargestellte Information, ohne Kontext bedeutungsoffen)"
+      points: 1
+    - criterion: "Information korrekt erklärt (Daten mit Bedeutung durch Kontext bzw. Interpretation)"
+      points: 1
+    - criterion: "Wissen korrekt erklärt; gleichwertig: vernetzte Information mit Erfahrung bzw. Handlungsbezug oder Information mit Nutzen für eine Problemlösung, abhängig vom Vorwissen"
+      points: 1
+    - criterion: "Eigenes Beispiel zeigt alle drei Stufen am selben Sachverhalt (2 Punkte); nur zwei Stufen oder Stufen an verschiedenen Sachverhalten (1 Punkt); Wasserzähler-Beispiel aus dem Lerntext übernommen (0 Punkte)"
+      points: 2
+    - criterion: "Im Beispiel ist der Übergang erkennbar begründet: Kontext macht Daten zur Information, Verknüpfung bzw. Handlung macht Information zu Wissen"
+      points: 1
+  space: lines:15
+- id: t01-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schema-auspraegung, data-dictionary]
+  type: define-example
+  difficulty: 1
+  points: 5
+  minutes: 5
+  prompt: |-
+    Erkläre den Unterschied zwischen dem **Schema** und der **Ausprägung** einer Datenbank.
+    a) Gib ein **eigenes** Beispiel: ein Tabellenschema mit mindestens drei Spalten in der Schreibweise Tabellenname(Spalte1, Spalte2, …) und eine Ausprägung mit zwei Zeilen. Einen Schlüssel zu unterstreichen ist optional (Schlüssel siehe t05).
+    b) Nenne für beide, wie oft sie sich typischerweise ändern und mit welcher Art von SQL-Anweisung.
+    c) Wo speichert das DBMS das Schema?
+  solution: |-
+    - **Schema:** die Beschreibung der Struktur, also welche Tabellen es gibt, welche Spalten mit welchen Datentypen und welche Bedingungen gelten. Es legt fest, wie gültige Daten aussehen, gehört zu den Metadaten und bildet die *intensionale* Ebene.
+    - **Ausprägung** (Instanz, Datenbankinstanz, Datenbankzustand): die konkreten Daten, die zu einem bestimmten Zeitpunkt gespeichert sind, also die *extensionale* Ebene. Sie muss zum Schema passen.
+
+    a) Beispiel (Musterlösung, andere passende Beispiele gleichwertig), Chor:
+    Schema: Saenger(<u>SaengerNr</u>, Name, Stimmlage)
+    Ausprägung am 1. Mai:
+
+    | SaengerNr | Name | Stimmlage |
+    |---|---|---|
+    | 1 | Ahmadi | Alt |
+    | 2 | Brandt | Bass |
+
+    b) Das Schema ändert sich selten, durch DDL-Anweisungen (`CREATE`, `ALTER`, `DROP`). Die Ausprägung ändert sich ständig, durch DML-Anweisungen (`INSERT`, `UPDATE`, `DELETE`). Tritt ein neues Mitglied ein, ändert sich nur die Ausprägung.
+
+    c) Im Data Dictionary (Systemkatalog), als Teil der Metadaten. In relationalen Systemen ist es selbst als Tabellen abgelegt.
+  rubric:
+    - criterion: "Schema als Strukturbeschreibung und Ausprägung als konkreter Datenbestand zu einem Zeitpunkt korrekt unterschieden; gleichwertig sind die Bezeichnungen intensionale/extensionale Ebene, Instanz bzw. Datenbankinstanz"
+      points: 1.5
+    - criterion: "Eigenes Beispiel mit Tabellenschema (mind. drei Spalten) und passender Ausprägung mit zwei Zeilen"
+      points: 1.5
+    - criterion: "Änderungshäufigkeit und Anweisungsart richtig zugeordnet (Schema selten per DDL, Ausprägung ständig per DML)"
+      points: 1
+    - criterion: "Data Dictionary bzw. Systemkatalog als Speicherort des Schemas genannt"
+      points: 1
+  space: lines:14
+- id: t01-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dateisystem-vs-dbs, redundanz-konsistenz, mehrbenutzerbetrieb, datenunabhaengigkeit]
+  type: explain
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Ein Tennisverein verwaltet seine Daten bisher in Dateien:
+    - Die Geschäftsführerin pflegt `mitglieder.csv` mit Mitgliedsnummer, Name, Anschrift und IBAN.
+    - Die Platzwartin pflegt `platzbuchung.csv` mit Datum, Uhrzeit, Platz, Mitgliedsnummer und Name des Mitglieds.
+    - Der Kassenwart hat eine Kopie von `mitglieder.csv` als `beitraege.csv` angelegt und um eine Spalte „bezahlt“ ergänzt.
+    - Ein Skript liest `platzbuchung.csv` und ermittelt die Auslastung. Es greift auf die Spalten über ihre Position zu (dritte Spalte = Platz).
+
+    a) Nenne für **zwei verschiedene Dateipaare** je eine redundant gespeicherte Angabe und beschreibe je eine dadurch mögliche Inkonsistenz.
+    b) Platzwartin und Geschäftsführerin öffnen beide gleichzeitig `platzbuchung.csv`, tragen je eine Buchung ein und speichern. Was passiert, und wie verhindert ein DBMS das?
+    c) Die Platzwartin fügt in `platzbuchung.csv` vor der Spalte „Platz“ eine neue Spalte „Belag“ ein. Welches Problem tritt auf? Wie heißt die Eigenschaft eines Datenbanksystems, die das verhindert, und warum hilft sie?
+  solution: |-
+    a) Mögliche Dateipaare (zwei verschiedene genügen):
+    - `mitglieder.csv` und `platzbuchung.csv`: Der Name des Mitglieds steht in beiden. Nach einer Namensänderung (z. B. Heirat) steht in den Buchungen der alte Name, die Bestände widersprechen sich.
+    - `mitglieder.csv` und `beitraege.csv`: Anschrift und IBAN (eigentlich die ganze Mitgliederliste) stehen in beiden. Ändert die Geschäftsführerin eine IBAN, bucht der Kassenwart weiter vom alten Konto ab. Oder: Ein neues Mitglied fehlt in `beitraege.csv` und zahlt nie Beitrag.
+    - `beitraege.csv` und `platzbuchung.csv`: Auch hier steht der Name doppelt; nach einer Namensänderung passt die Beitragsliste nicht mehr zu den Buchungen.
+
+    b) Beide laden den alten Dateistand. Wer zuletzt speichert, überschreibt die Datei, und die Buchung des anderen geht verloren (verlorene Änderung, *lost update*). Ein DBMS führt jede Buchung als Transaktion aus und synchronisiert gleichzeitige Zugriffe, z. B. durch Sperren. Beide Buchungen bleiben erhalten. Wollen beide denselben Platz zur selben Zeit, kann zusätzlich eine Integritätsbedingung (Eindeutigkeit von Platz und Zeit) die zweite Buchung ablehnen; das ist dann Konsistenzüberwachung, nicht Synchronisation.
+
+    c) Das Skript liest nun als dritte Spalte den Belag statt des Platzes und liefert falsche Auswertungen, ohne dass ein Fehler gemeldet wird. Im DBS gilt **Datenunabhängigkeit** (Programm-Daten-Unabhängigkeit): Die Struktur steht zentral im Data Dictionary, Anwendungen greifen per SQL über Spaltennamen zu (`SELECT Platz …`). Abfragen, die Spalten über ihren Namen ansprechen, bleiben deshalb gültig (logische Datenunabhängigkeit, siehe t02). Nur Anweisungen, die sich auf die Spaltenreihenfolge verlassen (`SELECT *`, `INSERT` ohne Spaltenliste), wären betroffen; für sie kann eine Sicht die alte Struktur weiter anbieten.
+  rubric:
+    - criterion: "a) Zwei zutreffende redundante Angaben in zwei verschiedenen Dateipaaren genannt (je 0,5 Punkte)"
+      points: 1
+    - criterion: "a) Zu jeder Redundanz eine konkrete, plausible Inkonsistenz beschrieben (je 1 Punkt)"
+      points: 2
+    - criterion: "b) Verlorene Änderung korrekt beschrieben (letzter Speichervorgang überschreibt)"
+      points: 1.5
+    - criterion: "b) Lösung durch Transaktionen bzw. Synchronisation (z. B. Sperren) im DBMS genannt"
+      points: 1
+    - criterion: "c) Problem erkannt: Positionszugriff liefert stillschweigend falsche Werte"
+      points: 1
+    - criterion: "c) Datenunabhängigkeit benannt und begründet (Struktur im Katalog, Zugriff über Namen statt Position)"
+      points: 1.5
+  space: lines:20
+- id: t01-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [db-dbms-dbs, data-dictionary]
+  type: define-example
+  difficulty: 2
+  points: 6
+  minutes: 7
+  prompt: |-
+    Erkläre die Begriffe **Datenbank**, **Datenbankmanagementsystem (DBMS)**, **Datenbanksystem** und **Data Dictionary** und wie sie zusammenhängen.
+    Ordne an einem **eigenen** Beispiel (nicht der Kleingartenverein aus dem Lerntext) zu, was in deinem Beispiel was ist, und nenne außerdem eine Datenbankanwendung. Gib drei konkrete Einträge an, die im Data Dictionary deines Beispiels stehen würden.
+  solution: |-
+    - **Datenbank** (gleichwertig: Datenbasis): der gespeicherte, zusammengehörige Datenbestand aus Anwendungsdaten und Data Dictionary.
+    - **DBMS:** die Software, die die Datenbank verwaltet. Gleichwertige Fassungen: Sie organisiert den Bestand, kontrolliert jeden Zugriff und bietet eine Datenbanksprache an; oder: Sie dient dazu, die Datenbank zu definieren (Strukturen, Datentypen, Bedingungen), zu konstruieren (anlegen und füllen) und zu manipulieren (abfragen, ändern, löschen).
+    - **Datenbanksystem:** DBMS und Datenbank zusammen. Im Sprachgebrauch wird „Datenbank“ oft für das ganze Datenbanksystem verwendet.
+    - **Data Dictionary** (Systemkatalog): die vom DBMS gepflegten Metadaten, also die Beschreibung der Datenbank. Es liegt in der Datenbank und wird vom DBMS bei jeder Schemaänderung aktualisiert.
+    - Eine **Datenbankanwendung** nutzt das Datenbanksystem, gehört aber nicht dazu.
+
+    Beispiel (Musterlösung, andere passende Beispiele gleichwertig), Tafel (Lebensmittelausgabe):
+    - DBMS: PostgreSQL auf dem Vereinsserver
+    - Datenbank: Bestand mit Kund:innen, Ausgabeterminen und Spenden
+    - Datenbanksystem: PostgreSQL samt diesem Bestand
+    - Datenbankanwendung: Tablet-App, mit der Ehrenamtliche die Ausgabe quittieren
+    - Data-Dictionary-Einträge: Tabelle Ausgabe hat die Spalte Datum vom Typ DATE; Kunde.KundenNr ist Primärschlüssel; Benutzer TABLET darf in Ausgabe nur einfügen und lesen.
+  rubric:
+    - criterion: "Datenbank (oder Datenbasis), DBMS und Datenbanksystem (DBS = DBMS + DB) korrekt definiert, je Begriff 0,5 Punkte; für das DBMS ist auch die Fassung Definieren/Konstruieren/Manipulieren gleichwertig"
+      points: 1.5
+    - criterion: "Data Dictionary korrekt erklärt (Metadaten bzw. Beschreibung der Datenbank, vom DBMS gepflegt)"
+      points: 1
+    - criterion: "Eigenes Beispiel: DBMS, Datenbank und Datenbanksystem richtig zugeordnet (je 0,5 Punkte)"
+      points: 1.5
+    - criterion: "Datenbankanwendung genannt und als nicht zum DBS gehörend eingeordnet"
+      points: 0.5
+    - criterion: "Drei passende Data-Dictionary-Einträge (Metadaten, keine Anwendungsdaten), je 0,5 Punkte"
+      points: 1.5
+  space: lines:14
+- id: t01-p005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dbms-anforderungen, codd-regeln]
+  type: explain
+  difficulty: 3
+  points: 10
+  minutes: 10
+  prompt: |-
+    a) Beschreibe Inhalt und Zweck der **neun Anforderungen an ein DBMS** nach Codd und der **zwölf Regeln** nach Codd.
+    b) Ordne jeder Situation aus einer Musikschul-Datenbank die passende der neun Anforderungen zu und begründe kurz:
+    1. Eine Lehrkraft sieht nur ihre eigenen Schüler:innen und deren Stundenplan, die Verwaltung sieht alle.
+    2. Beim Umbuchen eines Kurses soll die Abmeldung aus dem alten und die Anmeldung im neuen Kurs ganz oder gar nicht stattfinden.
+    3. Das DBMS weist eine Anmeldung mit einem Geburtsdatum in der Zukunft zurück.
+    4. Nach einem Festplattendefekt wird der Stand vom Vorabend wiederhergestellt.
+    5. Die Verwaltung kann jederzeit abfragen, welche Spalten die Tabelle Kurs hat.
+    c) Nenne **drei** weitere Anforderungen oder Regeln nach Codd und erläutere jede an einem eigenen Beispiel. Du darfst aus beiden Listen wählen; eine Regelnummer ist nicht nötig. Nicht zählen: Benutzersichten, Zugriffskontrolle, Transaktionen, Konsistenzüberwachung, Datensicherung und Katalog sowie die inhaltsgleichen Regeln 4 (Online-Katalog) und 10 (Integritätsunabhängigkeit).
+  solution: |-
+    a) Die **neun Anforderungen** (Integration, Operationen bzw. Sprache, Katalog, Benutzersichten, Konsistenzüberwachung, Zugriffskontrolle, Transaktionen, Synchronisation, Datensicherung) beschreiben, welche Funktionen ein DBMS bereitstellen soll. Sie werden meist als Codds Anforderungen an (relationale) DBMS dargestellt. Die **zwölf Regeln** (gezählt 0 bis 12) beschreiben Eigenschaften, an denen man ein relationales DBMS erkennt, etwa dass alle Informationen als Werte in Tabellen vorliegen. Ihr Zweck ist zu prüfen, ob ein Produkt die Bezeichnung „relational“ zu Recht trägt.
+
+    b)
+    1. **Benutzersichten:** Verschiedene Gruppen erhalten unterschiedliche Ausschnitte derselben Daten. (Zugriffskontrolle gilt ebenfalls als richtig, wenn die Begründung auf Rechte zielt.)
+    2. **Transaktionen:** Zwei Änderungen bilden eine unteilbare Einheit.
+    3. **Konsistenzüberwachung** (Integritätssicherung): Das DBMS prüft eine Integritätsbedingung bei der Änderung.
+    4. **Datensicherung** (Recovery): Wiederherstellung eines brauchbaren Stands nach einem Fehler.
+    5. **Katalog** (Data Dictionary): Die Beschreibung der Datenbank ist abrufbar.
+
+    c) Beispiel (Musterlösung, andere Regeln bzw. Anforderungen gleichwertig):
+    - **Regel 3, systematische Behandlung von NULL:** Fehlende Werte werden einheitlich markiert, unterscheidbar von 0 oder leerem Text. Hat eine Schülerin noch keine Telefonnummer angegeben, steht dort NULL, nicht eine leere Zeichenkette.
+    - **Regel 7, mengenorientierte Operationen:** Auch Ändern wirkt auf Mengen von Zeilen. Eine einzige Anweisung erhöht die Gebühr aller Gitarrenkurse um 5 %.
+    - **Integration (Datenintegration):** Alle Anwendungen nutzen einen gemeinsamen Bestand, jedes logische Datenelement liegt nur einmal vor. Stundenplanung, Gebührenabrechnung und Instrumentenverleih lesen die Anschrift einer Schülerin aus derselben Tabelle, statt je eine eigene Adressliste zu führen.
+  rubric:
+    - criterion: "a) Neun Anforderungen: Inhalt (sinngemäß Funktionen eines DBMS, mind. drei genannt) und Zweck (was ein DBMS leisten soll) beschrieben. Ob die Liste als allgemein für DBMS oder als Anforderung an relationale DBMS dargestellt wird, ist für die Bewertung unerheblich."
+      points: 1
+    - criterion: "a) Zwölf Regeln: Inhalt (Eigenschaften relationaler Systeme, mind. ein Beispiel) und Zweck (prüfen, ob ein System relational ist) beschrieben"
+      points: 1
+    - criterion: "b) Je Situation richtige Anforderung (0,5 Punkte) und passende Begründung (0,5 Punkte). Gleichwertige Bezeichnungen zählen, z. B. Integritätssicherung oder Konsistenzkontrolle, Recovery, Data Dictionary; bei Situation 1 auch Zugriffskontrolle mit Begründung über Rechte."
+      points: 5
+    - criterion: "c) Je Regel bzw. Anforderung: zutreffend genannt und erläutert (0,5 Punkte) und mit passendem eigenem Beispiel belegt (0,5 Punkte); Regelnummer nicht erforderlich. Keine Punkte für die im Prompt ausgeschlossenen Punkte (die Lösungen aus b einschließlich Zugriffskontrolle sowie Regel 4 und Regel 10)"
+      points: 3
+  space: lines:26
+- id: t01-p006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [benutzerrollen, miniwelt]
+  type: define-example
+  difficulty: 1
+  points: 6
+  minutes: 6
+  prompt: |-
+    Erkläre den Begriff **Miniwelt** und nenne **vier** typische Benutzerrollen rund um ein Datenbanksystem mit je einer typischen Tätigkeit.
+    Verwende ein **eigenes** Beispiel (nicht der Kleingartenverein aus dem Lerntext): Grenze die Miniwelt mit zwei Dingen ab, die dazugehören, und einem, das nicht dazugehört, und nenne für jede Rolle eine konkrete Person oder Gruppe aus deinem Beispiel.
+  solution: |-
+    - **Miniwelt** (Diskursbereich): der für einen bestimmten Zweck relevante Ausschnitt der realen Welt, den die Datenbank abbilden soll, einschließlich der dort geltenden Regeln.
+    - Zulässige Rollen (vier genügen): Endnutzer, Systemanalytiker bzw. Datenbankdesigner, Softwarearchitekt, Anwendungsentwickler bzw. -programmierer, Datenbankadministrator (DBA), DBMS-Entwickler, Datenadministrator. Endnutzer in Anwendungsnutzer und versierte Nutzer zu unterteilen, zählt als eine Rolle.
+
+    Beispiel (Musterlösung, andere passende Beispiele gleichwertig), Freiwillige Feuerwehr, Zweck Einsatz- und Lehrgangsverwaltung:
+    - Gehört dazu: Einsatzkräfte mit absolvierten Lehrgängen, Einsätze mit Datum und beteiligten Kräften.
+    - Gehört nicht dazu: die Lieblingsmannschaft der Einsatzkräfte, weil sie für Einsätze und Lehrgänge keine Rolle spielt.
+    - Endnutzer: der Wehrführer, der in der Anwendung nachsieht, wer einen Atemschutzlehrgang hat.
+    - Datenbankdesigner: der Kamerad, der mit der Wehrführung klärt, welche Daten nötig sind, und das ER-Modell entwirft.
+    - Anwendungsentwickler: eine Kameradin, die die Web-Oberfläche für die Einsatzberichte programmiert.
+    - DBA: der IT-Dienstleister der Gemeinde, der den Datenbankserver betreibt, Sicherungen einrichtet und Rechte vergibt.
+  rubric:
+    - criterion: "Miniwelt als zweckbezogener Ausschnitt der realen Welt erklärt"
+      points: 1
+    - criterion: "Miniwelt im eigenen Beispiel abgegrenzt: je zugehöriges Ding 0,25 Punkte, nicht zugehöriges Ding mit Zweckbezug 0,5 Punkte"
+      points: 1
+    - criterion: "Vier verschiedene zulässige Rollen mit je einer zutreffenden Tätigkeit (je 0,5 Punkte)"
+      points: 2
+    - criterion: "Je Rolle eine passende Person oder Gruppe aus dem eigenen Beispiel (je 0,5 Punkte); bei DBMS-Entwicklern zählt der Hersteller bzw. das Entwicklerteam des verwendeten DBMS, beim Datenadministrator die für Datenschutz bzw. Datenqualität zuständige Stelle"
+      points: 2
+  space: lines:16
+- id: t01-p007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [persistenz]
+  type: define-example
+  difficulty: 1
+  points: 4
+  minutes: 4
+  prompt: |-
+    Erkläre die Begriffe **persistente Daten** und **transiente Daten**.
+    Gib zu beiden je ein **eigenes** Beispiel aus einer Anwendung deiner Wahl (nicht der Kleingartenverein aus dem Lerntext). Begründe außerdem, warum ein Wert, der regelmäßig geändert wird, trotzdem persistent sein kann.
+  solution: |-
+    - **Persistente Daten** liegen auf einem dauerhaften Speicher (Datenbank, Datei). Sie überstehen das Programmende und einen Neustart, bleiben bis zum ausdrücklichen Löschen bestehen und sind auch für andere Programme zugänglich.
+    - **Transiente Daten** existieren nur während des Programmlaufs, meist im Arbeitsspeicher, und gehen mit dem Programmende verloren.
+
+    Beispiel (Musterlösung, andere passende Beispiele gleichwertig), Imkerverein:
+    - Persistent: die in der Datenbank gespeicherte Liste der Bienenvölker mit Standort.
+    - Transient: die Zwischensumme des Honigertrags, die das Auswertungsprogramm während der Berechnung in einer Variablen hält.
+    - Persistent und veränderlich: Das Gewicht eines Bienenstocks wird täglich von einer Stockwaage überschrieben. Es bleibt trotzdem persistent, weil jeder gespeicherte Wert Programmende und Neustart übersteht. Persistent beschreibt die Lebensdauer der Daten, nicht, ob sie sich ändern dürfen.
+  rubric:
+    - criterion: "Persistente Daten korrekt erklärt (dauerhaft gespeichert, überdauern Programmende bzw. Neustart)"
+      points: 1
+    - criterion: "Transiente Daten korrekt erklärt (nur während des Programmlaufs vorhanden)"
+      points: 1
+    - criterion: "Je ein passendes eigenes Beispiel für persistente und transiente Daten (je 0,5 Punkte)"
+      points: 1
+    - criterion: "Begründet, dass persistent nicht unveränderlich heißt (Lebensdauer statt Änderbarkeit)"
+      points: 1
+  space: lines:10

@@ -1,0 +1,32 @@
+// Aufbau eines Datenbanksystems am Beispiel Kleingartenverein (kein ER-Diagramm, sondern Komponentenübersicht)
+digraph datenbanksystem_aufbau {
+  rankdir=TB;
+  node [fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=10];
+
+  subgraph cluster_anwendungen {
+    label="Datenbankanwendungen (nicht Teil des DBS)";
+    style=dotted;
+    app_pacht [shape=box, style=rounded, label="Pachtverwaltung\n(Web-Anwendung)"];
+    app_wasser [shape=box, style=rounded, label="Wasserabrechnung\n(Skript)"];
+    app_sql [shape=box, style=rounded, label="SQL-Konsole\ndes Kassenwarts"];
+  }
+
+  subgraph cluster_dbs {
+    label="Datenbanksystem (DBS) = DBMS + Datenbasis";
+    style=dashed;
+    dbms [shape=box, label="DBMS\n(z. B. Firebird, PostgreSQL)\nPrüft Rechte, Integrität,\nsteuert Transaktionen"];
+    subgraph cluster_db {
+      label="Datenbank (DB) bzw. Datenbasis";
+      style=solid;
+      nutzdaten [shape=cylinder, label="Anwendungsdaten\n(Ausprägung: Parzellen,\nPächter, Zählerstände)"];
+      katalog [shape=cylinder, label="Data Dictionary\n(Metadaten: Schema,\nBedingungen, Rechte)"];
+    }
+  }
+
+  app_pacht -> dbms [label="SQL"];
+  app_wasser -> dbms [label="SQL"];
+  app_sql -> dbms [label="SQL"];
+  dbms -> nutzdaten [label="liest/schreibt", dir=both];
+  dbms -> katalog [label="liest/pflegt", dir=both];
+}

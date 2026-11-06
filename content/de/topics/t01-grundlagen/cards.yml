@@ -1,0 +1,292 @@
+- id: t01-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [daten-information-wissen]
+  front: "Was sind Daten im Sinne der Informatik?"
+  back: |-
+    **Daten** (*data*) sind Zeichen oder Zeichenketten, die nach festen Regeln (Syntax) aufgebaut und maschinell verarbeitbar sind. Sie sind die dargestellte Form einer Information.
+    Ohne Kontext haben sie keine eindeutige Bedeutung: `17;2025;38` kann ein Zählerstand, ein Datum oder eine Bestellnummer sein.
+- id: t01-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [daten-information-wissen]
+  front: "Wann werden Daten zu Information, und wie hängen beide zusammen?"
+  back: |-
+    Daten werden zu Information, wenn jemand sie in einem Kontext interpretiert (Semantik). Kurz: Information ist interpretierte Daten, Daten sind dargestellte Information.
+    Beispiel: `17;2025;38` wird zur Information „Parzelle 17 hat im Jahr 2025 38 m³ Wasser verbraucht“, sobald klar ist, was die drei Felder bedeuten.
+- id: t01-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [daten-information-wissen]
+  front: "Was unterscheidet Wissen von Information?"
+  back: |-
+    **Wissen** (*knowledge*) ist Information, die mit weiteren Informationen und Erfahrung verknüpft ist und beim Lösen eines Problems oder beim Handeln hilft (Pragmatik). Ob Information zu Wissen wird, hängt vom Vorwissen ab.
+    Beispiel: Der Wasserwart kennt den üblichen Verbrauch von 12–15 m³. 38 m³ deuten daher auf ein Leck, also prüft er die Leitung.
+- id: t01-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [persistenz]
+  front: "Was ist der Unterschied zwischen persistenten und transienten Daten?"
+  back: |-
+    - **Persistent:** auf dauerhaftem Speicher (Datenbank, Datei); überstehen Programmende und Neustart, bleiben bis zum ausdrücklichen Löschen und sind auch für andere Prozesse zugänglich.
+    - **Transient:** existieren nur, solange das Programm läuft, z. B. Variablen, Zwischensummen, noch nicht gespeicherte Formulareingaben.
+
+    Persistent heißt nicht unveränderlich.
+- id: t01-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [redundanz-konsistenz]
+  front: "Was ist Redundanz, und warum ist sie gefährlich?"
+  back: |-
+    **Redundanz** (*redundancy*): Eine Angabe ist mehrfach gespeichert oder aus anderen ableitbar, also eigentlich überflüssig.
+    Gefahr: Bei einer Änderung wird nicht jede Kopie angepasst, und der Bestand wird inkonsistent. Zusätzlich kostet sie Speicher und doppelte Pflegearbeit.
+- id: t01-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [redundanz-konsistenz]
+  front: "Was bedeuten Konsistenz und Inkonsistenz eines Datenbestands?"
+  back: |-
+    **Konsistenz** (*consistency*): Der Bestand ist widerspruchsfrei und erfüllt alle Regeln der Miniwelt (Integritätsbedingungen, siehe t05).
+    **Inkonsistenz:** Daten widersprechen sich, z. B. steht dieselbe Pächterin in zwei Dateien mit verschiedenen Anschriften.
+- id: t01-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [redundanz-konsistenz]
+  front: "Was ist kontrollierte Redundanz? Nenne zwei Beispiele."
+  back: |-
+    Mehrfachspeicherung mit bekanntem Zweck und geregeltem Umgang mit den Kopien.
+    Beispiele: Index und Replikat (vom System automatisch nachgeführt), Datensicherung (bewusst ein fester Stand eines Zeitpunkts, nicht laufend angeglichen), gezielte Denormalisierung (siehe t07).
+    Unkontrollierte Redundanz entsteht dagegen ungeplant, und niemand sorgt für den Abgleich.
+- id: t01-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dateisystem-vs-dbs]
+  front: "Welche Nachteile hat eine dateibasierte Datenhaltung gegenüber einem Datenbanksystem?"
+  back: |-
+    - Redundanz und daraus folgende Inkonsistenz (jede Anwendung hat eigene Dateien)
+    - Konsistenzregeln stecken in jedem Programm einzeln
+    - Programme hängen vom Dateiaufbau ab (keine Datenunabhängigkeit)
+    - kein sicherer Mehrbenutzerbetrieb (verlorene Änderungen)
+    - nur grobe Zugriffsrechte, Sicherung und Wiederherstellung von Hand
+- id: t01-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dateisystem-vs-dbs, datenunabhaengigkeit]
+  front: "Was bedeutet Datenunabhängigkeit?"
+  back: |-
+    Anwendungen greifen über eine feste Schnittstelle auf die Daten zu und müssen nicht wissen, wie sie gespeichert sind. Ändert sich die Speicherung (physisch, z. B. neuer Index) oder in Grenzen die logische Struktur (z. B. neue Spalte), laufen die Anwendungen unverändert weiter.
+    Ebenen und Arten im Detail: siehe t02.
+- id: t01-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dateisystem-vs-dbs, mehrbenutzerbetrieb]
+  front: "Welches Problem entsteht, wenn zwei Personen gleichzeitig dieselbe Datei bearbeiten, und wie löst ein DBMS es?"
+  back: |-
+    **Verlorene Änderung** (*lost update*): Beide laden den alten Stand, wer zuletzt speichert, überschreibt die Änderung des anderen.
+    Ein DBMS fasst Änderungen zu Transaktionen zusammen und synchronisiert parallele Zugriffe (z. B. durch Sperren), sodass keine bestätigte Änderung verloren geht.
+- id: t01-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [db-dbms-dbs]
+  front: "Wie unterscheiden sich Datenbank, DBMS und Datenbanksystem?"
+  back: |-
+    - **Datenbank (DB)**, auch **Datenbasis**: der gespeicherte Bestand aus Anwendungsdaten und Data Dictionary
+    - **DBMS** (auch Datenbankverwaltungssystem): die Software, die die Datenbank definiert, konstruiert und manipuliert und jeden Zugriff kontrolliert, z. B. Firebird
+    - **Datenbanksystem (DBS):** DBMS + Datenbasis (manche zählen Kommunikationsschnittstellen hinzu)
+
+    Im Sprachgebrauch steht „Datenbank“ oft für das ganze DBS.
+- id: t01-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [db-dbms-dbs]
+  front: "Gehört eine Datenbankanwendung zum Datenbanksystem?"
+  back: |-
+    Nein. Eine **Datenbankanwendung** ist ein Programm, das ein Datenbanksystem nutzt, z. B. die Web-Oberfläche der Pachtverwaltung. Sie greift über das DBMS (meist per SQL) zu, gehört aber nicht zum DBS.
+- id: t01-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [data-dictionary]
+  front: "Was ist ein Data Dictionary, und was steht darin?"
+  back: |-
+    Der vom DBMS gepflegte Katalog der **Metadaten** (Daten über die Daten), auch Systemkatalog oder Datenkatalog.
+    Inhalt u. a.: Tabellen, Spalten, Datentypen, Primär- und Fremdschlüssel, Integritätsbedingungen, Sichten, Trigger, Indexe, Benutzer und Rechte.
+    Nicht darin: die Anwendungsdaten selbst, etwa die Pacht von Parzelle 12.
+- id: t01-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [data-dictionary]
+  front: "Warum nennt man ein Datenbanksystem selbstbeschreibend?"
+  back: |-
+    Weil es neben den Anwendungsdaten auch deren Beschreibung (Schema, Bedingungen, Rechte) im Data Dictionary speichert. Die Struktur steht damit nicht in jedem Programm, sondern zentral im System. In relationalen Systemen ist der Katalog selbst als Tabellen abgelegt und per SQL abfragbar (in Firebird z. B. `RDB$RELATIONS`).
+- id: t01-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [miniwelt]
+  front: "Was ist die Miniwelt?"
+  back: |-
+    Der für einen bestimmten Zweck relevante Ausschnitt der realen Welt, den eine Datenbank abbilden soll, samt seinen Regeln. Auch **Diskursbereich** (*universe of discourse*, UoD).
+    Beispiel Kleingartenverein: Parzellen, Pächter:innen, Pachtzahlungen, Wasserzähler gehören dazu. Was in den Beeten wächst, gehört nicht dazu.
+- id: t01-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schema-auspraegung]
+  front: "Was ist der Unterschied zwischen Schema und Ausprägung?"
+  back: |-
+    - **Schema** (*schema*), intensionale Ebene: Strukturbeschreibung (Tabellen, Spalten, Datentypen, Bedingungen), gehört zu den Metadaten, z. B. Parzelle(<u>ParzellenNr</u>, Flaeche_m2, Pacht_EUR)
+    - **Ausprägung** (*instance*, auch Instanz, Datenbankinstanz, Datenbankzustand), extensionale Ebene: alle konkreten Zeilen zu einem Zeitpunkt, z. B. sämtliche Parzellenzeilen am 1. März
+
+    Analogie: Klasse und Objekt.
+- id: t01-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schema-auspraegung]
+  front: "Wie oft und womit ändern sich Schema und Ausprägung?"
+  back: |-
+    - Schema: selten, durch DDL-Anweisungen (`CREATE`, `ALTER`, `DROP`). Die Änderung landet im Data Dictionary.
+    - Ausprägung: ständig, durch DML-Anweisungen (`INSERT`, `UPDATE`, `DELETE`).
+
+    Jede gültige Ausprägung muss zum Schema passen.
+- id: t01-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schema-auspraegung]
+  front: "Welche zwei Bedeutungen hat das Wort Schema im Datenbankumfeld?"
+  back: |-
+    1. **Strukturbeschreibung** einer Datenbank (Gegenbegriff: Ausprägung). So wird es in diesem Kurs verwendet.
+    2. In manchen DBMS ein **Namensraum/Container** für Datenbankobjekte (Tabellen, Sichten, Sequenzen), der einem Benutzer gehört.
+
+    Zusätzlich gibt es externe, konzeptionelle und interne Schemata (siehe t02).
+- id: t01-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [benutzerrollen]
+  front: "Welche typischen Rollen gibt es rund um ein Datenbanksystem?"
+  back: |-
+    - Nutzen: **Endnutzer** (arbeiten über fertige Anwendungen und Werkzeuge)
+    - Entwickeln: **Systemanalytiker/Datenbankdesigner** (Miniwelt, ER-Entwurf, Schema), **Softwarearchitekt**, **Anwendungsentwickler**
+    - Betreiben: **Datenbankadministrator** (DBA)
+    - außerdem: **DBMS-Entwickler**, die das DBMS selbst bauen
+
+    Rollen sind Tätigkeiten, keine Personen.
+- id: t01-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [benutzerrollen]
+  front: "Nenne typische Aufgaben eines Datenbankadministrators (DBA)."
+  back: |-
+    - Systemarchitektur mitbestimmen, DBMS installieren und aktualisieren
+    - am logischen und physischen Entwurf mitwirken (Tabellen, Indexe, Sichten)
+    - Altbestände importieren, Schnittstellen wie ODBC/JDBC bereitstellen
+    - Benutzer und Rechte verwalten
+    - Speicherplatz und Leistung überwachen, reorganisieren
+    - Datensicherung und Wiederherstellung nach Ausfällen (Recovery)
+- id: t01-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  sources:
+    - id: watt-database-design-2e
+      ref: "Kap. 14 Database Users"
+  tags: [benutzerrollen]
+  front: "Wie werden Endnutzer in manchen Lehrbüchern weiter unterteilt?"
+  back: |-
+    Variante:
+    - **Anwendungsnutzer** (gelegentlich *naive users*): bedienen nur fertige Masken und Berichte.
+    - **Versierte Nutzer** (*sophisticated users*): formulieren ihre Abfragen selbst.
+
+    In anderen Einteilungen nutzen Endnutzer nur fertige Programme und Werkzeuge; wer selbst SQL schreibt, zählt dort zur Entwicklung.
+- id: t01-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dbms-anforderungen]
+  front: "Welche neun Anforderungen an ein DBMS gehen auf Codd zurück? Nenne auch gängige Alternativnamen."
+  back: |-
+    1. Integration (Datenintegration)
+    2. Operationen (Sprache)
+    3. Katalog (Data Dictionary)
+    4. Benutzersichten
+    5. Konsistenzüberwachung (Integritätssicherung, Konsistenzkontrolle)
+    6. Zugriffskontrolle (Datenschutz, Datenzugriffskontrolle)
+    7. Transaktionen
+    8. Synchronisation (Mehrbenutzerfähigkeit)
+    9. Datensicherung (Recovery)
+- id: t01-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dbms-anforderungen]
+  front: "Wie unterscheiden sich die DBMS-Anforderungen Transaktionen und Synchronisation?"
+  back: |-
+    - Fehlten **Transaktionen**, könnte ein einzelner Vorgang auf halbem Weg stecken bleiben (Zahlung gebucht, offener Betrag nicht gesenkt). Nach erfolgreichem Abschluss muss das Ergebnis zudem dauerhaft bleiben.
+    - Fehlte **Synchronisation** (Mehrbenutzerfähigkeit), kämen sich gleichzeitig laufende Vorgänge in die Quere, etwa durch eine verlorene Änderung. Mit ihr arbeitet jede Person scheinbar allein (Isolation).
+- id: t01-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [codd-regeln]
+  front: "Wozu dienen Codds zwölf Regeln?"
+  back: |-
+    Sie sind ein Kriterienkatalog, der festlegt, was ein DBMS leisten muss, um als **relational** zu gelten. Es sind 13 Regeln (Regel 0 bis 12), Regel 0 ist die Grundregel.
+    Bekannt wurden sie durch zwei Zeitschriftenartikel Codds von 1985. Ob heutige Produkte alle Regeln vollständig erfüllen, wird in der Literatur unterschiedlich bewertet.
+- id: t01-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [codd-regeln]
+  front: "Welche von Codds zwölf Regeln betreffen den Katalog und die Datenunabhängigkeit?"
+  back: |-
+    - **Regel 4** (Online-Katalog): Die Beschreibung der Datenbank liegt in Tabellen und ist mit derselben Sprache abfragbar wie die Anwendungsdaten.
+    - **Regel 8:** physische Datenunabhängigkeit
+    - **Regel 9:** logische Datenunabhängigkeit
+    - **Regel 10:** Integritätsunabhängigkeit (Bedingungen im Katalog, nicht in den Anwendungen)
+- id: t01-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dbms-anforderungen, codd-regeln]
+  front: "Was unterscheidet die neun Anforderungen an ein DBMS von Codds zwölf Regeln?"
+  back: |-
+    - **Neun Anforderungen:** Funktionen, die ein DBMS bereitstellen soll (Integration, Operationen, Katalog …). Meist als Codds Anforderungen an (relationale) DBMS dargestellt, teils allgemein auf DBMS übertragen.
+    - **Zwölf Regeln** (0 bis 12): Kriterien, an denen sich entscheidet, ob ein DBMS wirklich relational ist.
+
+    Überschneidung: Katalog, Integrität, Datensprache.
+- id: t01-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [codd-regeln]
+  front: "Mit welchen anderen Regeln Codds werden die zwölf Regeln für relationale Systeme leicht verwechselt?"
+  back: |-
+    Mit den **zwölf Evaluierungsregeln für OLAP-Systeme** (Online Analytical Processing), die Codd 1993 veröffentlichte. Sie betreffen Werkzeuge zur Datenanalyse, nicht die Frage, ob ein DBMS relational ist.
+- id: t01-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [db-dbms-dbs]
+  front: "Welche drei Aufgabengruppen eines DBMS nennt man, um den Begriff zu definieren?"
+  back: |-
+    - **Definieren:** Strukturen, Datentypen und Bedingungen festlegen (Schema, DDL)
+    - **Konstruieren:** die Datenbank anlegen und mit Daten füllen; die physische Ablage bestimmt das DBMS
+    - **Manipulieren:** abfragen, ändern, löschen, Auswertungen erzeugen (DML)
+- id: t01-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dateisystem-vs-dbs]
+  front: "Nenne mindestens fünf Vorteile eines Datenbanksystems gegenüber Dateien je Anwendung."
+  back: |-
+    - gemeinsamer, integrierter Bestand mit wenig Redundanz
+    - Integritätsbedingungen einmal zentral definiert und geprüft
+    - sicherer Mehrbenutzerbetrieb durch Transaktionen und Synchronisation
+    - Datenunabhängigkeit der Programme
+    - feine Zugriffsrechte und Sichten
+    - Datensicherung und Wiederherstellung durch das DBMS
+    - deklarative Abfragesprache statt eigenem Programm je Auswertung
+- id: t01-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [daten-information-wissen]
+  front: "Welche Varianten der Wissenspyramide gibt es?"
+  back: |-
+    - **DIKW** (*data, information, knowledge, wisdom*): Daten → Information → Wissen → Weisheit
+    - Variante mit Grundstufe **Zeichen**, ohne Weisheit: Zeichen → Daten → Information → Wissen. Syntax macht Zeichen zu Daten, Bedeutung Daten zu Information, Vernetzung Information zu Wissen.
+- id: t01-c031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dbms-anforderungen]
+  front: "Was umfasst die DBMS-Anforderung Operationen (auch Sprache)?"
+  back: |-
+    - Sprachmittel zum Definieren (DDL), zum Einfügen, Abfragen, Ändern und Löschen (DML) und zur Rechtevergabe (DCL)
+    - verschiedene Zugangswege: Programmierschnittstelle für Anwendungen (z. B. ODBC, JDBC), interaktive bzw. grafische Oberfläche, Zugriff über das Web

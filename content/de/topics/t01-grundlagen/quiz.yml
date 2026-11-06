@@ -1,0 +1,271 @@
+- id: t01-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [daten-information-wissen]
+  type: single
+  question: |-
+    In einer Textdatei steht ohne weitere Erklärung die Zeile `17;2025;38`. Wie ist diese Zeile einzuordnen?
+  options:
+    - text: "Als Daten"
+      correct: true
+      explain: "Die Zeichenfolge folgt einer Syntax (drei Felder, Semikolon als Trenner), aber ohne Kontext ist unklar, was sie bedeutet."
+    - text: "Als Information"
+      correct: false
+      explain: "Information entsteht erst, wenn klar ist, was die Felder bedeuten, z. B. Parzelle 17, Jahr 2025, 38 m³ Wasserverbrauch."
+    - text: "Als Wissen"
+      correct: false
+      explain: "Wissen setzt Information voraus, die mit Erfahrung vernetzt ist und Handeln ermöglicht. Davon ist eine nackte Zeichenfolge weit entfernt."
+    - text: "Als Metadaten"
+      correct: false
+      explain: "Metadaten beschreiben andere Daten, z. B. „Feld 3 ist der Verbrauch in m³“. Die Zeile selbst ist ein Nutzdatensatz."
+- id: t01-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [daten-information-wissen]
+  type: single
+  question: |-
+    Ein Sportverein speichert die Belegung seiner Hallen. Welche Aussage ist auf der Stufe **Wissen** angesiedelt?
+  options:
+    - text: "Weil die Halle dienstags seit Monaten überbucht ist und die Jugendgruppe wächst, verlegt der Vorstand das Seniorenturnen auf Donnerstag."
+      correct: true
+      explain: "Hier werden mehrere Informationen mit Erfahrung verknüpft und in eine Entscheidung umgesetzt. Das ist der Handlungsbezug von Wissen."
+    - text: "Die Halle 2 ist am 14.10. von 18 bis 20 Uhr durch die Gruppe „Jugend-Volleyball“ belegt."
+      correct: false
+      explain: "Das ist eine einzelne, interpretierte Angabe, also Information."
+    - text: "H2|2025-10-14|18-20|JVB"
+      correct: false
+      explain: "Das ist eine Zeichenfolge ohne erklärten Kontext, also Daten."
+    - text: "Die Spalte Uhrzeit hat den Datentyp TIME."
+      correct: false
+      explain: "Das ist eine Angabe über die Struktur der Daten, also Metadaten aus dem Schema bzw. Data Dictionary."
+- id: t01-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [persistenz]
+  type: multi
+  question: |-
+    Ein Programm erstellt die Jahresabrechnung eines Kleingartenvereins und schreibt das Ergebnis in die Datenbank. Welche Daten sind **transient**?
+  options:
+    - text: "Die Zwischensumme der Wassergebühren in einer Programmvariablen während der Berechnung"
+      correct: true
+      explain: "Sie existiert nur im Arbeitsspeicher, solange das Programm läuft."
+    - text: "Eine im Formular eingetippte, aber noch nicht gespeicherte Zählerablesung"
+      correct: true
+      explain: "Stürzt das Programm vor dem Speichern ab, ist der Wert verloren. Er ist also noch nicht persistent."
+    - text: "Die nach erfolgreichem Abschluss in der Datenbank gespeicherte Rechnung"
+      correct: false
+      explain: "Bestätigte Änderungen in der Datenbank überdauern Programmende und Neustart, sie sind persistent."
+    - text: "Der Pachtbetrag einer Parzelle, der jedes Jahr in der Datenbank angepasst wird"
+      correct: false
+      explain: "Persistent heißt nicht unveränderlich. Der Wert wird geändert, bleibt aber dauerhaft gespeichert."
+- id: t01-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [redundanz-konsistenz, dateisystem-vs-dbs]
+  type: single
+  question: |-
+    In einem Verein führt die Vorsitzende die Anschriften der Mitglieder in einer Datei, der Kassenwart eine eigene Kopie für Rechnungen. Nach einem Umzug ändert nur die Vorsitzende die Anschrift, und die Rechnung geht an die alte Adresse. Welche Begriffe beschreiben den Vorgang am treffendsten?
+  options:
+    - text: "Unkontrollierte Redundanz hat zu einer Inkonsistenz geführt."
+      correct: true
+      explain: "Die Anschrift ist ungeplant doppelt gespeichert (Redundanz). Weil nur eine Kopie geändert wurde, widersprechen sich die Bestände (Inkonsistenz)."
+    - text: "Kontrollierte Redundanz hat zu einer Inkonsistenz geführt."
+      correct: false
+      explain: "Kontrollierte Redundanz hat einen bekannten Zweck und einen geregelten Umgang mit den Kopien. Hier ist niemand für den Abgleich zuständig."
+    - text: "Es liegt ein Problem des Mehrbenutzerbetriebs (verlorene Änderung) vor."
+      correct: false
+      explain: "Die beiden haben nicht gleichzeitig dieselbe Datei bearbeitet, sondern zwei getrennte Kopien gepflegt."
+    - text: "Es fehlt nur an Datenunabhängigkeit."
+      correct: false
+      explain: "Datenunabhängigkeit betrifft die Abhängigkeit der Programme vom Speicheraufbau, nicht doppelt gespeicherte Werte."
+- id: t01-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dateisystem-vs-dbs]
+  type: multi
+  question: |-
+    Welche Aussagen beschreiben Vorteile eines Datenbanksystems gegenüber einer Datenhaltung in einzelnen Dateien je Anwendung?
+  options:
+    - text: "Integritätsbedingungen werden einmal zentral definiert und vom DBMS bei jeder Änderung geprüft."
+      correct: true
+      explain: "Bei Dateien müsste jedes Programm die Regeln selbst prüfen, und ein vergessenes Programm verletzt sie."
+    - text: "Die Struktur der Daten steht im Katalog statt in jedem Programm, sodass Anwendungen von Speicheränderungen entkoppelt sind."
+      correct: true
+      explain: "Das ist die Programm-Daten-Unabhängigkeit. Ein neuer Index erfordert z. B. keine Programmänderung."
+    - text: "Gleichzeitige Änderungen mehrerer Benutzer werden über Transaktionen und Synchronisation koordiniert."
+      correct: true
+      explain: "Damit werden verlorene Änderungen verhindert, die bei gemeinsam bearbeiteten Dateien typisch sind."
+    - text: "Ein Datenbanksystem speichert grundsätzlich jeden Wert nur genau einmal, auch in Sicherungen und Indexen."
+      correct: false
+      explain: "Backups und Indexe sind bewusste, kontrollierte Redundanz. Ein DBS vermeidet unkontrollierte Redundanz, nicht jede Mehrfachspeicherung."
+- id: t01-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [db-dbms-dbs]
+  type: multi
+  question: |-
+    Ein Verein betreibt Firebird mit einer Mitgliederdatenbank. Zusätzlich gibt es eine selbst geschriebene Web-Anwendung zur Kursanmeldung. Was gehört zum **Datenbanksystem**?
+  options:
+    - text: "Die Firebird-Software"
+      correct: true
+      explain: "Firebird ist das DBMS und damit Teil des Datenbanksystems."
+    - text: "Der gespeicherte Bestand an Mitglieder- und Kursdaten"
+      correct: true
+      explain: "Das ist die Datenbank (Datenbasis). DBMS und Datenbank zusammen bilden das Datenbanksystem."
+    - text: "Die vom DBMS gepflegten Metadaten (Data Dictionary)"
+      correct: true
+      explain: "Der Katalog liegt in der Datenbank und wird vom DBMS verwaltet. Er gehört damit zum Datenbanksystem."
+    - text: "Die Web-Anwendung zur Kursanmeldung"
+      correct: false
+      explain: "Sie ist eine Datenbankanwendung, die das Datenbanksystem nutzt, aber nicht dazugehört."
+- id: t01-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [data-dictionary]
+  type: single
+  question: |-
+    Welche Angabe steht **nicht** im Data Dictionary einer relationalen Datenbank?
+  options:
+    - text: "Die Parzelle 12 kostet 180 Euro Pacht im Jahr."
+      correct: true
+      explain: "Das ist ein Nutzdatum der Ausprägung. Das Data Dictionary enthält Daten über die Daten, nicht die Daten selbst."
+    - text: "Die Spalte Pacht_EUR hat den Datentyp NUMERIC(7,2)."
+      correct: false
+      explain: "Spalten und Datentypen sind Metadaten und stehen im Katalog."
+    - text: "Die Spalte PaechterNr der Tabelle Parzelle verweist auf die Tabelle Paechter."
+      correct: false
+      explain: "Fremdschlüssel und andere Integritätsbedingungen gehören zum Schema und stehen im Katalog."
+    - text: "Der Benutzer KASSE darf die Tabelle Zahlung lesen und ändern."
+      correct: false
+      explain: "Benutzer und Zugriffsrechte verwaltet das DBMS ebenfalls im Katalog."
+- id: t01-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schema-auspraegung]
+  type: truefalse
+  question: |-
+    Wird mit `INSERT` eine neue Zeile in die Tabelle Mitglied eingefügt, ändert sich das Schema der Datenbank.
+  options:
+    - text: "Wahr"
+      correct: false
+      explain: "Ein INSERT ändert nur die Ausprägung, also den aktuellen Datenbestand. Das Schema (Tabellen, Spalten, Bedingungen) bleibt gleich."
+    - text: "Falsch"
+      correct: true
+      explain: "Richtig. Das Schema ändert sich nur durch DDL wie CREATE oder ALTER, die Ausprägung durch DML wie INSERT, UPDATE und DELETE."
+- id: t01-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [miniwelt]
+  type: single
+  question: |-
+    Ein Ruderverein will seine Bootsreservierungen in einer Datenbank verwalten. Welche Aussage über die **Miniwelt** ist richtig?
+  options:
+    - text: "Sie ist der für die Reservierungsverwaltung relevante Weltausschnitt, z. B. Boote, Mitglieder, Reservierungen und die dafür geltenden Regeln."
+      correct: true
+      explain: "Die Miniwelt wird über den Zweck abgegrenzt. Je nach Zweck kann mehr dazugehören (etwa Schäden an Booten, wenn sie Reservierungen sperren), die Lieblingsfarbe der Mitglieder aber nicht."
+    - text: "Sie umfasst alles, was es über den Verein zu wissen gibt, damit die Datenbank später für jeden Zweck taugt."
+      correct: false
+      explain: "Eine Miniwelt ist immer ein zweckbezogener Ausschnitt. „Alles erfassen“ führt zu unnötigen, schlecht gepflegten Daten."
+    - text: "Sie ist das Datenbankschema, also die Tabellen mit ihren Spalten."
+      correct: false
+      explain: "Das Schema ist das Modell der Miniwelt in der Datenbank. Die Miniwelt selbst ist der reale Ausschnitt."
+    - text: "Sie ist der aktuelle Inhalt der Datenbank."
+      correct: false
+      explain: "Das ist die Ausprägung. Sie bildet einen Zustand der Miniwelt ab, ist aber nicht die Miniwelt."
+- id: t01-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [benutzerrollen]
+  type: single
+  question: |-
+    In einem Sportverein legt eine Person nächtliche Sicherungen an, vergibt dem neuen Kassenwart Leserechte auf die Beitragstabelle und richtet einen Index ein, weil die Mitgliedersuche langsam ist. Welche Rolle übt sie aus?
+  options:
+    - text: "Datenbankadministrator (DBA)"
+      correct: true
+      explain: "Datensicherung, Rechteverwaltung und Leistungsoptimierung sind typische DBA-Aufgaben."
+    - text: "Anwendungsentwickler"
+      correct: false
+      explain: "Anwendungsentwickler schreiben Programme, die auf die Datenbank zugreifen. Sicherungen und Rechte gehören nicht zu ihrem Kern."
+    - text: "Endnutzer"
+      correct: false
+      explain: "Endnutzer fragen Daten ab und pflegen sie, sie betreiben aber nicht das System."
+    - text: "Keine der Rollen, denn ein Vereinsmitglied kann kein DBA sein"
+      correct: false
+      explain: "Rollen hängen an Tätigkeiten, nicht an Berufen. Wer diese Aufgaben übernimmt, handelt in der DBA-Rolle."
+- id: t01-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dbms-anforderungen]
+  type: single
+  question: |-
+    In der Datenbank eines Sportvereins öffnen die Geschäftsführerin und der Kassenwart zur selben Zeit den Datensatz desselben Mitglieds. Sie trägt eine neue Telefonnummer ein, er eine neue IBAN, beide speichern fast gleichzeitig. Am Ende sind beide Änderungen vorhanden, keine hat die andere überschrieben. Welche der neun Anforderungen an ein DBMS hat das **in erster Linie** sichergestellt?
+  options:
+    - text: "Synchronisation (Mehrbenutzerfähigkeit)"
+      correct: true
+      explain: "Zwei Vorgänge laufen zur selben Zeit auf denselben Daten. Dass keiner die Änderung des anderen verliert, ist Aufgabe der Synchronisation."
+    - text: "Konsistenzüberwachung (Integritätssicherung)"
+      correct: false
+      explain: "Sie prüft, ob neue Werte die festgelegten Bedingungen erfüllen, z. B. ob eine IBAN das richtige Format hat. Ob gleichzeitige Änderungen einander überschreiben, regelt sie nicht."
+    - text: "Datensicherung (Recovery)"
+      correct: false
+      explain: "Datensicherung stellt einen Bestand nach Ausfällen oder versehentlichem Löschen wieder her. Hier ist nichts verloren gegangen, das zurückgeholt werden müsste."
+    - text: "Benutzersichten"
+      correct: false
+      explain: "Benutzersichten zeigen verschiedenen Gruppen unterschiedliche Ausschnitte der Daten. Mit dem gleichzeitigen Schreiben hat das nichts zu tun."
+- id: t01-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [dbms-anforderungen]
+  type: multi
+  question: |-
+    Welche Punkte gehören zu den neun Anforderungen an ein DBMS, die auf Codd zurückgehen?
+  options:
+    - text: "Katalog (Data Dictionary)"
+      correct: true
+      explain: "Programme, Werkzeuge und Menschen sollen beim DBMS nachfragen können, welche Tabellen, Spalten und Bedingungen es gibt. Ohne diese Selbstauskunft müsste man den Aufbau anderswo dokumentieren."
+    - text: "Zugriffskontrolle (Datenschutz)"
+      correct: true
+      explain: "Das DBMS entscheidet für jede Aktion, ob die anfragende Person sie ausführen darf. Fehlt das, könnte jeder mit Netzzugang alle Daten lesen und ändern."
+    - text: "Datensicherung (Recovery)"
+      correct: true
+      explain: "Geht durch einen Defekt, Absturz oder Bedienfehler etwas verloren, muss sich ein brauchbarer früherer Stand zurückholen lassen."
+    - text: "Normalisierung aller Tabellen bis zur 3. Normalform"
+      correct: false
+      explain: "Normalisierung ist eine Entwurfsaufgabe der Menschen (siehe t07), keine Funktion, die das DBMS erbringt."
+    - text: "Modellierung der Miniwelt als ER-Diagramm"
+      correct: false
+      explain: "Das ER-Modell entwerfen Menschen in der Rolle Datenbankdesigner (siehe t04), bevor es ein Schema gibt. Das DBMS verwaltet erst das fertige Schema. Verschiedene Zugangswege wie grafische Oberflächen gehören dagegen sehr wohl zur Anforderung Operationen (Sprache)."
+- id: t01-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [codd-regeln]
+  type: single
+  question: |-
+    Wofür hat Codd seine zwölf Regeln (gezählt von 0 bis 12, also eigentlich 13) formuliert?
+  options:
+    - text: "Als Prüfkriterien, ob ein DBMS als relational gelten darf"
+      correct: true
+      explain: "Die Regeln richten sich an relationale DBMS und sollten verhindern, dass Hersteller Systeme ohne echte relationale Arbeitsweise als relational bewerben."
+    - text: "Als Leistungsmaßstab, um die Abfragegeschwindigkeit verschiedener DBMS miteinander zu vergleichen"
+      correct: false
+      explain: "Die Regeln sagen nichts darüber, wie schnell ein System Anfragen beantwortet. Sie beschreiben Eigenschaften wie die Behandlung von NULL oder den Online-Katalog, an denen man ein relationales System erkennt. Geschwindigkeitsvergleiche sind Aufgabe von Benchmarks."
+    - text: "Als Regeln für den Entwurf normalisierter Tabellen"
+      correct: false
+      explain: "Die Regeln bewerten das DBMS, nicht den Tabellenentwurf. Für den Entwurf gibt es die Normalformen (siehe t07)."
+    - text: "Als Bewertungskriterien für OLAP-Analysewerkzeuge"
+      correct: false
+      explain: "Auch dafür hat Codd zwölf Regeln aufgestellt, aber das ist ein anderer, späterer Regelsatz."
+- id: t01-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [codd-regeln, datenunabhaengigkeit]
+  type: truefalse
+  question: |-
+    Nach Codds Regel 8 (physische Datenunabhängigkeit) dürfen Anwendungsprogramme nicht geändert werden müssen, wenn der DBA für eine Tabelle einen zusätzlichen Index anlegt.
+  options:
+    - text: "Wahr"
+      correct: true
+      explain: "Ein Index ändert nur die Speicher- und Zugriffsstruktur. Die Anwendungen formulieren dieselben Anfragen wie vorher."
+    - text: "Falsch"
+      correct: false
+      explain: "Gerade solche physischen Änderungen sollen vor den Anwendungen verborgen bleiben. Das ist der Kern von Regel 8."
