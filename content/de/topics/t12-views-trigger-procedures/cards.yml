@@ -1,0 +1,210 @@
+- id: t12-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, definition, externe-ebene]
+  front: "Was ist eine Sicht (*View*), was speichert das DBMS dafür, und zu welcher Ebene gehört sie?"
+  back: |-
+    Eine Sicht ist eine **virtuelle Tabelle**, die über eine gespeicherte Abfrage definiert ist (`CREATE VIEW name AS SELECT …`).
+
+    Gespeichert wird nur die **Definition**, nicht die Zeilen. Bei jedem Zugriff wertet das DBMS die Abfrage auf den aktuellen Basistabellen aus.
+
+    Sichten sind Bausteine der **externen Ebene** (externe Schemata) und werden in der Phase Datendefinition angelegt.
+- id: t12-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, zweck, datenschutz, datenunabhaengigkeit]
+  front: "Nenne drei Zwecke von Sichten mit je einem kurzen Beispiel."
+  back: |-
+    - **Vereinfachung:** Ein komplizierter Join steht einmal in der Sicht, Nutzer fragen nur `SELECT * FROM v_bestellübersicht` ab.
+    - **Datenschutz:** Die Sicht zeigt Name und Telefon, aber kein Gehalt; Rechte bekommt man nur auf die Sicht.
+    - **Logische Datenunabhängigkeit:** Ändert sich das Tabellenschema, passt man die Sicht an, und Programme, die die Sicht lesen, laufen unverändert weiter.
+- id: t12-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, aenderbare-sicht, firebird]
+  front: "Wann ist eine Sicht in Firebird 3 automatisch änderbar (INSERT, UPDATE, DELETE)?"
+  back: |-
+    Wenn sie
+    - aus **einer** Tabelle (oder änderbaren Sicht) liest, ohne Join und ohne Mengenoperation,
+    - keine Aggregate, Fensterfunktionen, GROUP BY/HAVING/ORDER BY, kein DISTINCT, keine Zeilenbegrenzung und keine Unterabfragen oder Ausdrücke als Spalten hat,
+    - und jede weggelassene Spalte der Basistabelle NULL erlaubt, einen Default hat oder per Trigger gefüllt wird.
+
+    PostgreSQL lässt berechnete Spalten zu (nur sie sind dann nicht änderbar), SQLite-Sichten sind nie änderbar.
+- id: t12-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, aenderbare-sicht, aggregation]
+  front: "Warum ist eine Sicht mit `GROUP BY` und `SUM(...)` grundsätzlich nicht änderbar?"
+  back: |-
+    Eine Zeile der Sicht fasst **viele** Basiszeilen zusammen. Bei `UPDATE v SET summe = 1000` ist nicht festgelegt, welche Basiszeilen sich wie ändern sollen. Das DBMS kann die Änderung nicht eindeutig zurückübersetzen und lehnt sie ab.
+- id: t12-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, with-check-option]
+  front: "Was bewirkt `WITH CHECK OPTION` bei einer änderbaren Sicht?"
+  back: |-
+    INSERT und UPDATE über die Sicht werden **abgewiesen**, wenn die Zeile danach die WHERE-Bedingung der Sicht nicht mehr erfüllt, also aus der Sicht „herausfallen“ würde.
+
+    Beispiel: Sicht `WHERE aktiv = TRUE` mit Check Option: `UPDATE v SET aktiv = FALSE …` scheitert.
+- id: t12-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, materialisierte-sicht]
+  front: "Worin unterscheidet sich eine materialisierte Sicht von einer normalen Sicht?"
+  back: |-
+    Eine **materialisierte Sicht** speichert das Abfrageergebnis wie eine Tabelle. Lesen ist schnell, aber die Daten können veraltet sein, bis sie aufgefrischt werden (in PostgreSQL `REFRESH MATERIALIZED VIEW`).
+
+    Eine normale Sicht speichert nur die Abfrage und ist immer aktuell. Firebird 3 kennt keine materialisierten Sichten.
+- id: t12-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, definition]
+  front: "Was ist ein Trigger (Auslöser), und aus welchen Bestandteilen besteht er?"
+  back: |-
+    Ein im DBMS gespeichertes Programm, das **automatisch** bei einer Datenänderung läuft. Bestandteile:
+    - **Name**,
+    - **auslösende Datenbankoperation:** Ereignis (INSERT, UPDATE, DELETE) auf einer Tabelle (oder Sicht),
+    - **Zeitpunkt:** BEFORE oder AFTER,
+    - **Folgeaktionen:** der Rumpf, der dann ausgeführt wird.
+- id: t12-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, before, after]
+  front: "Wofür nimmt man einen BEFORE-, wofür einen AFTER-Trigger?"
+  back: |-
+    - **BEFORE:** Werte der neuen Zeile prüfen oder ändern, bevor sie geschrieben wird (`NEW.x = …`), z. B. Text normalisieren, Wert ableiten, Regelverstoß mit Fehler abweisen.
+    - **AFTER:** auf die fertige Änderung reagieren, z. B. Protokoll schreiben oder andere Tabellen nachziehen. `NEW` ist dort nur lesbar.
+- id: t12-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, new, old]
+  front: "Welche der Kontextvariablen `NEW` und `OLD` gibt es bei INSERT, UPDATE und DELETE, und welche darf man ändern?"
+  back: |-
+    | Ereignis | OLD | NEW |
+    | --- | --- | --- |
+    | INSERT | nicht vorhanden | neue Zeile |
+    | UPDATE | Zeile vorher | Zeile nachher |
+    | DELETE | gelöschte Zeile | nicht vorhanden |
+
+    `OLD` ist immer nur lesbar. `NEW` darf man nur in einem **BEFORE**-Trigger ändern (berechnete Spalten ausgenommen). Auf die fehlende Zeile greift man nicht zu; PostgreSQL liefert dort NULL.
+- id: t12-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [integritaet, trigger, constraint, dynamische-integritaet]
+  front: "Erkläre statische und dynamische Integritätsbedingungen sowie deklarative und prozedurale Sicherung. Welche Bedingungen brauchen typischerweise einen Trigger?"
+  back: |-
+    Viele Lehrbücher setzen gleich: **statisch = deklarativ** (bei der Tabellendefinition festgelegt, gilt in jedem Zustand) und **dynamisch = prozedural** (vergleicht Zustand vor und nach einer Änderung, nur zur Laufzeit prüfbar).
+
+    Feiner: statisch/dynamisch beschreibt die Bedingung („Preis ≥ 0“ bzw. „Lieferdatum darf nachträglich nicht vorverlegt werden“), deklarativ/prozedural die Umsetzung (Constraint bzw. Programm, meist Trigger).
+
+    Trigger braucht man für dynamische Bedingungen (sie sehen `OLD` und `NEW`) und für zuverlässige Regeln über andere Tabellen.
+- id: t12-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [psql, set-term, firebird]
+  front: "Warum schreibt man in Firebird-Skripten `SET TERM ^ ;` vor ein `CREATE TRIGGER`?"
+  back: |-
+    Das Skriptwerkzeug (isql) beendet eine Anweisung am `;`. Der Rumpf eines Triggers enthält selbst Semikolons. `SET TERM ^ ;` macht `^` zum Endezeichen, der Rumpf endet mit `END^`. Danach stellt `SET TERM ; ^` das Semikolon wieder her. `SET TERM` ist ein Befehl des Werkzeugs, kein SQL.
+- id: t12-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [stored-procedure, definition]
+  front: "Was ist eine Stored Procedure (gespeicherte Prozedur), und welche Vorteile hat sie?"
+  back: |-
+    Ein benanntes Programm mit Parametern, das in der Datenbank gespeichert ist und **auf dem Server** läuft.
+
+    Vorteile: mehrere Schritte mit einem Aufruf (weniger Netzverkehr), Logik an einer Stelle für alle Anwendungen, Rechte nur auf die Prozedur statt auf die Tabellen.
+    Nachteil: herstellerspezifische Sprache (PSQL, PL/pgSQL, PL/SQL), also schlecht portierbar.
+- id: t12-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [stored-procedure, suspend, execute-procedure, firebird]
+  front: "Wie unterscheiden sich in Firebird ausführbare und selektierbare Prozeduren, und wie ruft man sie auf?"
+  back: |-
+    - **Ausführbar:** erledigt Arbeit (meist Änderungen), liefert höchstens eine Zeile Ausgabewerte. Aufruf: `EXECUTE PROCEDURE p(…);`
+    - **Selektierbar:** liefert mit `SUSPEND` beliebig viele Zeilen, wirkt wie eine Tabelle. Aufruf: `SELECT … FROM p(…);`
+
+    PostgreSQL: `CALL p(…)` für Prozeduren, `SELECT * FROM f(…)` für Funktionen mit `RETURNS TABLE`.
+- id: t12-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [index, zweck, kosten, interne-ebene]
+  front: "Was leistet ein Index, welchen Preis hat er, und in welche Entwurfsphase gehört er?"
+  back: |-
+    Er ordnet jedem Suchschlüssel die Fundstellen der passenden Zeilen zu. Eine Suche springt dadurch gezielt zu den Treffern, statt jede Zeile zu prüfen.
+
+    Preis: Er ist Redundanz und muss bei jeder Schreibänderung, die seine Spalten berührt, nachgezogen werden; Lesen wird schneller, Schreiben langsamer.
+
+    Er gehört zur internen Ebene und zum **physischen Entwurf**, auch wenn `CREATE INDEX` DDL-Syntax ist.
+- id: t12-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [index, b-baum]
+  front: "Wie funktioniert ein B-Baum-Index grob, und warum ist die Suche schnell?"
+  back: |-
+    Ein balancierter Mehrwegbaum: Innere Knoten enthalten Trennschlüssel und Verweise auf Kindknoten, die Blätter verweisen auf die Zeilen (B+-Baum, in deutschen Lehrbüchern auch B*-Baum). Alle Blätter liegen gleich tief.
+
+    Eine Suche läuft von der Wurzel zum Blatt: wenige Knoten, auch bei Millionen Zeilen (logarithmischer Aufwand statt Durchlesen der ganzen Tabelle).
+- id: t12-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [index, primary-key, unique, fremdschluessel]
+  front: "Für welche Constraints legt das DBMS automatisch einen Index an? Wo unterscheiden sich Firebird 3 und PostgreSQL?"
+  back: |-
+    - **PRIMARY KEY** und **UNIQUE**: in beiden Systemen automatisch ein eindeutiger Index.
+    - **FOREIGN KEY**: Firebird legt automatisch einen Index auf die Fremdschlüsselspalten an, PostgreSQL **nicht**. Dort legt man ihn bei Bedarf selbst an.
+- id: t12-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [index, selektivitaet]
+  front: "Welche drei Fragen entscheiden, ob sich ein zusätzlicher Index lohnt?"
+  back: |-
+    1. **Häufigkeit:** Wird oft über diese Spalte gesucht, verbunden oder sortiert, und ist die Tabelle groß genug, dass Durchlesen spürbar dauert?
+    2. **Eingrenzung:** Trifft die Bedingung nur einen kleinen Teil der Zeilen (hohe Selektivität)? Bei „ja/nein“-Spalten meist nicht.
+    3. **Schreiblast:** Wird die Spalte viel öfter geändert als gesucht? Dann überwiegt der Pflegeaufwand.
+- id: t12-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [index, zusammengesetzter-index]
+  front: "Ein Index liegt auf `(nachname, vorname)`. Bei welchen Bedingungen hilft er gut, bei welcher kaum?"
+  back: |-
+    Gut: `WHERE nachname = 'Roth'`, `WHERE nachname = 'Roth' AND vorname = 'Ida'`, `WHERE nachname LIKE 'Ro%'` (PostgreSQL: nur mit Sortierung `C` oder `text_pattern_ops`).
+
+    Kaum: `WHERE vorname = 'Ida'`. Die Einträge sind zuerst nach `nachname` geordnet, gleiche Vornamen liegen über den ganzen Index verteilt.
+- id: t12-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, plpgsql, dialekt, standardform]
+  front: "Wie unterscheiden sich Standardform, Firebird PSQL und PostgreSQL bei einem Zeilentrigger?"
+  back: |-
+    - **Norm:** `CREATE TRIGGER … BEFORE UPDATE ON t REFERENCING OLD ROW AS a NEW ROW AS n FOR EACH ROW WHEN (…) anweisung`; ohne Angabe gilt `FOR EACH STATEMENT`.
+    - **Firebird:** Rumpf direkt im Trigger, `OLD`/`NEW` fest, immer zeilenweise, Zuweisung `=`.
+    - **PostgreSQL:** Funktion `RETURNS trigger` (BEFORE: `RETURN NEW` bei INSERT/UPDATE, `RETURN OLD` bei DELETE), dann `CREATE TRIGGER … FOR EACH ROW EXECUTE FUNCTION f();`. Ohne `FOR EACH ROW` ist es ein Anweisungstrigger.
+- id: t12-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, inserting, updating, deleting, firebird]
+  front: "Wozu dienen `INSERTING`, `UPDATING` und `DELETING` in einem Firebird-Trigger?"
+  back: |-
+    Es sind Boolesche Kontextvariablen. In einem Trigger für mehrere Ereignisse (`AFTER INSERT OR UPDATE OR DELETE`) zeigen sie, welches Ereignis ihn gerade ausgelöst hat.
+
+    So greift man nur auf die Zeile zu, die es gibt: `NEW` bei INSERTING/UPDATING, `OLD` bei UPDATING/DELETING. Typisch für Änderungsprotokolle mit Aktionsart oder für Zähltabellen.
+- id: t12-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [datenunabhaengigkeit, view, index]
+  front: "Wie hängen Sichten und Indexe mit logischer und physischer Datenunabhängigkeit zusammen?"
+  back: |-
+    - **Logisch:** Ändert sich das konzeptionelle Schema (Tabelle wird aufgeteilt), passt man die Sicht an; Programme auf der externen Ebene merken nichts.
+    - **Physisch:** Ändert sich die interne Ebene (neuer Index, andere Speicherung), bleiben Tabellen, Sichten und Ergebnisse gleich; nur der Zugriff wird schneller oder langsamer.
+- id: t12-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [integritaet, check, assertion, firebird]
+  front: "Lässt sich eine Regel über zwei Tabellen als CHECK oder ASSERTION formulieren? Wo liegt die Grenze?"
+  back: |-
+    - **Norm:** `CREATE ASSERTION` für Bedingungen über die ganze Datenbank, bei jeder betroffenen Änderung geprüft, also zuverlässig. Weder Firebird noch PostgreSQL setzen sie um.
+    - **Firebird 3:** CHECK mit Unterabfrage ist erlaubt, wird aber nur geprüft, wenn die **eigene Zeile** eingefügt oder geändert wird. Ändert sich die andere Tabelle, bleibt die Verletzung unbemerkt.
+    - **PostgreSQL:** Unterabfragen im CHECK verboten.
+
+    In Firebird und PostgreSQL zuverlässig nur mit Triggern auf allen beteiligten Tabellen.

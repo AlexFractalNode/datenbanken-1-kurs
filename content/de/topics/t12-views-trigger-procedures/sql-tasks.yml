@@ -1,0 +1,572 @@
+- id: t12-s001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, create-view, join, left-join]
+  db: musikschule
+  kind: ddl
+  engines: [fb, pg]
+  prompt: |-
+    Das Sekretariat braucht eine Kursübersicht, ohne selbst Joins schreiben zu müssen. Lege die Sicht `v_kursplan` an. Sie enthält für **jeden** Kurs diese Spalten:
+
+    - `kurs_id` und `titel` des Kurses
+    - `lehrkraft_id` (Schlüssel der Lehrkraft)
+    - `lehrkraft`: Vor- und Nachname der Lehrkraft, durch ein Leerzeichen getrennt
+    - `raum`: Bezeichnung des Raums. Kurse ohne festen Raum sollen trotzdem erscheinen, dann mit `raum` = NULL.
+
+    Geprüft wird mit `SELECT titel, lehrkraft, raum FROM v_kursplan WHERE lehrkraft_id = 8`.
+
+    Überlege zusätzlich: Kann man über diese Sicht den Titel eines Kurses ändern? Begründe kurz.
+  solution: |-
+    CREATE VIEW v_kursplan (kurs_id, titel, lehrkraft_id, lehrkraft, raum) AS
+    SELECT k.kurs_id,
+           k.titel,
+           k.lehrkraft_id,
+           p.vorname || ' ' || p.nachname,
+           r.bezeichnung
+    FROM kurs k
+    JOIN person p ON p.person_id = k.lehrkraft_id
+    LEFT JOIN raum r ON r.raum_id = k.raum_id;
+
+    -- Erwartet: zwei Zeilen fuer Lehrkraft 8, Musiktheorie mit raum NULL und Chor im Saal.
+    -- Mit einem inneren Join auf raum fehlte Musiktheorie.
+    -- Aenderbar? Nein, nicht automatisch: Die Sicht verbindet drei Tabellen,
+    -- und die Spalte lehrkraft ist ein berechneter Ausdruck.
+  check: SELECT titel, lehrkraft, raum FROM v_kursplan WHERE lehrkraft_id = 8
+  dialect_note: "Gleiche Syntax in Firebird 3 und PostgreSQL. Die Spaltenliste hinter dem Sichtnamen benennt auch den berechneten Ausdruck; alternativ ginge ein Alias `AS lehrkraft` im SELECT."
+  hints:
+    - "`kurs.lehrkraft_id` verweist auf `lehrkraft.person_id`, und das ist zugleich der Schlüssel in `person`. Für den Namen kannst du deshalb direkt mit `person` verbinden."
+    - "Ein innerer Join mit `raum` verliert den Kurs ohne festen Raum. Welcher Join behält ihn?"
+    - "Für die Denkfrage: Überlege, aus wie vielen Tabellen eine Zeile der Sicht stammt."
+  paper_mode: write
+- id: t12-s002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, aggregation, datenschutz, left-join, "null"]
+  db: firma
+  kind: ddl
+  engines: [fb, pg]
+  prompt: |-
+    Die Geschäftsführung will je Abteilung sehen, wie viele Mitarbeitende dort arbeiten und wie hoch die monatliche Gehaltssumme ist. Einzelgehälter sollen dabei nicht sichtbar sein. Lege die Sicht `v_abteilungsstatistik` mit den Spalten `abteilung_id`, `bezeichnung`, `anzahl` und `gehaltssumme` an. Eine Abteilung ohne Mitarbeitende erscheint mit `anzahl` = 0 und `gehaltssumme` = 0.
+
+    Geprüft wird mit `SELECT bezeichnung, anzahl, gehaltssumme FROM v_abteilungsstatistik WHERE anzahl < 3`.
+
+    Warum kann über diese Sicht niemand ein Gehalt ändern?
+  solution: |-
+    CREATE VIEW v_abteilungsstatistik (abteilung_id, bezeichnung, anzahl, gehaltssumme) AS
+    SELECT a.abteilung_id,
+           a.bezeichnung,
+           COUNT(m.mitarbeiter_id),
+           COALESCE(SUM(m.gehalt), 0)
+    FROM abteilung a
+    LEFT JOIN mitarbeiter m ON m.abteilung_id = a.abteilung_id
+    GROUP BY a.abteilung_id, a.bezeichnung;
+
+    -- Erwartet: Geschaeftsfuehrung 2 / 13750.00 und Forschung 0 / 0.
+    -- Kein Gehalt aenderbar: Eine Zeile der Sicht fasst alle Mitarbeitenden einer
+    -- Abteilung zusammen (GROUP BY, SUM). Das DBMS kann eine Aenderung von
+    -- gehaltssumme keiner einzelnen Zeile von mitarbeiter zuordnen; die Sicht ist nur lesbar.
+  check: SELECT bezeichnung, anzahl, gehaltssumme FROM v_abteilungsstatistik WHERE anzahl < 3
+  dialect_note: "Gleiche Syntax in beiden Systemen; in beiden ist eine Sicht mit GROUP BY und Aggregaten nicht änderbar."
+  hints:
+    - "`COUNT(m.mitarbeiter_id)` zählt nur Zeilen, in denen es wirklich einen Mitarbeiter gibt. `COUNT(*)` ergäbe für die leere Abteilung 1."
+    - "`SUM` über keine Zeilen liefert NULL. `COALESCE` macht daraus 0."
+    - "Die Prüfabfrage darf mit WHERE auf `anzahl` filtern, weil die Sicht für sie wie eine fertige Tabelle wirkt. In der Sicht selbst könnte man ein Aggregat nur mit HAVING filtern."
+  paper_mode: write
+- id: t12-s003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, with-check-option, aenderbare-sicht, update]
+  db: musikschule
+  kind: ddl
+  engines: [fb, pg]
+  prompt: |-
+    Die Klavierlehrkräfte sollen nur Räume mit Klavier pflegen. Lege die Sicht `v_klavierraum` an. Sie zeigt aus `raum` die Spalten `raum_id`, `bezeichnung`, `etage`, `plaetze` und `hat_klavier`, aber nur für Räume mit Klavier. Über die Sicht darf kein Raum so geändert werden, dass er aus ihr herausfällt.
+
+    Erhöhe danach **über die Sicht** die Platzzahl von `R102` um 2.
+
+    Ausgangsdaten: R101 (4 Plätze), R102 (2 Plätze) und Saal (30 Plätze) haben ein Klavier, R201, R202 und Keller nicht.
+
+    Sage vorher:
+
+    1. Was liefert danach `SELECT bezeichnung, plaetze FROM v_klavierraum`?
+    2. Was passiert bei `UPDATE v_klavierraum SET hat_klavier = FALSE WHERE bezeichnung = 'Saal'`?
+    3. Was passiert bei `UPDATE v_klavierraum SET plaetze = 10 WHERE bezeichnung = 'R201'`?
+
+    Hinweis: Der automatische Vergleich prüft nur den Datenteil (Frage 1). Ob deine Check Option wirkt, sicherst du über die Vorhersage zu Frage 2 ab.
+  solution: |-
+    CREATE VIEW v_klavierraum AS
+    SELECT raum_id, bezeichnung, etage, plaetze, hat_klavier
+    FROM raum
+    WHERE hat_klavier = TRUE
+    WITH CHECK OPTION;
+
+    UPDATE v_klavierraum
+    SET plaetze = plaetze + 2
+    WHERE bezeichnung = 'R102';
+
+    -- 1. R101 4, R102 4, Saal 30.
+    -- 2. Abgewiesen mit Fehler: Der Saal erfuellte danach die Bedingung
+    --    hat_klavier = TRUE nicht mehr und fiele aus der Sicht (Check Option).
+    -- 3. Kein Fehler, aber 0 geaenderte Zeilen: R201 hat kein Klavier und ist
+    --    in der Sicht gar nicht sichtbar, also trifft das UPDATE nichts.
+  check: SELECT bezeichnung, plaetze FROM v_klavierraum
+  dialect_note: "Gleiche Syntax in beiden Systemen. PostgreSQL versteht `WITH CHECK OPTION` ohne Zusatz als `WITH CASCADED CHECK OPTION`, prüft also auch die Bedingungen darunterliegender Sichten; Firebird 3 kennt die Zusätze LOCAL und CASCADED nicht und prüft die Eingabe gegen die WHERE-Bedingung, bevor sie an die Basistabelle geht."
+  hints:
+    - "Eine Sicht auf **eine** Tabelle ohne Join, Aggregat und DISTINCT ist automatisch änderbar."
+    - "`WITH CHECK OPTION` steht ganz am Ende der Sichtdefinition und braucht eine WHERE-Bedingung."
+    - "Für Frage 3: Welche Zeilen kann ein UPDATE über die Sicht überhaupt treffen?"
+  paper_mode: predict
+- id: t12-s004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [index, create-index, zusammengesetzter-index, systemtabellen, firebird]
+  db: firma
+  kind: ddl
+  engines: [fb]
+  prompt: |-
+    Die Personalabteilung sucht Mitarbeitende oft über den Nachnamen, manchmal zusätzlich über den Vornamen. Lege den Index `ix_mitarbeiter_name` über `nachname` und `vorname` (in dieser Reihenfolge) an.
+
+    Weil ein Index das Ergebnis einer Abfrage nie ändert, kontrolliert man hier den Systemkatalog von Firebird. Zur Selbstkontrolle lokal in Firebird:
+
+    ```sql
+    SELECT TRIM(RDB$FIELD_NAME) AS spalte, RDB$FIELD_POSITION AS pos
+    FROM RDB$INDEX_SEGMENTS
+    WHERE RDB$INDEX_NAME = 'IX_MITARBEITER_NAME'
+    ORDER BY RDB$FIELD_POSITION
+    ```
+
+    Die Abfrage listet die Spalten des Index mit ihrer Position.
+
+    Überlege: Hilft dieser Index bei `WHERE nachname LIKE 'Frank%'`? Und bei `WHERE vorname = 'Lars'`? Ändert er das Ergebnis dieser Abfragen?
+  solution: |-
+    CREATE INDEX ix_mitarbeiter_name ON mitarbeiter (nachname, vorname);
+
+    -- Erwartet im Check: NACHNAME an Position 0, VORNAME an Position 1.
+    -- LIKE mit festem Praefix: ja, der Index ist zuerst nach nachname geordnet,
+    -- die Treffer liegen zusammen.
+    -- WHERE vorname = Lars: hilft kaum, denn die erste Indexspalte nachname ist
+    -- nicht eingeschraenkt; gleiche Vornamen liegen ueber den ganzen Index verteilt.
+    -- Ergebnis: in beiden Faellen dasselbe wie ohne Index, nur der Zugriffsweg aendert sich.
+  check: SELECT TRIM(RDB$FIELD_NAME) AS spalte, RDB$FIELD_POSITION AS pos FROM RDB$INDEX_SEGMENTS WHERE RDB$INDEX_NAME = 'IX_MITARBEITER_NAME' ORDER BY RDB$FIELD_POSITION
+  ordered: true
+  dialect_note: "Nur Firebird, weil der Check die Systemtabelle `RDB$INDEX_SEGMENTS` liest. Firebird speichert Bezeichner ohne Anführungszeichen in Großbuchstaben. Die `CREATE INDEX`-Anweisung selbst ist in PostgreSQL gleich; dort prüft man mit `SELECT indexdef FROM pg_indexes WHERE indexname = 'ix_mitarbeiter_name'`. Firebird legt die Sortierrichtung für den ganzen Index fest (`CREATE DESCENDING INDEX …`), PostgreSQL je Spalte. Firebird legt zu jedem Fremdschlüssel automatisch einen Index an, PostgreSQL nicht. In PostgreSQL nutzt ein B-Baum `LIKE 'Frank%'` nur bei Sortierung `C` oder mit `text_pattern_ops`."
+  hints:
+    - "Syntax: `CREATE INDEX name ON tabelle (spalte1, spalte2);`"
+    - "Ein zusammengesetzter Index ordnet zuerst nach der ersten Spalte und nur innerhalb gleicher Werte nach der zweiten."
+    - "Für die Denkfrage: Welche Bedingung liefert einen festen Einstiegspunkt in diese Ordnung?"
+  paper_mode: write
+- id: t12-s005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, before-insert, new, psql, abgeleiteter-wert, firebird]
+  db: musikschule
+  kind: ddl
+  engines: [fb]
+  prompt: |-
+    Ermäßigte Schülerinnen und Schüler sollen bei einer neuen Belegung automatisch 25 % Rabatt bekommen, wenn beim Einfügen kein Rabatt angegeben ist (`rabatt_prozent` = 0). Ein ausdrücklich angegebener anderer Rabatt bleibt unverändert.
+
+    Schreibe in Firebird PSQL den Trigger `trg_belegung_rabatt`, der das vor dem Einfügen in `belegung` erledigt. Teste ihn danach mit diesen drei Anmeldungen zum Kurs 13 am 20.01.2025:
+
+    | `schueler_id` | ermäßigt? | angegebener Rabatt |
+    | --- | --- | --- |
+    | 11 | ja | 0 |
+    | 16 | ja | 10 |
+    | 9 | nein | 0 |
+
+    Sage vorher, was `SELECT schueler_id, rabatt_prozent FROM belegung WHERE kurs_id = 13` danach liefert. (Kurs 13 hat vorher keine Belegungen.)
+
+    Hinweis: Der Check vergleicht nur das Ergebnis. Dass der Rabatt per Trigger entsteht und nicht fest eingetragen wird, gehört zur Musterlösung.
+  solution: |-
+    SET TERM ^ ;
+
+    CREATE TRIGGER trg_belegung_rabatt FOR belegung
+    ACTIVE BEFORE INSERT POSITION 0
+    AS
+    BEGIN
+      IF (NEW.rabatt_prozent = 0
+          AND EXISTS (SELECT 1
+                      FROM schueler s
+                      WHERE s.person_id = NEW.schueler_id
+                        AND s.ermaessigt = TRUE)) THEN
+        NEW.rabatt_prozent = 25;
+    END^
+
+    SET TERM ; ^
+
+    INSERT INTO belegung (schueler_id, kurs_id, angemeldet_am, rabatt_prozent)
+    VALUES (11, 13, DATE '2025-01-20', 0);
+
+    INSERT INTO belegung (schueler_id, kurs_id, angemeldet_am, rabatt_prozent)
+    VALUES (16, 13, DATE '2025-01-20', 10);
+
+    INSERT INTO belegung (schueler_id, kurs_id, angemeldet_am, rabatt_prozent)
+    VALUES (9, 13, DATE '2025-01-20', 0);
+
+    -- Erwartet: (9, 0), (11, 25), (16, 10).
+    -- 11 ist ermaessigt und ohne Rabatt angemeldet, der Trigger setzt 25.
+    -- 16 ist ermaessigt, hat aber schon 10, das bleibt.
+    -- 9 ist nicht ermaessigt, bleibt bei 0.
+  check: SELECT schueler_id, rabatt_prozent FROM belegung WHERE kurs_id = 13
+  dialect_note: "Nur Firebird (PSQL). `SET TERM` stellt das Endezeichen des Skripts auf `^` um, damit die Semikolons im Triggerrumpf die Anweisung nicht vorzeitig beenden. PostgreSQL-Skizze (nicht getestet): eine Funktion `RETURNS trigger LANGUAGE plpgsql`, die im IF `NEW.rabatt_prozent := 25` setzt und `RETURN NEW` liefert, angehängt mit `CREATE TRIGGER trg_belegung_rabatt BEFORE INSERT ON belegung FOR EACH ROW EXECUTE FUNCTION …`."
+  hints:
+    - "Den neuen Wert kann man nur in einem BEFORE-Trigger über `NEW.spalte = …` ändern."
+    - "Ob jemand ermäßigt ist, steht in `schueler.ermaessigt`. Die Verbindung ist `schueler.person_id = NEW.schueler_id`."
+    - "In Firebird gibt es kein `END IF`: Nach `THEN` folgt eine einzelne Anweisung oder ein Block `BEGIN … END`. Auf Papier ist auch die Standardform (`… ON belegung FOR EACH ROW …`, `IF … END IF`) richtig."
+  paper_mode: write
+- id: t12-s006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, after-update, old, new, protokollierung, psql, firebird]
+  db: firma
+  kind: ddl
+  engines: [fb]
+  prompt: |-
+    Jede Gehaltsänderung soll protokolliert werden. Lege dazu die Tabelle `gehalt_protokoll` an:
+
+    - `protokoll_id`: Identity-Spalte, Primärschlüssel
+    - `mitarbeiter_id`: Pflicht (bewusst **ohne** Fremdschlüssel, damit das Protokoll auch nach dem Löschen einer Person erhalten bleibt)
+    - `gehalt_alt`, `gehalt_neu`: `NUMERIC(9,2)`, Pflicht
+    - `geaendert_am`: Zeitstempel, Pflicht, Standard aktueller Zeitpunkt
+    - `geaendert_von`: Text bis 63 Zeichen, Pflicht, Standard aktueller Benutzer
+
+    Schreibe dann den Trigger `trg_mitarbeiter_gehalt`, der **nach** jeder Änderung einer Zeile in `mitarbeiter` einen Protokolleintrag schreibt, aber nur, wenn sich das Gehalt wirklich geändert hat.
+
+    Teste mit zwei Anweisungen: Alle Mitarbeitenden der Abteilung 4 bekommen 150 mehr, und Mitarbeiter 2 bekommt die Provision 400,00.
+
+    Geprüft wird mit `SELECT mitarbeiter_id, gehalt_alt, gehalt_neu FROM gehalt_protokoll`. Der Check vergleicht nur die Protokollzeilen; Zeitpunkt (AFTER) und die Defaults für Zeit und Benutzer gehören zur Musterlösung.
+  solution: |-
+    CREATE TABLE gehalt_protokoll (
+        protokoll_id   INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+        mitarbeiter_id INTEGER NOT NULL,
+        gehalt_alt     NUMERIC(9,2) NOT NULL,
+        gehalt_neu     NUMERIC(9,2) NOT NULL,
+        geaendert_am   TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        geaendert_von  VARCHAR(63) DEFAULT CURRENT_USER NOT NULL
+    );
+
+    SET TERM ^ ;
+
+    CREATE TRIGGER trg_mitarbeiter_gehalt FOR mitarbeiter
+    ACTIVE AFTER UPDATE POSITION 0
+    AS
+    BEGIN
+      IF (NEW.gehalt IS DISTINCT FROM OLD.gehalt) THEN
+        INSERT INTO gehalt_protokoll (mitarbeiter_id, gehalt_alt, gehalt_neu)
+        VALUES (NEW.mitarbeiter_id, OLD.gehalt, NEW.gehalt);
+    END^
+
+    SET TERM ; ^
+
+    UPDATE mitarbeiter SET gehalt = gehalt + 150 WHERE abteilung_id = 4;
+
+    UPDATE mitarbeiter SET provision = 400.00 WHERE mitarbeiter_id = 2;
+
+    -- Erwartet: vier Zeilen, je eine fuer die Mitarbeitenden 4, 13, 14 und 15:
+    -- (4, 6700.00, 6850.00), (13, 3500.00, 3650.00), (14, 4200.00, 4350.00), (15, 5000.00, 5150.00).
+    -- Das zweite UPDATE feuert den Trigger, aendert aber kein Gehalt und schreibt nichts.
+  check: SELECT mitarbeiter_id, gehalt_alt, gehalt_neu FROM gehalt_protokoll
+  dialect_note: "Nur Firebird (PSQL). Firebird-DML-Trigger feuern einmal je betroffener Zeile. `IS DISTINCT FROM` behandelt NULL wie einen Wert; bei der NOT-NULL-Spalte `gehalt` ginge auch `<>`, bei NULL-fähigen Spalten nicht. PostgreSQL-Skizze (nicht getestet): Triggerfunktion mit `RETURNS trigger` und `RETURN NULL;` (bei AFTER wird der Rückgabewert ignoriert), angehängt mit `CREATE TRIGGER … AFTER UPDATE ON mitarbeiter FOR EACH ROW EXECUTE FUNCTION …`; ohne `FOR EACH ROW` wäre es dort ein Anweisungstrigger."
+  hints:
+    - "In einem UPDATE-Trigger gibt es beide Zeilen: `OLD` (vorher) und `NEW` (nachher)."
+    - "Ein AFTER-Trigger darf `NEW` nur lesen. Für ein Protokoll genügt das."
+    - "`CURRENT_TIMESTAMP` und `CURRENT_USER` sind Kontextvariablen und deshalb in Firebird als DEFAULT erlaubt. Auf Papier ist auch die Standardform mit `FOR EACH ROW` richtig."
+  paper_mode: write
+- id: t12-s007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [stored-procedure, selektierbare-prozedur, suspend, psql, firebird]
+  db: musikschule
+  kind: ddl
+  engines: [fb]
+  prompt: |-
+    Lehrkräfte wollen für ihre eigenen Kurse sehen, wie viele Plätze noch frei sind. Schreibe die selektierbare Prozedur `kurs_auslastung` mit dem Eingabeparameter `p_lehrkraft_id` (ganze Zahl). Sie liefert je Kurs dieser Lehrkraft eine Zeile mit
+
+    - `titel` (bis 60 Zeichen),
+    - `belegt`: Anzahl der Belegungen, die nicht abgemeldet sind,
+    - `frei`: `max_teilnehmer` minus `belegt`.
+
+    Kurse ganz ohne Belegung erscheinen mit `belegt` = 0.
+
+    Geprüft wird mit zwei Aufrufen, für Lehrkraft 1 und für Lehrkraft 4:
+
+    ```sql
+    SELECT 1 AS lehrkraft, titel, belegt, frei FROM kurs_auslastung(1)
+    UNION ALL
+    SELECT 4, titel, belegt, frei FROM kurs_auslastung(4)
+    ```
+  solution: |-
+    SET TERM ^ ;
+
+    CREATE PROCEDURE kurs_auslastung (p_lehrkraft_id INTEGER)
+    RETURNS (titel VARCHAR(60), belegt INTEGER, frei INTEGER)
+    AS
+    BEGIN
+      FOR SELECT k.titel,
+                 COUNT(b.schueler_id),
+                 k.max_teilnehmer - COUNT(b.schueler_id)
+          FROM kurs k
+          LEFT JOIN belegung b
+                 ON b.kurs_id = k.kurs_id
+                AND b.abgemeldet_am IS NULL
+          WHERE k.lehrkraft_id = :p_lehrkraft_id
+          GROUP BY k.kurs_id, k.titel, k.max_teilnehmer
+          INTO :titel, :belegt, :frei
+      DO
+        SUSPEND;
+    END^
+
+    SET TERM ; ^
+
+    -- Erwartet:
+    -- (1, Klavier fuer Einsteiger, 4, 0), (1, Klavier Mittelstufe, 2, 0),
+    -- (1, Jazz-Improvisation, 0, 4), (4, Querfloete Mittelstufe, 2, 1).
+    -- Im Kurs Querfloete Mittelstufe ist eine von drei Belegungen abgemeldet;
+    -- ohne den Abmeldefilter kaemen dort 3 und 0 heraus.
+  check: SELECT 1 AS lehrkraft, titel, belegt, frei FROM kurs_auslastung(1) UNION ALL SELECT 4, titel, belegt, frei FROM kurs_auslastung(4)
+  dialect_note: "Nur Firebird (PSQL). `SUSPEND` gibt die aktuelle Belegung der Ausgabeparameter als Ergebniszeile an den Aufrufer; erst dadurch ist die Prozedur selektierbar und kann im FROM stehen. `EXECUTE PROCEDURE kurs_auslastung(1)` würde nur die erste Zeile liefern. PostgreSQL-Skizze (nicht getestet): `CREATE FUNCTION kurs_auslastung(p_lehrkraft_id INTEGER) RETURNS TABLE (titel VARCHAR, belegt BIGINT, frei BIGINT) LANGUAGE sql AS $$ SELECT … $$;` und Aufruf mit `SELECT * FROM kurs_auslastung(1)`."
+  hints:
+    - "Die Ausgabespalten stehen hinter `RETURNS (…)` mit Namen und Typ."
+    - "`FOR SELECT … INTO :var, … DO SUSPEND;` liefert jede Zeile der Abfrage einzeln aus."
+    - "Die Abmeldebedingung gehört in den ON-Teil des LEFT JOIN. Im WHERE würde sie einen Kurs verlieren, der nur abgemeldete Belegungen hat (in den Beispieldaten kommt das nicht vor, der Check erkennt den Unterschied also nicht)."
+  paper_mode: write
+- id: t12-s008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [stored-procedure, ausfuehrbare-prozedur, execute-procedure, psql, firebird]
+  db: musikschule
+  kind: ddl
+  engines: [fb]
+  prompt: |-
+    Wird ein Kurs vorzeitig beendet, sind immer zwei Schritte nötig: Alle Termine des Kurses **ab** einem Stichtag (einschließlich) werden als ausgefallen markiert, und das Enddatum des Kurses wird auf den Tag vor dem Stichtag gesetzt. Schreibe die ausführbare Prozedur `kurs_beenden` mit den Eingabeparametern `p_kurs_id` (ganze Zahl) und `p_ab` (Datum), die beide Schritte erledigt. Rufe sie danach für den Kurs 8 mit dem Stichtag Freitag, 18.10.2024, auf.
+
+    Kurs 8 hat Termine an jedem Freitag vom 06.09. bis zum 25.10.2024, keiner davon ist bisher ausgefallen.
+
+    Sage vorher, was diese Abfrage danach liefert:
+
+    ```sql
+    SELECT k.enddatum, COUNT(t.termin_id) AS ausgefallen
+    FROM kurs k
+    LEFT JOIN termin t ON t.kurs_id = k.kurs_id AND t.ausgefallen = TRUE
+    WHERE k.kurs_id = 8
+    GROUP BY k.enddatum
+    ```
+  solution: |-
+    SET TERM ^ ;
+
+    CREATE PROCEDURE kurs_beenden (p_kurs_id INTEGER, p_ab DATE)
+    AS
+    BEGIN
+      UPDATE termin
+         SET ausgefallen = TRUE
+       WHERE kurs_id = :p_kurs_id
+         AND datum >= :p_ab;
+
+      UPDATE kurs
+         SET enddatum = :p_ab - 1
+       WHERE kurs_id = :p_kurs_id;
+    END^
+
+    SET TERM ; ^
+
+    EXECUTE PROCEDURE kurs_beenden(8, DATE '2024-10-18');
+
+    -- Erwartet: enddatum 2024-10-17, ausgefallen 2 (Termine am 18.10. und 25.10.).
+    -- Mit datum > p_ab statt >= waere es nur 1, denn der Stichtag ist selbst ein Termintag.
+  check: SELECT k.enddatum, COUNT(t.termin_id) AS ausgefallen FROM kurs k LEFT JOIN termin t ON t.kurs_id = k.kurs_id AND t.ausgefallen = TRUE WHERE k.kurs_id = 8 GROUP BY k.enddatum
+  dialect_note: "Nur Firebird (PSQL). Eine Prozedur ohne `SUSPEND` ist ausführbar und wird mit `EXECUTE PROCEDURE` aufgerufen. Der Aufruf zählt als eine Anweisung: Scheitert das zweite UPDATE, nimmt Firebird auch das erste zurück, die Transaktion bleibt offen. PostgreSQL-Skizze (nicht getestet): `CREATE PROCEDURE kurs_beenden(p_kurs_id INTEGER, p_ab DATE) LANGUAGE plpgsql AS $$ BEGIN UPDATE …; UPDATE …; END $$;` und Aufruf mit `CALL kurs_beenden(8, DATE '2024-10-18');`."
+  hints:
+    - "Eine Prozedur ohne Ausgabewerte braucht keinen `RETURNS`-Teil."
+    - "In Firebird ergibt `datum - 1` den Vortag."
+    - "„Ab dem Stichtag einschließlich“ heißt `>=`."
+  paper_mode: predict
+- id: t12-s009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, abgeleitete-tabelle, inserting, updating, deleting, psql, firebird]
+  db: musikschule
+  kind: ddl
+  engines: [fb]
+  prompt: |-
+    Die Kursplanung möchte die Zahl der aktiven (nicht abgemeldeten) Belegungen je Kurs ohne Zählabfrage ablesen. Dafür gibt es eine eigene Tabelle, die ein Trigger immer aktuell hält.
+
+    1. Lege die Tabelle `kurs_belegt` an: `kurs_id` (Primärschlüssel, verweist auf `kurs`; wird ein Kurs gelöscht, verschwindet die Zeile) und `anzahl` (ganze Zahl, Pflicht).
+    2. Fülle sie mit **einer** Anweisung für alle Kurse mit dem aktuellen Stand.
+    3. Schreibe **einen** Trigger `trg_belegung_zaehlen` für `belegung`, der nach INSERT, UPDATE und DELETE die Zahl anpasst. Unterscheide die Ereignisse mit `INSERTING`, `UPDATING` und `DELETING`. Bedenke: Ein UPDATE kann eine Belegung abmelden.
+    4. Teste mit drei Änderungen:
+       - Schüler 11 meldet sich am 20.01.2025 zu Kurs 13 an (Rabatt 0).
+       - Schüler 16 meldet sich zum 31.12.2024 von Kurs 6 ab.
+       - Die Belegungen von Schüler 36 in Kurs 4 (schon abgemeldet) und von Schüler 26 in Kurs 1 (aktiv) werden gelöscht.
+
+    Zur Selbstkontrolle lokal in Firebird (vergleicht für jeden Kurs den Wert in `kurs_belegt` mit einer frischen Zählung):
+
+    ```sql
+    SELECT k.kurs_id, s.anzahl,
+           (SELECT COUNT(*) FROM belegung b
+            WHERE b.kurs_id = k.kurs_id AND b.abgemeldet_am IS NULL) AS nachgezaehlt
+    FROM kurs k
+    LEFT JOIN kurs_belegt s ON s.kurs_id = k.kurs_id
+    ```
+
+    Die Abfrage vergleicht nur das Ergebnis. Ein Trigger mit Ereignisunterscheidung und die Reihenfolge Befüllen → Trigger → Test gehören zur Musterlösung.
+  solution: |-
+    CREATE TABLE kurs_belegt (
+        kurs_id INTEGER NOT NULL PRIMARY KEY
+                REFERENCES kurs (kurs_id) ON DELETE CASCADE,
+        anzahl  INTEGER NOT NULL
+    );
+
+    INSERT INTO kurs_belegt (kurs_id, anzahl)
+    SELECT k.kurs_id,
+           (SELECT COUNT(*) FROM belegung b
+            WHERE b.kurs_id = k.kurs_id
+              AND b.abgemeldet_am IS NULL)
+    FROM kurs k;
+
+    SET TERM ^ ;
+
+    CREATE TRIGGER trg_belegung_zaehlen FOR belegung
+    ACTIVE AFTER INSERT OR UPDATE OR DELETE POSITION 0
+    AS
+    BEGIN
+      IF (INSERTING OR UPDATING) THEN
+        IF (NEW.abgemeldet_am IS NULL) THEN
+          UPDATE kurs_belegt SET anzahl = anzahl + 1 WHERE kurs_id = NEW.kurs_id;
+      IF (UPDATING OR DELETING) THEN
+        IF (OLD.abgemeldet_am IS NULL) THEN
+          UPDATE kurs_belegt SET anzahl = anzahl - 1 WHERE kurs_id = OLD.kurs_id;
+    END^
+
+    SET TERM ; ^
+
+    INSERT INTO belegung (schueler_id, kurs_id, angemeldet_am, rabatt_prozent)
+    VALUES (11, 13, DATE '2025-01-20', 0);
+
+    UPDATE belegung SET abgemeldet_am = DATE '2024-12-31'
+    WHERE schueler_id = 16 AND kurs_id = 6;
+
+    DELETE FROM belegung WHERE schueler_id = 36 AND kurs_id = 4;
+
+    DELETE FROM belegung WHERE schueler_id = 26 AND kurs_id = 1;
+
+    -- Erwartet: 13 Zeilen, keine mit anzahl NULL, in jeder anzahl = nachgezaehlt.
+    -- Wer die Startwerte per GROUP BY ueber belegung erzeugt, hat fuer Kurs 12 und 13
+    -- keine Zeile (anzahl NULL), und die Anmeldung in Kurs 13 geht verloren. Geaendert haben sich
+    -- Kurs 1 (4 auf 3), Kurs 6 (2 auf 1) und Kurs 13 (0 auf 1).
+    -- Kurs 4 bleibt bei 4, weil die geloeschte Belegung schon abgemeldet war.
+    -- Das UPDATE zaehlt die alte Fassung ab (OLD aktiv) und die neue nicht dazu (NEW abgemeldet).
+  check: SELECT k.kurs_id, s.anzahl, (SELECT COUNT(*) FROM belegung b WHERE b.kurs_id = k.kurs_id AND b.abgemeldet_am IS NULL) AS nachgezaehlt FROM kurs k LEFT JOIN kurs_belegt s ON s.kurs_id = k.kurs_id
+  dialect_note: "Nur Firebird (PSQL). Die Regel „UPDATE = alte Zeile abziehen, neue Zeile hinzuzählen“ deckt auch einen Wechsel des Kurses ab. Die geschachtelten IF sorgen dafür, dass `NEW` nur bei INSERT/UPDATE und `OLD` nur bei UPDATE/DELETE gelesen wird. PostgreSQL-Skizze (nicht getestet): eine Triggerfunktion, die `TG_OP` (`'INSERT'`, `'UPDATE'`, `'DELETE'`) abfragt, angehängt mit `AFTER INSERT OR UPDATE OR DELETE ON belegung FOR EACH ROW`."
+  hints:
+    - "Ein UPDATE lässt sich als „alte Zeile weg, neue Zeile dazu“ behandeln."
+    - "Zähle nur Zeilen mit `abgemeldet_am IS NULL`, alte wie neue."
+    - "Die Startwerte liefert `INSERT INTO … SELECT` mit einer Zählunterabfrage je Kurs."
+  paper_mode: write
+- id: t12-s010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, protokollierung, inserting, updating, deleting, psql, firebird]
+  db: musikschule
+  kind: ddl
+  engines: [fb]
+  prompt: |-
+    Änderungen am Instrumentenbestand sollen lückenlos protokolliert werden, mit Aktionsart und Leihgebühr vorher und nachher.
+
+    1. Lege die Tabelle `instrument_log` an: `log_id` (Identity, Primärschlüssel), `aktion` (ein Zeichen, Pflicht, nur `'I'`, `'U'` oder `'D'`), `instrument_id`, `bezeichnung` (bis 30 Zeichen), `gebuehr_alt`, `gebuehr_neu` (je `NUMERIC(8,2)`) und `geaendert_am` (Zeitstempel, Pflicht, Standard jetzt).
+    2. Schreibe **einen** Trigger `trg_instrument_log` für `instrument`, der nach INSERT, UPDATE und DELETE je Zeile einen Eintrag schreibt. Bei INSERT bleibt `gebuehr_alt` leer, bei DELETE `gebuehr_neu`.
+    3. Teste mit drei Änderungen: Das Saxophon (Familie Blas, Leihgebühr 16,00) kommt dazu, die Leihgebühr des Violoncellos wird von 25,00 auf 18,00 gesenkt, und die Ukulele (Leihgebühr 6,00) wird aus dem Bestand gelöscht.
+
+    Sage vorher, was diese Abfrage liefert (`mit_id` ist 1, wenn ein Schlüssel protokolliert wurde):
+
+    ```sql
+    SELECT aktion, bezeichnung, gebuehr_alt, gebuehr_neu,
+           CASE WHEN instrument_id IS NULL THEN 0 ELSE 1 END AS mit_id
+    FROM instrument_log
+    ```
+
+    Die Abfrage vergleicht nur das Ergebnis. Ein **einziger** Trigger mit Ereignisunterscheidung über `INSERTING`, `UPDATING` und `DELETING` gehört zur Musterlösung.
+  solution: |-
+    CREATE TABLE instrument_log (
+        log_id        INTEGER GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+        aktion        CHAR(1) NOT NULL CHECK (aktion IN ('I', 'U', 'D')),
+        instrument_id INTEGER,
+        bezeichnung   VARCHAR(30),
+        gebuehr_alt   NUMERIC(8,2),
+        gebuehr_neu   NUMERIC(8,2),
+        geaendert_am  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+    );
+
+    SET TERM ^ ;
+
+    CREATE TRIGGER trg_instrument_log FOR instrument
+    ACTIVE AFTER INSERT OR UPDATE OR DELETE POSITION 0
+    AS
+    BEGIN
+      IF (INSERTING) THEN
+        INSERT INTO instrument_log (aktion, instrument_id, bezeichnung, gebuehr_alt, gebuehr_neu)
+        VALUES ('I', NEW.instrument_id, NEW.bezeichnung, NULL, NEW.leihgebuehr);
+      ELSE IF (UPDATING) THEN
+        INSERT INTO instrument_log (aktion, instrument_id, bezeichnung, gebuehr_alt, gebuehr_neu)
+        VALUES ('U', NEW.instrument_id, NEW.bezeichnung, OLD.leihgebuehr, NEW.leihgebuehr);
+      ELSE
+        INSERT INTO instrument_log (aktion, instrument_id, bezeichnung, gebuehr_alt, gebuehr_neu)
+        VALUES ('D', OLD.instrument_id, OLD.bezeichnung, OLD.leihgebuehr, NULL);
+    END^
+
+    SET TERM ; ^
+
+    INSERT INTO instrument (bezeichnung, familie, leihgebuehr)
+    VALUES ('Saxophon', 'Blas', 16.00);
+
+    UPDATE instrument SET leihgebuehr = 18.00 WHERE bezeichnung = 'Violoncello';
+
+    DELETE FROM instrument WHERE bezeichnung = 'Ukulele';
+
+    -- Erwartet:
+    -- (I, Saxophon, NULL, 16.00, 1), (U, Violoncello, 25.00, 18.00, 1), (D, Ukulele, 6.00, NULL, 1).
+    -- mit_id 0 im DELETE-Fall hiesse: der Schluessel wurde aus NEW statt aus OLD gelesen.
+  check: SELECT aktion, bezeichnung, gebuehr_alt, gebuehr_neu, CASE WHEN instrument_id IS NULL THEN 0 ELSE 1 END AS mit_id FROM instrument_log
+  dialect_note: "Nur Firebird (PSQL). Bei DELETE gibt es nur `OLD`, deshalb stammen Schlüssel und Bezeichnung dort aus `OLD`. Die Ukulele lässt sich löschen, weil sie weder unterrichtet noch ausgeliehen wird. PostgreSQL-Skizze (nicht getestet): Triggerfunktion mit `IF TG_OP = 'INSERT' THEN … ELSIF TG_OP = 'UPDATE' THEN … ELSE … END IF; RETURN NULL;`, angehängt mit `AFTER INSERT OR UPDATE OR DELETE ON instrument FOR EACH ROW`."
+  hints:
+    - "`INSERTING`, `UPDATING` und `DELETING` sind Boolesche Variablen im Trigger."
+    - "In PSQL schreibt man `IF (…) THEN anweisung; ELSE anweisung;`, auch verschachtelt als `ELSE IF`."
+    - "Bei einem AFTER-Trigger ist die Identity-Nummer der neuen Zeile schon vergeben."
+  paper_mode: predict
+- id: t12-s011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, unterabfrage, extremwert, korrelierte-unterabfrage]
+  db: musikschule
+  kind: ddl
+  engines: [fb, pg]
+  prompt: |-
+    Für die Preisliste soll eine Sicht `v_spitzenkurs` je Niveau den teuersten Kurs zeigen, mit den Spalten `niveau`, `titel` und `gebuehr_monat`. Haben mehrere Kurse eines Niveaus dieselbe Höchstgebühr, erscheinen alle.
+
+    Teste die Sicht danach mit einer Preisänderung: Die Kurse 1 („Klavier für Einsteiger“, Niveau Anfaenger) und 6 („Querflöte Mittelstufe“, Niveau Mittelstufe) kosten ab sofort 66,00 im Monat. Bisher ist im Niveau Anfaenger „Cello für Erwachsene“ mit 66,00 am teuersten, in der Mittelstufe „Klavier Mittelstufe“ mit 78,00, bei den Fortgeschrittenen „Jazz-Improvisation“ mit 85,00.
+
+    Geprüft wird mit `SELECT niveau, titel, gebuehr_monat FROM v_spitzenkurs`. Sage das Ergebnis vorher.
+
+    Überlege: Warum reicht `SELECT niveau, titel, MAX(gebuehr_monat) FROM kurs GROUP BY niveau` nicht?
+  solution: |-
+    CREATE VIEW v_spitzenkurs (niveau, titel, gebuehr_monat) AS
+    SELECT k.niveau, k.titel, k.gebuehr_monat
+    FROM kurs k
+    WHERE k.gebuehr_monat = (SELECT MAX(k2.gebuehr_monat)
+                             FROM kurs k2
+                             WHERE k2.niveau = k.niveau);
+
+    UPDATE kurs SET gebuehr_monat = 66.00 WHERE kurs_id IN (1, 6);
+
+    -- Erwartet (vier Zeilen): Anfaenger / Klavier fuer Einsteiger / 66.00,
+    -- Anfaenger / Cello fuer Erwachsene / 66.00 (Gleichstand, beide erscheinen),
+    -- Mittelstufe / Klavier Mittelstufe / 78.00, Fortgeschritten / Jazz-Improvisation / 85.00.
+    -- Querfloete Mittelstufe (66.00) erscheint nicht: 66 ist nur im Niveau Anfaenger das Maximum.
+    -- Eine unkorrelierte Loesung mit IN (SELECT MAX(...) ... GROUP BY niveau) zeigte sie faelschlich.
+    -- Die GROUP-BY-Variante ist ungueltig: titel ist weder gruppiert noch aggregiert,
+    -- und MAX liefert nur den Wert, nicht die Zeile, zu der er gehoert.
+  check: SELECT niveau, titel, gebuehr_monat FROM v_spitzenkurs
+  dialect_note: "Gleiche Syntax in beiden Systemen. Die Sicht speichert keine Daten, deshalb zeigt sie die Preisänderung, obwohl sie vorher angelegt wurde."
+  hints:
+    - "Bestimme zuerst die Höchstgebühr je Niveau, dann die Kurse, die genau diese Gebühr haben."
+    - "Die Unterabfrage bezieht sich mit `k2.niveau = k.niveau` auf die Zeile der äußeren Abfrage."
+    - "Ein Aggregat liefert einen Wert, aber nicht die Zeile, aus der er stammt."
+  paper_mode: write

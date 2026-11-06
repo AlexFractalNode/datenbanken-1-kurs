@@ -1,0 +1,187 @@
+- id: t12-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, aenderbare-sicht]
+  type: single
+  question: "Gegeben ist die Tabelle `artikel (artikel_id, name, preis, kategorie)`, nur `artikel_id` ist Pflicht. Welche der folgenden Sichten ist in Firebird 3 automatisch änderbar?"
+  options:
+    - text: "`CREATE VIEW v1 AS SELECT artikel_id, name, preis FROM artikel WHERE kategorie = 'Tee'`"
+      correct: true
+      explain: "Eine Tabelle, nur Spalten ohne Ausdruck, eine WHERE-Bedingung: Jede Sichtzeile entspricht genau einer Zeile von `artikel`. Die weggelassene Spalte `kategorie` darf NULL sein."
+    - text: "`CREATE VIEW v2 AS SELECT kategorie, AVG(preis) AS schnitt FROM artikel GROUP BY kategorie`"
+      correct: false
+      explain: "Gruppierung und Aggregat: Eine Sichtzeile fasst viele Artikel zusammen. Eine Änderung von `schnitt` lässt sich nicht eindeutig auf einzelne Preise zurückführen."
+    - text: "`CREATE VIEW v3 AS SELECT DISTINCT kategorie FROM artikel`"
+      correct: false
+      explain: "DISTINCT fasst gleiche Zeilen zusammen. Welche der vielen Artikel einer Kategorie soll ein UPDATE treffen? Deshalb ist die Sicht nicht änderbar."
+    - text: "`CREATE VIEW v4 AS SELECT artikel_id, name, preis * 1.19 AS brutto FROM artikel`"
+      correct: false
+      explain: "Firebird 3 lässt in einer automatisch änderbaren Sicht keine Ausdrücke als Spalten zu. PostgreSQL wäre hier großzügiger: Dort sind die einfachen Spalten änderbar, nur `brutto` nicht."
+- id: t12-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, zweck]
+  type: multi
+  question: "Welche Aussagen über (nicht materialisierte) Sichten treffen zu?"
+  options:
+    - text: "Eine Sicht kann Spalten verbergen, die bestimmte Nutzer nicht sehen sollen, z. B. Gehälter."
+      correct: true
+      explain: "Datenschutz ist ein Hauptzweck: Man vergibt Leserechte nur auf die Sicht, nicht auf die Basistabelle."
+    - text: "Eine Sicht kann Programme vor Änderungen am Tabellenschema schützen."
+      correct: true
+      explain: "Das ist logische Datenunabhängigkeit: Wird eine Tabelle umgebaut, passt man die Sichtdefinition an, die Programme lesen weiter dieselben Spalten."
+    - text: "Eine Sicht speichert ihr Ergebnis zusätzlich und macht Abfragen dadurch immer schneller."
+      correct: false
+      explain: "Das beschreibt eine materialisierte Sicht. Eine normale Sicht speichert nur die Abfrage und wertet sie bei jedem Zugriff neu aus."
+    - text: "Wird eine Zeile in der Basistabelle geändert, zeigt die Sicht sofort den neuen Stand."
+      correct: true
+      explain: "Weil die Sicht bei jedem Zugriff neu berechnet wird, ist sie immer aktuell."
+    - text: "Eine Sicht ersetzt Constraints: Was die Sicht nicht zeigt, kann niemand in die Tabelle schreiben."
+      correct: false
+      explain: "Wer direkt auf die Tabelle schreiben darf, umgeht die Sicht. Integrität sichern Constraints und Trigger an der Tabelle."
+- id: t12-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [view, with-check-option]
+  type: single
+  question: "Gegeben ist `CREATE VIEW v_aktiv AS SELECT kunde_id, name, aktiv FROM kunde WHERE aktiv = TRUE WITH CHECK OPTION`. Kunde 99 gibt es noch nicht. Was passiert bei `INSERT INTO v_aktiv (kunde_id, name, aktiv) VALUES (99, 'Ida Roth', FALSE)`?"
+  options:
+    - text: "Die Anweisung wird mit einem Fehler abgewiesen, es entsteht keine neue Zeile."
+      correct: true
+      explain: "Die neue Zeile erfüllt `aktiv = TRUE` nicht und wäre in der Sicht unsichtbar. Die Check Option prüft auch beim INSERT und weist es ab."
+    - text: "Die Zeile wird in `kunde` eingefügt, ist in `v_aktiv` aber nicht zu sehen."
+      correct: false
+      explain: "So wäre es **ohne** `WITH CHECK OPTION`: Dann darf man über eine Sicht Zeilen anlegen, die sie selbst nicht zeigt."
+    - text: "Die Zeile wird eingefügt, und das DBMS setzt `aktiv` automatisch auf TRUE."
+      correct: false
+      explain: "Eine Sicht korrigiert keine Werte. Sie lässt die Zeile durch oder weist sie ab."
+    - text: "Ein INSERT über eine Sicht ist grundsätzlich verboten."
+      correct: false
+      explain: "Die Sicht liest aus einer Tabelle ohne Join, Aggregat und Ausdruck und ist damit änderbar. INSERT ist erlaubt, solange die Zeile die Bedingung erfüllt."
+- id: t12-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, new, before]
+  type: single
+  question: "In welchem Trigger darf man in Firebird einen Wert der geänderten Zeile per `NEW.spalte = …` festlegen, sodass er so in die Tabelle geschrieben wird?"
+  options:
+    - text: "BEFORE INSERT oder BEFORE UPDATE"
+      correct: true
+      explain: "Vor dem Schreiben ist die neue Zeile noch änderbar. Was der Trigger in `NEW` einträgt, wird gespeichert."
+    - text: "AFTER INSERT oder AFTER UPDATE"
+      correct: false
+      explain: "Nach dem Schreiben ist die Zeile schon gespeichert, `NEW` ist dann nur lesbar. Ein AFTER-Trigger eignet sich für Protokolle oder Folgeänderungen in anderen Tabellen."
+    - text: "BEFORE DELETE"
+      correct: false
+      explain: "Beim Löschen gibt es keine neue Zeile, nur `OLD`, und `OLD` ist immer nur lesbar."
+    - text: "In jedem Trigger, der Zeitpunkt spielt keine Rolle."
+      correct: false
+      explain: "Gerade beim Ändern von `NEW` ist der Zeitpunkt entscheidend: nur BEFORE."
+- id: t12-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [trigger, zeilentrigger, firebird]
+  type: truefalse
+  question: "In Firebird 3 läuft ein `AFTER UPDATE`-Trigger auf einer Tabelle genau einmal, wenn ein einziges UPDATE 50 Zeilen ändert."
+  options:
+    - text: "wahr"
+      correct: false
+      explain: "Firebird-Trigger für INSERT, UPDATE und DELETE sind Zeilentrigger. Sie laufen einmal je geänderter Zeile, hier also 50-mal. Anweisungstrigger (einmal je Anweisung) gibt es z. B. in PostgreSQL mit `FOR EACH STATEMENT`; dort ist das sogar die Voreinstellung, wenn man `FOR EACH ROW` weglässt."
+    - text: "falsch"
+      correct: true
+      explain: "Richtig: Der Trigger läuft 50-mal, einmal je Zeile, jeweils mit deren `OLD` und `NEW`."
+- id: t12-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [integritaet, trigger, check]
+  type: multi
+  question: "Ein Teeladen hat die Tabellen `kunde`, `bestellung (…, kunde_id, status)` und `tee (…, preis_100g)`. Für welche Regeln reicht ein deklarativer Constraint nicht aus, sodass man für eine zuverlässige Durchsetzung einen Trigger braucht?"
+  options:
+    - text: "Ein Kunde darf höchstens drei offene Bestellungen gleichzeitig haben."
+      correct: true
+      explain: "Die Regel zählt andere Zeilen. UNIQUE und FOREIGN KEY decken Zählregeln nicht ab. Firebird 3 erlaubt zwar einen CHECK mit Unterabfrage, prüft ihn aber nur, wenn die eigene Zeile geändert wird; PostgreSQL verbietet Unterabfragen im CHECK ganz. Zuverlässig wird die Regel erst mit einem Trigger."
+    - text: "Jede Preisänderung soll mit altem und neuem Wert protokolliert werden."
+      correct: true
+      explain: "Das ist keine Bedingung, sondern eine Aktion bei einer Änderung, also typisch für einen AFTER-UPDATE-Trigger."
+    - text: "Der Rabatt liegt zwischen 0 und 50 Prozent."
+      correct: false
+      explain: "Eine Bedingung an einen Wert der eigenen Zeile: `CHECK (rabatt BETWEEN 0 AND 50)` reicht."
+    - text: "Jede Bestellung gehört zu einem existierenden Kunden."
+      correct: false
+      explain: "Das ist referenzielle Integrität und wird deklarativ mit FOREIGN KEY gesichert."
+    - text: "Der Status einer Bestellung darf nicht von `'versandt'` zurück auf `'offen'` wechseln."
+      correct: true
+      explain: "Eine dynamische Bedingung: Sie vergleicht den Zustand vor und nach der Änderung. Ein CHECK kennt nur den neuen Zustand, ein BEFORE-UPDATE-Trigger sieht `OLD.status` und `NEW.status`."
+- id: t12-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [stored-procedure, suspend, firebird]
+  type: single
+  question: "Eine Firebird-Prozedur `offene_posten(p_kunde INTEGER)` liefert mit `FOR SELECT … DO SUSPEND;` mehrere Zeilen. Wie bekommt man alle Zeilen?"
+  options:
+    - text: "`SELECT * FROM offene_posten(42);`"
+      correct: true
+      explain: "Eine Prozedur mit `SUSPEND` ist selektierbar und steht wie eine Tabelle im FROM, mit den Parametern in Klammern."
+    - text: "`EXECUTE PROCEDURE offene_posten(42);`"
+      correct: false
+      explain: "`EXECUTE PROCEDURE` ist für ausführbare Prozeduren gedacht und liefert bei einer selektierbaren nur die erste Zeile."
+    - text: "`CALL offene_posten(42);`"
+      correct: false
+      explain: "`CALL` ist die Aufrufform in PostgreSQL. Firebird 3 kennt kein `CALL`."
+    - text: "`SELECT offene_posten(42) FROM RDB$DATABASE;`"
+      correct: false
+      explain: "So ruft man eine Funktion mit **einem** Rückgabewert auf, keine Prozedur mit mehreren Zeilen."
+- id: t12-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [index, kosten]
+  type: multi
+  question: "Welche Aussagen über Indexe treffen zu?"
+  options:
+    - text: "Ein Index kann Abfragen mit passender WHERE-Bedingung deutlich beschleunigen."
+      correct: true
+      explain: "Statt alle Zeilen zu lesen, sucht das DBMS im sortierten Index und springt direkt zu den passenden Zeilen."
+    - text: "Jeder zusätzliche Index macht INSERT und DELETE auf der Tabelle etwas langsamer."
+      correct: true
+      explain: "Jeder Index muss bei jeder Änderung mitgepflegt werden. Viele Indexe kosten deshalb Schreibleistung und Speicher."
+    - text: "Mit einem Index liefert eine Abfrage manchmal andere Zeilen als ohne."
+      correct: false
+      explain: "Ein Index ändert nur den Zugriffsweg, nie das Ergebnis. Auch eine Sortierung ist ohne ORDER BY nicht garantiert, mit oder ohne Index."
+    - text: "Ein Index auf einer Ja/Nein-Spalte, bei der die Hälfte der Zeilen „ja“ hat, lohnt sich fast immer."
+      correct: false
+      explain: "Die Bedingung trifft die Hälfte der Tabelle. Dann ist Durchlesen meist billiger, der Index würde selten genutzt und trotzdem bei jeder Änderung gepflegt."
+    - text: "Der SQL-Standard schreibt die Syntax von `CREATE INDEX` vor."
+      correct: false
+      explain: "Indexe sind eine physische Angelegenheit und nicht im SQL-Standard geregelt. `CREATE INDEX` ist trotzdem in fast allen Systemen ähnlich."
+- id: t12-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [index, zusammengesetzter-index]
+  type: single
+  question: "Auf `kunde` liegt nur der Index `ix_ort_name (ort, nachname)`. Bei welcher Abfrage kann das DBMS diesen Index am wirkungsvollsten nutzen?"
+  options:
+    - text: "`SELECT * FROM kunde WHERE ort = 'Kiel' AND nachname = 'Roth'`"
+      correct: true
+      explain: "Beide Spalten sind in Indexreihenfolge mit `=` eingeschränkt. Das DBMS springt direkt an die passende Stelle."
+    - text: "`SELECT * FROM kunde WHERE nachname = 'Roth'`"
+      correct: false
+      explain: "Die erste Indexspalte `ort` ist nicht eingeschränkt. Die Roths sind über alle Orte verteilt, der Index hilft kaum."
+    - text: "`SELECT * FROM kunde WHERE nachname LIKE '%oth'`"
+      correct: false
+      explain: "Ein Muster mit führendem `%` hat kein festes Präfix, und `nachname` ist zudem nur die zweite Spalte."
+    - text: "`SELECT * FROM kunde WHERE UPPER(ort) = 'KIEL'`"
+      correct: false
+      explain: "Der Index enthält `ort`, nicht `UPPER(ort)`. Für so eine Bedingung bräuchte man einen Ausdrucksindex (Firebird: `COMPUTED BY`)."
+- id: t12-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [index, fremdschluessel, dialekt]
+  type: truefalse
+  question: "In Firebird 3 legt das DBMS beim Anlegen eines FOREIGN-KEY-Constraints automatisch einen Index auf die Fremdschlüsselspalten an."
+  options:
+    - text: "wahr"
+      correct: true
+      explain: "Richtig. Firebird legt zu PRIMARY KEY, UNIQUE **und** FOREIGN KEY automatisch einen Index an. PostgreSQL tut das nur für PRIMARY KEY und UNIQUE, nicht für Fremdschlüssel."
+    - text: "falsch"
+      correct: false
+      explain: "Das trifft auf PostgreSQL zu, nicht auf Firebird 3. Dort bekommt jeder Fremdschlüssel automatisch einen Index."

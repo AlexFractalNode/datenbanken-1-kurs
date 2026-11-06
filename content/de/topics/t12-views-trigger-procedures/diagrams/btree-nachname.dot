@@ -1,0 +1,22 @@
+// B-Baum-Index (vereinfacht, B+-Baum-Variante) auf kunde.nachname im Teeladen-Beispiel.
+// Innere Knoten: Trennschlüssel, Blätter: alle Schlüssel mit Verweis auf die Zeile.
+digraph btree_nachname {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=11, nodesep=0.3, ranksep=0.6,
+         label="Index auf nachname: Suche nach 'Mohr' liest nur Wurzel und ein Blatt", labelloc=b];
+  node  [shape=record, fontname="Helvetica", fontsize=11];
+  edge  [fontname="Helvetica", fontsize=9];
+
+  wurzel [label="<p0> | Lang | <p1> | Roth | <p2>"];
+
+  blatt1 [label="Abel → Z. 17 | Berg → Z. 3 | Fuchs → Z. 42"];
+  blatt2 [label="Lang → Z. 8 | Mohr → Z. 25 | Noll → Z. 11"];
+  blatt3 [label="Roth → Z. 5 | Voss → Z. 30 | Wolf → Z. 2"];
+
+  wurzel:p0 -> blatt1 [label="< Lang"];
+  wurzel:p1 -> blatt2 [label="Lang … < Roth", color="black", penwidth=2];
+  wurzel:p2 -> blatt3 [label="≥ Roth"];
+
+  { rank=same; blatt1; blatt2; blatt3; }
+  blatt1 -> blatt2 [style=dashed, arrowsize=0.6, label="nächstes Blatt"];
+  blatt2 -> blatt3 [style=dashed, arrowsize=0.6];
+}
