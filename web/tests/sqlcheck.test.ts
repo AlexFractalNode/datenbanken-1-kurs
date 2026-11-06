@@ -81,7 +81,16 @@ describe('sqlcheck.equal (same rules as tools/resultcmp.py)', () => {
     expect(normalizeValue(-0.30000000000000004)).toBe(-0.3);
     expect(normalizeValue(1e21)).toBe(1e21);
     expect(normalizeValue(Number.MAX_SAFE_INTEGER)).toBe(Number.MAX_SAFE_INTEGER);
-    expect(normalizeValue(Number.POSITIVE_INFINITY)).toBe(Number.POSITIVE_INFINITY);
+    // integral floats from 1e21 on are rounded like resultcmp does with the float it reads from JSON
+    expect(normalizeValue(1.2345678901234567e21)).toBe(1.23456789012e21);
+    // non-finite numbers are null, as in the snapshots (JSON has no NaN/Infinity)
+    expect(normalizeValue(Number.POSITIVE_INFINITY)).toBeNull();
+    expect(normalizeValue(Number.NEGATIVE_INFINITY)).toBeNull();
+    expect(normalizeValue(Number.NaN)).toBeNull();
+  });
+
+  it('judges NaN from PGlite against the null of a snapshot as equal (G5)', () => {
+    expect(equal({ cols: ['x'], rows: [[Number.NaN], [1]] }, { cols: ['x'], rows: [[null], [1]], ordered: true }).ok).toBe(true);
   });
 
   it('normalises other runtime types like resultcmp (bytes -> hex, bigint, objects)', () => {

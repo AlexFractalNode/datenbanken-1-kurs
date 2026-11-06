@@ -22,6 +22,11 @@ const VALUES: unknown[] = [
   -0.30000000000000004, 1e21, 1.5e-7, 123456789.123456789, 0.000123456789012345, 4503599627370496.5,
   Number.MAX_SAFE_INTEGER, 100, 1e5, 1.2345678901234568e16, '', 'abc', 'abc  ', ' lead', 'ä ö', '2024-03-01', '16:30:00.5',
   '01ff', '9007199254740993',
+  // Integral floats from 1e21 on: the runner's JSON writes them with an exponent, so Python reads a float and
+  // rounds it to 12 significant digits like any other float (G5).
+  1.2345678901234567e21, -9.876543210987654e25, 1e21 + 2 ** 20, 1.7976931348623157e308, 1e300,
+  // NaN and ±Infinity: JSON (the runner, the snapshots) has no such numbers and writes null (G5).
+  NaN, Infinity, -Infinity,
 ];
 
 const PAIRS: [Row[], Row[], boolean][] = [
@@ -33,6 +38,8 @@ const PAIRS: [Row[], Row[], boolean][] = [
   [[[null], [0]], [[0], [null]], false],
   [[[2.5, 'a  ']], [[2.50, 'a']], true],
   [[[1.0000001]], [[1]], true],
+  [[[NaN], [Infinity]], [[null], [null]], true],
+  [[[1.2345678901234567e21]], [[1.23456789012e21]], true],
 ];
 
 describe.skipIf(!python || !existsSync(TOOLS))('sqlcheck.ts matches tools/resultcmp.py', () => {

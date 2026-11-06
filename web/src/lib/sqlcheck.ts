@@ -9,6 +9,9 @@
  * - Integers stay exact. Every other number is rounded to 12 significant digits, half-even, on its
  *   shortest decimal form (Python: `Decimal(repr(x))`; JS `String(x)` yields the same digits). An integral
  *   result is an integer: 2.50 = 2.5, 3.00 = 3, 0.1 + 0.2 = 0.3. No fixed number of decimals.
+ *   Python only sees what the runner's JSON says: integral numbers from 1e21 on carry an exponent there
+ *   and are floats, so they are rounded here as well; below 1e21 an integral number is an integer.
+ * - NaN and ±Infinity become null, as in the snapshots (JSON has no such numbers, the runner writes null).
  * - Strings stay unchanged, because the runner already trimmed CHAR columns. `trim: true` is the
  *   fallback for untyped sources and strips trailing blanks (only U+0020, like `rstrip(" ")`) everywhere.
  * - Column names are ignored, only the column count counts.
@@ -38,7 +41,10 @@ const NUMBER_FORM = /^(-?)(\d+)(?:\.(\d+))?(?:e([+-]?\d+))?$/;
 /** Rounds to SIGNIFICANT_DIGITS significant digits, half-even, on the shortest decimal form. */
 export function roundSignificant(x: number): number {
   if (x === 0) return 0; // also -0, like Python's int(Decimal)
-  if (!Number.isFinite(x) || Number.isInteger(x)) return x; // integers stay exact
+  if (!Number.isFinite(x)) return x;
+  // Integers stay exact, as long as JSON writes them as integers (below 1e21). From 1e21 on the runner's
+  // JSON uses an exponent, Python reads a float and rounds it like every other float.
+  if (Number.isInteger(x) && Math.abs(x) < 1e21) return x;
   const m = NUMBER_FORM.exec(String(x));
   if (!m) return x;
   const [, sign, intPart, fracPart = '', exp = '0'] = m;
@@ -73,7 +79,8 @@ function pad(n: number, width = 2): string {
 export function normalizeValue(value: unknown, trim = false): Cell {
   if (value === null || value === undefined) return null;
   if (typeof value === 'boolean') return value;
-  if (typeof value === 'number') return roundSignificant(value);
+  // NaN/±Infinity: the runner's JSON (and so every snapshot) has no such numbers and holds null.
+  if (typeof value === 'number') return Number.isFinite(value) ? roundSignificant(value) : null;
   if (typeof value === 'bigint') {
     const safe = BigInt(Number.MAX_SAFE_INTEGER);
     return value <= safe && value >= -safe ? Number(value) : value.toString();
