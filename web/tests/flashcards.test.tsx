@@ -331,7 +331,9 @@ describe('Flashcards: daily limit for new cards', () => {
     const { container } = render(<Flashcards cards={CARDS} topics={TOPICS} />);
     const el = await ready(container);
     expect(el.dataset.verifyState).toBe('empty');
-    await act(() => vi.advanceTimersByTimeAsync(15_000));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
     expect(el.dataset.verifyState).toBe('ready');
     expect(el.dataset.verifyCount).toBe('1');
   });

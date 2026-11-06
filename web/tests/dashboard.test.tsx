@@ -227,7 +227,9 @@ describe('Dashboard island', () => {
     const { container } = render(<Dashboard topics={topics} />);
     await waitFor(() => expect(container.querySelector('[data-stat="due"]')).toBeTruthy());
     expect(container.querySelector('[data-stat="due"] strong')!.textContent).toBe('0 Karten');
-    await act(() => vi.advanceTimersByTimeAsync(15_000));
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(15_000);
+    });
     expect(container.querySelector('[data-stat="due"] strong')!.textContent).toBe('1 Karte');
   });
 
