@@ -29,6 +29,10 @@ Mengenoperationen bei NULL: In PostgreSQL behandelt `EXCEPT` zwei NULL-Werte als
 | `AVG(n * 1.0)` | Skala 1 (2,3) | 2,333… | wie oben, Skala bewusst wählen |
 | `CHAR_LENGTH` von `CHAR(5)` | zählt das Auffüllen mit (5) | ohne Auffüllen (2) | `CHAR_LENGTH(TRIM(x))` |
 | `7 / 2` | 3 | 3 | gleich (ganzzahlige Division in beiden) |
+| mehrspaltiges `UNIQUE (a, b)` mit NULL | `(1, NULL)` zweimal → **Verletzung**; nur vollständig leere Schlüssel `(NULL, NULL)` sind mehrfach erlaubt | `(1, NULL)` beliebig oft erlaubt | Aufgaben nicht auf das Verhalten von Teil-NULL in mehrspaltigen UNIQUE stützen; im Lerntext als Dialektunterschied nennen |
+| `NUMERIC(p,s)` mit `p` ≤ 9 | Präzision **nicht erzwungen** (gespeichert als INTEGER/BIGINT), `NUMERIC(6,2)` nimmt `99999.99` an | Präzision erzwungen (`numeric field overflow`) | Obergrenzen per `CHECK` absichern, nicht über die Präzision |
+
+Geprüft am FB-3.0.14-Container (2026-11-06). Ebenfalls dort bestätigt: `ALTER TABLE … ALTER COLUMN x TO y` scheitert in Firebird 3, wenn `x` in einem Constraint vorkommt (PK, UNIQUE, FK, CHECK): „Column … is referenced in …“. PostgreSQL benennt in diesem Fall um und passt den Constraint an.
 
 Vergleiche wie `c = 'ab'` auf einer `CHAR(5)`-Spalte sind in beiden Systemen wahr. Der Ergebnisvergleich entfernt das Auffüllen ohnehin.
 
