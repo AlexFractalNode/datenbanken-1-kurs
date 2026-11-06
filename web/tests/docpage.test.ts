@@ -37,6 +37,17 @@ describe('DocPage', () => {
     expect(html).toContain('&lt;script&gt;');
   });
 
+  it('renders referenced diagrams like the topic pages, sanitised (G8)', async () => {
+    const html = await render('cheatsheet');
+    expect(html).toContain('<figure class="diagram" data-verify-unit="diagram"');
+    expect(html).toContain('aria-label="Chen-Notation: Entitätstyp und Beziehungstyp"');
+    expect(html).toMatch(/<svg[\s>]/);
+    expect(html).not.toContain('diagrams/notation.dot');
+    expect(html).not.toContain('javascript:');
+    // the figure is not counted as a section
+    expect(html).toContain('data-verify-count="2"');
+  });
+
   it('shows an empty state for a missing document', async () => {
     const html = await render('lernplan');
     expect(html).toContain('<h1>Fallback</h1>');

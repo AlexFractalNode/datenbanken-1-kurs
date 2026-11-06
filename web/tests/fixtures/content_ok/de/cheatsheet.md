@@ -17,3 +17,5 @@ Kurzüberblick. Siehe [Glossar](glossar/).
 ## 2. Notation
 
 - Chen: Rechteck, Raute, Ellipse
+
+![Chen-Notation: Entitätstyp und Beziehungstyp](diagrams/notation.dot)

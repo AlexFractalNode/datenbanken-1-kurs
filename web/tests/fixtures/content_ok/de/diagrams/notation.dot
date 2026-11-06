@@ -1,0 +1,6 @@
+graph notation {
+  label="Chen-Notation im Cheatsheet"
+  kunde [shape=box, label="Kunde", URL="javascript:alert(1)"]
+  kauft [shape=diamond, label="kauft"]
+  kunde -- kauft
+}

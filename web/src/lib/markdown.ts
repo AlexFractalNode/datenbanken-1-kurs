@@ -12,6 +12,9 @@
  */
 import { Marked, Renderer, type MarkedExtension, type Token, type Tokens } from 'marked';
 import { diagramFigureHtml, escapeAttr, renderDot } from './diagram';
+import { isSafeUrl } from './url';
+
+export { isSafeUrl };
 
 const DIAGRAM_HREF = /^diagrams\/([A-Za-z0-9][A-Za-z0-9._-]*\.dot)$/;
 
@@ -19,31 +22,6 @@ function minHeadingDepth(tokens: Token[]): number {
   let min = 7;
   for (const token of tokens) if (token.type === 'heading') min = Math.min(min, (token as Tokens.Heading).depth);
   return min;
-}
-
-const SAFE_SCHEMES = new Set(['http', 'https', 'mailto']);
-
-/** Decodes numeric/named HTML entities that could hide a scheme (e.g. `&#106;avascript:`). */
-function decodeEntities(s: string): string {
-  return s
-    .replace(/&#x([0-9a-f]+);?/gi, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
-    .replace(/&#(\d+);?/g, (_, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
-    .replace(/&colon;/gi, ':')
-    .replace(/&tab;|&newline;/gi, '');
-}
-
-/** True for http(s)/mailto URLs, relative paths and anchors; false for javascript:, data:, vbscript: … */
-export function isSafeUrl(url: string): boolean {
-  let normalized = decodeEntities(url);
-  try {
-    normalized = decodeURIComponent(normalized);
-  } catch {
-    // keep the entity-decoded value; malformed escapes cannot form a scheme
-  }
-  // Browsers ignore control characters and whitespace inside the scheme.
-  normalized = normalized.replace(/[\u0000- \u007f-\u009f]/g, '');
-  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(normalized);
-  return scheme ? SAFE_SCHEMES.has(scheme[1].toLowerCase()) : true;
 }
 
 function isDiagramImage(token: Token): token is Tokens.Image {

@@ -428,6 +428,18 @@ export function getDiagram(topicId: string, name: string, root: string = content
   return readFileSync(path, 'utf8');
 }
 
+/**
+ * DOT source of `diagrams/<name>.dot` next to the course documents (`content/<lang>/diagrams/`), which a
+ * document references like a topic summary does (`![Alt](diagrams/x.dot)`).
+ */
+export function getDocDiagram(name: string, root: string = contentRoot()): string {
+  name = name.endsWith('.dot') ? name : `${name}.dot`;
+  if (!DIAGRAM_NAME.test(name) || name.includes('..')) throw new Error(`Invalid diagram name "${name}"`);
+  const path = join(root, LANG, 'diagrams', name);
+  if (!isFile(path)) throw new Error(`Diagram "${name}" not found in ${join(LANG, 'diagrams')}`);
+  return readFileSync(path, 'utf8');
+}
+
 export interface TopicOverview {
   topic: Topic;
   status: Status | null;
