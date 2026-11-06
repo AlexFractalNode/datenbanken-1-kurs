@@ -11,8 +11,8 @@ def names(steps):
 def test_step_order():
     steps = check.build_steps(check.parse_args([]))
     assert names(steps) == [
-        "leakguard", "validate", "pytest", "sqltest", "web-build",
-        "web-test", "pdf", "diagrams", "anki",
+        "leakguard", "validate", "pytest", "sqltest", "web-build", "linkcheck",
+        "web-test", "diagrams", "pdf", "anki-import", "anki",
     ]
 
 
@@ -58,3 +58,30 @@ def test_run_reports_failure_and_continues(capsys):
 
 def test_run_all_ok():
     assert check.run_steps([check.Step("a", [sys.executable, "-c", "pass"])]) == 0
+
+
+def test_diagrams_before_pdf_and_anki():
+    n = names(check.build_steps(check.parse_args([])))
+    assert n.index("diagrams") < n.index("pdf") < n.index("anki")
+
+
+def test_linkcheck_and_anki_import_steps():
+    steps = {s.name: s for s in check.build_steps(check.parse_args([]))}
+    assert "tools/linkcheck.py" in steps["linkcheck"].cmd
+    assert steps["anki-import"].cmd[-1] == "tests/test_anki.py"
+    assert steps["anki-import"].cmd[:3] == ["uv", "run", "pytest"]
+
+
+def test_skip_web_install():
+    n = names(check.build_steps(check.parse_args(["--ci", "--skip", "web-install"])))
+    assert "web-install" not in n
+
+
+def test_keyboard_interrupt_is_reported(monkeypatch, capsys):
+    def boom(*a, **k):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(check.subprocess, "run", boom)
+    rc = check.run_steps([check.Step("a", [sys.executable, "-c", "pass"]), check.Step("b", [sys.executable, "-c", "pass"])])
+    out = capsys.readouterr().out
+    assert rc == 1 and "interrupted" in out and "summary" in out

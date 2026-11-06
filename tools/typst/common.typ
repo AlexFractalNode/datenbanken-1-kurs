@@ -25,7 +25,7 @@
 }
 
 // Render a Markdown string.
-#let md(s) = cmarker.render(s, scope: (:), raw-typst: false)
+#let md(s) = cmarker.render(s, scope: (image: (source, alt: none, format: auto) => block(breakable: false, image(source, alt: alt, width: 80%, format: format))), raw-typst: false)
 
 // Write space below a task: "lines:N" -> N ruled lines of 8 mm, "box:H" -> framed box of H mm.
 #let write-space(spec) = {

@@ -4,12 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_call:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # github.workflow is the caller's name when reused, so deploy and ci runs do not cancel each other.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -36,16 +38,16 @@ jobs:
       FB_USER: SYSDBA
       FB_PASSWORD: masterkey
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           enable-cache: true
           cache-dependency-glob: uv.lock
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
@@ -54,11 +56,27 @@ jobs:
             web/package-lock.json
 
       # Typst downloads packages on demand into its cache directory.
-      - uses: actions/cache@v4
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: /home/runner/.cache/typst
-          key: typst-${{ runner.os }}-${{ hashFiles('tools/typst/**', 'tools/pdf.py', 'uv.lock') }}
+          key: typst-${{ runner.os }}-${{ hashFiles('tools/typst/**', 'tools/pdf.py') }}
           restore-keys: typst-${{ runner.os }}-
+
+      - name: Leakguard over the changed commits
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            uv run tools/leakguard.py --range "origin/${BASE_REF}..HEAD"
+          elif [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+               || ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            # new branch, tag or unknown base: scan the whole history
+            uv run tools/leakguard.py --history
+          else
+            uv run tools/leakguard.py --range "${BEFORE}..HEAD"
+          fi
 
       - name: Install Firebird client library
         run: sudo apt-get update && sudo apt-get install -y libfbclient2
@@ -71,7 +89,7 @@ jobs:
 
       - name: Upload build artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: dist
           path: |
@@ -86,9 +104,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 24
           cache: npm
@@ -97,6 +115,11 @@ jobs:
       - name: Install web dependencies
         working-directory: web
         run: npm ci
+
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: /home/runner/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('web/package-lock.json') }}
 
       - name: Install Playwright browsers
         working-directory: web

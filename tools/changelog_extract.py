@@ -2,7 +2,7 @@
 
     uv run tools/changelog_extract.py v1.0.0 [--changelog CHANGELOG.md] [--out FILE]
 
-Falls back to a pointer line if the section is missing (exit 0, warning on stderr).
+Exit 1 if the section for the tag is missing.
 """
 from __future__ import annotations
 
@@ -32,8 +32,8 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     body = extract(text, args.tag)
     if body is None:
-        print(f"warning: no CHANGELOG section for {args.tag}", file=sys.stderr)
-        body = "See CHANGELOG.md."
+        print(f"error: no CHANGELOG section for {args.tag}", file=sys.stderr)
+        return 1
     if args.out:
         out = Path(args.out)
         out.parent.mkdir(parents=True, exist_ok=True)

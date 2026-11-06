@@ -2,7 +2,8 @@
 
     uv run tools/check.py [--ci] [--strict] [--skip NAME]... [--engines fb,pg]
 
-Steps: leakguard, validate, pytest, sqltest, web-build, web-test, pdf, diagrams, anki.
+Steps: leakguard, validate, pytest, sqltest, web-build, linkcheck, web-test, diagrams, pdf,
+anki-import, anki (web-install only with --ci).
 Every step runs even if an earlier one fails; exit code 1 if any step failed.
 --ci      CI flavour: `npm ci`, Firebird client library from the host (--fb-via local).
 --strict  validate with the total minimum counts (default: --no-min until release).
@@ -18,7 +19,10 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-STEP_NAMES = ["leakguard", "validate", "pytest", "sqltest", "web-build", "web-test", "pdf", "diagrams", "anki"]
+STEP_NAMES = [
+    "leakguard", "validate", "pytest", "sqltest", "web-install", "web-build", "linkcheck",
+    "web-test", "diagrams", "pdf", "anki-import", "anki",
+]
 
 
 @dataclass
@@ -54,9 +58,11 @@ def build_steps(args: argparse.Namespace) -> list[Step]:
         steps.append(Step("web-install", ["npm", "ci"], web))
     steps += [
         Step("web-build", ["npm", "run", "build"], web),
+        Step("linkcheck", [*py, "tools/linkcheck.py", "web/dist", "--base", "/datenbanken-1-kurs/"]),
         Step("web-test", ["npm", "test"], web),
-        Step("pdf", [*py, "tools/pdf.py"]),
         Step("diagrams", ["node", "tools/render_diagrams.mjs", "--out", "dist/diagrams"]),
+        Step("pdf", [*py, "tools/pdf.py", "--diagrams", "dist/diagrams"]),
+        Step("anki-import", [*py, "pytest", "-q", "tests/test_anki.py"]),
         Step("anki", [*py, "tools/anki_export.py", "--per-topic", "--diagrams", "dist/diagrams"]),
     ]
     return [s for s in steps if s.name not in args.skip]
@@ -74,6 +80,10 @@ def run_steps(steps: list[Step]) -> int:
         else:
             try:
                 rc = subprocess.run([exe, *s.cmd[1:]], cwd=s.cwd).returncode
+            except KeyboardInterrupt:
+                print("interrupted", file=sys.stderr)
+                results.append((s.name, False, time.monotonic() - start, "interrupted"))
+                break
             except OSError as exc:
                 rc, note = 1, str(exc)
                 print(note, file=sys.stderr)

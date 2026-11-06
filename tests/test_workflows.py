@@ -41,3 +41,68 @@ def test_changelog_section():
     text = "# Changelog\n\n## [Unreleased]\n\n- x\n\n## [1.0.0] - 2026-01-01\n\n- a\n- b\n\n## [0.9.0]\n\n- old\n"
     assert changelog_extract.extract(text, "v1.0.0") == "- a\n- b"
     assert changelog_extract.extract(text, "v2.0.0") is None
+
+
+def test_changelog_missing_section_exit_1(tmp_path, capsys):
+    cl = tmp_path / "CHANGELOG.md"
+    cl.write_text("# Changelog\n\n## [1.0.0]\n\n- a\n", encoding="utf-8")
+    assert changelog_extract.main(["v2.0.0", "--changelog", str(cl)]) == 1
+    assert changelog_extract.main(["v1.0.0", "--changelog", str(cl), "--out", str(tmp_path / "n.md")]) == 0
+    assert (tmp_path / "n.md").read_text(encoding="utf-8") == "- a\n"
+
+
+def _steps(wf, job):
+    return wf["jobs"][job].get("steps", [])
+
+
+def test_actions_pinned_to_sha():
+    import re
+
+    for name in ("ci.yml", "deploy.yml"):
+        text = (WF / name).read_text(encoding="utf-8")
+        for line in text.splitlines():
+            m = re.search(r"uses:\s*(\S+)", line)
+            if not m or m.group(1).startswith("./"):
+                continue
+            assert re.fullmatch(r"[\w./-]+@[0-9a-f]{40}", m.group(1)), f"{name}: {line.strip()}"
+            assert re.search(r"#\s*v\d", line), f"{name}: missing version comment: {line.strip()}"
+
+
+def test_dependabot_github_actions():
+    d = yaml.safe_load((WF.parent / "dependabot.yml").read_text(encoding="utf-8"))
+    assert d["version"] == 2
+    assert any(u["package-ecosystem"] == "github-actions" for u in d["updates"])
+
+
+def test_ci_leakguard_range_and_history_fallback():
+    text = (WF / "ci.yml").read_text(encoding="utf-8")
+    assert "github.base_ref" in text and "github.event.before" in text
+    assert "--range" in text and "--history" in text
+    assert "0000000000000000000000000000000000000000" in text
+
+
+def test_ci_is_reusable_with_unique_concurrency():
+    ci = load("ci.yml")
+    assert "workflow_call" in ci["on"]
+    assert "github.workflow" in ci["concurrency"]["group"]
+
+
+def test_deploy_gated_by_checks_and_main_only():
+    d = load("deploy.yml")
+    assert d["jobs"]["checks"]["uses"] == "./.github/workflows/ci.yml"
+    assert d["jobs"]["build"]["needs"] == "checks"
+    assert d["jobs"]["deploy"]["if"] == "github.ref == 'refs/heads/main'"
+    runs = " ".join(s.get("run", "") for s in _steps(d, "release"))
+    assert "tools/validate.py --strict" in runs
+
+
+def test_typst_cache_independent_of_uv_lock_and_in_release():
+    ci_text = (WF / "ci.yml").read_text(encoding="utf-8")
+    d_text = (WF / "deploy.yml").read_text(encoding="utf-8")
+    for t in (ci_text, d_text):
+        assert "typst-${{ runner.os }}" in t
+        assert "hashFiles('tools/typst/**', 'tools/pdf.py')" in t
+
+
+def test_smoke_caches_playwright():
+    assert "ms-playwright" in (WF / "ci.yml").read_text(encoding="utf-8")

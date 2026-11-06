@@ -175,15 +175,59 @@ def test_cheatsheet_truncates_long_glossary(tmp_path):
     assert "vollständig im Web-Glossar" in _text(path)
 
 
-def test_task_data_replaces_local_images_with_placeholder():
-    import pdf
+SVG = (
+    '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="60" viewBox="0 0 120 60">'
+    '<rect x="5" y="5" width="110" height="50" fill="#cccccc" stroke="#000000"/></svg>'
+)
 
-    t = {
-        "id": "t06-p001",
-        "points": 3,
-        "prompt": "Siehe ![Schema der Vorlage](diagrams/x.dot) oben.",
-        "solution": "![](diagrams/y.dot)",
-    }
-    d = pdf._task_data(t)
-    assert "diagrams/" not in d["prompt"] and "Schema der Vorlage" in d["prompt"]
-    assert "diagrams/" not in d["solution"]
+
+def _fixture_with_diagram(tmp_path: Path, prompt: str, with_svg: bool = True) -> tuple[Path, Path]:
+    import shutil
+
+    root = tmp_path / "root"
+    shutil.copytree(FIXTURE, root)
+    exam = root / "content" / "de" / "exams" / "exam-01.yml"
+    exam.write_text(
+        exam.read_text(encoding="utf-8").replace("prompt: Platzhalter-Klausuraufgabe 1", f"prompt: {prompt!r}", 1),
+        encoding="utf-8",
+    )
+    dg = tmp_path / "diagrams"
+    if with_svg:
+        (dg / "t04").mkdir(parents=True)
+        (dg / "t04" / "x.svg").write_text(SVG, encoding="utf-8")
+    return root, dg
+
+
+def _has_graphic(path: Path) -> bool:
+    """Typst draws SVGs as vector paths: look for the SVG fill #cccccc (0.8 scn) in the page streams."""
+    for page in PdfReader(path).pages:
+        xo = page.get("/Resources", {}).get("/XObject", {})
+        if xo or b" 0.8 scn" in page.get_contents().get_data():
+            return True
+    return False
+
+
+def test_exam_embeds_rendered_diagram(tmp_path, out):
+    root, dg = _fixture_with_diagram(tmp_path, "Siehe ![Schema (alt)](diagrams/x.dot) oben.")
+    out_dir = tmp_path / "out"
+    assert pdf.main(["--root", str(root), "--out", str(out_dir), "--diagrams", str(dg)]) == 0
+    assert _has_graphic(out_dir / "exam-01.pdf")
+    assert not _has_graphic(out / "exam-01.pdf")  # control: fixture without diagram
+
+
+def test_missing_diagram_svg_fails_clearly(tmp_path, capsys):
+    root, dg = _fixture_with_diagram(tmp_path, "![a](diagrams/x.dot)", with_svg=False)
+    assert pdf.main(["--root", str(root), "--out", str(tmp_path / "o"), "--diagrams", str(dg)]) == 1
+    err = capsys.readouterr().err
+    assert "x.svg" in err and "render_diagrams" in err
+
+
+def test_remote_image_becomes_text(tmp_path):
+    root, dg = _fixture_with_diagram(tmp_path, "![Logo](https://example.org/a_(b).png)")
+    assert pdf.main(["--root", str(root), "--out", str(tmp_path / "o"), "--diagrams", str(dg)]) == 0
+    assert "https://example.org/a_(b).png" in _text(tmp_path / "o" / "exam-01.pdf")
+
+
+def test_image_scan_handles_parens_in_path():
+    md, refs = pdf._scan_images("a ![x](diagrams/a(1).dot) b ![y](http://h/p_(q).png \"t\")")
+    assert [r.dest for r in refs] == ["diagrams/a(1).dot", "http://h/p_(q).png"]
