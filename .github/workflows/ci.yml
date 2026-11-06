@@ -1,0 +1,108 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      firebird:
+        image: firebirdsql/firebird:3.0.14
+        env:
+          FIREBIRD_ROOT_PASSWORD: masterkey
+        ports:
+          - 3050:3050
+        options: >-
+          --health-cmd "bash -c '</dev/tcp/127.0.0.1/3050'"
+          --health-interval 2s
+          --health-timeout 2s
+          --health-retries 30
+    env:
+      # Never skip Firebird tests silently in CI.
+      SQLTEST_REQUIRE_FB: "1"
+      FB_HOST: 127.0.0.1
+      FB_PORT: "3050"
+      FB_USER: SYSDBA
+      FB_PASSWORD: masterkey
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            web/package-lock.json
+
+      # Typst downloads packages on demand into its cache directory.
+      - uses: actions/cache@v4
+        with:
+          path: /home/runner/.cache/typst
+          key: typst-${{ runner.os }}-${{ hashFiles('tools/typst/**', 'tools/pdf.py', 'uv.lock') }}
+          restore-keys: typst-${{ runner.os }}-
+
+      - name: Install Firebird client library
+        run: sudo apt-get update && sudo apt-get install -y libfbclient2
+
+      - name: Install root Node dependencies (PGlite runner)
+        run: npm ci
+
+      - name: Run all checks
+        run: uv run tools/check.py --ci
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            dist/pdf
+            dist/anki
+          if-no-files-found: ignore
+
+  smoke:
+    # Prepared in A14, enabled by B6 (remove `if: false`).
+    if: false
+    needs: checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: web
+        run: npx playwright install --with-deps chromium
+
+      # playwright.config.ts builds the site and serves it with `astro preview` itself.
+      - name: Playwright smoke tests
+        working-directory: web
+        run: npm run test:e2e
