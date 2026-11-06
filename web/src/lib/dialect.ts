@@ -7,12 +7,11 @@
  * because PostgreSQL reports most of these only as a generic syntax error.
  */
 
-/** Removes comments and the content of string literals, so keywords inside them do not count. */
+import { scanSql } from './sql-scan';
+
+/** Removes comments and the content of string literals, so keywords inside them do not count (see `scanSql`). */
 export function stripSql(sql: string): string {
-  return sql
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/--[^\n]*/g, ' ')
-    .replace(/'(?:[^']|'')*'/g, "''");
+  return scanSql(sql).text;
 }
 
 interface Rule {

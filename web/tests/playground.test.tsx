@@ -5,6 +5,9 @@ import { resolve } from 'node:path';
 import { renderToString } from 'preact-render-to-string';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import Playground, { type PlaygroundDb, type PlaygroundTask } from '../src/components/Playground';
+import { inProcessWorker } from './support/in-process-worker';
+
+const ENGINE = { spawn: inProcessWorker };
 
 // No generated snapshots in the tests: the expected result comes from the reference solution, except where a test sets one.
 const snapshots = vi.hoisted(() => ({ map: new Map<string, unknown>() }));
@@ -77,7 +80,7 @@ const type = (field: HTMLElement, value: string) => fireEvent.input(field, { tar
 const runButton = () => screen.getByRole('button', { name: /^Ausführen/ }) as HTMLButtonElement;
 
 async function mount(props: Partial<Parameters<typeof Playground>[0]> = {}) {
-  const view = render(<Playground tasks={TASKS} databases={DATABASES} topics={[{ id: 't04', title: 'ER-Modellierung' }]} codeMirror={false} {...props} />);
+  const view = render(<Playground tasks={TASKS} databases={DATABASES} topics={[{ id: 't04', title: 'ER-Modellierung' }]} codeMirror={false} engine={ENGINE} {...props} />);
   await waitFor(() => expect(unit(view.container).dataset.verifyState).toBe('ready'), READY);
   return view;
 }
@@ -103,7 +106,7 @@ describe('Playground: contract and basics', () => {
   });
 
   it('is empty (but usable) without tasks', async () => {
-    const view = render(<Playground tasks={[]} databases={DATABASES} topics={[]} codeMirror={false} />);
+    const view = render(<Playground tasks={[]} databases={DATABASES} topics={[]} codeMirror={false} engine={ENGINE} />);
     await waitFor(() => expect(unit(view.container).dataset.verifyState).toBe('empty'), READY);
     expect(unit(view.container).dataset.verifyCount).toBe('0');
     type(sqlField(), 'SELECT 1 AS x');
@@ -112,7 +115,7 @@ describe('Playground: contract and basics', () => {
 
   it('reports an error if the database cannot be built', async () => {
     const broken = [{ ...DATABASES[0], schema: 'CREATE TABLE kaputt (' }, DATABASES[1]];
-    const view = render(<Playground tasks={[]} databases={broken} topics={[]} codeMirror={false} />);
+    const view = render(<Playground tasks={[]} databases={broken} topics={[]} codeMirror={false} engine={ENGINE} />);
     await waitFor(() => expect(unit(view.container).dataset.verifyState).toBe('error'), READY);
     expect(unit(view.container).dataset.verifyError).toMatch(/Beispieldatenbank konnte nicht aufgebaut werden/);
     expect(screen.getByRole('alert').textContent).toMatch(/nicht aufgebaut/);
@@ -129,38 +132,43 @@ describe('Playground: contract and basics', () => {
 
   it('shows the result table, NULL and the row count', async () => {
     const { container } = await mount();
-    type(sqlField(), "SELECT 1 AS zahl, NULL AS leer, 'a' AS text, TRUE AS wahr UNION ALL SELECT 2, NULL, 'b', FALSE ORDER BY 1");
+    type(sqlField(), "SELECT 1 AS zahl, NULL AS leer, 'a' AS text, TRUE AS wahr, 'NULL' AS wort UNION ALL SELECT 2, NULL, 'b', FALSE, 'x' ORDER BY 1");
     fireEvent.click(runButton());
     await waitFor(() => expect(unit(container, 'sql-result').dataset.verifyState).toBe('ready'), READY);
     const result = unit(container, 'sql-result');
     expect(result.dataset.verifyCount).toBe('2');
     const table = w(result).getByRole('table');
-    expect(within(table).getAllByRole('columnheader').map((c) => c.textContent)).toEqual(['zahl', 'leer', 'text', 'wahr']);
-    const cells = within(table).getAllByRole('cell').map((c) => c.textContent);
-    expect(cells.slice(0, 4)).toEqual(['1', 'NULL', 'a', 'true']);
+    expect(within(table).getAllByRole('columnheader').map((c) => c.textContent)).toEqual(['zahl', 'leer', 'text', 'wahr', 'wort']);
+    const cells = within(table).getAllByRole('cell');
+    expect(cells.slice(0, 5).map((c) => c.textContent)).toEqual(['1', 'NULL (kein Wert)', 'a', 'true', 'NULL']);
+    // SQL NULL differs from the text 'NULL' not only by style: marked element plus hidden wording, and a legend
+    expect(cells[1].querySelector('.pg-null')).toBeTruthy();
+    expect(cells[4].querySelector('.pg-null')).toBeNull();
+    expect(result.textContent).toMatch(/NULL im Rahmen.*kein Wert/);
     expect(result.textContent).toContain('2 Zeilen');
   });
 
-  it('shows a syntax error as state=error with the message', async () => {
+  it('shows a syntax error in the result unit only; the playground itself stays ready', async () => {
     const { container } = await mount();
     type(sqlField(), 'SELEKT 1');
     fireEvent.click(runButton());
-    await waitFor(() => expect(unit(container).dataset.verifyState).toBe('error'), READY);
-    expect(unit(container).dataset.verifyError).toMatch(/syntax error/i);
-    expect(unit(container, 'sql-result').dataset.verifyState).toBe('error');
+    await waitFor(() => expect(unit(container, 'sql-result').dataset.verifyState).toBe('error'), READY);
+    expect(unit(container, 'sql-result').dataset.verifyError).toMatch(/syntax error/i);
+    expect(unit(container).dataset.verifyState).toBe('ready');
+    expect(unit(container).dataset.verifyError).toBeUndefined();
     expect(screen.getByRole('alert').textContent).toMatch(/syntax error/i);
     // fixing the statement clears the error
     type(sqlField(), 'SELECT 1');
     fireEvent.click(runButton());
-    await waitFor(() => expect(unit(container).dataset.verifyState).toBe('ready'), READY);
-    expect(unit(container).dataset.verifyError).toBeUndefined();
+    await waitFor(() => expect(unit(container, 'sql-result').dataset.verifyState).toBe('ready'), READY);
+    expect(unit(container, 'sql-result').dataset.verifyError).toBeUndefined();
   });
 
   it('adds the PostgreSQL equivalent for Firebird syntax', async () => {
     const { container } = await mount();
     type(sqlField(), 'SELECT FIRST 3 * FROM abteilung');
     fireEvent.click(runButton());
-    await waitFor(() => expect(unit(container).dataset.verifyState).toBe('error'), READY);
+    await waitFor(() => expect(unit(container, 'sql-result').dataset.verifyState).toBe('error'), READY);
     const hint = w(container).getByRole('note', { name: /Firebird/ });
     expect(hint.textContent).toContain('LIMIT 3');
     expect(hint.textContent).toContain('FETCH FIRST 3 ROWS ONLY');
@@ -170,8 +178,15 @@ describe('Playground: contract and basics', () => {
     const { container } = await mount();
     type(sqlField(), 'SELECT * FROM gibtesnicht');
     fireEvent.click(runButton());
-    await waitFor(() => expect(unit(container).dataset.verifyState).toBe('error'), READY);
+    await waitFor(() => expect(unit(container, 'sql-result').dataset.verifyState).toBe('error'), READY);
     expect(w(container).queryByRole('note', { name: /Firebird/ })).toBeNull();
+  });
+
+  it('says how long free-practice changes last: until the page is left or the database is reset', async () => {
+    await mount();
+    const text = screen.getByText(/Freies Üben:/).textContent ?? '';
+    expect(text).toMatch(/bis du die Seite verlässt oder neu lädst/);
+    expect(text).toMatch(/zurücksetzt/);
   });
 
   it('resets the practice database to the seed state', async () => {
@@ -340,7 +355,9 @@ describe('Playground: "Ohne Rechner" mode', () => {
     fireEvent.click(runButton());
     const note = await screen.findByText(/Abfrage läuft/);
     expect(note.closest('[aria-live="polite"]')).toBeTruthy();
-    expect(note.closest('[aria-live="polite"]')!.textContent).toMatch(/Seite neu, um abzubrechen/);
+    // the database runs in a worker: the page stays usable, a statement is aborted after 10 s
+    expect(note.closest('[aria-live="polite"]')!.textContent).toMatch(/nach 10 Sekunden/i);
+    expect(note.closest('[aria-live="polite"]')!.textContent).not.toMatch(/blockiert/);
     expect(unit(container, 'sql-result').dataset.verifyState).toBe('loading');
     expect(runButton().disabled).toBe(true);
     await waitFor(() => expect(unit(container, 'sql-result').dataset.verifyState).toBe('ready'), READY);

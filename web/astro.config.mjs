@@ -17,5 +17,19 @@ export default defineConfig({
     // dependency optimizer would move the module away from them in `astro dev`. In the build Vite
     // emits both files into _astro/ and addresses them under `base`.
     optimizeDeps: { exclude: ['@electric-sql/pglite'] },
+    // The playground runs PGlite in a module Web Worker (src/lib/pg.worker.ts). The worker loads PGlite
+    // with a dynamic import, which needs code splitting, so the worker bundle is ES, not IIFE.
+    // The worker is bundled by the client and by the prerender build; with Astro's file name pattern both
+    // emit the same names, so the 15 MB of PGlite assets land in dist/_astro only once.
+    worker: {
+      format: 'es',
+      rolldownOptions: {
+        output: {
+          entryFileNames: '_astro/[name].[hash].js',
+          chunkFileNames: '_astro/[name].[hash].js',
+          assetFileNames: '_astro/[name].[hash][extname]',
+        },
+      },
+    },
   },
 });

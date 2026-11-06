@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { openDatabase, transactionControl, TRANSACTION_BLOCKED, type Database } from '../src/lib/pg-engine';
 import { equal } from '../src/lib/sqlcheck';
+import { inProcessWorker } from './support/in-process-worker';
 
 const dbDir = resolve(process.cwd(), '..', 'db', 'firma');
 const source = {
@@ -27,7 +28,7 @@ describe('transactionControl', () => {
 describe('PGlite database', () => {
   let db: Database;
   beforeAll(async () => {
-    db = await openDatabase(source);
+    db = await openDatabase(source, { spawn: inProcessWorker });
   }, 60_000);
   afterAll(async () => {
     await db.close();
@@ -89,5 +90,17 @@ describe('PGlite database', () => {
     expect(good.user.rows).toEqual([[6]]);
     expect(good.after).toBeNull();
     expect(equal(good.user, { cols: ['n'], rows: [[6]], ordered: false }).ok).toBe(true);
+  });
+
+  it('runs concurrent checks one after the other, each on the seed state (G6)', async () => {
+    const job = {
+      sql: "INSERT INTO abteilung (bezeichnung, standort) VALUES ('Neu', 'Ost')",
+      kind: 'dml' as const,
+      check: "SELECT abteilung_id, bezeichnung FROM abteilung WHERE bezeichnung = 'Neu'",
+    };
+    const [a, b, c] = await Promise.all([db.check(job), db.check(job), db.check({ sql: 'SELECT count(*) FROM abteilung', kind: 'query' })]);
+    expect(a.after?.rows).toEqual([[7, 'Neu']]);
+    expect(b.after?.rows).toEqual([[7, 'Neu']]);
+    expect(c.user.rows).toEqual([[6]]);
   });
 });

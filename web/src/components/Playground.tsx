@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { hint as dialectHint } from '../lib/dialect';
-import { openDatabase, type CheckRun, type Database, type RunResult } from '../lib/pg-engine';
-import { equal, type ExpectedResult } from '../lib/sqlcheck';
+import { createExpectedCache } from '../lib/expected';
+import { openDatabase, QUERY_TIMEOUT_MS, type CheckRun, type Database, type EngineOptions, type RunResult } from '../lib/pg-engine';
+import { equal } from '../lib/sqlcheck';
 import { loadSnapshot } from '../lib/snapshots';
 import { topicFromUrl, writeTopicToUrl, type TopicOption } from '../lib/topic-filter';
 import SqlEditor from './SqlEditor';
@@ -41,6 +42,8 @@ interface Props {
   topics: TopicOption[];
   /** false: plain textarea instead of CodeMirror (tests). */
   codeMirror?: boolean;
+  /** Engine options (tests: an in-process worker, since Node has no Web Worker). */
+  engine?: EngineOptions;
 }
 
 type EngineState = { status: 'loading' | 'ready' } | { status: 'error'; error: string };
@@ -69,13 +72,21 @@ function plural(n: number, one: string, many: string): string {
   return `${n} ${n === 1 ? one : many}`;
 }
 
+/** SQL NULL is framed and spelled out for screen readers, so it differs from the text 'NULL' not only by style. */
 function cellText(v: unknown) {
-  if (v === null) return <i class="pg-null">NULL</i>;
+  if (v === null) {
+    return (
+      <span class="pg-null">
+        NULL<span class="visually-hidden"> (kein Wert)</span>
+      </span>
+    );
+  }
   return String(v);
 }
 
 function ResultTable({ result }: { result: RunResult }) {
   const shown = result.rows.slice(0, MAX_ROWS);
+  const hasNull = shown.some((row) => row.some((v) => v === null));
   return (
     <>
       <div class="pg-scroll" role="region" aria-label="Ergebnistabelle" tabIndex={0}>
@@ -100,6 +111,14 @@ function ResultTable({ result }: { result: RunResult }) {
           </tbody>
         </table>
       </div>
+      {hasNull && (
+        <p class="meta">
+          <span class="pg-null" aria-hidden="true">
+            NULL
+          </span>{' '}
+          im Rahmen: SQL-NULL, also kein Wert (nicht der Text „NULL“).
+        </p>
+      )}
       {result.rows.length > MAX_ROWS && (
         <p class="meta">
           Angezeigt werden die ersten {MAX_ROWS} von {result.rows.length} Zeilen.
@@ -109,7 +128,7 @@ function ResultTable({ result }: { result: RunResult }) {
   );
 }
 
-export default function Playground({ tasks, databases, topics, codeMirror = true }: Props) {
+export default function Playground({ tasks, databases, topics, codeMirror = true, engine: engineOptions }: Props) {
   const [taskId, setTaskId] = useState('');
   const [topic, setTopic] = useState('');
   const [dbName, setDbName] = useState<PlaygroundDb['name']>(databases[0]?.name ?? 'musikschule');
@@ -125,7 +144,7 @@ export default function Playground({ tasks, databases, topics, codeMirror = true
   const [phase, setPhase] = useState<Phase>({ state: 'idle' });
 
   const dbs = useRef(new Map<string, Promise<Database>>());
-  const expected = useRef(new Map<string, ExpectedResult | null>());
+  const expected = useRef(createExpectedCache(loadSnapshot));
   const drafts = useRef(new Map<string, string>());
   const runId = useRef(0);
 
@@ -144,7 +163,7 @@ export default function Playground({ tasks, databases, topics, codeMirror = true
     if (!p) {
       const source = databases.find((d) => d.name === name);
       if (!source) return Promise.reject(new Error(`Die Beispieldatenbank ${name} fehlt.`));
-      p = openDatabase(source);
+      p = openDatabase(source, engineOptions);
       const created = p;
       created.catch(() => {
         if (dbs.current.get(key) === created) dbs.current.delete(key);
@@ -238,25 +257,12 @@ export default function Playground({ tasks, databases, topics, codeMirror = true
     setAttempt((n) => n + 1);
   }
 
-  async function expectedFor(t: PlaygroundTask, checker: Database): Promise<ExpectedResult | null> {
-    if (expected.current.has(t.id)) return expected.current.get(t.id) ?? null;
-    let exp = await loadSnapshot(t.id);
-    if (!exp) {
-      // no snapshot: derive the expected result from the reference solution on the same seed state
-      const ref = await checker.check({ sql: t.solutionPg ?? t.solution, kind: t.kind, check: t.check });
-      const res = t.kind === 'query' ? ref.user : ref.after;
-      if (!ref.user.error && res && !res.error && res.cols.length > 0) exp = { cols: res.cols, rows: res.rows, ordered: t.ordered };
-    }
-    expected.current.set(t.id, exp);
-    return exp;
-  }
-
   async function judge(t: PlaygroundTask, checker: Database, out: CheckRun): Promise<Verdict> {
     const actual = t.kind === 'query' ? out.user : out.after;
     if (!actual || actual.error) {
       return { kind: 'unchecked', text: 'Diese Aufgabe hat keine Prüfabfrage. Vergleiche dein Ergebnis mit der Musterlösung.' };
     }
-    const exp = await expectedFor(t, checker);
+    const exp = await expected.current.get(t, checker);
     if (!exp) return { kind: 'unchecked', text: 'Für diese Aufgabe gibt es keinen Vergleichswert. Vergleiche dein Ergebnis mit der Musterlösung.' };
     const outcome = equal(actual, exp);
     return outcome.ok
@@ -316,7 +322,8 @@ export default function Playground({ tasks, databases, topics, codeMirror = true
     blocked = prediction.trim() === '' ? 'Ohne Rechner: Schreibe zuerst deine Vorhersage und halte sie fest.' : 'Ohne Rechner: Halte deine Vorhersage fest, dann kannst du ausführen.';
   }
 
-  const failure = engine.status === 'error' ? engine.error : phase.state === 'error' ? phase.error : null;
+  // An error of the user's statement belongs to the result unit; the playground itself is only in error if the engine is.
+  const failure = engine.status === 'error' ? engine.error : null;
   const rootState = failure !== null ? 'error' : engine.status === 'loading' || running ? 'loading' : tasks.length === 0 ? 'empty' : 'ready';
 
   const resultState = phase.state === 'idle' ? 'empty' : phase.state === 'running' ? 'loading' : phase.state === 'error' ? 'error' : 'ready';
@@ -436,7 +443,7 @@ export default function Playground({ tasks, databases, topics, codeMirror = true
           </div>
         ) : (
           <p class="meta">
-            Freies Üben: Probiere SQL auf der Beispieldatenbank aus. Änderungen bleiben erhalten, bis du die Datenbank zurücksetzt. Oder wähle oben eine Aufgabe mit automatischer Prüfung.
+            Freies Üben: Probiere SQL auf der Beispieldatenbank aus. Deine Änderungen gelten nur in diesem Tab: Sie bleiben, bis du die Seite verlässt oder neu lädst oder die Datenbank zurücksetzt; gespeichert werden sie nicht. Oder wähle oben eine Aufgabe mit automatischer Prüfung.
           </p>
         )}
       </section>
@@ -501,8 +508,8 @@ export default function Playground({ tasks, databases, topics, codeMirror = true
         <div aria-live="polite" class="pg-running">
           {running && (
             <p class="notice notice--info">
-              <strong>Abfrage läuft …</strong> Die Datenbank arbeitet im Browser und blockiert die Seite, bis sie fertig ist. Hängt sie,
-              lade die Seite neu, um abzubrechen; nicht gespeicherter Text im Editor geht dabei verloren.
+              <strong>Abfrage läuft …</strong> Die Datenbank arbeitet im Hintergrund, die Seite bleibt bedienbar. Liegt nach{' '}
+              {QUERY_TIMEOUT_MS / 1000} Sekunden kein Ergebnis vor, wird die Anweisung abgebrochen und die Datenbank neu aufgebaut.
             </p>
           )}
         </div>

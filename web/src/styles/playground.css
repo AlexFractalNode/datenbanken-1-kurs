@@ -196,9 +196,18 @@
   background: var(--c-surface-2);
 }
 
+/* SQL NULL: framed and italic, so it is not mistaken for the text 'NULL' (the cell also says "kein Wert" to screen readers). */
 .pg-null {
+  /* contains the visually hidden "(kein Wert)", which would otherwise widen the page from inside the scroller */
+  position: relative;
+  display: inline-block;
+  padding: 0 0.3em;
+  border: 1px dashed currentColor;
+  border-radius: 0.25em;
   color: var(--c-text-muted);
   font-style: italic;
+  font-size: 0.9em;
+  line-height: 1.3;
 }
 
 .pg-prediction {

@@ -1,222 +1,167 @@
 /**
- * PostgreSQL in the browser (PGlite) for the SQL playground.
+ * Page side of the playground database. PostgreSQL (PGlite, `pg-core.ts`) runs in a Web Worker
+ * (`pg.worker.ts`), so an endless statement cannot freeze the tab: every call has a timeout
+ * (QUERY_TIMEOUT_MS). When it expires, the worker is terminated and a new one is built from schema +
+ * seed, like `tools/pglite-runner.mjs` does with its worker threads; the call reports
+ * QUERY_TIMEOUT_ERROR. A crashed worker is replaced the same way.
  *
- * PGlite is loaded lazily (dynamic import): the 15 MB of WebAssembly and data only travel when the
- * playground page is opened. Vite ships the files next to the bundle and resolves them against `base`.
- * The value conventions are those of `tools/pglite-runner.mjs`, which produced the snapshots:
- * dates and times as PostgreSQL text, NUMERIC as number, INT8 as number (decimal string beyond 2^53),
- * CHAR(n) without padding, BYTEA as lowercase hex.
- *
- * Auto-checks must run on the freshly seeded state (db/DIALECT-NOTES.md, "Für den Playground"). `pg.clone()`
- * does not guarantee that: sequences of a clone jump ahead (observed: 2 became 34). So `check` runs the user
- * statement in a transaction that is always rolled back and then sets all sequences back to their seed
- * values, exactly like the runner does.
+ * Calls run one after the other; a queued call only starts its timeout once it is sent. Unit tests
+ * (no `Worker` in Node/happy-dom) pass `spawn` with the same host running in-process.
  */
-import type { PGlite } from '@electric-sql/pglite';
-import type { Cell } from './sqlcheck';
+import type { CheckJob, CheckRun, Database, DbSource, RunResult } from './pg-core';
+import type { HostRequest, HostResponse } from './pg-host';
 
-export interface DbSource {
-  schema: string;
-  seed: string;
+export { TRANSACTION_BLOCKED, transactionControl } from './pg-core';
+export type { CheckJob, CheckRun, Database, DbSource, RunResult } from './pg-core';
+
+export const QUERY_TIMEOUT_MS = 10_000;
+
+export const QUERY_TIMEOUT_ERROR =
+  `Abgebrochen: Die Anweisung lief länger als ${QUERY_TIMEOUT_MS / 1000} Sekunden (zum Beispiel eine rekursive Abfrage ohne Abbruchbedingung). ` +
+  'Die Datenbank wurde aus Schema und Beispieldaten neu aufgebaut; eigene Änderungen aus dem freien Üben sind dabei verloren gegangen.';
+
+export const WORKER_CRASH_ERROR =
+  'Die Datenbank im Hintergrund ist abgestürzt (zum Beispiel, weil der Speicher nicht reichte). ' +
+  'Sie wurde aus Schema und Beispieldaten neu aufgebaut; eigene Änderungen aus dem freien Üben sind dabei verloren gegangen.';
+
+export const NO_WORKER_ERROR =
+  'Dieser Browser kann die Datenbank nicht im Hintergrund (Web Worker) starten. Nutze bitte einen aktuellen Browser.';
+
+/** The part of the Web Worker API the client uses (tests pass a stand-in). */
+export interface WorkerLike {
+  postMessage(msg: HostRequest): void;
+  terminate(): void;
+  onmessage: ((event: { data: HostResponse }) => void) | null;
+  onerror: ((event: unknown) => void) | null;
 }
 
-export interface RunResult {
-  cols: string[];
-  rows: Cell[][];
-  error: string | null;
-  /** Rows affected by the last statement, if it returned no result set. */
-  affected?: number;
+export interface EngineOptions {
+  /** Creates the worker; default: a module Web Worker running `pg.worker.ts`. */
+  spawn?: () => WorkerLike | Promise<WorkerLike>;
+  timeoutMs?: number;
 }
 
-export interface CheckJob {
-  sql: string;
-  kind: 'query' | 'ddl' | 'dml';
-  /** Query whose result is compared for ddl/dml tasks. */
-  check?: string;
+type Request = HostRequest extends infer R ? (R extends { id: number } ? Omit<R, 'id'> : never) : never;
+type Outcome = { ok: true; value: unknown } | { ok: false; error: string; fatal: boolean };
+
+interface Conn {
+  worker: WorkerLike;
+  pending: Map<number, (out: Outcome) => void>;
+  dead: boolean;
 }
 
-/** `user`: result of the user's statement; `after`: result of the task's check query run right after it (ddl/dml). */
-export interface CheckRun {
-  user: RunResult;
-  after: RunResult | null;
+/**
+ * A module Web Worker. There is deliberately no in-process fallback in the page bundle: it would freeze
+ * the tab on an endless statement and ship PGlite a second time.
+ */
+function defaultSpawn(): WorkerLike {
+  if (typeof Worker === 'undefined') throw new Error(NO_WORKER_ERROR);
+  return new Worker(new URL('./pg.worker.ts', import.meta.url), { type: 'module', name: 'pglite' }) as unknown as WorkerLike;
 }
 
-export interface Database {
-  /** Runs one or several statements for good (the free-practice database of the user). */
-  run(sql: string): Promise<RunResult>;
-  /**
-   * Runs a task job on the seed state and rolls everything back afterwards. Use a database that is only
-   * used for checks: `run` on the same instance would change the state the checks start from.
-   */
-  check(job: CheckJob): Promise<CheckRun>;
-  close(): Promise<void>;
-}
-
-export const TRANSACTION_BLOCKED =
-  'Transaktionsbefehle (BEGIN, COMMIT, ROLLBACK, START TRANSACTION ...) sind im Playground gesperrt: Jede Ausführung läuft für sich. ' +
-  'ROLLBACK TO SAVEPOINT ist erlaubt.';
-
-const MAX_SAFE = BigInt(Number.MAX_SAFE_INTEGER);
-
-/** Same list as tools/sqltest.py: statements that would leave or break the surrounding transaction. */
-export function transactionControl(sql: string): boolean {
-  const text = sql
-    .replace(/\/\*[\s\S]*?\*\//g, ' ')
-    .replace(/--[^\n]*/g, ' ')
-    .replace(/'(?:[^']|'')*'/g, "''")
-    .replace(/\$([A-Za-z_]\w*)?\$[\s\S]*?\$\1\$/g, "''");
-  return text.split(';').some((stmt) => {
-    const s = stmt.trim().toLowerCase().replace(/\s+/g, ' ');
-    if (/^(begin|end|abort|commit|start transaction|prepare transaction)\b/.test(s)) return true;
-    if (/^set (session characteristics as )?transaction\b/.test(s)) return true;
-    return /^rollback\b/.test(s) && !/^rollback( work| transaction)? to\b/.test(s);
-  });
-}
-
+const EMPTY: RunResult = { cols: [], rows: [], error: null };
+const CLOSED = 'Die Datenbank ist geschlossen.';
 const errorText = (err: unknown): string => String((err as { message?: unknown })?.message ?? err);
 
-interface Pg {
-  PGlite: typeof import('@electric-sql/pglite').PGlite;
-  types: typeof import('@electric-sql/pglite').types;
-}
+/** Builds the database (schema + seed) in a worker. Rejects with the PostgreSQL message if a script fails. */
+export async function openDatabase(source: DbSource, options: EngineOptions = {}): Promise<Database> {
+  const spawn = options.spawn ?? defaultSpawn;
+  const timeoutMs = options.timeoutMs ?? QUERY_TIMEOUT_MS;
+  let nextId = 0;
+  let closed = false;
 
-let pgPromise: Promise<Pg> | undefined;
+  function kill(conn: Conn, error: string): void {
+    if (conn.dead) return;
+    conn.dead = true;
+    conn.worker.terminate();
+    for (const settle of conn.pending.values()) settle({ ok: false, error, fatal: true });
+    conn.pending.clear();
+  }
 
-/** Loads the PGlite module once; a failed load can be retried. */
-export function loadPglite(): Promise<Pg> {
-  pgPromise ??= import('@electric-sql/pglite').then(({ PGlite, types }) => ({ PGlite, types }));
-  pgPromise.catch(() => {
-    pgPromise = undefined;
-  });
-  return pgPromise;
-}
+  function send(conn: Conn, req: Request, timeout: number): Promise<Outcome> {
+    return new Promise((resolve) => {
+      if (conn.dead) return resolve({ ok: false, error: WORKER_CRASH_ERROR, fatal: true });
+      const id = (nextId += 1);
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      conn.pending.set(id, (out) => {
+        if (timer !== undefined) clearTimeout(timer);
+        resolve(out);
+      });
+      if (timeout > 0) {
+        timer = setTimeout(() => {
+          conn.pending.delete(id);
+          resolve({ ok: false, error: QUERY_TIMEOUT_ERROR, fatal: true });
+          kill(conn, QUERY_TIMEOUT_ERROR);
+        }, timeout);
+      }
+      conn.worker.postMessage({ id, ...req } as HostRequest);
+    });
+  }
 
-function options(types: Pg['types']) {
-  const raw = (value: string) => value;
-  return {
-    rowMode: 'array' as const,
-    parsers: {
-      [types.DATE]: raw,
-      [types.TIME]: raw,
-      [types.TIMETZ]: raw,
-      [types.TIMESTAMP]: raw,
-      [types.TIMESTAMPTZ]: raw,
-      [types.INTERVAL]: raw,
-      [types.NUMERIC]: (value: string) => Number(value),
-      [types.INT8]: (value: string) => {
-        const big = BigInt(value);
-        return big <= MAX_SAFE && big >= -MAX_SAFE ? Number(big) : value;
-      },
-      [types.BPCHAR]: (value: string) => value.replace(/ +$/, ''),
-      [types.BYTEA]: (value: string) => (value.startsWith('\\x') ? value.slice(2).toLowerCase() : value),
-    },
-  };
-}
-
-type ExecResult = { fields: { name: string }[]; rows: unknown[][]; affectedRows?: number };
-const EMPTY: RunResult = { cols: [], rows: [], error: null };
-
-/** The result of the last statement that returns columns; otherwise the affected rows of the last one. */
-function lastResult(results: ExecResult[]): RunResult {
-  for (let i = results.length - 1; i >= 0; i -= 1) {
-    if (results[i].fields.length > 0) {
-      return { cols: results[i].fields.map((f) => f.name), rows: results[i].rows as Cell[][], error: null };
+  async function connect(): Promise<Conn> {
+    const worker = await spawn();
+    const conn: Conn = { worker, pending: new Map(), dead: false };
+    worker.onmessage = ({ data }) => {
+      const settle = conn.pending.get(data.id);
+      if (!settle) return;
+      conn.pending.delete(data.id);
+      settle(data.ok ? { ok: true, value: data.value } : { ok: false, error: data.error, fatal: false });
+    };
+    worker.onerror = () => kill(conn, WORKER_CRASH_ERROR);
+    // Building the database has no timeout: the first start also downloads 15 MB.
+    const opened = await send(conn, { op: 'open', source }, 0);
+    if (!opened.ok) {
+      kill(conn, opened.error);
+      throw new Error(opened.error);
     }
+    return conn;
   }
-  const last = results[results.length - 1];
-  return last?.affectedRows !== undefined ? { ...EMPTY, affected: last.affectedRows } : { ...EMPTY };
-}
 
-interface Sequence {
-  schema: string;
-  name: string;
-  last: number | null;
-  start: number;
-}
+  let conn: Promise<Conn> = connect();
+  await conn;
 
-async function sequences(pg: PGlite, opts: ReturnType<typeof options>): Promise<Map<string, Sequence>> {
-  const res = await pg.query<unknown[]>(
-    'SELECT schemaname, sequencename, last_value, start_value FROM pg_sequences ORDER BY 1, 2',
-    [],
-    opts,
-  );
-  return new Map(
-    (res.rows as [string, string, number | null, number][]).map(([schema, name, last, start]) => [
-      `${schema}.${name}`,
-      { schema, name, last, start },
-    ]),
-  );
-}
-
-async function restoreSequences(pg: PGlite, baseline: Map<string, Sequence>, opts: ReturnType<typeof options>): Promise<void> {
-  const current = await sequences(pg, opts);
-  for (const [key, base] of baseline) {
-    const now = current.get(key);
-    if (now === undefined || now.last === base.last) continue;
-    // setval(seq, start, false): the next value is `start`, like a fresh sequence
-    await pg.query("SELECT setval(format('%I.%I', $1::text, $2::text)::regclass, $3, $4)", [
-      base.schema,
-      base.name,
-      base.last ?? base.start,
-      base.last !== null,
-    ]);
+  let chain: Promise<unknown> = Promise.resolve();
+  function call(req: Request): Promise<Outcome> {
+    const job = chain.then(async (): Promise<Outcome> => {
+      if (closed) return { ok: false, error: CLOSED, fatal: false };
+      let c: Conn | null = await conn.catch(() => null);
+      if (!c || c.dead) {
+        // the rebuild after a timeout or crash failed (or the worker died while idle): try again now
+        conn = connect();
+        try {
+          c = await conn;
+        } catch (err) {
+          return { ok: false, error: errorText(err), fatal: false };
+        }
+      }
+      const out = await send(c, req, timeoutMs);
+      if (!out.ok && out.fatal && !closed) {
+        // rebuild right away, so the next statement does not wait for the whole start
+        conn = connect();
+        conn.catch(() => undefined);
+      }
+      return out;
+    });
+    chain = job.catch(() => undefined);
+    return job;
   }
-}
-
-/** Builds an in-memory database from schema + seed. Throws with the PostgreSQL message if a script fails. */
-export async function openDatabase(source: DbSource): Promise<Database> {
-  const { PGlite, types } = await loadPglite();
-  const opts = options(types);
-  const pg = await PGlite.create();
-  try {
-    await pg.exec(source.schema);
-    await pg.exec(source.seed);
-  } catch (err) {
-    await pg.close().catch(() => undefined);
-    throw new Error(`Beispieldatenbank konnte nicht aufgebaut werden: ${errorText(err)}`);
-  }
-  const baseline = await sequences(pg, opts);
-  let broken = false;
 
   return {
     async run(sql) {
-      if (transactionControl(sql)) return { ...EMPTY, error: TRANSACTION_BLOCKED };
-      try {
-        return lastResult((await pg.exec(sql, opts)) as unknown as ExecResult[]);
-      } catch (err) {
-        return { ...EMPTY, error: errorText(err) };
-      }
+      const out = await call({ op: 'run', sql });
+      return out.ok ? (out.value as RunResult) : { ...EMPTY, error: out.error };
     },
-
-    async check(job) {
-      const fail = (error: string): CheckRun => ({ user: { ...EMPTY, error }, after: null });
-      if (broken) return fail('Die Prüf-Datenbank ist nicht mehr nutzbar. Bitte lade die Seite neu.');
-      if (transactionControl(job.sql)) return fail(TRANSACTION_BLOCKED);
-      let out: CheckRun;
-      try {
-        await pg.exec('BEGIN');
-        try {
-          const user = lastResult((await pg.exec(job.sql, opts)) as unknown as ExecResult[]);
-          const hasCheck = job.kind !== 'query' && job.check !== undefined && job.check.trim() !== '';
-          out = {
-            user,
-            after: hasCheck ? lastResult((await pg.exec(job.check!, opts)) as unknown as ExecResult[]) : null,
-          };
-        } catch (err) {
-          out = fail(errorText(err));
-        } finally {
-          await pg.exec('ROLLBACK');
-        }
-        await restoreSequences(pg, baseline, opts);
-      } catch (err) {
-        broken = true;
-        return fail(`Prüf-Datenbank: ${errorText(err)}`);
-      }
-      return out;
+    async check(job: CheckJob) {
+      const out = await call({ op: 'check', job });
+      return out.ok ? (out.value as CheckRun) : { user: { ...EMPTY, error: out.error }, after: null };
     },
-
     async close() {
-      await pg.close().catch(() => undefined);
+      closed = true;
+      const c = await conn.catch(() => null);
+      if (!c || c.dead) return;
+      // Idle: let PGlite shut down cleanly. Busy (e.g. an endless statement): terminate right away.
+      if (c.pending.size === 0) await send(c, { op: 'close' }, 2_000);
+      kill(c, CLOSED);
     },
   };
 }
