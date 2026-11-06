@@ -11,6 +11,18 @@ type UnitState = 'loading' | 'empty' | 'ready';
 
 const letterId = (letter: string) => `buchstabe-${letter === '#' ? 'sonstige' : letter.toLowerCase()}`;
 
+/** The live region speaks the hit count only after typing pauses, not after every key. */
+export const ANNOUNCE_DELAY_MS = 400;
+
+/** The id in the URL fragment; a malformed escape (e.g. `#%E0%A4%A`) is no id. */
+function hashId(hash: string): string {
+  try {
+    return decodeURIComponent(hash.slice(1));
+  } catch {
+    return '';
+  }
+}
+
 /**
  * Searchable glossary. The full list is rendered on the server, so it also works without JavaScript
  * (only the filter needs it). Every entry keeps its anchor `#g-…`; following a link to an entry that
@@ -30,11 +42,18 @@ export default function Glossary({ items, topics }: Props) {
   }, [visible]);
   const topicsInUse = useMemo(() => topics.filter((t) => items.some((i) => i.topics.some((x) => x.id === t.id))), [items, topics]);
   const filtered = query.trim() !== '' || topic !== '';
+  const [announced, setAnnounced] = useState(visible.length);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const timer = setTimeout(() => setAnnounced(visible.length), ANNOUNCE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [mounted, visible.length, query, topic]);
 
   useEffect(() => {
     setMounted(true);
     const onHash = () => {
-      const id = decodeURIComponent(window.location.hash.slice(1));
+      const id = hashId(window.location.hash);
       if (!id || document.getElementById(id) || !items.some((i) => i.id === id)) return;
       // The target exists but the filter hides it: show everything, then jump there after the render.
       pendingId.current = id;
@@ -98,7 +117,7 @@ export default function Glossary({ items, topics }: Props) {
             )}
           </form>
           <p class="meta" role="status">
-            {mounted ? `${visible.length} von ${items.length} Einträgen` : `${items.length} Einträge`}
+            {mounted ? `${announced} von ${items.length} Einträgen` : `${items.length} Einträge`}
           </p>
 
           {visible.length === 0 ? (

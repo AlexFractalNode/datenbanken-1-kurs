@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/preact';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/preact';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Glossary from '../src/components/Glossary';
 import type { GlossaryEntry } from '../src/lib/content';
 import { buildGlossaryItems, filterGlossary, letterOf, parseDefinition, searchKey } from '../src/lib/glossary';
@@ -128,7 +128,8 @@ describe('Glossary island', () => {
     const { container } = render(<Glossary items={items} topics={topics} />);
     fireEvent.input(screen.getByLabelText('Begriff suchen'), { target: { value: 'rolle' } });
     await waitFor(() => expect(unit(container).dataset.verifyCount).toBe('2'));
-    expect(screen.getByRole('status').textContent).toContain('2 von 5');
+    // announced with a short delay (debounced live region)
+    await waitFor(() => expect(screen.getByRole('status').textContent).toContain('2 von 5'));
     expect(container.querySelector('dt#g-join')).toBeNull();
   });
 
@@ -156,6 +157,49 @@ describe('Glossary island', () => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
     await waitFor(() => expect(container.querySelector('dt#g-join')).toBeTruthy());
     expect((screen.getByLabelText('Begriff suchen') as HTMLInputElement).value).toBe('');
+  });
+
+  it('announces the number of hits only after typing pauses (G7)', async () => {
+    const { container } = render(<Glossary items={items} topics={topics} />);
+    await waitFor(() => expect(unit(container).dataset.verifyState).toBe('ready'));
+    vi.useFakeTimers();
+    try {
+      const field = screen.getByLabelText('Begriff suchen');
+      for (const value of ['r', 'ro', 'rol', 'roll', 'rolle']) {
+        fireEvent.input(field, { target: { value } });
+        act(() => {
+          vi.advanceTimersByTime(100);
+        });
+      }
+      // the list and the contract follow at once, the live region waits
+      expect(unit(container).dataset.verifyCount).toBe('2');
+      expect(screen.getByRole('status').textContent).toBe('5 von 5 Einträgen');
+      act(() => {
+        vi.advanceTimersByTime(600);
+      });
+      expect(screen.getByRole('status').textContent).toBe('2 von 5 Einträgen');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('ignores a malformed anchor instead of throwing (G7)', async () => {
+    const errors: unknown[] = [];
+    const onError = (e: ErrorEvent) => errors.push(e.error ?? e.message);
+    window.addEventListener('error', onError);
+    const spy = vi.spyOn(console, 'error').mockImplementation((...args) => errors.push(args));
+    try {
+      const { container } = render(<Glossary items={items} topics={topics} />);
+      await waitFor(() => expect(unit(container).dataset.verifyState).toBe('ready'));
+      window.location.hash = '#%E0%A4%A';
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+      await new Promise((r) => setTimeout(r, 20));
+      expect(errors).toEqual([]);
+      expect(unit(container).dataset.verifyCount).toBe('5');
+    } finally {
+      window.removeEventListener('error', onError);
+      spy.mockRestore();
+    }
   });
 
   it('is empty without entries', async () => {
