@@ -1,0 +1,1339 @@
+# Glossar des Kurses. Jeder Eintrag nennt sein Thema am Ende der Definition (z. B. "(t04)").
+# en: "–" steht dort, wo kein etablierter englischer Fachbegriff belegt ist.
+# keep_english: true, wenn im deutschen Fachtext der englische Ausdruck selbst verwendet wird; sonst false.
+
+# ---------- t01 Grundlagen ----------
+- id: g-daten
+  de: "Daten"
+  en: "data"
+  keep_english: false
+  def_de: "Zeichen oder Zeichenfolgen, die nach festen Syntaxregeln aufgebaut sind und maschinell verarbeitet werden können. Sie sind die dargestellte Form einer Information und ohne Kontext bedeutungsoffen. (t01)"
+  def_en: "Characters or strings built according to fixed syntax rules that can be processed by machine. They are the represented form of information and carry no meaning without context. (t01)"
+- id: g-information
+  de: "Information"
+  en: "information"
+  keep_english: false
+  def_de: "Daten, denen jemand in einem Kontext durch Interpretation eine Bedeutung gibt. (t01)"
+  def_en: "Data that someone gives meaning to by interpreting it in a context. (t01)"
+- id: g-wissen
+  de: "Wissen"
+  en: "knowledge"
+  keep_english: false
+  def_de: "Mit weiteren Informationen und Erfahrung verknüpfte Information, die hilft, ein Problem zu lösen oder eine Entscheidung zu treffen. (t01)"
+  def_en: "Information linked with further information and experience that helps to solve a problem or make a decision. (t01)"
+- id: g-persistente-daten
+  de: "persistente Daten"
+  en: "persistent data"
+  keep_english: false
+  def_de: "Daten auf dauerhaftem Speicher, die das Programmende und einen Neustart überstehen und bis zum ausdrücklichen Löschen bestehen. Persistent heißt nicht unveränderlich. (t01)"
+  def_en: "Data on durable storage that survives the end of a program and a restart and remains until explicitly deleted. Persistent does not mean immutable. (t01)"
+- id: g-transiente-daten
+  de: "transiente Daten"
+  en: "transient data"
+  keep_english: false
+  def_de: "Daten, die nur während eines Programmlaufs existieren, meist im Arbeitsspeicher, und nur von diesem Programm gesehen werden. (t01)"
+  def_en: "Data that exists only while a program runs, usually in main memory, and is visible only to that program. (t01)"
+- id: g-redundanz
+  de: "Redundanz"
+  en: "redundancy"
+  keep_english: false
+  def_de: "Mehrfache Speicherung einer Angabe oder Ableitbarkeit aus anderen Angaben. Unkontrollierte Redundanz führt zu Inkonsistenz, kontrollierte Redundanz (z. B. Index) hat einen Zweck und geregelten Umgang. (t01)"
+  def_en: "Storing a piece of information more than once, or being able to derive it from other data. Uncontrolled redundancy leads to inconsistency; controlled redundancy (e.g. an index) has a purpose and a defined handling. (t01)"
+- id: g-konsistenz
+  de: "Konsistenz"
+  en: "consistency"
+  keep_english: false
+  def_de: "Zustand eines Datenbestands, der widerspruchsfrei ist und alle Integritätsbedingungen erfüllt. Gegenteil: Inkonsistenz. (t01)"
+  def_en: "State of a data set that is free of contradictions and satisfies all integrity constraints. Opposite: inconsistency. (t01)"
+- id: g-datenbank
+  de: "Datenbank (Datenbasis)"
+  en: "database"
+  keep_english: false
+  def_de: "Gespeicherter, zusammengehöriger Datenbestand aus Anwendungsdaten und dem Data Dictionary, das diese beschreibt. (t01)"
+  def_en: "Stored, coherent body of data consisting of application data and the data dictionary that describes it. (t01)"
+- id: g-dbms
+  de: "Datenbankmanagementsystem (DBMS)"
+  en: "database management system (DBMS)"
+  keep_english: false
+  def_de: "Software, die eine Datenbank definiert, anlegt und manipuliert und dabei jeden Zugriff kontrolliert, auch den gleichzeitigen mehrerer Benutzer. Beispiele: Firebird, PostgreSQL. (t01)"
+  def_en: "Software that defines, creates and manipulates a database and controls every access, including concurrent access by several users. Examples: Firebird, PostgreSQL. (t01)"
+- id: g-datenbanksystem
+  de: "Datenbanksystem (DBS)"
+  en: "database system"
+  keep_english: false
+  def_de: "DBMS zusammen mit der von ihm verwalteten Datenbank: DBS = DBMS + DB. (t01)"
+  def_en: "A DBMS together with the database it manages: database system = DBMS + database. (t01)"
+- id: g-datenbankanwendung
+  de: "Datenbankanwendung"
+  en: "database application"
+  keep_english: false
+  def_de: "Programm, das ein Datenbanksystem nutzt, etwa eine Web-Oberfläche. Es gehört nicht zum Datenbanksystem, mitgelieferte Clients des DBMS schon. (t01)"
+  def_en: "Program that uses a database system, e.g. a web front end. It is not part of the database system, whereas clients shipped with the DBMS are. (t01)"
+- id: g-data-dictionary
+  de: "Data Dictionary (Systemkatalog)"
+  en: "data dictionary"
+  keep_english: true
+  def_de: "Vom DBMS gepflegter Katalog der Metadaten (Tabellen, Spalten, Typen, Schlüssel, Sichten, Trigger, Benutzer, Rechte). In relationalen Systemen selbst als Tabellen abgelegt. (t01)"
+  def_en: "Catalog of metadata (tables, columns, types, keys, views, triggers, users, privileges) maintained by the DBMS. In relational systems it is itself stored as tables. (t01)"
+- id: g-metadaten
+  de: "Metadaten"
+  en: "metadata"
+  keep_english: false
+  def_de: "Daten über Daten, etwa die Beschreibung von Tabellen und Spalten. Das Schema gehört dazu. (t01)"
+  def_en: "Data about data, such as the description of tables and columns. The schema is part of it. (t01)"
+- id: g-miniwelt
+  de: "Miniwelt (Diskursbereich)"
+  en: "mini-world (universe of discourse)"
+  keep_english: false
+  def_de: "Zweckbezogener Ausschnitt der realen Welt samt der dort geltenden Regeln, den die Datenbank abbilden soll. (t01)"
+  def_en: "Purpose-related excerpt of the real world, including the rules that apply there, which the database is meant to represent. (t01)"
+- id: g-schema
+  de: "Schema"
+  en: "schema"
+  keep_english: false
+  def_de: "Beschreibung der Struktur einer Datenbank (Tabellen, Spalten, Datentypen, Bedingungen), per DDL definiert und selten geändert. In manchen DBMS zusätzlich ein Namensraum. (t01)"
+  def_en: "Description of the structure of a database (tables, columns, data types, constraints), defined with DDL and rarely changed. In some DBMS also a namespace. (t01)"
+- id: g-auspraegung
+  de: "Ausprägung (Instanz)"
+  en: "instance"
+  keep_english: false
+  def_de: "Menge der konkreten Daten einer Datenbank zu einem Zeitpunkt. Sie ändert sich durch DML und muss zum Schema passen. (t01)"
+  def_en: "The set of concrete data in a database at one point in time. It changes through DML and must conform to the schema. (t01)"
+- id: g-datenunabhaengigkeit
+  de: "Datenunabhängigkeit"
+  en: "data independence"
+  keep_english: false
+  def_de: "Entkopplung von Anwendungen und Datenspeicherung, sodass Änderungen auf einer Ebene die darüberliegende nicht erreichen. Unterschieden nach physischer und logischer Datenunabhängigkeit. (t01)"
+  def_en: "Decoupling of applications from data storage so that changes on one level do not reach the level above. Divided into physical and logical data independence. (t01)"
+- id: g-lost-update
+  de: "verlorene Änderung (Lost Update)"
+  en: "lost update"
+  keep_english: true
+  def_de: "Eine Änderung geht verloren, weil ein gleichzeitiger zweiter Speichervorgang sie überschreibt. Transaktionen und Synchronisation verhindern das. (t01)"
+  def_en: "A change is lost because a concurrent second write overwrites it. Transactions and synchronization prevent this. (t01)"
+- id: g-transaktion
+  de: "Transaktion"
+  en: "transaction"
+  keep_english: false
+  def_de: "Zusammenfassung von Änderungen, die mit COMMIT bestätigt oder mit ROLLBACK verworfen wird. Transaktionen haben die ACID-Eigenschaften: Atomarität (ganz oder gar nicht), Konsistenz, Isolation, Dauerhaftigkeit. (t01, t11)"
+  def_en: "A group of changes that is confirmed with COMMIT or discarded with ROLLBACK. Transactions have the ACID properties: atomicity (all or nothing), consistency, isolation, durability. (t01, t11)"
+- id: g-codd-anforderungen
+  de: "Codds neun Anforderungen an ein DBMS"
+  en: "Codd's nine DBMS requirements"
+  keep_english: false
+  def_de: "Aufgabenkatalog eines DBMS: Integration, Operationen, Katalog, Benutzersichten, Konsistenzüberwachung, Zugriffskontrolle, Transaktionen, Synchronisation, Datensicherung. Nicht zu verwechseln mit den zwölf Regeln. (t01)"
+  def_en: "Catalog of DBMS tasks: integration, operations, catalog, user views, integrity monitoring, access control, transactions, synchronization, backup and recovery. Not to be confused with the twelve rules. (t01)"
+- id: g-codd-regeln
+  de: "Codds zwölf Regeln"
+  en: "Codd's twelve rules"
+  keep_english: false
+  def_de: "Kriterienkatalog (gezählt 0 bis 12), an dem man erkennt, ob ein DBMS relational ist. Nicht zu verwechseln mit Codds OLAP-Regeln. (t01)"
+  def_en: "Catalog of criteria (numbered 0 to 12) for deciding whether a DBMS is relational. Not to be confused with Codd's OLAP rules. (t01)"
+- id: g-benutzerrolle
+  de: "Benutzerrolle (Rolle im Datenbankbetrieb)"
+  en: "user role"
+  keep_english: false
+  def_de: "Tätigkeit im Umgang mit einem Datenbanksystem (u. a. Endnutzer, Systemanalytiker und Datenbankdesigner, Softwarearchitekt, Anwendungsentwickler, DBA, DBMS-Entwickler). Eine Person kann mehrere Rollen haben. Nicht die ER-Rolle (siehe g-rolle) und nicht die Rolle der Rechteverwaltung (siehe g-rolle-rechte). (t01)"
+  def_en: "Activity in dealing with a database system (among others end user, systems analyst and database designer, software architect, application developer, DBA, DBMS developer). One person can hold several roles. Not the ER role (see g-rolle) and not the privilege role (see g-rolle-rechte). (t01)"
+- id: g-dba
+  de: "Datenbankadministrator (DBA)"
+  en: "database administrator (DBA)"
+  keep_english: false
+  def_de: "Rolle, die für den zuverlässigen Betrieb des Datenbanksystems sorgt: Aufbau, Entwurf, Sicherheit, Betrieb, Notfallvorsorge. (t01)"
+  def_en: "Role responsible for reliable operation of the database system: setup, design, security, operation and disaster recovery. (t01)"
+
+# ---------- t02 Datenbankmodelle & Architektur ----------
+- id: g-modell
+  de: "Modell"
+  en: "model"
+  keep_english: false
+  def_de: "Vereinfachtes, zweckgebundenes Abbild eines Originals (Abbildungs-, Verkürzungs- und pragmatisches Merkmal). (t02)"
+  def_en: "Simplified, purpose-bound representation of an original (mapping, reduction and pragmatic features). (t02)"
+- id: g-datenbankmodell
+  de: "Datenbankmodell (Datenmodell)"
+  en: "database model (data model)"
+  keep_english: false
+  def_de: "Allgemeine Beschreibungsmittel für Daten: generische Strukturen (statisch), generische Operatoren (dynamisch) und Integritätsbedingungen. Das konkrete Ergebnis für eine Anwendung ist deren Schema. (t02)"
+  def_en: "General means of describing data: generic structures (static), generic operators (dynamic) and integrity constraints. The concrete result for one application is its schema. (t02)"
+- id: g-hierarchisches-modell
+  de: "hierarchisches Modell"
+  en: "hierarchical model"
+  keep_english: false
+  def_de: "Datenbankmodell mit Baumstruktur: Jeder Satztyp außer der Wurzel hat genau einen Elternsatztyp. Zugriff navigierend, m:n nur mit Kopien. Vertreter: IMS. (t02)"
+  def_en: "Database model with a tree structure: every record type except the root has exactly one parent record type. Navigational access; m:n only via copies. Example: IMS. (t02)"
+- id: g-netzwerkmodell
+  de: "Netzwerkmodell"
+  en: "network model"
+  keep_english: false
+  def_de: "Datenbankmodell (CODASYL), das den Baum zum Graphen verallgemeinert: Ein Satz darf mehrere übergeordnete Sätze haben. Zugriff navigierend. Vertreter: IDMS, UDS. (t02)"
+  def_en: "Database model (CODASYL) that generalizes the tree to a graph: a record may have several parent records. Navigational access. Examples: IDMS, UDS. (t02)"
+- id: g-relationales-modell
+  de: "relationales Modell"
+  en: "relational model"
+  keep_english: false
+  def_de: "Von Codd (1970) vorgeschlagenes Modell: Alle Daten stehen als Werte in Relationen, Beziehungen entstehen über gleiche Werte, Anfragen sind deklarativ. (t02, t05)"
+  def_en: "Model proposed by Codd (1970): all data is stored as values in relations, relationships arise through equal values, queries are declarative. (t02, t05)"
+- id: g-objektorientiertes-modell
+  de: "objektorientiertes Datenbankmodell"
+  en: "object-oriented database model"
+  keep_english: false
+  def_de: "Speichert Objekte wie eine objektorientierte Programmiersprache: komplexe Objekte, Objektidentität (OID), Kapselung, Nachrichten, Vererbung. Nischensysteme, z. B. db4o. (t02)"
+  def_en: "Stores objects as an object-oriented language sees them: complex objects, object identity (OID), encapsulation, messages, inheritance. Niche systems, e.g. db4o. (t02)"
+- id: g-objektrelationales-modell
+  de: "objektrelationales Datenbankmodell"
+  en: "object-relational database model"
+  keep_english: false
+  def_de: "Relationales System, erweitert um objektorientierte Konzepte wie eigene Typen, Methoden und Vererbung (SQL:1999). Beispiele: Oracle, Db2, PostgreSQL. (t02)"
+  def_en: "Relational system extended with object-oriented concepts such as custom types, methods and inheritance (SQL:1999). Examples: Oracle, Db2, PostgreSQL. (t02)"
+- id: g-oid
+  de: "Objektidentität (OID)"
+  en: "object identity (object identifier, OID)"
+  keep_english: true
+  def_de: "Systemweit eindeutige Kennung eines Objekts, die gleich bleibt, auch wenn sich alle Attributwerte ändern. Anders als ein Primärschlüssel. (t02)"
+  def_en: "System-wide unique identifier of an object that stays the same even if all attribute values change. Unlike a primary key. (t02)"
+- id: g-navigierender-zugriff
+  de: "navigierender Zugriff"
+  en: "navigational access"
+  keep_english: false
+  def_de: "Das Programm folgt Satz für Satz gespeicherten Verweisen und muss die Zugriffspfade kennen. Typisch für hierarchisches und Netzwerkmodell. (t02)"
+  def_en: "The program follows stored pointers record by record and must know the access paths. Typical for the hierarchical and network models. (t02)"
+- id: g-deklarativ
+  de: "deklarativ"
+  en: "declarative"
+  keep_english: false
+  def_de: "Man beschreibt, was gewünscht ist; das System entscheidet, wie es erreicht wird (SQL-Abfragen, Integritätsbedingungen im Schema). Gegenstück: prozedural. (t02, t05)"
+  def_en: "You describe what is wanted; the system decides how to achieve it (SQL queries, constraints in the schema). Counterpart: procedural. (t02, t05)"
+- id: g-impedance-mismatch
+  de: "Impedance Mismatch (Objekt-Tabellen-Fehlanpassung)"
+  en: "impedance mismatch"
+  keep_english: true
+  def_de: "Lücke zwischen objektorientierter Programmierung und relationaler Speicherung, weil Objekte auf viele Tabellen verteilt sind. (t02)"
+  def_en: "Gap between object-oriented programming and relational storage because objects are spread over many tables. (t02)"
+- id: g-nosql
+  de: "NoSQL"
+  en: "NoSQL"
+  keep_english: true
+  def_de: "Sammelbegriff für nicht-relationale Systeme: Key-Value, dokumentenorientiert, Graph, spaltenorientiert. Nur als Ausblick behandelt. (t02)"
+  def_en: "Umbrella term for non-relational systems: key-value, document, graph, column-oriented. Covered only as an outlook. (t02)"
+- id: g-ansi-sparc
+  de: "ANSI-SPARC-Drei-Ebenen-Architektur"
+  en: "ANSI/SPARC three-level architecture"
+  keep_english: false
+  def_de: "Architektur von 1975 mit externer, konzeptioneller und interner Ebene, verbunden durch Abbildungen. Lesarten der konzeptionellen Ebene: eng (Gesamtschema im DBMS, bei relationalen Systemen die Tabellen) oder weit (zusätzlich das ER-Schema aus dem Entwurf). Variante mit vier Stufen beachten. (t02)"
+  def_en: "Architecture from 1975 with external, conceptual and internal levels, connected by mappings. Readings of the conceptual level: narrow (overall schema in the DBMS, i.e. the tables in relational systems) or wide (also the ER schema from design). Beware the four-level variant. (t02)"
+- id: g-externe-ebene
+  de: "externe Ebene"
+  en: "external level"
+  keep_english: false
+  def_de: "Ebene der Benutzersichten: Jede Gruppe sieht den für sie passenden Ausschnitt. Es gibt viele externe Schemata, in SQL typischerweise Views. (t02)"
+  def_en: "Level of user views: each group sees the excerpt that suits it. There are many external schemas, in SQL typically views. (t02)"
+- id: g-konzeptionelle-ebene
+  de: "konzeptionelle Ebene"
+  en: "conceptual level"
+  keep_english: false
+  def_de: "Eine integrierte, anwendungsneutrale Gesamtbeschreibung der Daten mit Integritätsbedingungen. Eng gelesen die Tabellen der laufenden Datenbank, weit gelesen auch das ER-Schema. Nicht mit der Entwurfsphase konzeptioneller Entwurf gleichsetzen. (t02, t03)"
+  def_en: "One integrated, application-neutral overall description of the data including integrity constraints. Read narrowly: the tables of the running database; read widely: also the ER schema. Do not equate with the design phase conceptual design. (t02, t03)"
+- id: g-interne-ebene
+  de: "interne Ebene (physische Ebene)"
+  en: "internal level"
+  keep_english: false
+  def_de: "Ebene der Speicherung: Dateien, Seiten, Dateiorganisation, Indexe. Bewusste Redundanz ist erlaubt. (t02)"
+  def_en: "Level of storage: files, pages, file organization, indexes. Deliberate redundancy is allowed. (t02)"
+- id: g-physische-datenunabhaengigkeit
+  de: "physische Datenunabhängigkeit"
+  en: "physical data independence"
+  keep_english: false
+  def_de: "Die interne Ebene lässt sich ändern (Index, Speicherort), ohne dass Schema und Anwendungen geändert werden müssen. (t02)"
+  def_en: "The internal level can be changed (index, storage location) without changing the schema or applications. (t02)"
+- id: g-logische-datenunabhaengigkeit
+  de: "logische Datenunabhängigkeit"
+  en: "logical data independence"
+  keep_english: false
+  def_de: "Das konzeptionelle Schema lässt sich informationserhaltend ändern, ohne dass externe Schemata und Anwendungen geändert werden müssen. Nur eingeschränkt erreichbar. (t02)"
+  def_en: "The conceptual schema can be changed in an information-preserving way without changing external schemas and applications. Achievable only to a limited extent. (t02)"
+
+# ---------- t03 Entwicklungsprozess ----------
+- id: g-phasenmodell
+  de: "Phasenmodell des Datenbankentwurfs"
+  en: "database design phase model"
+  keep_english: false
+  def_de: "Sechs Phasen im Kurs: Anforderungsanalyse, konzeptioneller Entwurf, logischer Entwurf, Datendefinition, physischer Entwurf, Implementierung und Wartung. Die Validierung begleitet alle Phasen. Rücksprünge sind normal. (t03)"
+  def_en: "Six phases in this course: requirements analysis, conceptual design, logical design, data definition, physical design, implementation and maintenance. Validation accompanies all phases. Jumping back is normal. (t03)"
+- id: g-anforderungsanalyse
+  de: "Anforderungsanalyse"
+  en: "requirements analysis"
+  keep_english: false
+  def_de: "Erste Entwurfsphase: Miniwelt abgrenzen, Benutzergruppen und Stakeholder bestimmen, Informations- und Verarbeitungsanforderungen erfassen und als Anforderungsspezifikation festhalten. (t03)"
+  def_en: "First design phase: delimit the mini-world, identify user groups and stakeholders, capture the requirements on data and on its processing and record them in a requirements specification. (t03)"
+- id: g-informationsanforderung
+  de: "Informationsanforderung"
+  en: "–"
+  keep_english: false
+  def_de: "Anforderung an den Datenbestand: welche Objekte, Eigenschaften und Beziehungen gespeichert werden und welche Integritätsbedingungen gelten. Ergebnis der Datenanalyse. (t03)"
+  def_en: "Requirement on the data stock: which objects, properties and relationships are stored and which integrity constraints apply. Result of data analysis. (t03)"
+- id: g-verarbeitungsanforderung
+  de: "Verarbeitungsanforderung (Datenverarbeitungs-, Bearbeitungsanforderung)"
+  en: "–"
+  keep_english: false
+  def_de: "Anforderung an den Umgang mit den Daten: Abfragen, Auswertungen und Änderungsvorgänge samt Häufigkeit, Antwortzeit, Datenmenge und Berechtigung. Ergebnis der Funktionsanalyse. (t03)"
+  def_en: "Requirement on how data is handled: queries, reports and update operations with frequency, response time, data volume and authorization. Result of the analysis of functions. (t03)"
+- id: g-datenanalyse
+  de: "Datenanalyse"
+  en: "data analysis"
+  keep_english: false
+  def_de: "Teiltätigkeit der Anforderungsanalyse, die die Informationsanforderungen erfasst. Im Englischen teils auch Name des konzeptionellen Schritts. (t03)"
+  def_en: "Sub-activity of requirements analysis that captures the information requirements. In English sometimes also the name of the conceptual step. (t03)"
+- id: g-funktionsanalyse
+  de: "Funktionsanalyse"
+  en: "–"
+  keep_english: false
+  def_de: "Teiltätigkeit der Anforderungsanalyse, die die Verarbeitungsanforderungen erfasst. (t03)"
+  def_en: "Sub-activity of requirements analysis that captures the requirements on data processing. (t03)"
+- id: g-mengengeruest
+  de: "Mengengerüst"
+  en: "–"
+  keep_english: false
+  def_de: "Erwartete Anzahlen von Objekten, Beziehungen und Vorgängen, die in der Anforderungsspezifikation festgehalten werden. (t03)"
+  def_en: "Expected counts of objects, relationships and operations recorded in the requirements specification. (t03)"
+- id: g-belegungsgrad
+  de: "Belegungsgrad (Füllgrad)"
+  en: "–"
+  keep_english: false
+  def_de: "Angabe, bei wie vielen Objekten ein Attribut einen Wert hat; auch als Muss/Kann angegeben. (t03)"
+  def_en: "Indication of how many objects have a value for an attribute; also stated as mandatory/optional. (t03)"
+- id: g-anforderungsspezifikation
+  de: "Anforderungsspezifikation"
+  en: "requirements specification"
+  keep_english: false
+  def_de: "Verbindliches Ergebnisdokument der Anforderungsanalyse mit Objekt-, Beziehungs- und Vorgangsbeschreibungen sowie Glossar. (t03)"
+  def_en: "Binding result document of requirements analysis containing object, relationship and process descriptions and a glossary. (t03)"
+- id: g-stakeholder
+  de: "Stakeholder"
+  en: "stakeholder"
+  keep_english: true
+  def_de: "Alle Personen und Stellen, die Anforderungen haben oder vom System betroffen sind. (t03)"
+  def_en: "All persons and bodies that have requirements or are affected by the system. (t03)"
+- id: g-lastenheft
+  de: "Lastenheft"
+  en: "requirements document (customer specification)"
+  keep_english: false
+  def_de: "Dokument, in dem der Auftraggeber beschreibt, was er braucht. Gegenstück: Pflichtenheft. (t03)"
+  def_en: "Document in which the client describes what is needed. Counterpart: Pflichtenheft (contractor's specification). (t03)"
+- id: g-pflichtenheft
+  de: "Pflichtenheft"
+  en: "functional specification (contractor)"
+  keep_english: false
+  def_de: "Dokument, in dem der Auftragnehmer beschreibt, wie er die Anforderungen umsetzen will. (t03)"
+  def_en: "Document in which the contractor describes how the requirements will be implemented. (t03)"
+- id: g-use-case
+  de: "Anwendungsfall (Use Case)"
+  en: "use case"
+  keep_english: true
+  def_de: "Beschreibung eines Ablaufs mit Akteur, Auslöser, Schritten und Ergebnis, etwa „Ausfahrt eintragen“. (t03)"
+  def_en: "Description of a flow with actor, trigger, steps and result. (t03)"
+- id: g-user-story
+  de: "User Story"
+  en: "user story"
+  keep_english: true
+  def_de: "Kurzer Satz aus Nutzersicht, der eine Anforderung beschreibt („Als … möchte ich …, damit …“). (t03)"
+  def_en: "Short sentence from the user's point of view describing a requirement. (t03)"
+- id: g-konzeptioneller-entwurf
+  de: "konzeptioneller Entwurf"
+  en: "conceptual design"
+  keep_english: false
+  def_de: "Phase 2: formale Beschreibung der Miniwelt unabhängig von Datenmodell und DBMS, im Kurs als ER-Modell. Enthält die Sichtenintegration. Ergebnis: integriertes ER-Diagramm. (t03)"
+  def_en: "Phase 2: formal description of the mini-world independent of data model and DBMS, in this course as an ER model. Includes view integration. Result: integrated ER diagram. (t03)"
+- id: g-logischer-entwurf
+  de: "logischer Entwurf"
+  en: "logical design"
+  keep_english: false
+  def_de: "Phase 3: Überführung des konzeptionellen Schemas in das Datenmodell, hier relational (Abbildung, Normalisierung, Integritätsbedingungen). Abhängig vom Datenmodell, nicht vom Produkt. (t03)"
+  def_en: "Phase 3: translating the conceptual schema into the data model, here relational (mapping, normalization, constraints). Depends on the data model, not on the product. (t03)"
+- id: g-datendefinition
+  de: "Datendefinition"
+  en: "data definition"
+  keep_english: false
+  def_de: "Phase 4: Beschreibung von logischem Schema und Benutzersichten in der Sprache des DBMS (DDL-Skript mit Tabellen, Datentypen, Constraints, Views, Rechten). Nicht dasselbe wie die Sprachklasse DDL. (t03, t09)"
+  def_en: "Phase 4: describing the logical schema and user views in the DBMS language (DDL script with tables, data types, constraints, views, privileges). Not the same as the language class DDL. (t03, t09)"
+- id: g-physischer-entwurf
+  de: "physischer Entwurf"
+  en: "physical design"
+  keep_english: false
+  def_de: "Phase 5: Festlegung der internen Ebene (Indexe, Speicherorganisation, Leistungsmaßnahmen, ggf. begründete Denormalisierung), ohne die Bedeutung der Daten zu ändern. (t03)"
+  def_en: "Phase 5: defining the internal level (indexes, storage organization, performance measures, possibly justified denormalization) without changing the meaning of the data. (t03)"
+- id: g-implementierung-wartung
+  de: "Implementierung und Wartung"
+  en: "implementation and maintenance"
+  keep_english: false
+  def_de: "Phase 6: Datenbank anlegen, befüllen, Benutzer einrichten, Anwendung anbinden, später betreiben und anpassen. (t03)"
+  def_en: "Phase 6: create and populate the database, set up users, connect the application, and later operate and adapt it. (t03)"
+- id: g-validierung
+  de: "Validierung"
+  en: "validation"
+  keep_english: false
+  def_de: "Prüfung, ob ein Ergebnis die Anforderungen erfüllt. Keine eigene Phase, sondern Querschnittsaufgabe: Testen mit Probedaten, Prototyping, formale Prüfung. (t03)"
+  def_en: "Checking whether a result meets the requirements. Not a phase of its own but a cross-cutting task: testing with sample data, prototyping, formal checking. (t03)"
+- id: g-prototyping
+  de: "Prototyping"
+  en: "prototyping"
+  keep_english: true
+  def_de: "Die Fachseite probiert eine vorläufige Version aus, bevor endgültig implementiert wird. (t03)"
+  def_en: "The domain side tries a preliminary version before final implementation. (t03)"
+- id: g-sichtenintegration
+  de: "Sichtenintegration (Konsolidierung)"
+  en: "view integration"
+  keep_english: false
+  def_de: "Zusammenführen der Teilschemata aller Benutzergruppen zu einem widerspruchs- und redundanzfreien konzeptionellen Gesamtschema. Teil des konzeptionellen Entwurfs. (t03)"
+  def_en: "Merging the partial schemas of all user groups into one conceptual overall schema free of contradiction and redundancy. Part of conceptual design. (t03)"
+- id: g-benutzersicht
+  de: "Benutzersicht (Sicht im Entwurf)"
+  en: "user view"
+  keep_english: false
+  def_de: "Teilschema, das eine Benutzergruppe im Entwurf von der Miniwelt hat. Nicht dasselbe wie eine SQL-View (siehe g-view), die sie in der Datendefinition umsetzt. (t03)"
+  def_en: "Partial schema a user group has of the mini-world during design. Not the same as an SQL view (see g-view), which implements it in data definition. (t03)"
+- id: g-namenskonflikt
+  de: "Namenskonflikt"
+  en: "–"
+  keep_english: false
+  def_de: "Konflikt der Sichtenintegration durch Bezeichnungen: Synonym (verschiedene Namen, gleiche Sache) oder Homonym (gleicher Name, verschiedene Sachen). Verwandt sind Ober- und Unterbegriffe (Hyperonym/Hyponym): Ein Begriff meint nur eine Teilmenge eines anderen und ist kein Synonym; Auflösung über den Oberbegriff oder eine Spezialisierung. (t03)"
+  def_en: "View integration conflict caused by naming: synonym (different names, same thing) or homonym (same name, different things). Related are hypernyms and hyponyms: one term covers only a subset of another and is not a synonym; resolved via the broader term or a specialization. (t03)"
+- id: g-synonym
+  de: "Synonym"
+  en: "synonym"
+  keep_english: false
+  def_de: "Verschiedene Namen für dieselbe Sache in verschiedenen Sichten. Auflösung: ein Name, Attribute vereinigen. (t03)"
+  def_en: "Different names for the same thing in different views. Resolved by choosing one name and merging attributes. (t03)"
+- id: g-homonym
+  de: "Homonym"
+  en: "homonym"
+  keep_english: false
+  def_de: "Gleicher Name für verschiedene Sachen in verschiedenen Sichten. Auflösung: umbenennen. (t03)"
+  def_en: "Same name for different things in different views. Resolved by renaming. (t03)"
+- id: g-typkonflikt
+  de: "Typkonflikt"
+  en: "–"
+  keep_english: false
+  def_de: "Dasselbe Element ist unterschiedlich dargestellt oder codiert (Zahl vs. Text, Meter vs. Zentimeter). Die Werte lassen sich ineinander umrechnen. (t03)"
+  def_en: "The same element is represented or encoded differently (number vs. text, metres vs. centimetres). The values can be converted into each other. (t03)"
+- id: g-wertebereichskonflikt
+  de: "Wertebereichskonflikt"
+  en: "–"
+  keep_english: false
+  def_de: "Gleiche Darstellung, aber unterschiedliche zulässige Werte; eine Sicht erlaubt Werte, die die andere ausschließt. (t03)"
+  def_en: "Same representation but different permitted values; one view allows values that the other excludes. (t03)"
+- id: g-bedingungskonflikt
+  de: "Bedingungskonflikt"
+  en: "–"
+  keep_english: false
+  def_de: "Unterschiedliche Integritätsbedingungen in verschiedenen Sichten, vor allem bei Schlüsseln und Kardinalitäten. (t03)"
+  def_en: "Different integrity constraints in different views, especially for keys and cardinalities. (t03)"
+- id: g-strukturkonflikt
+  de: "Strukturkonflikt"
+  en: "–"
+  keep_english: false
+  def_de: "Derselbe Sachverhalt ist mit verschiedenen Modellelementen dargestellt, z. B. als Attribut in einer und als Entitätstyp in einer anderen Sicht. (t03)"
+  def_en: "The same fact is modelled with different model elements, e.g. as an attribute in one view and as an entity type in another. (t03)"
+
+# ---------- t04 ER-Modellierung ----------
+- id: g-er-modell
+  de: "Entity-Relationship-Modell (ER-Modell)"
+  en: "entity-relationship model (ER model)"
+  keep_english: false
+  def_de: "Konzeptuelles Datenmodell, das Entitätstypen, ihre Attribute und die Beziehungstypen zwischen ihnen beschreibt, unabhängig von einem bestimmten DBMS. (t04)"
+  def_en: "Conceptual data model describing entity types, their attributes and the relationship types between them, independent of a particular DBMS. (t04)"
+- id: g-entitaet
+  de: "Entität"
+  en: "entity"
+  keep_english: false
+  def_de: "Einzelnes, eindeutig unterscheidbares Objekt der Miniwelt, über das Daten gespeichert werden. (t04)"
+  def_en: "Single, uniquely distinguishable object of the mini-world about which data is stored. (t04)"
+- id: g-entitaetstyp
+  de: "Entitätstyp"
+  en: "entity type"
+  keep_english: false
+  def_de: "Zusammenfassung gleichartiger Entitäten mit denselben Attributen. Im Chen-Diagramm ein Rechteck. (t04)"
+  def_en: "Set of similar entities sharing the same attributes. Drawn as a rectangle in Chen notation. (t04)"
+- id: g-attribut
+  de: "Attribut"
+  en: "attribute"
+  keep_english: false
+  def_de: "Eigenschaft eines Entitäts- oder Beziehungstyps. Im Chen-Diagramm eine Ellipse. (t04)"
+  def_en: "Property of an entity or relationship type. Drawn as an ellipse in Chen notation. (t04)"
+- id: g-zusammengesetztes-attribut
+  de: "zusammengesetztes Attribut"
+  en: "composite attribute"
+  keep_english: false
+  def_de: "Attribut, dessen Wert aus mehreren Teilattributen besteht, z. B. Name aus Vor- und Nachname. (t04)"
+  def_en: "Attribute whose value consists of several component attributes, e.g. a name made of first and last name. (t04)"
+- id: g-mehrwertiges-attribut
+  de: "mehrwertiges Attribut"
+  en: "multivalued attribute"
+  keep_english: false
+  def_de: "Attribut, das für eine Entität mehrere Werte derselben Art haben kann. Im Chen-Diagramm eine doppelte Ellipse. (t04)"
+  def_en: "Attribute that can hold several values of the same kind for one entity. Drawn as a double ellipse in Chen notation. (t04)"
+- id: g-abgeleitetes-attribut
+  de: "abgeleitetes Attribut"
+  en: "derived attribute"
+  keep_english: false
+  def_de: "Attribut, dessen Wert aus anderen Daten berechnet und nicht gespeichert wird. Im Chen-Diagramm eine gestrichelte Ellipse. (t04)"
+  def_en: "Attribute whose value is computed from other data rather than stored. Drawn as a dashed ellipse in Chen notation. (t04)"
+- id: g-optionales-attribut
+  de: "optionales Attribut"
+  en: "optional attribute"
+  keep_english: false
+  def_de: "Attribut, das bei einzelnen Entitäten fehlen darf. In der Tabelle wird daraus eine Spalte, die NULL annehmen darf; Pflichtattribute werden NOT NULL. (t04)"
+  def_en: "Attribute that may be missing for individual entities. In the table it becomes a column that may hold NULL; mandatory attributes become NOT NULL. (t04)"
+- id: g-beziehungstyp
+  de: "Beziehungstyp"
+  en: "relationship type"
+  keep_english: false
+  def_de: "Zusammenfassung gleichartiger Beziehungen zwischen Entitäten. Im Chen-Diagramm eine Raute. Die Menge seiner Beziehungen ist eine Teilmenge des kartesischen Produkts der Entitätsmengen. (t04)"
+  def_en: "Set of similar relationships between entities. Drawn as a diamond in Chen notation. The set of its relationships is a subset of the Cartesian product of the entity sets. (t04)"
+- id: g-grad-beziehungstyp
+  de: "Grad eines Beziehungstyps"
+  en: "degree of a relationship type"
+  keep_english: false
+  def_de: "Anzahl der beteiligten Entitätstypen: binär (2), ternär (3) und mehr. Rekursive Beziehungen zählen als unär oder als eigene Kategorie. Nicht der Grad einer Relation (siehe g-grad-relation). (t04)"
+  def_en: "Number of participating entity types: binary (2), ternary (3) and more. Recursive relationships count as unary or as a category of their own. Not the degree of a relation (see g-grad-relation). (t04)"
+- id: g-kardinalitaet
+  de: "Kardinalität"
+  en: "cardinality"
+  keep_english: false
+  def_de: "Angabe, mit wie vielen Partnern eine Entität in einem Beziehungstyp höchstens verbunden sein kann (z. B. 1:1, 1:n, m:n). Bei Relationen ist die Kardinalität dagegen die Zeilenzahl (siehe g-relationen-kardinalitaet). (t04)"
+  def_en: "Specification of how many partners an entity can be associated with at most in a relationship type (e.g. 1:1, 1:n, m:n). For relations, cardinality instead means the number of rows (see g-relationen-kardinalitaet). (t04)"
+- id: g-chen-notation
+  de: "Chen-Notation"
+  en: "Chen notation"
+  keep_english: false
+  def_de: "ER-Notation mit Rechteck, Raute und Ellipse. Kardinalitäten werden gegenüber (look-across) notiert und zeigen nur Obergrenzen. (t04)"
+  def_en: "ER notation using rectangles, diamonds and ellipses. Cardinalities are placed look-across and show maximums only. (t04)"
+- id: g-min-max-notation
+  de: "(min,max)-Notation"
+  en: "(min,max) notation"
+  keep_english: false
+  def_de: "ER-Notation, die beim eigenen Entitätstyp angibt, an mindestens und höchstens wie vielen Beziehungen eine Entität teilnimmt. Obergrenzen erscheinen gegenüber Chen vertauscht. Standardkonvention dieses Kurses für reine Chen-Kardinalitäten (ohne Text, Doppellinie oder MC-Symbole): 1:1 → (0,1)/(0,1); 1:n → Elternseite (0,*), Kindseite (1,1); m:n → (0,*)/(0,*). (t04)"
+  def_en: "ER notation stating, next to the entity type itself, the minimum and maximum number of relationships an entity participates in. Maximums appear swapped compared with Chen. Course standard for plain Chen cardinalities (no text, double line or MC symbols): 1:1 → (0,1)/(0,1); 1:n → parent side (0,*), child side (1,1); m:n → (0,*)/(0,*). (t04)"
+- id: g-mc-notation
+  de: "modifizierte Chen-Notation (MC-Notation)"
+  en: "modified Chen notation (MC notation)"
+  keep_english: false
+  def_de: "Chen-Variante mit Symbolen 1, c, m/n und mc/nc, die Obergrenze und Optionalität zugleich ausdrücken. Die Bedeutung der Symbole hängt von der Legende ab. (t04)"
+  def_en: "Chen variant with symbols 1, c, m/n and mc/nc that express upper limit and optionality together. The meaning of the symbols depends on the legend. (t04)"
+- id: g-kraehenfuss-notation
+  de: "Krähenfuß-Notation"
+  en: "crow's foot notation"
+  keep_english: true
+  def_de: "ER-Notation (auch Martin-Notation) mit Strich für eins, Gabel für viele und Kreis für optional an den Linienenden. (t04)"
+  def_en: "ER notation (also Martin notation) using a bar for one, a fork for many and a circle for optional at the line ends. (t04)"
+- id: g-multiplizitaet
+  de: "Multiplizität"
+  en: "multiplicity"
+  keep_english: false
+  def_de: "UML-Angabe mit unterer und oberer Schranke an einem Assoziationsende, z. B. 0..1 oder 1..*. (t04)"
+  def_en: "UML specification of a lower and upper bound at an association end, e.g. 0..1 or 1..*. (t04)"
+- id: g-teilnahmebeschraenkung
+  de: "Teilnahmebeschränkung"
+  en: "participation constraint"
+  keep_english: false
+  def_de: "Angabe, ob jede Entität an einer Beziehung teilnehmen muss: total (Doppellinie, min ≥ 1) oder partiell (einfache Linie, min = 0). Die einfache Linie bedeutet min = 0 nur, wenn das Diagramm die Teilnahme durchgängig kennzeichnet; sonst gilt die Standardkonvention (siehe g-min-max-notation). Nicht zu verwechseln mit total/partiell bei der Spezialisierung. (t04)"
+  def_en: "Specification of whether every entity must take part in a relationship: total (double line, min ≥ 1) or partial (single line, min = 0). The single line means min = 0 only if the diagram marks participation throughout; otherwise the standard convention applies (see g-min-max-notation). Not to be confused with total/partial in specialization. (t04)"
+- id: g-existenzabhaengigkeit
+  de: "Existenzabhängigkeit"
+  en: "existence dependency"
+  keep_english: false
+  def_de: "Eine Entität kann nur existieren, solange sie mit mindestens einer Entität eines anderen Typs in Beziehung steht (min ≥ 1). Einseitig oder wechselseitig. (t04)"
+  def_en: "An entity can exist only as long as it is related to at least one entity of another type (min ≥ 1). One-sided or mutual. (t04)"
+- id: g-superschluessel
+  de: "Superschlüssel"
+  en: "superkey"
+  keep_english: false
+  def_de: "Attributmenge, die jede Entität bzw. jedes Tupel eindeutig identifiziert. Sie darf überflüssige Attribute enthalten. (t04)"
+  def_en: "Set of attributes that uniquely identifies every entity or tuple. It may contain superfluous attributes. (t04)"
+- id: g-schluesselkandidat
+  de: "Schlüsselkandidat (Kandidatenschlüssel)"
+  en: "candidate key"
+  keep_english: false
+  def_de: "Minimaler Superschlüssel, der ohne eines seiner Attribute nicht mehr eindeutig wäre. Im Modell nie NULL. (t04)"
+  def_en: "Minimal superkey that would no longer be unique if any of its attributes were removed. Never NULL in the model. (t04)"
+- id: g-primaerschluessel
+  de: "Primärschlüssel"
+  en: "primary key"
+  keep_english: false
+  def_de: "Der aus den Schlüsselkandidaten ausgewählte Schlüssel, über den Entitäten bzw. Tupel identifiziert werden. Eindeutig und nie NULL. In SQL: PRIMARY KEY. (t04, t05)"
+  def_en: "The key chosen from the candidate keys to identify entities or tuples. Unique and never NULL. In SQL: PRIMARY KEY. (t04, t05)"
+- id: g-alternativschluessel
+  de: "Alternativschlüssel"
+  en: "alternate key"
+  keep_english: false
+  def_de: "Schlüsselkandidat, der nicht als Primärschlüssel gewählt wurde und eindeutig bleibt. In SQL als UNIQUE und NOT NULL deklariert. (t04, t05)"
+  def_en: "Candidate key that was not chosen as primary key and remains unique. Declared in SQL as UNIQUE and NOT NULL. (t04, t05)"
+- id: g-nichtschluesselattribut
+  de: "Nichtschlüsselattribut"
+  en: "non-key attribute (non-prime attribute)"
+  keep_english: false
+  def_de: "Attribut, das in keinem Schlüsselkandidaten vorkommt. Gegenstück: Schlüsselattribut bzw. Primattribut. (t04, t07)"
+  def_en: "Attribute that occurs in no candidate key. Counterpart: key attribute or prime attribute. (t04, t07)"
+- id: g-kuenstlicher-schluessel
+  de: "künstlicher Schlüssel (Surrogatschlüssel)"
+  en: "surrogate key"
+  keep_english: false
+  def_de: "Zusätzlich eingeführtes Schlüsselattribut ohne fachliche Bedeutung, z. B. eine fortlaufende Nummer. (t04)"
+  def_en: "Additional key attribute without business meaning, e.g. a sequential number. (t04)"
+- id: g-fremdschluessel
+  de: "Fremdschlüssel"
+  en: "foreign key"
+  keep_english: false
+  def_de: "Attribut(e) einer Relation, deren Werte auf einen Schlüssel einer anderen oder derselben Relation verweisen: im Modell auf einen Schlüsselkandidaten, in SQL auf PRIMARY KEY oder eine UNIQUE-Spalte(nkombination) (FOREIGN KEY). Er ist NULL-fähig, sofern nicht NOT NULL deklariert, und muss nicht eindeutig sein. Im ER-Diagramm nach Konvention nicht eingetragen. (t04, t05)"
+  def_en: "Attribute(s) of a relation whose values reference a key of another or the same relation: in the model a candidate key, in SQL PRIMARY KEY or a UNIQUE column (combination) (FOREIGN KEY). It can be NULL unless declared NOT NULL, and it need not be unique. By convention not drawn in the ER diagram. (t04, t05)"
+- id: g-schwacher-entitaetstyp
+  de: "schwacher Entitätstyp"
+  en: "weak entity type"
+  keep_english: false
+  def_de: "Entitätstyp, der existenzabhängig von einem identifizierenden (starken) Entitätstyp ist und dessen Entitäten nur zusammen mit dem Besitzerschlüssel eindeutig sind. Er hat nur einen partiellen Schlüssel. Im Chen-Diagramm mit doppeltem Rahmen und doppelter Raute. Existenzabhängigkeit allein genügt nicht. (t04)"
+  def_en: "Entity type that is existence-dependent on an identifying (strong) entity type and whose entities are unique only together with the owner's key. It has only a partial key. Drawn with a double border and a double diamond in Chen notation. Existence dependency alone is not sufficient. (t04)"
+- id: g-identifizierende-beziehung
+  de: "identifizierende Beziehung"
+  en: "identifying relationship"
+  keep_english: false
+  def_de: "Beziehungstyp zwischen schwachem Entitätstyp und seinem Besitzer, über den der fehlende Schlüsselteil bezogen wird. Im Chen-Diagramm eine doppelte Raute. (t04)"
+  def_en: "Relationship type between a weak entity type and its owner that supplies the missing part of the key. Drawn as a double diamond in Chen notation. (t04)"
+- id: g-partieller-schluessel
+  de: "partieller Schlüssel"
+  en: "partial key"
+  keep_english: false
+  def_de: "Attribut(e) eines schwachen Entitätstyps, die nur innerhalb eines Besitzers eindeutig sind. Im Diagramm gestrichelt unterstrichen. (t04)"
+  def_en: "Attribute(s) of a weak entity type that are unique only within one owner. Shown with a dashed underline in the diagram. (t04)"
+- id: g-rolle
+  de: "Rolle (im ER-Modell)"
+  en: "role"
+  keep_english: false
+  def_de: "Bezeichnung der Funktion, in der ein Entitätstyp an einem Beziehungstyp teilnimmt. Pflicht bei rekursiven Beziehungen. Nicht die Rolle der Rechteverwaltung (siehe g-rolle-rechte). (t04)"
+  def_en: "Name of the function in which an entity type participates in a relationship type. Required for recursive relationships. Not the role in privilege management (see g-rolle-rechte). (t04)"
+- id: g-rekursive-beziehung
+  de: "rekursive Beziehung"
+  en: "recursive relationship"
+  keep_english: false
+  def_de: "Beziehungstyp, an dem derselbe Entitätstyp mehrfach (in verschiedenen Rollen) teilnimmt. Bei hierarchischen Rekursionen haben beide Rollen min = 0. (t04)"
+  def_en: "Relationship type in which the same entity type participates more than once (in different roles). In hierarchical recursions both roles have min = 0. (t04)"
+- id: g-n-aere-beziehung
+  de: "n-äre Beziehung"
+  en: "n-ary relationship"
+  keep_english: false
+  def_de: "Beziehungstyp mit mehr als zwei beteiligten Entitätstypen, z. B. ternär bei drei. Sie lässt sich im Allgemeinen nicht verlustfrei in paarweise binäre Beziehungen zerlegen. (t04)"
+  def_en: "Relationship type with more than two participating entity types, e.g. ternary with three. In general it cannot be decomposed losslessly into pairwise binary relationships. (t04)"
+- id: g-generalisierung
+  de: "Generalisierung"
+  en: "generalization"
+  keep_english: false
+  def_de: "Zusammenfassen gemeinsamer Eigenschaften mehrerer Entitätstypen in einem Obertyp (is-a-Beziehung), bottom-up. (t04)"
+  def_en: "Combining common properties of several entity types into a supertype (is-a relationship), bottom-up. (t04)"
+- id: g-spezialisierung
+  de: "Spezialisierung"
+  en: "specialization"
+  keep_english: false
+  def_de: "Ableiten von Untertypen mit zusätzlichen Eigenschaften aus einem Obertyp (top-down). Sie ist total oder partiell sowie disjunkt oder überlappend; Untertypen erben den Schlüssel. (t04)"
+  def_en: "Deriving subtypes with additional properties from a supertype (top-down). It is total or partial and disjoint or overlapping; subtypes inherit the key. (t04)"
+- id: g-is-a
+  de: "is-a-Beziehung"
+  en: "is-a relationship"
+  keep_english: true
+  def_de: "Beziehung zwischen Untertyp und Obertyp („Hund ist ein Tier“). Die Entitätsmenge des Untertyps ist eine Teilmenge der des Obertyps. (t04)"
+  def_en: "Relationship between subtype and supertype (a dog is an animal). The entity set of the subtype is a subset of that of the supertype. (t04)"
+- id: g-aggregation
+  de: "Aggregation"
+  en: "aggregation"
+  keep_english: false
+  def_de: "In der ER-Modellierung des Kurses die Teil-Ganzes-Beziehung (is-part-of): Komponenten bilden ein Aggregat, als Rollenaggregation (verschiedenartige Teile) oder Mengenaggregation (viele gleichartige Teile). Nicht gemeint ist die Lesart des erweiterten ER-Modells, in der ein Beziehungstyp als Einheit an weiteren Beziehungen teilnimmt; sie wird im Kurs nicht verwendet. (t04)"
+  def_en: "In the course's ER modelling, the part-whole relationship (is-part-of): components form an aggregate, as role aggregation (different kinds of parts) or set aggregation (many similar parts). Not meant is the extended-ER reading in which a relationship type takes part in further relationships as a unit; it is not used in this course. (t04)"
+- id: g-historisierung
+  de: "Historisierung"
+  en: "historization"
+  keep_english: false
+  def_de: "Speichern früherer Zustände statt Überschreiben, im ER-Modell meist über eigene Entitätstypen mit Gültigkeitszeitraum (von/bis). (t04)"
+  def_en: "Keeping previous states instead of overwriting them, in ER models usually via separate entity types with a validity period (from/to). (t04)"
+- id: g-gueltigkeitszeit
+  de: "Gültigkeitszeit"
+  en: "valid time"
+  keep_english: false
+  def_de: "Zeitraum, in dem ein Sachverhalt in der realen Welt gilt. (t04)"
+  def_en: "Period during which a fact holds in the real world. (t04)"
+- id: g-transaktionszeit
+  de: "Transaktionszeit"
+  en: "transaction time"
+  keep_english: false
+  def_de: "Zeitpunkt, zu dem ein Eintrag in der Datenbank gespeichert oder geändert wurde. (t04)"
+  def_en: "Point in time at which an entry was stored or changed in the database. (t04)"
+
+# ---------- t05 Relationales Modell & Integrität ----------
+- id: g-relation
+  de: "Relation"
+  en: "relation"
+  keep_english: false
+  def_de: "Menge von Tupeln über einem Relationenschema, r ⊆ D1 × … × Dn. Tabellensicht: Tabelle. Nicht mit „Beziehung“ gleichzusetzen. (t05)"
+  def_en: "Set of tuples over a relation schema, r ⊆ D1 × … × Dn. In table terms: a table. Not to be equated with relationship. (t05)"
+- id: g-tupel
+  de: "Tupel"
+  en: "tuple"
+  keep_english: false
+  def_de: "Element einer Relation mit genau einem Wert je Attribut; Tabellensicht: Zeile. (t05)"
+  def_en: "Element of a relation with exactly one value per attribute; in table terms: a row. (t05)"
+- id: g-domaene
+  de: "Domäne (Wertebereich)"
+  en: "domain"
+  keep_english: false
+  def_de: "Menge zulässiger atomarer Werte eines Attributs. Kann enger sein als der Datentyp. In SQL zusätzlich ein benanntes Objekt (CREATE DOMAIN). (t05, t09)"
+  def_en: "Set of permitted atomic values of an attribute. Can be narrower than the data type. In SQL also a named object (CREATE DOMAIN). (t05, t09)"
+- id: g-relationenschema
+  de: "Relationenschema"
+  en: "relation schema"
+  keep_english: false
+  def_de: "Name einer Relation mit ihren Attributen und deren Domänen, der Tabellenkopf. (t05)"
+  def_en: "Name of a relation with its attributes and their domains, the table header. (t05)"
+- id: g-grad-relation
+  de: "Grad einer Relation"
+  en: "degree (arity)"
+  keep_english: false
+  def_de: "Anzahl der Attribute (Spalten) einer Relation. Ändert sich nur durch Schemaänderung. Nicht der Grad eines Beziehungstyps (siehe g-grad-beziehungstyp). (t05)"
+  def_en: "Number of attributes (columns) of a relation. Changes only through a schema change. Not the degree of a relationship type (see g-grad-beziehungstyp). (t05)"
+- id: g-relationen-kardinalitaet
+  de: "Kardinalität einer Relation"
+  en: "cardinality of a relation"
+  keep_english: false
+  def_de: "Anzahl der Tupel (Zeilen) einer Relation. Nicht die Kardinalität eines Beziehungstyps (siehe g-kardinalitaet). (t05)"
+  def_en: "Number of tuples (rows) of a relation. Not the cardinality of a relationship type (see g-kardinalitaet). (t05)"
+- id: g-integritaetsbedingung
+  de: "Integritätsbedingung"
+  en: "integrity constraint"
+  keep_english: false
+  def_de: "Regel, die jeder zulässige Datenbankzustand erfüllen muss; gehört zum Schema. Das DBMS weist Änderungen ab, die sie verletzen würden. Arten: Entitäts-, referenzielle, Domänen- und benutzerdefinierte Integrität. (t05)"
+  def_en: "Rule that every valid database state must satisfy; part of the schema. The DBMS rejects changes that would violate it. Kinds: entity, referential, domain and user-defined integrity. (t05)"
+- id: g-entitaetsintegritaet
+  de: "Entitätsintegrität"
+  en: "entity integrity"
+  keep_english: false
+  def_de: "Jede Relation hat einen Primärschlüssel, dessen Werte eindeutig sind und dessen Attribute nie NULL sind. Mittel: PRIMARY KEY. (t05)"
+  def_en: "Every relation has a primary key whose values are unique and none of whose attributes is NULL. Means: PRIMARY KEY. (t05)"
+- id: g-referenzielle-integritaet
+  de: "referenzielle Integrität"
+  en: "referential integrity"
+  keep_english: false
+  def_de: "Zu jedem Fremdschlüsselwert ungleich NULL gibt es in der referenzierten Relation ein Tupel mit diesem Schlüsselwert; keine Verweise ins Leere. Mittel: FOREIGN KEY. (t05)"
+  def_en: "For every non-NULL foreign key value there is a tuple with that key value in the referenced relation; no dangling references. Means: FOREIGN KEY. (t05)"
+- id: g-domaenenintegritaet
+  de: "Domänenintegrität"
+  en: "domain integrity"
+  keep_english: false
+  def_de: "Jeder Attributwert liegt in der Domäne seines Attributs. Mittel: Datentyp, NOT NULL, Spalten-CHECK, CREATE DOMAIN. (t05)"
+  def_en: "Every attribute value lies in the domain of its attribute. Means: data type, NOT NULL, column CHECK, CREATE DOMAIN. (t05)"
+- id: g-benutzerdefinierte-integritaet
+  de: "benutzerdefinierte Integrität"
+  en: "user-defined integrity"
+  keep_english: false
+  def_de: "Fachliche Regeln der Miniwelt, die weder aus Schlüsseln noch aus einzelnen Domänen folgen. Einzeilig per CHECK, mehrzeilig oder alt/neu per Trigger. (t05)"
+  def_en: "Business rules of the mini-world that follow neither from keys nor from single domains. One-row rules via CHECK, multi-row or old/new rules via triggers. (t05)"
+- id: g-deklarative-integritaet
+  de: "deklarative Integritätssicherung"
+  en: "declarative integrity enforcement"
+  keep_english: false
+  def_de: "Die Bedingung steht im Schema (PRIMARY KEY, UNIQUE, NOT NULL, FOREIGN KEY, CHECK, DOMAIN) und wird vom DBMS selbst geprüft. (t05)"
+  def_en: "The constraint is stated in the schema (PRIMARY KEY, UNIQUE, NOT NULL, FOREIGN KEY, CHECK, DOMAIN) and checked by the DBMS itself. (t05)"
+- id: g-prozedurale-integritaet
+  de: "prozedurale Integritätssicherung"
+  en: "procedural integrity enforcement"
+  keep_english: false
+  def_de: "Ein Programm legt fest, wie geprüft wird: Trigger, Stored Procedures oder Anwendungscode. Prüfung nur in der Anwendung ist umgehbar. (t05)"
+  def_en: "A program determines how checking is done: triggers, stored procedures or application code. Checking only in the application can be bypassed. (t05)"
+- id: g-referenzielle-aktion
+  de: "referenzielle Aktion"
+  en: "referential action"
+  keep_english: false
+  def_de: "Festlegung mit ON DELETE / ON UPDATE, was mit Kindzeilen geschieht: NO ACTION (Standard), CASCADE, SET NULL, SET DEFAULT; RESTRICT gibt es in Firebird 3 nicht. Scheitert ein Schritt, wird die ganze Anweisung zurückgenommen. (t05, t09, t11)"
+  def_en: "Rule set with ON DELETE / ON UPDATE for what happens to child rows: NO ACTION (default), CASCADE, SET NULL, SET DEFAULT; RESTRICT does not exist in Firebird 3. If one step fails, the whole statement is rolled back. (t05, t09, t11)"
+- id: g-null
+  de: "NULL"
+  en: "NULL"
+  keep_english: true
+  def_de: "Markierung für einen fehlenden oder nicht zutreffenden Wert. Kein Element einer Domäne, führt zur dreiwertigen Logik. (t05, t10)"
+  def_en: "Marker for a missing or inapplicable value. Not an element of a domain; leads to three-valued logic. (t05, t10)"
+- id: g-dreiwertige-logik
+  de: "dreiwertige Logik"
+  en: "three-valued logic"
+  keep_english: false
+  def_de: "Logik mit TRUE, FALSE und UNKNOWN. Vergleiche mit NULL ergeben UNKNOWN; WHERE, HAVING und ON behalten nur TRUE, ein CHECK lässt auch UNKNOWN durch. (t10, t05)"
+  def_en: "Logic with TRUE, FALSE and UNKNOWN. Comparisons with NULL yield UNKNOWN; WHERE, HAVING and ON keep only TRUE, while a CHECK also lets UNKNOWN pass. (t10, t05)"
+
+# ---------- t06 ERM -> Relationen ----------
+- id: g-zwischentabelle
+  de: "Zwischentabelle (Beziehungstabelle)"
+  en: "junction table"
+  keep_english: false
+  def_de: "Eigene Tabelle für eine m:n-Beziehung (auch ternär, rekursiv m:n) mit je einem Fremdschlüssel pro Partner. Bei m:n bilden beide FKs den Primärschlüssel. Bei ternären Beziehungen gehören die FKs der Partner mit Chen-1 nicht hinein. Ist eine Kombination wiederholbar, kommt ein Zeitattribut in den PK. Beziehungsattribute stehen dort. (t06)"
+  def_en: "Separate table for an m:n relationship (also ternary, recursive m:n) with one foreign key per partner. For m:n both FKs form the primary key. In ternary relationships the FKs of partners with Chen-1 are not part of it. If a combination can repeat, a time attribute joins the PK. Relationship attributes go there. (t06)"
+- id: g-vertikale-abbildung
+  de: "vertikale Fragmentierung der Generalisierung (Class Table Inheritance)"
+  en: "class table inheritance"
+  keep_english: false
+  def_de: "Obertyp und jeder Untertyp erhalten eine Tabelle; der Primärschlüssel des Untertyps ist zugleich Fremdschlüssel auf den Obertyp. (t06)"
+  def_en: "The supertype and each subtype get a table; the subtype's primary key is also a foreign key to the supertype. (t06)"
+- id: g-horizontale-abbildung
+  de: "horizontale Fragmentierung der Generalisierung (Concrete Table Inheritance)"
+  en: "concrete table inheritance"
+  keep_english: false
+  def_de: "Nur die Untertypen erhalten Tabellen, die die Obertyp-Attribute mitführen. Geeignet nur bei total und disjunkter Spezialisierung (sonst mit Rest-Tabelle für Entitäten ohne Untertyp; bei überlappend entstehen Duplikate). (t06)"
+  def_en: "Only the subtypes get tables, which also carry the supertype attributes. Suitable only for total and disjoint specialization (otherwise with a remainder table for entities without a subtype; overlapping causes duplicates). (t06)"
+- id: g-single-table
+  de: "virtuelle Fragmentierung / Gesamttabelle der Generalisierung (Single Table Inheritance)"
+  en: "single table inheritance"
+  keep_english: false
+  def_de: "Eine Tabelle für alle Typen mit Typ-Attribut (NOT NULL) und NULL-Spalten für untertypspezifische Attribute. (t06)"
+  def_en: "One table for all types with a type attribute (NOT NULL) and NULL columns for subtype-specific attributes. (t06)"
+
+# ---------- t07 Normalisierung ----------
+- id: g-anomalie
+  de: "Anomalie (Einfüge-, Änderungs-, Löschanomalie)"
+  en: "anomaly (insertion, update, deletion)"
+  keep_english: false
+  def_de: "Unerwünschter Effekt redundanter Tabellen: Einfügeanomalie (Daten lassen sich nicht ohne Scheinwerte eintragen), Änderungsanomalie (Kopien werden uneinheitlich geändert), Löschanomalie (Löschen vernichtet fremde Angaben). Gemeinsame Ursache: mehrere Sachverhalte in einer Tabelle. (t07)"
+  def_en: "Undesirable effect of redundant tables: insertion anomaly (data cannot be entered without dummy values), update anomaly (copies are changed inconsistently), deletion anomaly (deleting destroys unrelated facts). Common cause: several facts in one table. (t07)"
+- id: g-funktionale-abhaengigkeit
+  de: "funktionale Abhängigkeit (FD)"
+  en: "functional dependency"
+  keep_english: false
+  def_de: "X → Y gilt, wenn in jeder zulässigen Ausprägung gleiche X-Werte gleiche Y-Werte erzwingen. Eine Regel der Miniwelt, keine Beobachtung in Beispieldaten. (t07)"
+  def_en: "X → Y holds if in every valid instance equal X values force equal Y values. A rule of the mini-world, not an observation in sample data. (t07)"
+- id: g-determinante
+  de: "Determinante"
+  en: "determinant"
+  keep_english: false
+  def_de: "Linke Seite X einer funktionalen Abhängigkeit X → Y. (t07)"
+  def_en: "The left-hand side X of a functional dependency X → Y. (t07)"
+- id: g-triviale-fd
+  de: "triviale funktionale Abhängigkeit"
+  en: "trivial functional dependency"
+  keep_english: false
+  def_de: "X → Y mit Y ⊆ X; gilt immer und zählt bei der Prüfung der Normalformen nicht. (t07)"
+  def_en: "X → Y with Y ⊆ X; always holds and is ignored when checking normal forms. (t07)"
+- id: g-volle-abhaengigkeit
+  de: "volle funktionale Abhängigkeit"
+  en: "full functional dependency"
+  keep_english: false
+  def_de: "X → Y gilt, aber für keine echte Teilmenge von X. (t07)"
+  def_en: "X → Y holds, but not for any proper subset of X. (t07)"
+- id: g-partielle-abhaengigkeit
+  de: "partielle Abhängigkeit"
+  en: "partial dependency"
+  keep_english: false
+  def_de: "Ein echter Teil eines zusammengesetzten Schlüssels bestimmt bereits das Attribut. Verletzt die 2NF, wenn das abhängige Attribut ein Nichtschlüsselattribut ist. (t07)"
+  def_en: "A proper part of a composite key already determines the attribute. Violates 2NF if the dependent attribute is a non-key attribute. (t07)"
+- id: g-transitive-abhaengigkeit
+  de: "transitive Abhängigkeit"
+  en: "transitive dependency"
+  keep_english: false
+  def_de: "Z hängt über ein Zwischenglied Y von X ab (X → Y → Z), wobei Y kein Schlüsselteil ist und X nicht bestimmt. Verletzt die 3NF, wenn Z ein Nichtschlüsselattribut ist. (t07)"
+  def_en: "Z depends on X via an intermediate Y (X → Y → Z), where Y is not part of a key and does not determine X. Violates 3NF if Z is a non-key attribute. (t07)"
+- id: g-armstrong-axiome
+  de: "Armstrong-Axiome"
+  en: "Armstrong's axioms"
+  keep_english: false
+  def_de: "Drei Regeln zum Herleiten von FDs: Reflexivität, Verstärkung, Transitivität (Vertiefung). (t07)"
+  def_en: "Three rules for deriving FDs: reflexivity, augmentation, transitivity (advanced). (t07)"
+- id: g-attributhuelle
+  de: "Attributhülle"
+  en: "attribute closure"
+  keep_english: false
+  def_de: "Menge X⁺ aller Attribute, die sich aus X mit der FD-Menge herleiten lassen. X ist Superschlüssel, wenn X⁺ alle Attribute enthält (Vertiefung). (t07)"
+  def_en: "The set X⁺ of all attributes derivable from X with the set of FDs. X is a superkey if X⁺ contains all attributes (advanced). (t07)"
+- id: g-primattribut
+  de: "Primattribut"
+  en: "prime attribute"
+  keep_english: false
+  def_de: "Attribut, das in mindestens einem Schlüsselkandidaten enthalten ist. (t07)"
+  def_en: "Attribute contained in at least one candidate key. (t07)"
+- id: g-0nf
+  de: "unnormalisierte Form (0NF)"
+  en: "unnormalized form (UNF)"
+  keep_english: false
+  def_de: "Relation mit Wiederholungsgruppen oder nicht atomaren Werten. Die Bezeichnung 0NF ist im Deutschen üblich. (t07)"
+  def_en: "Relation with repeating groups or non-atomic values. The label 0NF is common in German. (t07)"
+- id: g-1nf
+  de: "erste Normalform (1NF)"
+  en: "first normal form (1NF)"
+  keep_english: false
+  def_de: "Jedes Attribut hat einen festen, unstrukturierten Wertebereich mit atomaren Werten; es gibt keine Wiederholungsgruppen. (t07)"
+  def_en: "Every attribute has a fixed, unstructured domain with atomic values; there are no repeating groups. (t07)"
+- id: g-2nf
+  de: "zweite Normalform (2NF)"
+  en: "second normal form (2NF)"
+  keep_english: false
+  def_de: "1NF und jedes Nichtschlüsselattribut ist von jedem Schlüsselkandidaten voll funktional abhängig, also keine partielle Abhängigkeit. (t07)"
+  def_en: "1NF and every non-key attribute is fully functionally dependent on every candidate key, i.e. no partial dependency. (t07)"
+- id: g-3nf
+  de: "dritte Normalform (3NF)"
+  en: "third normal form (3NF)"
+  keep_english: false
+  def_de: "2NF und keine transitive Abhängigkeit eines Nichtschlüsselattributs. Kurztest: Für jede nicht-triviale FD X → A ist X Superschlüssel oder A Primattribut. (t07)"
+  def_en: "2NF and no transitive dependency of a non-key attribute. Short test: for every non-trivial FD X → A, X is a superkey or A is a prime attribute. (t07)"
+- id: g-bcnf
+  de: "Boyce-Codd-Normalform (BCNF)"
+  en: "Boyce-Codd normal form (BCNF)"
+  keep_english: false
+  def_de: "Für jede nicht-triviale FD X → A ist X ein Superschlüssel. Strenger als die 3NF; Zerlegung ist verlustfrei, aber nicht immer abhängigkeitserhaltend. Ausblick. (t07)"
+  def_en: "For every non-trivial FD X → A, X is a superkey. Stricter than 3NF; decomposition is lossless but not always dependency-preserving. Outlook. (t07)"
+- id: g-4nf
+  de: "vierte Normalform (4NF)"
+  en: "fourth normal form (4NF)"
+  keep_english: false
+  def_de: "BCNF und jede nicht-triviale mehrwertige Abhängigkeit hat einen Superschlüssel als linke Seite. Ausblick. (t07)"
+  def_en: "BCNF and every non-trivial multivalued dependency has a superkey on its left-hand side. Outlook. (t07)"
+- id: g-mehrwertige-abhaengigkeit
+  de: "mehrwertige Abhängigkeit"
+  en: "multivalued dependency"
+  keep_english: false
+  def_de: "X ↠ Y: Zu einem X-Wert gehört eine Menge von Y-Werten, unabhängig von den übrigen Attributen. (t07)"
+  def_en: "X ↠ Y: one X value is associated with a set of Y values, independent of the remaining attributes. (t07)"
+- id: g-verlustfreie-zerlegung
+  de: "verlustfreie Zerlegung"
+  en: "lossless decomposition"
+  keep_english: false
+  def_de: "Der natürliche Verbund der Teilrelationen ergibt wieder genau die Ausgangsrelation, ohne Scheintupel. Für zwei Teile: Die gemeinsamen Attribute bestimmen einen der Teile. (t07)"
+  def_en: "The natural join of the parts yields exactly the original relation again, without spurious tuples. For two parts: the common attributes determine one of the parts. (t07)"
+- id: g-abhaengigkeitserhaltung
+  de: "Abhängigkeitserhaltung"
+  en: "dependency preservation"
+  keep_english: false
+  def_de: "Alle FDs der Ausgangsrelation lassen sich nach der Zerlegung innerhalb der Teilrelationen prüfen bzw. aus deren FDs herleiten. (t07)"
+  def_en: "All FDs of the original relation can still be checked within the parts after decomposition, or derived from their FDs. (t07)"
+- id: g-scheintupel
+  de: "Scheintupel"
+  en: "spurious tuple"
+  keep_english: false
+  def_de: "Zusätzliches Tupel, das bei einer verlustbehafteten Zerlegung im Verbund entsteht. (t07)"
+  def_en: "Additional tuple that appears in the join after a lossy decomposition. (t07)"
+- id: g-denormalisierung
+  de: "Denormalisierung"
+  en: "denormalization"
+  keep_english: false
+  def_de: "Bewusstes Zurücknehmen der Normalisierung zugunsten der Leseleistung, im physischen Entwurf. Anomalien kehren zurück und müssen durch Konsistenzsicherung abgefangen werden. (t07)"
+  def_en: "Deliberately reversing normalization for read performance, in physical design. Anomalies return and must be countered by consistency measures. (t07)"
+
+# ---------- t08 Relationale Algebra ----------
+- id: g-relationale-algebra
+  de: "relationale Algebra"
+  en: "relational algebra"
+  keep_english: false
+  def_de: "Prozedurale Anfragesprache mit Operatoren auf Relationen (σ, π, ρ, ×, ⋈, ∪, ∩, −, ÷). Grundlage der SQL-Auswertung. (t08)"
+  def_en: "Procedural query language with operators on relations (σ, π, ρ, ×, ⋈, ∪, ∩, −, ÷). Basis for evaluating SQL. (t08)"
+- id: g-multimenge
+  de: "Multimenge"
+  en: "multiset (bag)"
+  keep_english: false
+  def_de: "Menge, in der gleiche Elemente mehrfach vorkommen dürfen. SQL-Tabellen und -Ergebnisse sind Multimengen; DISTINCT entfernt Duplikate. (t08, t10)"
+  def_en: "A set in which equal elements may occur more than once. SQL tables and results are multisets; DISTINCT removes duplicates. (t08, t10)"
+- id: g-selektion
+  de: "Selektion σ"
+  en: "selection"
+  keep_english: false
+  def_de: "σ_{Bedingung}(R) behält die Tupel von R, für die die Bedingung wahr ist (Zeilenfilter, auch Restriktion). SQL: WHERE. (t08)"
+  def_en: "σ_{condition}(R) keeps the tuples of R for which the condition is true (row filter, also restriction). SQL: WHERE. (t08)"
+- id: g-projektion
+  de: "Projektion π"
+  en: "projection"
+  keep_english: false
+  def_de: "π_{Attribute}(R) wählt Spalten aus und entfernt entstehende Duplikate. SQL: SELECT DISTINCT. (t08)"
+  def_en: "π_{attributes}(R) selects columns and removes resulting duplicates. SQL: SELECT DISTINCT. (t08)"
+- id: g-umbenennung
+  de: "Umbenennung ρ"
+  en: "rename"
+  keep_english: false
+  def_de: "ρ_{neu←alt}(R) ändert Namen von Attributen oder Relationen, nicht den Inhalt. Der Pfeil zeigt auf den neuen Namen. SQL: AS. (t08)"
+  def_en: "ρ_{new←old}(R) changes names of attributes or relations, not the content. The arrow points to the new name. SQL: AS. (t08)"
+- id: g-kartesisches-produkt
+  de: "kartesisches Produkt"
+  en: "Cartesian product"
+  keep_english: false
+  def_de: "R × S kombiniert jedes Tupel von R mit jedem von S. Grade addieren sich, Kardinalitäten multiplizieren sich. SQL: CROSS JOIN. (t08)"
+  def_en: "R × S combines every tuple of R with every tuple of S. Degrees add, cardinalities multiply. SQL: CROSS JOIN. (t08)"
+- id: g-join
+  de: "Verbund (Join)"
+  en: "join"
+  keep_english: true
+  def_de: "Verknüpfung zweier Relationen über eine Bedingung: R ⋈_θ S = σ_θ(R × S). Varianten: Theta-, Equi-, natürlicher und äußerer Join. SQL: JOIN … ON. (t08, t10)"
+  def_en: "Combination of two relations via a condition: R ⋈_θ S = σ_θ(R × S). Variants: theta, equi, natural and outer join. SQL: JOIN … ON. (t08, t10)"
+- id: g-theta-join
+  de: "Theta-Join"
+  en: "theta join"
+  keep_english: true
+  def_de: "Join mit beliebiger Vergleichsbedingung θ (=, ≠, <, ≤, >, ≥). (t08)"
+  def_en: "Join with an arbitrary comparison condition θ (=, ≠, <, ≤, >, ≥). (t08)"
+- id: g-equi-join
+  de: "Equi-Join"
+  en: "equi-join"
+  keep_english: true
+  def_de: "Theta-Join mit reiner Gleichheitsbedingung; beide verglichenen Attribute bleiben im Ergebnis. (t08)"
+  def_en: "Theta join with a pure equality condition; both compared attributes remain in the result. (t08)"
+- id: g-natuerlicher-join
+  de: "natürlicher Verbund (Natural Join)"
+  en: "natural join"
+  keep_english: true
+  def_de: "R ⋈ S setzt Gleichheit auf allen gleichnamigen Attributen voraus und übernimmt jedes gemeinsame Attribut nur einmal. Ohne gemeinsames Attribut entsteht das Produkt. (t08, t10)"
+  def_en: "R ⋈ S requires equality on all same-named attributes and keeps each shared attribute only once. Without a shared attribute the result is the product. (t08, t10)"
+- id: g-aeusserer-join
+  de: "äußerer Verbund (Outer Join)"
+  en: "outer join"
+  keep_english: true
+  def_de: "Behält Tupel ohne Partner und füllt fehlende Attribute mit NULL auf: links (⟕), rechts (⟖) oder beidseitig (⟗). SQL: LEFT/RIGHT/FULL OUTER JOIN. (t08, t10)"
+  def_en: "Keeps tuples without a partner and fills missing attributes with NULL: left (⟕), right (⟖) or both sides (⟗). SQL: LEFT/RIGHT/FULL OUTER JOIN. (t08, t10)"
+- id: g-semi-join
+  de: "Semi-Join"
+  en: "semi-join"
+  keep_english: true
+  def_de: "R ⋉ S liefert die Tupel von R mit mindestens einem Partner in S, nur mit den Attributen von R (R ⋊ S entsprechend für S). SQL: EXISTS oder IN. (t08)"
+  def_en: "R ⋉ S returns the tuples of R with at least one partner in S, with only the attributes of R (R ⋊ S likewise for S). SQL: EXISTS or IN. (t08)"
+- id: g-anti-join
+  de: "Anti-Join"
+  en: "anti-join"
+  keep_english: true
+  def_de: "R ▷ S = R − (R ⋉ S): die Tupel von R ohne Partner in S. SQL: NOT EXISTS. (t08)"
+  def_en: "R ▷ S = R − (R ⋉ S): the tuples of R without a partner in S. SQL: NOT EXISTS. (t08)"
+- id: g-vereinigung
+  de: "Vereinigung ∪"
+  en: "union"
+  keep_english: false
+  def_de: "R ∪ S enthält die Tupel, die in R oder S liegen; gemeinsame Tupel einmal. Vereinigungsverträglichkeit nötig. SQL: UNION. (t08, t10)"
+  def_en: "R ∪ S contains the tuples that are in R or S; common tuples once. Union compatibility required. SQL: UNION. (t08, t10)"
+- id: g-durchschnitt
+  de: "Durchschnitt ∩"
+  en: "intersection"
+  keep_english: false
+  def_de: "R ∩ S enthält die Tupel in R und S, ableitbar als R − (R − S). Firebird 3 hat kein INTERSECT (Ersatz EXISTS/IN). (t08, t10)"
+  def_en: "R ∩ S contains the tuples in both R and S, derivable as R − (R − S). Firebird 3 has no INTERSECT (substitute EXISTS/IN). (t08, t10)"
+- id: g-differenz
+  de: "Differenz −"
+  en: "difference"
+  keep_english: false
+  def_de: "R − S enthält die Tupel aus R, die nicht in S liegen; nicht kommutativ. Firebird 3 hat kein EXCEPT (Ersatz NOT EXISTS). (t08, t10)"
+  def_en: "R − S contains the tuples of R that are not in S; not commutative. Firebird 3 has no EXCEPT (substitute NOT EXISTS). (t08, t10)"
+- id: g-division
+  de: "Division ÷"
+  en: "division"
+  keep_english: false
+  def_de: "Beantwortet „für alle“-Fragen; kein Grundoperator, ableitbar aus π, × und −. (t08)"
+  def_en: "Answers “for all” questions; not a basic operator, derivable from π, × and −. (t08)"
+- id: g-vereinigungsvertraeglichkeit
+  de: "Vereinigungsverträglichkeit"
+  en: "union compatibility"
+  keep_english: false
+  def_de: "Voraussetzung für ∪, ∩, −. Kursstandard: gleicher Grad, gleiche Attributnamen (ggf. nach ρ), gleiche Wertebereiche und Reihenfolge. SQL prüft nur Spaltenzahl und Typen. (t08)"
+  def_en: "Precondition for ∪, ∩, −. Course standard: same degree, same attribute names (possibly after ρ), same domains and order. SQL checks only column count and types. (t08)"
+- id: g-operatorbaum
+  de: "Operatorbaum"
+  en: "operator tree"
+  keep_english: false
+  def_de: "Baumdarstellung eines Algebra-Ausdrucks: Blätter sind Relationen, innere Knoten Operatoren. Wird von unten nach oben ausgewertet; Selektionen werden früh angewendet. (t08)"
+  def_en: "Tree representation of an algebra expression: leaves are relations, inner nodes are operators. Evaluated bottom-up; selections are applied early. (t08)"
+
+# ---------- t09 SQL-Grundlagen & DDL ----------
+- id: g-ddl
+  de: "Datendefinitionssprache (DDL)"
+  en: "data definition language (DDL)"
+  keep_english: true
+  def_de: "SQL-Sprachklasse, die das Schema ändert: CREATE, ALTER, DROP. Nicht mit der Entwurfsphase Datendefinition gleichzusetzen. (t09)"
+  def_en: "SQL language class that changes the schema: CREATE, ALTER, DROP. Not to be equated with the design phase data definition. (t09)"
+- id: g-dml
+  de: "Datenmanipulationssprache (DML)"
+  en: "data manipulation language (DML)"
+  keep_english: true
+  def_de: "SQL-Sprachklasse, die Zeilen ändert: INSERT, UPDATE, DELETE. SELECT wird je nach Quelle zur DML oder zur DQL gezählt. (t09, t11)"
+  def_en: "SQL language class that changes rows: INSERT, UPDATE, DELETE. SELECT is counted as DML or DQL depending on the source. (t09, t11)"
+- id: g-dql
+  de: "Datenabfragesprache (DQL)"
+  en: "data query language (DQL)"
+  keep_english: true
+  def_de: "SQL-Sprachklasse für das Lesen von Daten mit SELECT. (t09, t10)"
+  def_en: "SQL language class for reading data with SELECT. (t09, t10)"
+- id: g-dcl
+  de: "Datenkontrollsprache (Datenüberwachungssprache, DCL)"
+  en: "data control language (DCL)"
+  keep_english: true
+  def_de: "SQL-Sprachklasse zur Rechteverwaltung: GRANT, REVOKE. Variante: Manche Quellen fassen die DCL weiter (Zugriffsstrukturen, Integritätskontrolle, Sicherung) oder zählen die Transaktionssteuerung dazu (siehe g-tcl). (t09, t13)"
+  def_en: "SQL language class for privilege management: GRANT, REVOKE. Variant: some sources define DCL more broadly (access structures, integrity control, backup) or include transaction control (see g-tcl). (t09, t13)"
+- id: g-tcl
+  de: "Transaktionssteuerungssprache (TCL)"
+  en: "transaction control language (TCL)"
+  keep_english: true
+  def_de: "SQL-Sprachklasse zur Steuerung von Transaktionen: COMMIT, ROLLBACK, SAVEPOINT. Manche Quellen zählen sie zur DCL. (t09, t11)"
+  def_en: "SQL language class for controlling transactions: COMMIT, ROLLBACK, SAVEPOINT. Some sources count it as part of DCL. (t09, t11)"
+- id: g-constraint
+  de: "Constraint"
+  en: "constraint"
+  keep_english: true
+  def_de: "Im Schema deklarierte Bedingung an Tabelle oder Spalte (PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, NOT NULL); als Spalten- oder Tabellenbedingung. (t09)"
+  def_en: "Condition declared in the schema on a table or column (PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, NOT NULL); as column or table constraint. (t09)"
+- id: g-eindeutigkeitsbedingung
+  de: "UNIQUE-Bedingung (Eindeutigkeitsbedingung)"
+  en: "unique constraint"
+  keep_english: false
+  def_de: "Verbietet doppelte Werte in einer Spalte oder Spaltenkombination. Ohne NOT NULL kein Schlüsselkandidat; einspaltig sind mehrere NULL erlaubt, bei mehrspaltigem UNIQUE mit Teil-NULL weicht Firebird 3 von PostgreSQL ab. (t05, t09)"
+  def_en: "Forbids duplicate values in a column or column combination. Without NOT NULL it is no candidate key; several NULLs are allowed for one column, and for multi-column UNIQUE with partial NULL Firebird 3 differs from PostgreSQL. (t05, t09)"
+- id: g-check-constraint
+  de: "CHECK-Bedingung"
+  en: "check constraint"
+  keep_english: false
+  def_de: "Prüft einen Ausdruck für die eigene Zeile. Gilt als erfüllt, wenn das Ergebnis TRUE oder UNKNOWN ist; nur FALSE wird abgewiesen. Eine Unterabfrage im CHECK (Firebird) wird nur geprüft, wenn sich die eigene Zeile ändert; PostgreSQL erlaubt sie nicht. (t05, t09)"
+  def_en: "Checks an expression for the row itself. Counts as satisfied if the result is TRUE or UNKNOWN; only FALSE is rejected. A subquery in a CHECK (Firebird) is evaluated only when the row itself changes; PostgreSQL does not allow it. (t05, t09)"
+- id: g-identity-spalte
+  de: "Identity-Spalte"
+  en: "identity column"
+  keep_english: true
+  def_de: "Spalte mit automatisch vergebenem Schlüsselwert (GENERATED BY DEFAULT AS IDENTITY). Lücken sind normal; Werte werden durch ROLLBACK nicht zurückgegeben. (t09, t11)"
+  def_en: "Column with automatically assigned key values (GENERATED BY DEFAULT AS IDENTITY). Gaps are normal; values are not returned by ROLLBACK. (t09, t11)"
+- id: g-sequenz-generator
+  de: "Sequenz (Generator)"
+  en: "sequence (generator)"
+  keep_english: false
+  def_de: "Datenbankobjekt, das fortlaufende Zahlen liefert (CREATE SEQUENCE, NEXT VALUE FOR, in Firebird auch GEN_ID). Nicht transaktional. (t09)"
+  def_en: "Database object that supplies consecutive numbers (CREATE SEQUENCE, NEXT VALUE FOR, in Firebird also GEN_ID). Not transactional. (t09)"
+
+# ---------- t10 SQL-DQL ----------
+- id: g-alias
+  de: "Alias"
+  en: "alias"
+  keep_english: false
+  def_de: "Eigener Name für eine Spalte oder Tabelle in einer Abfrage (AS). Ein Spaltenalias ist im WHERE und HAVING unbekannt, im ORDER BY bekannt. Ein Tabellenalias gilt in der ganzen Abfrage und ist beim Selbstverbund Pflicht. (t10)"
+  def_en: "Own name for a column or table in a query (AS). A column alias is unknown in WHERE and HAVING but known in ORDER BY. A table alias is valid in the whole query and mandatory for a self-join. (t10)"
+- id: g-aggregatfunktion
+  de: "Aggregatfunktion"
+  en: "aggregate function"
+  keep_english: false
+  def_de: "Fasst mehrere Zeilen zu einem Wert zusammen: COUNT, SUM, AVG, MIN, MAX. COUNT(*) zählt Zeilen, COUNT(spalte) nur Werte ungleich NULL; die übrigen übergehen NULL. (t10)"
+  def_en: "Condenses several rows into one value: COUNT, SUM, AVG, MIN, MAX. COUNT(*) counts rows, COUNT(column) only non-NULL values; the others ignore NULL. (t10)"
+- id: g-group-by
+  de: "Gruppierung (GROUP BY)"
+  en: "grouping (GROUP BY)"
+  keep_english: true
+  def_de: "Bildet Gruppen gleicher Werte, auf die Aggregate wirken. Nicht aggregierte Spalten der SELECT-Liste gehören ins GROUP BY. (t10)"
+  def_en: "Forms groups of equal values on which aggregates operate. Non-aggregated columns of the SELECT list belong in GROUP BY. (t10)"
+- id: g-having
+  de: "HAVING"
+  en: "HAVING"
+  keep_english: true
+  def_de: "Filtert Gruppen nach dem Gruppieren, meist mit einem Aggregat; WHERE filtert Zeilen davor. (t10)"
+  def_en: "Filters groups after grouping, usually with an aggregate; WHERE filters rows before. (t10)"
+- id: g-unterabfrage
+  de: "Unterabfrage"
+  en: "subquery"
+  keep_english: false
+  def_de: "Eine in eine andere Abfrage eingebettete Abfrage: skalar, Liste oder Tabelle (IN, ANY, ALL, EXISTS). Korreliert, wenn sie auf die äußere Abfrage Bezug nimmt und allein nicht lauffähig ist. (t10)"
+  def_en: "A query embedded in another query: scalar, list or table (IN, ANY, ALL, EXISTS). Correlated if it refers to the outer query and cannot run alone. (t10)"
+- id: g-auswertungsreihenfolge
+  de: "logische Auswertungsreihenfolge"
+  en: "logical order of evaluation"
+  keep_english: false
+  def_de: "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY, danach Ergebnisbegrenzung. Weicht von der Schreibreihenfolge ab und erklärt, wo Aliase und Aggregate erlaubt sind. (t10)"
+  def_en: "FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY, then row limiting. Differs from the written order and explains where aliases and aggregates are allowed. (t10)"
+
+# ---------- t12 Views, Trigger, Stored Procedures, Index ----------
+- id: g-view
+  de: "Sicht (View)"
+  en: "view"
+  keep_english: true
+  def_de: "In der Datenbank gespeicherte Abfrage (CREATE VIEW), keine Kopie der Daten; Mittel der externen Ebene. Setzt die Benutzersichten des Entwurfs um (siehe g-benutzersicht). Änderbar nur bei einfachen Sichten. (t12)"
+  def_en: "Query stored in the database (CREATE VIEW), not a copy of the data; a means of the external level. Implements the user views from design (see g-benutzersicht). Updatable only for simple views. (t12)"
+- id: g-with-check-option
+  de: "WITH CHECK OPTION"
+  en: "WITH CHECK OPTION"
+  keep_english: true
+  def_de: "Weist Änderungen über eine Sicht ab, durch die die Zeile aus der Sicht herausfiele. (t12)"
+  def_en: "Rejects changes through a view that would make the row drop out of the view. (t12)"
+- id: g-trigger
+  de: "Trigger (Auslöser)"
+  en: "trigger"
+  keep_english: true
+  def_de: "Gespeichertes Programm, das bei INSERT, UPDATE oder DELETE auf einer Tabelle automatisch läuft, BEFORE oder AFTER. In OLD ist der alte, in NEW der neue Zustand lesbar; NEW ist nur in BEFORE änderbar. (t12)"
+  def_en: "Stored program that runs automatically on INSERT, UPDATE or DELETE of a table, BEFORE or AFTER. OLD holds the old and NEW the new state; NEW can be changed only in BEFORE. (t12)"
+- id: g-stored-procedure
+  de: "Stored Procedure (gespeicherte Prozedur)"
+  en: "stored procedure"
+  keep_english: true
+  def_de: "Serverseitig gespeichertes Programm mit Parametern. In Firebird mit EXECUTE PROCEDURE (ausführbar) oder per SELECT mit SUSPEND (selektierbar) aufrufbar. (t12)"
+  def_en: "Program stored on the server with parameters. In Firebird called with EXECUTE PROCEDURE (executable) or via SELECT with SUSPEND (selectable). (t12)"
+- id: g-index
+  de: "Index"
+  en: "index"
+  keep_english: false
+  def_de: "Zusätzliche Zugriffsstruktur (meist B-Baum) auf der internen Ebene, die selektive Suchen beschleunigt. Kontrollierte Redundanz, die bei jedem Schreiben nachgezogen wird; ändert keine Ergebnisse. PK und UNIQUE haben automatisch einen, in Firebird auch jeder FK. (t12)"
+  def_en: "Additional access structure (usually a B-tree) on the internal level that speeds up selective searches. Controlled redundancy updated on every write; does not change results. PK and UNIQUE get one automatically, in Firebird also every FK. (t12)"
+- id: g-partieller-index
+  de: "partieller Index"
+  en: "partial index"
+  keep_english: false
+  def_de: "Index nur über die Zeilen, die eine WHERE-Bedingung erfüllen, z. B. CREATE UNIQUE INDEX … WHERE offen. Gibt es in PostgreSQL und SQLite, nicht in Firebird 3. (t12)"
+  def_en: "Index covering only the rows that satisfy a WHERE condition, e.g. CREATE UNIQUE INDEX … WHERE open. Available in PostgreSQL and SQLite, not in Firebird 3. (t12)"
+
+# ---------- t13 Anwendungszugriff & Sicherheit ----------
+- id: g-drei-schichten-architektur
+  de: "Drei-Schichten-Architektur"
+  en: "three-tier architecture"
+  keep_english: false
+  def_de: "Anwendungsaufbau aus Präsentation, Logik und Datenhaltung; nur der Anwendungsserver kennt die Zugangsdaten. Nicht dasselbe wie die ANSI-SPARC-Schemaebenen. (t13)"
+  def_en: "Application structure of presentation, logic and data storage; only the application server knows the credentials. Not the same as the ANSI/SPARC schema levels. (t13)"
+- id: g-odbc
+  de: "ODBC"
+  en: "ODBC (Open Database Connectivity)"
+  keep_english: true
+  def_de: "Sprachunabhängige Programmierschnittstelle zwischen Anwendung und DBMS mit Treiber je DBMS. (t13)"
+  def_en: "Language-independent programming interface between application and DBMS, with one driver per DBMS. (t13)"
+- id: g-jdbc
+  de: "JDBC"
+  en: "JDBC (Java Database Connectivity)"
+  keep_english: true
+  def_de: "Programmierschnittstelle für den Datenbankzugriff aus Java, mit Treiber je DBMS. (t13)"
+  def_en: "Programming interface for database access from Java, with one driver per DBMS. (t13)"
+- id: g-cursor
+  de: "Cursor (ResultSet)"
+  en: "cursor"
+  keep_english: true
+  def_de: "Zeiger über ein Abfrageergebnis, mit dem eine Anwendung die Zeilen nacheinander liest. (t13)"
+  def_en: "Pointer over a query result with which an application reads the rows one after another. (t13)"
+- id: g-sql-injection
+  de: "SQL-Injection"
+  en: "SQL injection"
+  keep_english: true
+  def_de: "Angriff, bei dem Eingaben durch Verkettung in den SQL-Text gelangen und ihn verändern. Der Schaden hängt an den Rechten des Anwendungskontos. (t13)"
+  def_en: "Attack in which input is concatenated into the SQL text and alters it. The damage depends on the privileges of the application account. (t13)"
+- id: g-prepared-statement
+  de: "Prepared Statement"
+  en: "prepared statement"
+  keep_english: true
+  def_de: "Vorbereitete Anweisung mit Platzhaltern, in die Werte getrennt vom SQL-Text gebunden werden. Wichtigster Schutz gegen SQL-Injection; Platzhalter gelten nur für Werte, nicht für Bezeichner. (t13)"
+  def_en: "Prepared statement with placeholders into which values are bound separately from the SQL text. The main protection against SQL injection; placeholders work only for values, not identifiers. (t13)"
+- id: g-privileg
+  de: "Recht (Privileg)"
+  en: "privilege"
+  keep_english: false
+  def_de: "Erlaubnis für eine Aktion auf einem Objekt, vergeben mit GRANT (ggf. WITH GRANT OPTION), entzogen mit REVOKE. Rechte addieren sich aus direkter Vergabe, der aktiven Rolle und PUBLIC. In Firebird 3 ist je Sitzung genau eine Rolle aktiv (beim Verbinden angegeben oder per SET ROLE); nur deren Rechte zählen. (t13)"
+  def_en: "Permission for an action on an object, granted with GRANT (optionally WITH GRANT OPTION) and withdrawn with REVOKE. Privileges add up from direct grants, the active role and PUBLIC. In Firebird 3 exactly one role is active per session (given at connect or via SET ROLE); only its privileges count. (t13)"
+- id: g-rolle-rechte
+  de: "Rolle (in der Rechteverwaltung)"
+  en: "role"
+  keep_english: false
+  def_de: "Benanntes Bündel von Rechten für eine Aufgabe, das Benutzern zugewiesen wird (CREATE ROLE, GRANT). In Firebird 3 ist genau eine Rolle je Sitzung aktiv (beim Verbinden oder mit SET ROLE). Nicht die Rolle im ER-Modell (siehe g-rolle). (t13)"
+  def_en: "Named bundle of privileges for a task that is assigned to users (CREATE ROLE, GRANT). In Firebird 3 exactly one role is active per session (at connect or via SET ROLE). Not the role in the ER model (see g-rolle). (t13)"
+- id: g-minimale-rechte
+  de: "Prinzip der minimalen Rechte"
+  en: "principle of least privilege"
+  keep_english: false
+  def_de: "Jedes Konto erhält nur die Rechte, die es braucht; begrenzt den Schaden etwa bei SQL-Injection. (t13)"
+  def_en: "Each account gets only the privileges it needs; limits the damage, e.g. in case of SQL injection. (t13)"
+- id: g-public
+  de: "PUBLIC"
+  en: "PUBLIC"
+  keep_english: true
+  def_de: "Pseudo-Empfänger für alle Benutzer. Was an PUBLIC vergeben wurde, muss auch von PUBLIC entzogen werden. (t13)"
+  def_en: "Pseudo-grantee representing all users. What was granted to PUBLIC must be revoked from PUBLIC. (t13)"
+- id: g-with-grant-option
+  de: "WITH GRANT OPTION"
+  en: "WITH GRANT OPTION"
+  keep_english: true
+  def_de: "Zusatz bei GRANT, der dem Empfänger erlaubt, das Recht weiterzugeben. (t13)"
+  def_en: "Clause of GRANT that allows the recipient to pass the privilege on. (t13)"
+
+# ---------- t11 SQL-DML ----------
+- id: g-commit-rollback
+  de: "COMMIT und ROLLBACK"
+  en: "COMMIT and ROLLBACK"
+  keep_english: true
+  def_de: "COMMIT macht die Änderungen einer Transaktion dauerhaft, ROLLBACK verwirft sie. Vergebene Zählerwerte (Identity, Generator) bleiben verbraucht. (t11)"
+  def_en: "COMMIT makes the changes of a transaction permanent, ROLLBACK discards them. Counter values already issued (identity, generator) stay used up. (t11)"
+- id: g-savepoint
+  de: "Savepoint"
+  en: "savepoint"
+  keep_english: true
+  def_de: "Markierung innerhalb einer Transaktion (SAVEPOINT name), bis zu der sich mit ROLLBACK TO SAVEPOINT teilweise zurückgehen lässt. (t11)"
+  def_en: "Marker within a transaction (SAVEPOINT name) to which a partial rollback is possible with ROLLBACK TO SAVEPOINT. (t11)"
+- id: g-autocommit
+  de: "Autocommit"
+  en: "autocommit"
+  keep_english: true
+  def_de: "Modus vieler Werkzeuge, in dem jede Anweisung automatisch bestätigt wird. (t11)"
+  def_en: "Mode of many tools in which every statement is confirmed automatically. (t11)"
+- id: g-insert-select
+  de: "INSERT … SELECT"
+  en: "INSERT … SELECT"
+  keep_english: true
+  def_de: "Fügt die Zeilen eines Abfrageergebnisses ein; in Firebird 3 der Weg, mehrere Zeilen mit einer Anweisung einzufügen. (t11)"
+  def_en: "Inserts the rows of a query result; in Firebird 3 the way to insert several rows with one statement. (t11)"
+- id: g-returning
+  de: "RETURNING"
+  en: "RETURNING"
+  keep_english: true
+  def_de: "Klausel, die Werte der eingefügten oder geänderten Zeile zurückgibt, z. B. die vergebene ID. In Firebird 3 höchstens eine Zeile. (t11)"
+  def_en: "Clause that returns values of the inserted or changed row, e.g. the assigned ID. In Firebird 3 at most one row. (t11)"
+- id: g-upsert
+  de: "Upsert (UPDATE OR INSERT, MERGE)"
+  en: "upsert"
+  keep_english: true
+  def_de: "Ändern, falls die Zeile existiert, sonst Einfügen. Firebird: UPDATE OR INSERT … MATCHING; SQL-Standard: MERGE. (t11)"
+  def_en: "Update if the row exists, otherwise insert. Firebird: UPDATE OR INSERT … MATCHING; SQL standard: MERGE. (t11)"
+
+# ---------- weitere Begriffe ----------
+- id: g-disjunkt-ueberlappend
+  de: "disjunkt / überlappend"
+  en: "disjoint / overlapping"
+  keep_english: false
+  def_de: "Eigenschaft einer Spezialisierung: höchstens ein Untertyp je Entität (disjunkt) oder mehrere möglich (überlappend); unabhängig von total/partiell. (t04)"
+  def_en: "Property of a specialization: at most one subtype per entity (disjoint) or several possible (overlapping); independent of total/partial. (t04)"
+- id: g-wiederholungsgruppe
+  de: "Wiederholungsgruppe"
+  en: "repeating group"
+  keep_english: false
+  def_de: "Mehrere gleichartige Wertgruppen in einer Zelle oder nummerierte Spalten wie Sorte1, Sorte2; verletzt die 1NF. (t07)"
+  def_en: "Several similar groups of values in one cell, or numbered columns such as item1, item2; violates 1NF. (t07)"
+- id: g-distinct
+  de: "DISTINCT"
+  en: "DISTINCT"
+  keep_english: true
+  def_de: "Entfernt doppelte Zeilen aus dem Abfrageergebnis; entspricht der Projektion der Algebra. (t10)"
+  def_en: "Removes duplicate rows from the query result; corresponds to projection in algebra. (t10)"
+- id: g-union-all
+  de: "UNION ALL"
+  en: "UNION ALL"
+  keep_english: true
+  def_de: "Vereinigung, die alle Zeilen behält; UNION entfernt dagegen Duplikate. (t10)"
+  def_en: "Union that keeps all rows; UNION by contrast removes duplicates. (t10)"
+- id: g-ergebnisbegrenzung
+  de: "Ergebnisbegrenzung"
+  en: "row limiting"
+  keep_english: false
+  def_de: "Beschränkung auf die ersten n Zeilen nach ORDER BY: Firebird FIRST/SKIP oder ROWS, PostgreSQL LIMIT/OFFSET, portabel OFFSET … FETCH. Firebird 3 kennt kein LIMIT. (t10)"
+  def_en: "Restricting the result to the first n rows after ORDER BY: Firebird FIRST/SKIP or ROWS, PostgreSQL LIMIT/OFFSET, portable OFFSET … FETCH. Firebird 3 has no LIMIT. (t10)"
+- id: g-default
+  de: "DEFAULT (Vorgabewert)"
+  en: "default value"
+  keep_english: true
+  def_de: "Wert, den eine Spalte erhält, wenn sie beim INSERT fehlt. Kein Mittel der Domänenintegrität. In Firebird muss DEFAULT vor NOT NULL stehen. (t09)"
+  def_en: "Value a column receives when it is omitted in INSERT. Not a means of domain integrity. In Firebird DEFAULT must precede NOT NULL. (t09)"
+- id: g-b-baum
+  de: "B-Baum"
+  en: "B-tree"
+  keep_english: false
+  def_de: "Ausgeglichene Baumstruktur, Standard für Indexe. (t02, t12)"
+  def_en: "Balanced tree structure, the standard for indexes. (t02, t12)"
+- id: g-beziehung
+  de: "Beziehung"
+  en: "relationship"
+  keep_english: false
+  def_de: "Verbindung konkreter Entitäten; gleichartige Beziehungen bilden einen Beziehungstyp. Nicht mit Relation zu verwechseln. (t04)"
+  def_en: "Connection between concrete entities; similar relationships form a relationship type. Not to be confused with relation. (t04)"
+- id: g-entitaetsmenge
+  de: "Entitätsmenge"
+  en: "entity set"
+  keep_english: false
+  def_de: "Menge der aktuell vorhandenen Entitäten eines Entitätstyps. (t04)"
+  def_en: "The set of entities of an entity type that currently exist. (t04)"
+- id: g-schluesselattribut
+  de: "Schlüsselattribut"
+  en: "key attribute (prime attribute)"
+  keep_english: false
+  def_de: "Attribut, das in mindestens einem Schlüsselkandidaten vorkommt; Gegenstück: Nichtschlüsselattribut. (t04)"
+  def_en: "Attribute that occurs in at least one candidate key; counterpart: non-key attribute. (t04)"
