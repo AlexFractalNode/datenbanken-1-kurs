@@ -257,7 +257,7 @@
   de: "Phasenmodell des Datenbankentwurfs"
   en: "database design phase model"
   keep_english: false
-  def_de: "Sechs Phasen im Kurs: Anforderungsanalyse, konzeptioneller Entwurf, logischer Entwurf, Datendefinition, physischer Entwurf, Implementierung und Wartung. Die Validierung begleitet alle Phasen. Rücksprünge sind normal. (t03)"
+  def_de: "Kursstandard mit sechs Phasen: (1) Anforderungsanalyse, (2) konzeptioneller und (3) logischer Entwurf, (4) Datendefinition, (5) physischer Entwurf, (6) Implementierung samt Wartung. Validierung läuft als Querschnittsaufgabe mit, Rücksprünge sind normal. (t03)"
   def_en: "Six phases in this course: requirements analysis, conceptual design, logical design, data definition, physical design, implementation and maintenance. Validation accompanies all phases. Jumping back is normal. (t03)"
 - id: g-anforderungsanalyse
   de: "Anforderungsanalyse"
@@ -865,8 +865,8 @@
   de: "zweite Normalform (2NF)"
   en: "second normal form (2NF)"
   keep_english: false
-  def_de: "1NF und jedes Nichtschlüsselattribut ist von jedem Schlüsselkandidaten voll funktional abhängig, also keine partielle Abhängigkeit. (t07)"
-  def_en: "1NF and every non-key attribute is fully functionally dependent on every candidate key, i.e. no partial dependency. (t07)"
+  def_de: "Eine Relation in 1NF, in der kein Nichtschlüsselattribut schon von einem echten Teil eines Schlüsselkandidaten bestimmt wird; jeder Schlüsselkandidat wird dafür vollständig gebraucht. (t07)"
+  def_en: "A relation in 1NF where no non-key attribute is already determined by a proper part of a candidate key; each candidate key is needed in full. (t07)"
 - id: g-3nf
   de: "dritte Normalform (3NF)"
   en: "third normal form (3NF)"

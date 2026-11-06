@@ -48,7 +48,7 @@
   tags: [odbc, jdbc]
   front: "Was ist ODBC, was ist JDBC? Nenne je ein Merkmal."
   back: |-
-    - **ODBC** (*Open Database Connectivity*): sprachunabhängige Funktionsschnittstelle; Programme schicken darüber SQL an jedes DBMS, für das es einen ODBC-Treiber gibt. Grundlage ist das Call Level Interface von X/Open und ISO/IEC, Urheber Microsoft; nicht mehr nur unter Windows verfügbar.
+    - **ODBC** (*Open Database Connectivity*): Funktionsschnittstelle, die von der Programmiersprache unabhängig ist. Ein Programm erreicht damit jedes DBMS, zu dem ein ODBC-Treiber existiert. Entwickelt hat sie Microsoft auf Basis des standardisierten Call Level Interface; heute gibt es sie auch außerhalb von Windows.
     - **JDBC** (*Java Database Connectivity*): die entsprechende Schnittstelle der Java-Plattform (Pakete `java.sql`, `javax.sql`), mit Treibern je DBMS.
 - id: t13-c007
   status: reviewed
