@@ -1,0 +1,462 @@
+- id: t06-q001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-n, chen]
+  type: single
+  question: |-
+    Chen-Notation: `Ausbilder:in —1— leitet —n— Kurs`. Wie wird die Beziehung im Relationenschema abgebildet?
+  options:
+    - text: "kurs erhält die Spalte ausbilder_nr → ausbilder."
+      correct: true
+      explain: "Der PK der 1-Seite wird FK auf der n-Seite. Jeder Kurs hat höchstens eine Leitung, das passt in eine Spalte."
+    - text: "ausbilder erhält die Spalte kurs_nr → kurs."
+      correct: false
+      explain: "Eine Ausbilder:in kann mehrere Kurse leiten. Eine einzelne Spalte kann nicht mehrere Kursnummern aufnehmen."
+    - text: "Es wird eine Zwischentabelle leitet(ausbilder_nr, kurs_nr) mit zusammengesetztem PK angelegt."
+      correct: false
+      explain: "Eine Zwischentabelle mit PK aus beiden Spalten würde m:n erlauben, also mehrere Leitungen je Kurs. Für 1:n genügt ein FK."
+    - text: "Beide Tabellen erhalten je einen Fremdschlüssel auf die andere."
+      correct: false
+      explain: "Das wäre redundant, und die beiden Verweise könnten sich widersprechen. Außerdem entstünde ein unnötiger Zyklus."
+- id: t06-q002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [min-max, not-null, umrechnung]
+  type: single
+  question: |-
+    (min,max)-Notation: `Team (0,n) — trägt aus — (1,1) Spieltermin`. Ein Team trägt beliebig viele Spieltermine aus, jeder Spieltermin gehört genau einem Team. Wie sieht die korrekte Abbildung aus?
+  options:
+    - text: "spieltermin erhält team_nr → team mit NOT NULL."
+      correct: true
+      explain: "In (min,max) kommt der FK auf die Seite mit max = 1 (Spieltermin). min = 1 dort bedeutet NOT NULL."
+    - text: "team erhält spieltermin_nr → spieltermin mit NOT NULL."
+      correct: false
+      explain: "Hier wurde (min,max) wie Chen gelesen. Ein Team hat bis zu n Termine, die passen nicht in eine Spalte."
+    - text: "spieltermin erhält team_nr → team, NULL erlaubt."
+      correct: false
+      explain: "Die Seite stimmt, aber (1,1) heißt, dass jeder Termin genau ein Team hat. Ohne NOT NULL wären Termine ohne Team möglich."
+    - text: "spieltermin erhält team_nr → team mit NOT NULL UNIQUE."
+      correct: false
+      explain: "UNIQUE würde jedem Team höchstens einen Termin erlauben. Das widerspricht (0,n) beim Team."
+- id: t06-q003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [m-n, zwischentabelle]
+  type: multi
+  question: |-
+    Eine m:n-Beziehung `Teilnehmer:in bucht Kurs` mit dem Attribut Buchungsdatum soll überführt werden. Welche Aussagen sind richtig?
+  options:
+    - text: "Es entsteht eine Zwischentabelle mit den Fremdschlüsseln teilnehmer_nr und kurs_nr."
+      correct: true
+      explain: "m:n wird immer über eine eigene Tabelle mit den PKs beider Seiten als FKs abgebildet."
+    - text: "Der Primärschlüssel der Zwischentabelle ist (teilnehmer_nr, kurs_nr), wenn jede Person einen Kurs höchstens einmal bucht."
+      correct: true
+      explain: "Der zusammengesetzte PK aus beiden FKs verhindert doppelte Buchungen desselben Paars."
+    - text: "Das Buchungsdatum wird Spalte der Tabelle kurs."
+      correct: false
+      explain: "Das Datum gehört zur Kombination aus Person und Kurs. In kurs könnte nur ein Datum je Kurs stehen."
+    - text: "Es genügt, in kurs eine Spalte teilnehmer_nr anzulegen."
+      correct: false
+      explain: "Dann hätte jeder Kurs höchstens eine Person. Das ist 1:n, nicht m:n."
+- id: t06-q004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-1, unique]
+  type: single
+  question: |-
+    Jede Fahrer:in fährt genau ein Lastenrad (1,1). Ein Lastenrad ist höchstens einer Fahrer:in fest zugeordnet, Ersatzräder keiner (0,1). Es sollen zwei Tabellen entstehen, **ohne NULL-Werte in der FK-Spalte**, und beide Obergrenzen sollen erzwungen werden. Welche Abbildung erfüllt das?
+  options:
+    - text: "fahrer erhält rad_nr → lastenrad mit NOT NULL UNIQUE."
+      correct: true
+      explain: "FK auf die Pflichtseite (1,1): NOT NULL ohne leere Zellen, UNIQUE sorgt für höchstens eine Fahrer:in je Rad."
+    - text: "lastenrad erhält fahrer_nr → fahrer mit NOT NULL UNIQUE."
+      correct: false
+      explain: "Ersatzräder haben keine Fahrer:in, NOT NULL würde sie verbieten. Ein NULL-fähiger UNIQUE-FK in lastenrad wäre zwar eine zulässige 1:1-Abbildung (die Seite ist frei wählbar), verletzt aber die Vorgabe „ohne NULL-Werte“."
+    - text: "fahrer erhält rad_nr → lastenrad mit NOT NULL, ohne UNIQUE."
+      correct: false
+      explain: "Ohne UNIQUE könnten mehrere Fahrer:innen dasselbe Rad haben. Das wäre 1:n."
+    - text: "Fahrer:in und Lastenrad werden zu einer Tabelle zusammengelegt."
+      correct: false
+      explain: "Gefordert sind zwei Tabellen. Zusammenlegen ist eine anerkannte 1:1-Abbildung, passt aber am besten bei beidseitiger Pflicht. Ersatzräder ohne Fahrer:in hätten hier keine sinnvolle Zeile."
+- id: t06-q005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-1, unique]
+  type: truefalse
+  question: |-
+    Ein Fremdschlüssel, der zusätzlich mit `UNIQUE` belegt ist, bildet eine Beziehung mit der Obergrenze 1 auf beiden Seiten ab (1:1).
+  options:
+    - text: "Wahr"
+      correct: true
+      explain: "Der FK erlaubt je Zeile höchstens einen Partner. UNIQUE verhindert, dass ein Partner von mehreren Zeilen referenziert wird."
+    - text: "Falsch"
+      correct: false
+      explain: "Ohne UNIQUE wäre es 1:n. Gerade das UNIQUE macht den Unterschied."
+- id: t06-q006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ternaer, schluessel]
+  type: single
+  question: |-
+    Ternäre Beziehung `wird eingeteilt` zwischen Kurs (m), Teilnehmer:in (n) und Boot (1). Je Kurs und Teilnehmer:in gibt es also höchstens ein Boot. Welcher Primärschlüssel ist richtig für einteilung(kurs_nr, teilnehmer_nr, boot_nr)?
+  options:
+    - text: "(kurs_nr, teilnehmer_nr)"
+      correct: true
+      explain: "Die Kombination aus Kurs und Teilnehmer:in bestimmt das Boot. Der FK des Beteiligten mit Chen-1, also boot_nr, gehört deshalb nicht in den PK. kurs_nr und teilnehmer_nr (m bzw. n) gehören hinein."
+    - text: "(kurs_nr, teilnehmer_nr, boot_nr)"
+      correct: false
+      explain: "Damit dürfte dieselbe Person im selben Kurs mehreren Booten zugeteilt werden. Das widerspricht der 1 bei Boot."
+    - text: "(kurs_nr, boot_nr)"
+      correct: false
+      explain: "Dann dürfte auf einem Boot je Kurs nur eine Person sitzen. Laut n bei Teilnehmer:in sind es mehrere."
+    - text: "boot_nr allein"
+      correct: false
+      explain: "Ein Boot wird in vielen Kursen und mit vielen Personen eingesetzt. boot_nr ist hier gar nicht eindeutig."
+- id: t06-q007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rekursiv]
+  type: single
+  question: |-
+    Rekursive 1:n-Beziehung: Eine Ausbilder:in kann Mentor:in mehrerer anderer Ausbilder:innen sein, jede hat höchstens eine Mentor:in. Welche Abbildung ist korrekt?
+  options:
+    - text: "ausbilder(ausbilder_nr, …, mentor_nr → ausbilder), mentor_nr darf NULL sein."
+      correct: true
+      explain: "FK auf dieselbe Tabelle, Spaltenname nach der Rolle. NULL ist nötig, weil nicht jede Person eine Mentor:in hat."
+    - text: "Eigene Tabelle mentor(mentor_nr, vorname, nachname) mit FK aus ausbilder."
+      correct: false
+      explain: "Mentor:innen sind selbst Ausbilder:innen. Eine zweite Personentabelle würde dieselben Personen doppelt speichern. Zulässig wäre dagegen eine reine Beziehungsrelation mentoring(schuetzling_nr → ausbilder, mentor_nr → ausbilder) ohne Personendaten."
+    - text: "ausbilder(ausbilder_nr, …, ausbilder_nr → ausbilder)"
+      correct: false
+      explain: "Ein Spaltenname darf in einer Tabelle nicht zweimal vorkommen. Die FK-Spalte braucht den Rollennamen."
+    - text: "ausbilder(ausbilder_nr, …, mentor_nr → ausbilder) mit mentor_nr NOT NULL."
+      correct: false
+      explain: "Mit NOT NULL bräuchte schon die erste Ausbilder:in eine Mentor:in. Das widerspricht (0,1) und macht das erste Einfügen unmöglich."
+- id: t06-q008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet]
+  type: single
+  question: |-
+    Hörbuch-Verlag: Kapitel werden je Hörbuch ab 1 durchnummeriert (schwacher Entitätstyp Kapitel, Besitzer Hörbuch). Welcher Primärschlüssel ist richtig?
+  options:
+    - text: "kapitel(hoerbuch_nr → hoerbuch, kapitel_nr, …) mit PK (hoerbuch_nr, kapitel_nr)"
+      correct: true
+      explain: "PK = FK des Besitzers + partieller Schlüssel. Erst die Kombination ist eindeutig."
+    - text: "kapitel(kapitel_nr, hoerbuch_nr → hoerbuch, …) mit PK kapitel_nr"
+      correct: false
+      explain: "Kapitel 1 gibt es in jedem Hörbuch. kapitel_nr allein ist nicht eindeutig."
+    - text: "Eigene Zwischentabelle hoerbuch_kapitel(hoerbuch_nr, kapitel_nr) für die identifizierende Beziehung"
+      correct: false
+      explain: "Die identifizierende Beziehung ist 1:n und steckt bereits im FK der schwachen Tabelle. Eine Zwischentabelle ist überflüssig."
+    - text: "hoerbuch erhält eine Spalte kapitel_nr."
+      correct: false
+      explain: "Ein Hörbuch hat viele Kapitel. Der FK gehört auf die n-Seite."
+- id: t06-q009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  type: multi
+  question: |-
+    Ein Bootsverleih spezialisiert Boot in Jolle und Kielboot. Die Spezialisierung ist **disjunkt und partiell**: Es gibt auch Ruderboote ohne eigenen Subtyp. Abgebildet wird mit horizontaler Fragmentierung (Concrete Table Inheritance): nur jolle(boot_nr, bootsname, baujahr, schwertart) und kielboot(boot_nr, bootsname, baujahr, tiefgang_m, kojen). Welche Nachteile hat das?
+  options:
+    - text: "Ruderboote, die weder Jolle noch Kielboot sind, können nicht gespeichert werden."
+      correct: true
+      explain: "Ohne Supertyp-Tabelle fehlt bei partieller Spezialisierung der Platz für Entitäten ohne Subtyp."
+    - text: "Eine andere Tabelle kann keinen einzelnen Fremdschlüssel auf „alle Boote“ setzen."
+      correct: true
+      explain: "Ein FK hat genau eine Zieltabelle. Die Boote verteilen sich hier aber auf zwei."
+    - text: "Dieselbe boot_nr könnte in beiden Tabellen vorkommen, ohne dass das DBMS es verhindert."
+      correct: true
+      explain: "Jeder PK gilt nur innerhalb seiner Tabelle. Eindeutigkeit über zwei Tabellen ist deklarativ nicht gesichert."
+    - text: "Für die Daten einer Jolle braucht man immer einen Join."
+      correct: false
+      explain: "Das ist gerade ein Vorteil der horizontalen Variante: Alle Attribute einer Jolle stehen in einer Zeile. Joins braucht die vertikale Variante (Class Table Inheritance)."
+- id: t06-q010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung, ueberlappend]
+  type: single
+  question: |-
+    Personen eines Vereins können Mitglied und/oder Übungsleiter:in sein, manche sind keins von beiden (überlappend, partiell). Beide Subtypen haben mehrere eigene Attribute und eigene Beziehungen. Welche Abbildung passt am besten?
+  options:
+    - text: "Vertikale Fragmentierung (Class Table Inheritance): person plus mitglied und uebungsleiter, deren PK jeweils FK auf person ist."
+      correct: true
+      explain: "Überlappung heißt Zeilen in beiden Subtabellen, partiell heißt keine Subtabellen-Zeile. Subtypbeziehungen können gezielt auf die Subtabelle zeigen."
+    - text: "Horizontale Fragmentierung (Concrete Table Inheritance): nur mitglied und uebungsleiter mit allen Personenattributen."
+      correct: false
+      explain: "Personen ohne Subtyp hätten keinen Platz. Bei Überlappung stünden Name usw. doppelt."
+    - text: "Gesamttabelle (Single Table Inheritance) mit einem einzigen Typ-Attribut art IN ('M', 'U')."
+      correct: false
+      explain: "Ein einziges Typ-Attribut erlaubt nur einen Subtyp je Person, also nur disjunkt. Nötig wären Kennzeichen je Subtyp."
+    - text: "Gar nicht abbilden, das relationale Modell kann keine Spezialisierung darstellen."
+      correct: false
+      explain: "Es kennt keine Vererbung, aber jede der drei Varianten bildet die Spezialisierung nach."
+- id: t06-q011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [reihenfolge]
+  type: single
+  question: |-
+    Gegeben: kurs(… ausbilder_nr → ausbilder), buchung(… teilnehmer_nr → teilnehmer, kurs_nr → kurs), ausbilder(…), teilnehmer(…). Welche Anlage-Reihenfolge ist gültig?
+  options:
+    - text: "ausbilder, teilnehmer, kurs, buchung"
+      correct: true
+      explain: "Jede Tabelle wird erst angelegt, wenn alle von ihr referenzierten Tabellen existieren."
+    - text: "buchung, kurs, teilnehmer, ausbilder"
+      correct: false
+      explain: "Das ist die Lösch-Reihenfolge. Beim Anlegen würde buchung auf noch nicht existierende Tabellen verweisen."
+    - text: "kurs, ausbilder, teilnehmer, buchung"
+      correct: false
+      explain: "kurs verweist auf ausbilder, das zu diesem Zeitpunkt noch nicht existiert."
+    - text: "teilnehmer, buchung, ausbilder, kurs"
+      correct: false
+      explain: "buchung braucht kurs, und kurs braucht ausbilder. Beide fehlen noch."
+- id: t06-q012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zyklus, firebird]
+  type: truefalse
+  question: |-
+    Zwei Tabellen verweisen gegenseitig aufeinander. Damit man in Firebird 3 ohne Entfernen von Constraints Zeilen einfügen kann, muss mindestens eine der beiden Fremdschlüsselspalten NULL erlauben.
+  options:
+    - text: "Wahr"
+      correct: true
+      explain: "Firebird prüft jeden FK sofort und kennt keine verzögerte Prüfung. Eine Zeile muss zunächst ohne Partner (NULL) eingefügt und später per UPDATE ergänzt werden."
+    - text: "Falsch"
+      correct: false
+      explain: "Mit zwei NOT-NULL-Spalten bräuchte jede neue Zeile einen schon vorhandenen Partner. Keine Zeile kann dann die erste sein."
+- id: t06-q013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute, mehrwertig]
+  type: single
+  question: |-
+    Ein Produkt kann mehrere Allergene haben (mehrwertiges Attribut). Wie wird das korrekt abgebildet?
+  options:
+    - text: "produkt_allergen(produkt_nr → produkt, allergen) mit PK (produkt_nr, allergen)"
+      correct: true
+      explain: "Mehrwertige Attribute werden zu einer eigenen Tabelle aus Besitzer-FK und Wert. Beide zusammen sind eindeutig."
+    - text: "Spalte allergene VARCHAR(200) in produkt mit Werten wie „Gluten, Sesam“"
+      correct: false
+      explain: "Eine Liste in einer Zelle ist nicht atomar. Suchen, Zählen und Prüfen einzelner Allergene werden fehleranfällig."
+    - text: "Spalten allergen1, allergen2, allergen3 in produkt"
+      correct: false
+      explain: "Das setzt eine willkürliche Obergrenze und erzeugt viele NULL-Werte. Abfragen müssen alle Spalten durchsuchen."
+    - text: "produkt_allergen(produkt_nr → produkt, allergen) mit PK produkt_nr"
+      correct: false
+      explain: "Die Tabelle stimmt, aber mit PK produkt_nr allein wäre nur ein Allergen je Produkt möglich."
+- id: t06-q014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [min-max, grenzen]
+  type: multi
+  question: |-
+    Beziehung `Ausbilder:in (1,n) — leitet — (1,1) Kurs`. Zusätzlich gilt: Ein Kurs hat höchstens 8 Teilnehmende. Welche dieser Regeln lassen sich allein mit PRIMARY KEY, FOREIGN KEY, NOT NULL und UNIQUE erzwingen?
+  options:
+    - text: "Jeder Kurs hat genau eine leitende Ausbilder:in."
+      correct: true
+      explain: "FK kurs.ausbilder_nr mit NOT NULL: höchstens ein Wert je Zeile, und er muss vorhanden sein."
+    - text: "Jede Ausbilder:in leitet mindestens einen Kurs."
+      correct: false
+      explain: "Das betrifft die referenzierte Seite. Ob es verweisende Kurszeilen gibt, prüft kein deklarativer Constraint, dafür braucht es Trigger oder die Anwendung."
+    - text: "Ein Kurs hat höchstens 8 Teilnehmende."
+      correct: false
+      explain: "Feste Obergrenzen über 1 sind mit FK/UNIQUE nicht ausdrückbar. Sie brauchen einen Trigger oder eine Prüfung in der Anwendung."
+    - text: "Die angegebene ausbilder_nr eines Kurses gibt es in ausbilder wirklich."
+      correct: true
+      explain: "Genau das sichert der Fremdschlüssel (referenzielle Integrität)."
+- id: t06-q015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktion, firebird]
+  type: single
+  question: |-
+    Welche referenzielle Aktion gehört **nicht** zur `ON DELETE`-Syntax von Firebird 3?
+  options:
+    - text: "RESTRICT"
+      correct: true
+      explain: "Firebird 3 kennt NO ACTION, CASCADE, SET NULL und SET DEFAULT. RESTRICT gibt es z. B. in PostgreSQL."
+    - text: "CASCADE"
+      correct: false
+      explain: "CASCADE gibt das Löschen an die verweisenden Zeilen weiter und ist in Firebird erlaubt."
+    - text: "SET NULL"
+      correct: false
+      explain: "SET NULL setzt die FK-Spalten der verweisenden Zeilen auf NULL und ist in Firebird erlaubt."
+    - text: "NO ACTION"
+      correct: false
+      explain: "NO ACTION ist die Voreinstellung in Firebird: Das Löschen wird abgelehnt, solange Verweise bestehen."
+- id: t06-q016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute]
+  type: single
+  question: |-
+    Wie wird das zusammengesetzte Attribut „Lieferadresse (Straße, PLZ, Ort)“ einer Kund:in abgebildet?
+  options:
+    - text: "Drei Spalten strasse, plz, ort in der Tabelle kunde."
+      correct: true
+      explain: "Zusammengesetzte Attribute werden in ihre Teilattribute aufgelöst. Jedes Teil wird eine eigene, atomare Spalte."
+    - text: "Eine Spalte lieferadresse mit dem gesamten Text."
+      correct: false
+      explain: "Dann lassen sich z. B. PLZ oder Ort nicht gezielt abfragen oder prüfen."
+    - text: "Eine eigene Tabelle adresse mit zusammengesetztem PK aus strasse, plz, ort."
+      correct: false
+      explain: "Eine eigene Tabelle ist die Regel für mehrwertige Attribute. Eine einzelne Adresse je Kund:in braucht das nicht."
+    - text: "Gar nicht, zusammengesetzte Attribute sind abgeleitet und werden nicht gespeichert."
+      correct: false
+      explain: "Zusammengesetzt ist nicht dasselbe wie abgeleitet. Die Adresse ist echte Information und muss gespeichert werden."
+- id: t06-q017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  type: truefalse
+  question: |-
+    Bei der vertikalen Fragmentierung einer Generalisierung (Class Table Inheritance: Tabelle je Super- und Subtyp) ist der Primärschlüssel der Subtyp-Tabelle zugleich Fremdschlüssel auf die Supertyp-Tabelle.
+  options:
+    - text: "Wahr"
+      correct: true
+      explain: "Subtypen erben den Schlüssel. jolle(boot_nr → boot) nutzt boot_nr als PK und als Verweis auf den Supertyp."
+    - text: "Falsch"
+      correct: false
+      explain: "Ein eigener Subtyp-Schlüssel wäre falsch, weil Subtypen keinen eigenen Schlüssel haben (t04). Der geerbte Schlüssel verbindet die Zeilen."
+- id: t06-q018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [reihenfolge, zyklus]
+  type: single
+  question: |-
+    `ausbilder.stammboot_nr → boot` wurde per `ALTER TABLE` als Constraint `fk_ausbilder_stammboot` ergänzt, `boot.bootswart_nr → ausbilder` steht in `CREATE TABLE boot`. Wie baut man beide Tabellen in Firebird ab?
+  options:
+    - text: "ALTER TABLE ausbilder DROP CONSTRAINT fk_ausbilder_stammboot; DROP TABLE boot; DROP TABLE ausbilder;"
+      correct: true
+      explain: "Erst den Zyklus öffnen, dann in umgekehrter Abhängigkeitsreihenfolge löschen: boot verweist auf ausbilder, also boot zuerst."
+    - text: "DROP TABLE ausbilder; DROP TABLE boot;"
+      correct: false
+      explain: "ausbilder wird noch von boot referenziert. Das DROP wird abgelehnt."
+    - text: "DROP TABLE boot; DROP TABLE ausbilder;"
+      correct: false
+      explain: "boot wird noch über fk_ausbilder_stammboot referenziert. Der Zyklus muss vorher aufgelöst werden."
+    - text: "DROP TABLE boot CASCADE; DROP TABLE ausbilder;"
+      correct: false
+      explain: "Gefragt ist Firebird 3, und dort gibt es DROP TABLE … CASCADE nicht. Im SQL-Standard und in PostgreSQL wäre diese Form erlaubt. Dort entfernt CASCADE den verweisenden Constraint mit."
+- id: t06-q019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung, begriffe]
+  type: single
+  question: |-
+    Ein Tierpark hat den Supertyp Tier (tier_nr, name, geburtsdatum) mit den Subtypen Vogel (spannweite_cm) und Fisch (wassertyp). Abgebildet wird als: tier(tier_nr, name, geburtsdatum, tierklasse, spannweite_cm, wassertyp). Wie heißt diese Abbildungsvariante?
+  options:
+    - text: "Single Table Inheritance („virtuelle“ Fragmentierung, Gesamttabelle)"
+      correct: true
+      explain: "Eine Tabelle für die ganze Hierarchie, das Typ-Attribut tierklasse unterscheidet die Subtypen, nicht zutreffende Spalten bleiben NULL."
+    - text: "Class Table Inheritance (vertikale Fragmentierung)"
+      correct: false
+      explain: "Dabei gäbe es eine Supertyp-Tabelle tier und je eine Subtyp-Tabelle vogel und fisch, deren PK zugleich FK auf tier ist."
+    - text: "Concrete Table Inheritance (horizontale Fragmentierung)"
+      correct: false
+      explain: "Dabei gäbe es nur die Tabellen vogel und fisch, jede mit name und geburtsdatum, aber keine Tabelle tier."
+    - text: "Gar keine Variante, denn ohne eigene Subtyp-Tabellen geht die Spezialisierung verloren."
+      correct: false
+      explain: "Die Spezialisierung bleibt über das Typ-Attribut erhalten. Mit NOT NULL und CHECK lässt sich sogar disjunkt und total erzwingen."
+- id: t06-q020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktion]
+  type: multi
+  question: |-
+    Gegeben: ausleihe(… werkzeug_nr → werkzeug) in einer Werkzeugbibliothek. Werkzeug 12 hat zwei Ausleihen. Es wird `DELETE FROM werkzeug WHERE werkzeug_nr = 12` ausgeführt. Welche Aussagen über die Wirkung der ON-DELETE-Aktion des Fremdschlüssels sind richtig?
+  options:
+    - text: "Bei NO ACTION wird das Löschen abgelehnt, beide Ausleihen und das Werkzeug bleiben."
+      correct: true
+      explain: "NO ACTION ist die Voreinstellung. Solange Verweise bestehen, scheitert das Löschen der referenzierten Zeile."
+    - text: "Bei CASCADE werden das Werkzeug und beide Ausleihen gelöscht."
+      correct: true
+      explain: "CASCADE gibt das Löschen an alle verweisenden Zeilen weiter."
+    - text: "Bei SET NULL wird das Werkzeug gelöscht, und werkzeug_nr der beiden Ausleihen wird NULL, sofern die Spalte NULL erlaubt."
+      correct: true
+      explain: "SET NULL leert die Verweise. Ist werkzeug_nr NOT NULL, scheitert die Operation."
+    - text: "Bei SET DEFAULT bleibt das Werkzeug erhalten, nur die Ausleihen bekommen den Default-Wert."
+      correct: false
+      explain: "Das Werkzeug wird gelöscht. Die Ausleihen erhalten den Default der FK-Spalte, und dieser Wert muss selbst in werkzeug existieren."
+- id: t06-q021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ternaer, schluessel, zeitbezug]
+  type: single
+  question: |-
+    Ternäre Beziehung `prüft` zwischen Ausbilder:in (n), Teilnehmer:in (m) und Prüfungsart (p) mit dem Attribut Datum. Dieselbe Ausbilder:in darf dieselbe Teilnehmer:in mehrmals in derselben Prüfungsart prüfen (Wiederholungsprüfung). Welcher Primärschlüssel passt für pruefung(ausbilder_nr, teilnehmer_nr, art_nr, datum, ergebnis)?
+  options:
+    - text: "(ausbilder_nr, teilnehmer_nr, art_nr, datum)"
+      correct: true
+      explain: "Die drei FKs allein wären bei Wiederholungen nicht eindeutig. Wie bei m:n mit Historie kommt das Zeitattribut in den PK."
+    - text: "(ausbilder_nr, teilnehmer_nr, art_nr)"
+      correct: false
+      explain: "Das ist die Standardregel für überall n/m. Sie verbietet aber eine zweite Prüfung derselben Kombination."
+    - text: "(teilnehmer_nr, art_nr, datum)"
+      correct: false
+      explain: "Das ginge nur, wenn je Person, Art und Tag genau eine Ausbilder:in prüft. Das ist nicht vorgegeben, ausbilder_nr hat hier n."
+    - text: "datum allein"
+      correct: false
+      explain: "Am selben Tag finden viele Prüfungen statt. Ein Datum identifiziert keine Prüfung."
+- id: t06-q022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rekursiv, zeitbezug]
+  type: multi
+  question: |-
+    In einem Verein kann jedes Mitglied höchstens eine Pat:in haben, eine Pat:in betreut beliebig viele Neumitglieder (rekursiv 1:n). Zusätzlich soll gespeichert werden, seit wann die Patenschaft besteht. Welche Abbildungen sind korrekt?
+  options:
+    - text: "mitglied(mitglieds_nr, …, pate_nr → mitglied, pate_seit), beide neuen Spalten NULL-fähig"
+      correct: true
+      explain: "FK auf dieselbe Tabelle mit Rollennamen. Das Beziehungsattribut kommt mit auf die n-Seite, also in dieselbe Zeile."
+    - text: "patenschaft(neumitglied_nr → mitglied, pate_nr → mitglied, seit) mit PK neumitglied_nr und pate_nr NOT NULL"
+      correct: true
+      explain: "Eigene Beziehungsrelation: PK auf der Rolle mit n, also höchstens eine Pat:in je Neumitglied, und keine NULL-Werte."
+    - text: "patenschaft(neumitglied_nr → mitglied, pate_nr → mitglied, seit) mit PK pate_nr"
+      correct: false
+      explain: "Dann hätte jede Pat:in höchstens ein Neumitglied. Das kehrt die Kardinalität um."
+    - text: "mitglied(mitglieds_nr, …, neumitglied_nr → mitglied)"
+      correct: false
+      explain: "Der FK läge auf der 1-Seite (Pat:in). Eine Pat:in mit mehreren Neumitgliedern bräuchte mehrere Werte in einer Zelle."
+- id: t06-q023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rekursiv, m-n, zwischentabelle]
+  type: single
+  question: |-
+    In einem Kochkurs-Programm kann ein Rezept andere Rezepte als Bestandteil enthalten (z. B. „Lasagne“ enthält „Béchamelsauce“), und ein Rezept kann Bestandteil mehrerer Rezepte sein. Zu jedem Bestandteil wird die Menge gespeichert. Welche Abbildung ist richtig?
+  options:
+    - text: "bestandteil(rezept_nr → rezept, teil_nr → rezept, menge) mit PK (rezept_nr, teil_nr)"
+      correct: true
+      explain: "Rekursiv m:n wird zur Zwischentabelle mit zwei FKs auf dieselbe Tabelle, benannt nach den Rollen. Das Beziehungsattribut menge gehört dorthin."
+    - text: "rezept erhält eine Spalte teil_nr → rezept und eine Spalte menge."
+      correct: false
+      explain: "Eine Spalte nimmt je Rezept nur einen Bestandteil auf. Das reicht nur für eine rekursive 1:n-Beziehung."
+    - text: "bestandteil(rezept_nr → rezept, rezept_nr → rezept, menge)"
+      correct: false
+      explain: "Ein Spaltenname darf nicht zweimal vorkommen. Die beiden FK-Spalten brauchen verschiedene Rollennamen."
+    - text: "bestandteil(rezept_nr → rezept, teil_nr → rezept, menge) mit PK rezept_nr"
+      correct: false
+      explain: "Mit PK rezept_nr allein hätte jedes Rezept höchstens einen Bestandteil. Das wäre 1:n, nicht m:n."
+- id: t06-q024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-n, zeitbezug]
+  type: single
+  question: |-
+    In einer Jugendfeuerwehr hat jede Gruppe zu jedem Zeitpunkt genau eine Betreuer:in, und eine Betreuer:in kann mehrere Gruppen betreuen (1:n). Betreuungswechsel sollen mit Zeitraum (von, bis) dauerhaft gespeichert werden. Welche Abbildung ist richtig?
+  options:
+    - text: "betreuung(gruppe_nr → gruppe, von, bis, betreuer_nr → betreuer) mit PK (gruppe_nr, von)"
+      correct: true
+      explain: "Über die Zeit hat eine Gruppe mehrere Betreuer:innen. Die Beziehung wird zur eigenen Relation, und der Beginn gehört in den PK."
+    - text: "gruppe erhält betreuer_nr → betreuer NOT NULL sowie von und bis."
+      correct: false
+      explain: "Das ist die Standardlösung ohne Historie. Ein Wechsel überschreibt die alte Zuordnung."
+    - text: "betreuung(gruppe_nr → gruppe, betreuer_nr → betreuer, von, bis) mit PK gruppe_nr"
+      correct: false
+      explain: "Mit PK gruppe_nr allein ist je Gruppe nur eine einzige Betreuung für immer möglich."
+    - text: "betreuung(gruppe_nr → gruppe, betreuer_nr → betreuer, von, bis) mit PK (gruppe_nr, betreuer_nr)"
+      correct: false
+      explain: "Dann könnte dieselbe Person dieselbe Gruppe kein zweites Mal betreuen, etwa nach einer Pause. Der Zeitpunkt gehört in den PK."

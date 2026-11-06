@@ -1,0 +1,382 @@
+- id: t06-c001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [relationenschema, notation]
+  front: "Was ist ein Relationenschema, und wie notiert man es in Kurzschreibweise?"
+  back: |-
+    Die logische Beschreibung der Tabellen: Name, Spalten, Primär- und Fremdschlüssel.
+    Kurzschreibweise im Kurs: `tabelle(PK, Attribut, FK → Ziel)`, PK unterstrichen, FK mit Pfeil auf die Zieltabelle, z. B. kurs(<u>kurs_nr</u>, titel, ausbilder_nr → ausbilder).
+    Varianten: Zusätze `(PK)`, `(FK)` hinter der Spalte oder FK grafisch markiert (gestrichelt unterstrichen, kursiv, `#`/`↑`). Schreibweise angeben.
+- id: t06-c002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [entitaetstyp]
+  front: "Wie wird ein starker Entitätstyp ins Relationenmodell überführt?"
+  back: |-
+    - eigene Tabelle
+    - jedes einfache Attribut wird eine Spalte
+    - Schlüssel des Entitätstyps wird Primärschlüssel
+    - weitere Schlüsselkandidaten bekommen `UNIQUE`
+- id: t06-c003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute]
+  front: "Wie wird ein zusammengesetztes Attribut wie „Adresse (Straße, PLZ, Ort)“ abgebildet?"
+  back: |-
+    Es wird in seine Teilattribute aufgelöst: drei Spalten `strasse`, `plz`, `ort`. Eine Spalte „adresse“ für das Ganze entfällt.
+- id: t06-c004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute, mehrwertig]
+  front: "Wie wird ein mehrwertiges Attribut (z. B. mehrere Telefonnummern) abgebildet?"
+  back: |-
+    Als eigene Tabelle mit dem Fremdschlüssel des Besitzers und dem Wert. Beide zusammen bilden den Primärschlüssel:
+    teilnehmer_telefon(<u>teilnehmer_nr → teilnehmer, telefon</u>).
+    Keine Komma-Liste und keine Spalten `telefon1`, `telefon2`.
+- id: t06-c005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [attribute]
+  front: "Was passiert bei der Überführung mit abgeleiteten Attributen?"
+  back: |-
+    Sie werden in der Regel nicht als Spalte gespeichert, sondern bei Bedarf berechnet (z. B. Alter aus Geburtsdatum). Gespeichert würden sie veralten und Redundanz erzeugen.
+- id: t06-c006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-n]
+  front: "1:n-Beziehung: Wohin kommt der Fremdschlüssel, und warum nicht auf die andere Seite?"
+  back: |-
+    Der PK der 1-Seite wird FK in der Tabelle der **n-Seite**. Attribute der Beziehung kommen mit dorthin.
+    Auf der 1-Seite hätte jede Zeile nur eine Zelle für beliebig viele Partner.
+- id: t06-c007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-n, not-null, min-max]
+  front: "Wann bekommt eine Fremdschlüsselspalte NOT NULL?"
+  back: |-
+    Wenn die Seite, die den FK trägt, laut (min,max) die Untergrenze 1 hat, also (1,1): Jede Zeile muss einen Partner haben.
+    Bei (0,1) bleibt die Spalte NULL-fähig.
+- id: t06-c008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [min-max, grenzen]
+  front: "Welche Kardinalitätsangaben lassen sich mit PK, FK, NOT NULL und UNIQUE nicht erzwingen?"
+  back: |-
+    - Mindestteilnahme der **referenzierten** Seite, z. B. „jede Ausbilder:in leitet mindestens einen Kurs“ (1,n)
+    - feste Obergrenzen > 1, z. B. „höchstens 8 Teilnehmende“
+    Diese Regeln brauchen Trigger oder Prüfungen in der Anwendung.
+- id: t06-c009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [min-max, umrechnung]
+  front: "Woran erkennt man in der (min,max)-Notation, wohin der Fremdschlüssel einer binären Beziehung kommt?"
+  back: |-
+    An der Seite mit **max = 1**: Sie nimmt an höchstens einer Beziehung teil, also passt der Partner in eine Spalte.
+    In Chen ist das dieselbe Seite, dort steht aber „n“, weil die Angaben vertauscht notiert werden.
+    max > 1 auf beiden Seiten bedeutet Zwischentabelle.
+- id: t06-c010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-1]
+  front: "Welche Abbildungsmöglichkeiten gibt es für eine 1:1-Beziehung?"
+  back: |-
+    1. beide Typen zu einer Tabelle zusammenlegen (in mehreren Quellen die erste, einfachste Option)
+    2. FK auf einer Seite mit `UNIQUE` (Seite frei wählbar, Kurs: bevorzugt Pflichtseite)
+    3. gemeinsamer PK: PK der abhängigen Tabelle ist zugleich FK
+    4. eigene Beziehungstabelle mit zwei `UNIQUE`-Spalten (beidseitig optional, Zeitbezug)
+    Welche als Standard gilt, variiert je Quelle. Die Wahl begründen.
+- id: t06-c011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-1, unique]
+  front: "Warum braucht der Fremdschlüssel einer 1:1-Beziehung ein UNIQUE?"
+  back: |-
+    Ohne `UNIQUE` dürfte derselbe Wert in mehreren Zeilen stehen. Dann könnte z. B. ein Boot mehreren Liegeplätzen zugeordnet sein, und das Schema bildet in Wahrheit 1:n ab.
+- id: t06-c012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-1, not-null]
+  front: "1:1-Beziehung mit zwei Tabellen: Auf welche Seite legt man den Fremdschlüssel?"
+  back: |-
+    Fachlich ist die Seite frei wählbar. Dieser Kurs empfiehlt die Seite mit **Pflichtteilnahme** (1,1): Dann ist die Spalte `NOT NULL UNIQUE`, es gibt keine leeren Zellen, und die Untergrenze ist erzwungen.
+    Beispiel: Liegeplatz (1,1), Boot (0,1) → `liegeplatz.boot_nr NOT NULL UNIQUE`. In `boot` wäre die Spalte NULL-fähig, auch korrekt.
+- id: t06-c013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-1]
+  front: "Wann bietet es sich an, eine 1:1-Beziehung durch Zusammenlegen der Tabellen abzubilden?"
+  back: |-
+    Wenn beide Seiten verpflichtend teilnehmen ((1,1) zu (1,1)) und die Daten fast immer gemeinsam gebraucht werden. Dann entstehen keine NULL-Spalten. Der Schlüssel der eingegliederten Seite bleibt als `UNIQUE`-Spalte erhalten. Manche Quellen nennen das Zusammenlegen als Standardlösung für 1:1.
+- id: t06-c014
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [m-n, zwischentabelle]
+  front: "Wie wird eine m:n-Beziehung abgebildet?"
+  back: |-
+    Als **Zwischentabelle** (*junction table*): Sie enthält die PKs beider Seiten als Fremdschlüssel, zusammen bilden sie den zusammengesetzten Primärschlüssel.
+    buchung(<u>teilnehmer_nr → teilnehmer, kurs_nr → kurs</u>, …)
+    Damit wird m:n in **zwei 1:n-Beziehungen** aufgelöst (teilnehmer 1:n buchung, kurs 1:n buchung).
+- id: t06-c015
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [m-n, beziehungsattribut]
+  front: "Wohin kommen Attribute einer m:n-Beziehung (z. B. Buchungsdatum)?"
+  back: |-
+    In die Zwischentabelle. Sie gehören zur Kombination der beiden Partner und sind je Paar verschieden. In keiner der beiden Entitätstabellen hätten sie einen eindeutigen Platz.
+- id: t06-c016
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [m-n, schluessel]
+  front: "Wann reicht der PK aus den beiden Fremdschlüsseln einer Zwischentabelle nicht aus?"
+  back: |-
+    Wenn dasselbe Paar mehrfach vorkommen darf, z. B. bei Historie (gleiche Person bucht denselben Kurs in mehreren Jahren). Dann ein weiteres Attribut (z. B. Datum) in den PK aufnehmen, oder ein künstlicher Schlüssel plus passendes `UNIQUE`.
+- id: t06-c017
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ternaer]
+  front: "Wie wird eine ternäre Beziehung abgebildet?"
+  back: |-
+    Als eigene Tabelle mit **drei Fremdschlüsseln** (einer je beteiligtem Entitätstyp) und den Beziehungsattributen. Eine Zerlegung in drei Paartabellen verliert die Dreierkombination.
+- id: t06-c018
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ternaer, schluessel]
+  front: "Wie bestimmt man den Primärschlüssel der Tabelle einer ternären Beziehung?"
+  back: |-
+    - überall n/m: alle drei FKs bilden den PK
+    - Chen-1 bei einem Teilnehmer: dessen FK gehört **nicht** in den PK (er ist durch die beiden anderen bestimmt), nur `NOT NULL`
+    - FKs von Teilnehmern mit n/m sind immer Teil des PK
+    - mehrere Einsen: mehrere Kandidaten, einer PK, der Rest `UNIQUE`
+    - Kombination wiederholbar: zusätzlich ein Zeitattribut (z. B. Datum) in den PK
+- id: t06-c019
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rekursiv]
+  front: "Welche zwei Abbildungen gibt es für eine rekursive 1:n-Beziehung?"
+  back: |-
+    1. FK auf **dieselbe Tabelle**, benannt nach der Rolle: ausbilder(<u>ausbilder_nr</u>, …, mentor_nr → ausbilder), NULL-fähig (Anfang der Hierarchie).
+    2. Eigene Beziehungsrelation: mentoring(<u>schuetzling_nr → ausbilder</u>, mentor_nr → ausbilder). PK auf der n-Rolle. Keine NULLs, Platz für Attribute wie „seit“, aber ein Join mehr.
+- id: t06-c020
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rekursiv, m-n]
+  front: "Wie wird eine rekursive m:n-Beziehung abgebildet?"
+  back: |-
+    Als Zwischentabelle mit zwei Fremdschlüsseln auf **dieselbe** Tabelle, Spaltennamen nach den Rollen:
+    kurs_voraussetzung(<u>kurs_nr → kurs, voraussetzung_nr → kurs</u>), sinnvoll mit `CHECK (kurs_nr <> voraussetzung_nr)`.
+- id: t06-c021
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet]
+  front: "Wie lautet der Primärschlüssel der Tabelle eines schwachen Entitätstyps?"
+  back: |-
+    **Fremdschlüssel des Besitzers + partieller Schlüssel**, z. B. wartung(<u>boot_nr → boot, lfd_nr</u>, …). Die identifizierende Beziehung braucht keine eigene Tabelle.
+- id: t06-c022
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet, referenzielle-aktion]
+  front: "Welche drei Eigenschaften bekommt der Besitzer-Fremdschlüssel eines schwachen Entitätstyps, und warum?"
+  back: |-
+    - **Pflichtwert** `NOT NULL` (ohnehin Teil des PK)
+    - **Löschweitergabe** `ON DELETE CASCADE`: Ohne Besitzer hat die Zeile keinen Sinn.
+    - **Änderungsweitergabe** `ON UPDATE CASCADE`: Ein geänderter Besitzer-Schlüssel wird nachgezogen.
+    Gilt ebenso für den PK-FK von Subtyp-Tabellen (vertikale Variante).
+- id: t06-c023
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [referenzielle-aktion, firebird]
+  front: "Welche referenziellen Aktionen kennt Firebird 3 bei ON DELETE / ON UPDATE?"
+  back: |-
+    - `NO ACTION` (Voreinstellung): Operation wird abgelehnt, solange Verweise bestehen
+    - `CASCADE`: Löschen/Ändern wird an die verweisenden Zeilen weitergegeben
+    - `SET NULL`: FK-Spalten werden NULL
+    - `SET DEFAULT`: FK-Spalten erhalten ihren Default
+    `RESTRICT` gibt es in PostgreSQL, nicht in Firebird 3.
+- id: t06-c024
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  front: "Generalisierung: Wie sieht die vertikale Fragmentierung (Class Table Inheritance) aus?"
+  back: |-
+    Je eine Tabelle für den Supertyp und jeden Subtyp. Die Subtyp-Tabelle enthält nur ihre Zusatzattribute, ihr **PK ist zugleich FK** auf den Supertyp.
+    boot(<u>boot_nr</u>, …), jolle(<u>boot_nr → boot</u>, schwertart)
+    Im Kurs Variante 1. Auch *Table per Type* (TPT) oder *Joined*.
+- id: t06-c025
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  front: "Generalisierung: Wie sieht die horizontale Fragmentierung (Concrete Table Inheritance) aus, und wofür ist sie ungeeignet?"
+  back: |-
+    Nur Subtyp-Tabellen, jede mit allen geerbten Attributen des Supertyps, keine Supertyp-Tabelle (im Kurs Variante 2).
+    Ungeeignet für **partielle** Spezialisierung (Entitäten ohne Subtyp haben keinen Platz). Bei überlappender entsteht Redundanz. Kein FK „auf alle“ möglich. Supertyp-Änderungen treffen jede Subtyp-Tabelle.
+- id: t06-c026
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  front: "Generalisierung: Wie sieht die Gesamttabelle („virtuelle“ Fragmentierung, Single Table Inheritance) aus, und was ist ihr Hauptnachteil?"
+  back: |-
+    Eine Tabelle mit allen Attributen aller Subtypen und einem **Typ-Attribut** (`NOT NULL`). Nicht zutreffende Spalten bleiben NULL (im Kurs Variante 3, auch *Table per Hierarchy*).
+    Hauptnachteil: viele NULL-Werte, also Speicher. Subtyp-Pflichtfelder gehen nur per `CHECK`.
+- id: t06-c027
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung, ueberlappend]
+  front: "Welche Generalisierungs-Varianten eignen sich für eine überlappende Spezialisierung?"
+  back: |-
+    - vertikal (Class Table): ja, eine Entität hat dann Zeilen in mehreren Subtyp-Tabellen
+    - Gesamttabelle (Single Table): nur mit je einem Kennzeichen pro Subtyp (z. B. BOOLEAN-Spalten) statt eines einzigen Typ-Attributs
+    - horizontal (Concrete Table): nur mit Redundanz (gemeinsame Attribute mehrfach)
+- id: t06-c028
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung, grenzen]
+  front: "Lassen sich „total“ und „disjunkt“ bei der vertikalen Fragmentierung (Class Table Inheritance) deklarativ erzwingen?"
+  back: |-
+    Nein. PK/FK sichern nur, dass jede Subtyp-Zeile einen Supertyp hat. Ob eine Entität in genau einer bzw. mindestens einer Subtyp-Tabelle steht, prüfen erst Trigger oder die Anwendung. Bei der Gesamttabelle geht das per `NOT NULL` und `CHECK` auf dem Typ-Attribut.
+- id: t06-c029
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [reihenfolge]
+  front: "In welcher Reihenfolge legt man Tabellen mit Fremdschlüsseln an?"
+  back: |-
+    Zuerst Tabellen ohne Fremdschlüssel, dann jeweils Tabellen, deren referenzierte Tabellen schon existieren (Abhängigkeitsreihenfolge). Ein FK auf die eigene Tabelle stört nicht. Daten werden in derselben Reihenfolge eingefügt.
+- id: t06-c030
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [reihenfolge]
+  front: "In welcher Reihenfolge löscht man Zeilen bzw. Tabellen?"
+  back: |-
+    Umgekehrt zur Anlage: erst die verweisenden Tabellen (z. B. `buchung`), dann die referenzierten (`kurs`). Bei Zeilen nimmt `ON DELETE CASCADE` das Löschen der abhängigen Zeilen ab.
+- id: t06-c031
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [reihenfolge, zyklus]
+  front: "Wie legt man zwei Tabellen an, die gegenseitig aufeinander verweisen?"
+  back: |-
+    1. erste Tabelle **ohne** den FK auf die zweite anlegen
+    2. zweite Tabelle mit FK auf die erste anlegen
+    3. fehlenden FK nachträglich ergänzen: `ALTER TABLE t1 ADD CONSTRAINT fk_… FOREIGN KEY (…) REFERENCES t2 (…);`
+    Beim Abbau zuerst `ALTER TABLE … DROP CONSTRAINT`.
+- id: t06-c032
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [zyklus, firebird]
+  front: "Warum muss bei zyklischen Fremdschlüsseln in Firebird mindestens eine FK-Spalte NULL erlauben?"
+  back: |-
+    Firebird prüft jeden Fremdschlüssel sofort. Sind beide Spalten `NOT NULL`, braucht jede neue Zeile einen schon existierenden Partner in der anderen Tabelle, und keine kann die erste sein. Lösung: eine Zeile mit NULL einfügen, Partner einfügen, dann per `UPDATE` nachtragen. PostgreSQL kann Prüfungen alternativ mit `DEFERRABLE` verzögern.
+- id: t06-c033
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [firebird, ddl]
+  front: "Warum sollte man Constraints in CREATE TABLE benennen, und was ist in Firebird 3 dabei zu beachten?"
+  back: |-
+    Mit Namen lassen sich Constraints gezielt per `ALTER TABLE … DROP CONSTRAINT name` entfernen und Fehlermeldungen leichter zuordnen. Kurs-Konvention: Präfixe `pk_…`, `fk_…`, `uq_…`, `ck_…`. Andere Konventionen (z. B. `PK_KURS`, `kurs_pk`) sind gleichwertig. Bezeichner dürfen in Firebird 3 höchstens 31 Bytes lang sein.
+- id: t06-c034
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, ddl]
+  front: "Worauf darf ein Fremdschlüssel verweisen?"
+  back: |-
+    Auf den Primärschlüssel oder einen `UNIQUE`-Schlüssel einer anderen oder derselben Tabelle, mit passenden Datentypen und gleicher Spaltenanzahl. Ein FK hat immer genau **eine** Zieltabelle.
+- id: t06-c035
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, schwache-entitaet]
+  front: "Was ist ein zusammengesetzter Fremdschlüssel, und wann braucht man ihn?"
+  back: |-
+    Ein FK aus mehreren Spalten, der auf einen zusammengesetzten Schlüssel verweist. Nötig, wenn das Ziel einen mehrspaltigen PK hat, z. B. ein Verweis auf eine schwache Entität: `FOREIGN KEY (boot_nr, lfd_nr) REFERENCES wartung (boot_nr, lfd_nr)`.
+- id: t06-c036
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung, begriffe]
+  front: "Wie heißen die drei Abbildungsvarianten der Generalisierung als Fragmentierungsbegriff und als ORM-Muster?"
+  back: |-
+    1. Super- + Subtyp-Tabellen: **vertikale Fragmentierung**, **Class Table Inheritance**
+    2. nur Subtyp-Tabellen: **horizontale Fragmentierung**, **Concrete Table Inheritance**
+    3. Gesamttabelle mit Typ-Attribut: **„virtuelle“ Fragmentierung**, **Single Table Inheritance**
+    Nummerierungen und vereinzelt auch vertikal/horizontal variieren je Quelle, deshalb immer benennen.
+- id: t06-c037
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung, vergleich]
+  front: "Wie unterscheiden sich die drei Generalisierungsvarianten bei Tabellenzugriffen, Verwaltung der Zusammengehörigkeit und Speicher?"
+  back: |-
+    - vertikal: Join aus 2 Tabellen je Entität; DBMS kennt Zusammenhang (PK = FK); keine Subtyp-NULLs
+    - horizontal: 1 Tabelle je Entität, aber Vereinigung über alle; nur die Anwendung kennt den Zusammenhang; kompakt
+    - Gesamttabelle: immer 1 Tabelle; DBMS über Typ-Attribut/CHECK; viele NULLs
+- id: t06-c038
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  front: "Welcher Nachteil der horizontalen Fragmentierung (Concrete Table Inheritance) zeigt sich bei Schemaänderungen?"
+  back: |-
+    Die Supertyp-Attribute stehen in jeder Subtyp-Tabelle. Wird ein Supertyp-Attribut geändert oder ergänzt (z. B. neues Attribut `heimathafen` für alle Boote), muss man **jede** Subtyp-Tabelle ändern. Bei den anderen beiden Varianten betrifft das nur eine Tabelle.
+- id: t06-c039
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [abbildung, ziele]
+  front: "Welche Ziele verfolgt man bei der Abbildung eines ER-Modells auf Relationen?"
+  back: |-
+    - Information erhalten (alle Fakten, möglichst viele Kardinalitäten als Constraints)
+    - minimale Redundanz
+    - möglichst wenige Relationen (weniger Joins)
+    - nachvollziehbare Abbildung (jede Tabelle/jeder FK einem ERM-Element zuordenbar)
+    Die Ziele konkurrieren, z. B. weniger Tabellen vs. weniger NULL.
+- id: t06-c040
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [abbildung, zusammenfassen]
+  front: "Wann fasst man zwei Relationen mit gleichem Primärschlüssel zu einer zusammen?"
+  back: |-
+    Wenn der Schlüssel in beiden dasselbe bedeutet, zu fast jeder Zeile der einen eine Zeile der anderen gehört (kaum NULL) und die Daten meist gemeinsam abgefragt werden. Nicht, wenn dadurch viele NULL-Spalten oder Wiederholungen entstehen.
+- id: t06-c041
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-n, 1-1, zeitbezug]
+  front: "Wann bildet man auch eine 1:n- oder 1:1-Beziehung als eigene Relation ab?"
+  back: |-
+    - bei optionaler Teilnahme mit sonst vielen NULLs
+    - bei eigenen Beziehungsattributen
+    - bei **Zeitbezug/Historie**: Dann gehört der Beginn in den PK, z. B. leitung(<u>kurs_nr → kurs, von</u>, bis, ausbilder_nr → ausbilder)
+    Ohne Historie: PK = FK der n-Seite.
+- id: t06-c042
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [rekursiv, 1-1]
+  front: "Wie bildet man eine rekursive 1:1-Beziehung ab, und was ist bei symmetrischen Beziehungen zu beachten?"
+  back: |-
+    FK auf dieselbe Tabelle mit `UNIQUE` (NULL-fähig) oder eigene Relation vertretung(<u>ausbilder_nr → ausbilder</u>, vertreter_nr UNIQUE).
+    Symmetrisch (Partner:innen): beide Richtungen speichern = Redundanz; eine Richtung = Abfragen müssen beide Spalten prüfen.
+- id: t06-c043
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ternaer, schluessel, zeitbezug]
+  front: "Ternäre Beziehung: Was gilt für den Primärschlüssel, wenn dieselbe Kombination mehrfach vorkommen darf?"
+  back: |-
+    Dann reichen die Fremdschlüssel nicht. Wie bei m:n kommt ein Zeitattribut dazu, z. B. pruefung(<u>ausbilder_nr, teilnehmer_nr, art_nr, datum</u>, ergebnis) bei erlaubten Wiederholungsprüfungen. Vier PK-Spalten sind dann richtig.
+- id: t06-c044
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ddl, alter-table]
+  front: "Wie ergänzt man eine Beziehung nachträglich in einer bestehenden Tabelle?"
+  back: |-
+    Spalte und Constraints per `ALTER TABLE`:
+    `ALTER TABLE ausbilder ADD vertretung_nr INTEGER;`
+    `ALTER TABLE ausbilder ADD CONSTRAINT fk_ausbilder_vertretung FOREIGN KEY (vertretung_nr) REFERENCES ausbilder (ausbilder_nr);`
+    Die neue Spalte ist zunächst NULL, `NOT NULL` erst, wenn alle Zeilen einen Wert haben.
+- id: t06-c045
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ddl, firebird, standard]
+  front: "Gibt es DROP TABLE … CASCADE?"
+  back: |-
+    Im SQL-Standard und in PostgreSQL ja: `DROP TABLE name [RESTRICT | CASCADE]`. **Firebird 3 nicht.** Dort wird `DROP TABLE` abgelehnt, solange ein Fremdschlüssel auf die Tabelle zeigt (wie `RESTRICT`). Man löscht also erst die verweisenden Tabellen oder Constraints.
+- id: t06-c046
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [fremdschluessel, begriffe]
+  front: "Was bedeuten Eltern-/Kindtabelle bzw. Master-/Detailtabelle?"
+  back: |-
+    Eltern- oder Mastertabelle (*parent*): die **referenzierte** Tabelle, z. B. `kurs`.
+    Kind- oder Detailtabelle (*child*): die **verweisende** Tabelle mit dem Fremdschlüssel, z. B. `buchung`.
+    Bei rekursiven Beziehungen sind beide dieselbe Tabelle.

@@ -1,0 +1,69 @@
+// Ausgangs-ERM für Aufgabe t06-p003 (Escape-Room) in Chen-Notation.
+// Kantenlabel: Chen-Kardinalität, darunter (min,max).
+// Hinweis ist ein schwacher Entitätstyp: Hinweis-Nr. ist nur je Raum eindeutig
+// (Lehrbuch: gestrichelt unterstrichen; hier unterstrichen mit Zusatz "(partiell)").
+graph escape_room {
+  layout=neato;
+  overlap=false;
+  splines=true;
+  sep="+12";
+  node [fontsize=11];
+  edge [fontsize=10];
+
+  spielleitung [shape=box, label="Spielleiter:in"];
+  raum         [shape=box, label="Raum"];
+  team         [shape=box, label="Team"];
+  hinweis      [shape=box, peripheries=2, label="Hinweis"];
+
+  betreut [shape=diamond, label="betreut"];
+  spielt  [shape=diamond, label="spielt"];
+  hat     [shape=diamond, peripheries=2, label="hat"];
+
+  s_nr       [shape=ellipse, label=<<u>SL-Nr.</u>>];
+  s_vorname  [shape=ellipse, label="Vorname"];
+  s_nachname [shape=ellipse, label="Nachname"];
+
+  r_nr     [shape=ellipse, label=<<u>Raum-Nr.</u>>];
+  r_titel  [shape=ellipse, label="Titel"];
+  r_stufe  [shape=ellipse, label="Schwierigkeit (1-5)"];
+  r_max    [shape=ellipse, label="Max. Spielende (2-8)"];
+
+  t_nr    [shape=ellipse, label=<<u>Team-Nr.</u>>];
+  t_name  [shape=ellipse, label="Teamname"];
+  t_mail  [shape=ellipse, label="Kontakt-E-Mail"];
+
+  h_nr     [shape=ellipse, label=<<u>Hinweis-Nr.</u> (partiell)>];
+  h_text   [shape=ellipse, label="Text"];
+  h_strafe [shape=ellipse, label="Strafminuten"];
+
+  sp_datum [shape=ellipse, label="Datum"];
+  sp_dauer [shape=ellipse, label="Dauer (min)"];
+
+  spielleitung -- betreut [label="1\n(0,n)"];
+  betreut -- raum         [label="n\n(1,1)"];
+
+  team -- spielt [label="m\n(0,n)"];
+  spielt -- raum [label="n\n(0,n)"];
+  spielt -- sp_datum;
+  spielt -- sp_dauer;
+
+  raum -- hat    [label="1\n(0,n)"];
+  hat -- hinweis [label="n\n(1,1)", color="black:invis:black"];
+
+  spielleitung -- s_nr;
+  spielleitung -- s_vorname;
+  spielleitung -- s_nachname;
+
+  raum -- r_nr;
+  raum -- r_titel;
+  raum -- r_stufe;
+  raum -- r_max;
+
+  team -- t_nr;
+  team -- t_name;
+  team -- t_mail;
+
+  hinweis -- h_nr;
+  hinweis -- h_text;
+  hinweis -- h_strafe;
+}

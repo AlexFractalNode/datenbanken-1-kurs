@@ -1,0 +1,75 @@
+// Ausgangs-ERM für Aufgabe t06-p005 (Gemeinschaftsgarten) in Chen-Notation.
+// Kantenlabel: Chen-Kardinalität, darunter (min,max).
+// Enthalten: n:1 (gehört zu), 1:1 (spricht für) - zusammen ein Zyklus zwischen
+// Gärtner:in und Arbeitsgruppe -, rekursiv 1:n mit Rollen (ist Pat:in von)
+// und ternär (betreut: je Beet und Pflanzenart genau eine Gärtner:in).
+graph gemeinschaftsgarten {
+  layout=neato;
+  overlap=false;
+  splines=true;
+  sep="+12";
+  node [fontsize=11];
+  edge [fontsize=10];
+
+  gaertner [shape=box, label="Gärtner:in"];
+  ag       [shape=box, label="Arbeitsgruppe"];
+  beet     [shape=box, label="Beet"];
+  art      [shape=box, label="Pflanzenart"];
+
+  gehoert  [shape=diamond, label="gehört zu"];
+  spricht  [shape=diamond, label="spricht für"];
+  pate     [shape=diamond, label="ist Pat:in von"];
+  betreut  [shape=diamond, label="betreut"];
+
+  g_nr      [shape=ellipse, label=<<u>Mitglieds-Nr.</u>>];
+  g_vorname [shape=ellipse, label="Vorname"];
+  g_nachname[shape=ellipse, label="Nachname"];
+  g_mail    [shape=ellipse, label="E-Mail"];
+
+  ag_nr     [shape=ellipse, label=<<u>AG-Nr.</u>>];
+  ag_bez    [shape=ellipse, label="Bezeichnung"];
+
+  b_nr      [shape=ellipse, label=<<u>Beet-Nr.</u>>];
+  b_flaeche [shape=ellipse, label="Fläche (m²)"];
+  b_lage    [shape=ellipse, label="Lage"];
+
+  a_nr      [shape=ellipse, label=<<u>Art-Nr.</u>>];
+  a_name    [shape=ellipse, label="Artname"];
+  a_monat   [shape=ellipse, label="Erntemonat (1-12)"];
+
+  be_datum  [shape=ellipse, label="gepflanzt am"];
+
+  // gehört zu: jede Gärtner:in genau einer AG, jede AG mindestens ein Mitglied
+  gaertner -- gehoert [label="n\n(1,1)"];
+  gehoert -- ag       [label="1\n(1,n)"];
+
+  // spricht für: jede AG hat genau eine Sprecher:in, eine Gärtner:in spricht für höchstens eine AG
+  gaertner -- spricht [label="1\n(0,1)"];
+  spricht -- ag       [label="1\n(1,1)"];
+
+  // ist Pat:in von: rekursiv
+  gaertner -- pate [label="Pat:in\n1\n(0,n)"];
+  pate -- gaertner [label="Neumitglied\nn\n(0,1)"];
+
+  // betreut: ternär
+  gaertner -- betreut [label="1\n(0,n)"];
+  beet -- betreut     [label="m\n(0,n)"];
+  betreut -- art      [label="n\n(0,n)"];
+  betreut -- be_datum;
+
+  gaertner -- g_nr;
+  gaertner -- g_vorname;
+  gaertner -- g_nachname;
+  gaertner -- g_mail;
+
+  ag -- ag_nr;
+  ag -- ag_bez;
+
+  beet -- b_nr;
+  beet -- b_flaeche;
+  beet -- b_lage;
+
+  art -- a_nr;
+  art -- a_name;
+  art -- a_monat;
+}

@@ -1,0 +1,747 @@
+- id: t06-p001
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [m-n, zwischentabelle, fremdschluessel]
+  type: define-example
+  difficulty: 1
+  points: 5
+  minutes: 5
+  prompt: |-
+    Erkläre die Begriffe **Fremdschlüssel**, **Zwischentabelle** und **zusammengesetzter Primärschlüssel**.
+    Wähle dazu ein **eigenes** Beispiel mit einer m:n-Beziehung, die mindestens ein Beziehungsattribut hat, und gib das vollständige Relationenschema in Kurzschreibweise an (PK unterstrichen, FK mit Pfeil).
+  solution: |-
+    - **Fremdschlüssel:** Spalte(n) einer Tabelle, deren Werte auf den Primärschlüssel (oder einen UNIQUE-Schlüssel) einer anderen oder derselben Tabelle verweisen. Das DBMS lässt nur Werte zu, die es dort gibt (oder NULL, falls erlaubt).
+    - **Zwischentabelle:** eigene Tabelle, mit der eine m:n-Beziehung abgebildet wird. Sie enthält die Primärschlüssel beider beteiligten Tabellen als Fremdschlüssel und die Attribute der Beziehung. Damit wird m:n in zwei 1:n-Beziehungen aufgelöst.
+    - **Zusammengesetzter Primärschlüssel:** Primärschlüssel aus mehreren Spalten. Erst die Kombination ist eindeutig. In der Zwischentabelle besteht er typischerweise aus beiden Fremdschlüsseln.
+
+    Beispiel (Musterlösung, andere passende Beispiele gleichwertig): Ein Chor. Sänger:innen treten in beliebig vielen Konzerten auf, an einem Konzert wirken viele Sänger:innen mit. Je Auftritt wird festgehalten, ob die Person ein Solo singt.
+    - saenger(<u>saenger_nr</u>, vorname, nachname, stimmlage)
+    - konzert(<u>konzert_nr</u>, datum, ort)
+    - auftritt(<u>saenger_nr → saenger, konzert_nr → konzert</u>, solo)
+
+    `solo` steht in der Zwischentabelle, weil es zur Kombination aus Person und Konzert gehört.
+  rubric:
+    - criterion: "Fremdschlüssel korrekt erklärt (Verweis auf PK/UNIQUE einer anderen oder derselben Tabelle)"
+      points: 1
+    - criterion: "Zwischentabelle als Abbildung einer m:n-Beziehung mit beiden PKs als FKs erklärt"
+      points: 1
+    - criterion: "Zusammengesetzter Primärschlüssel korrekt erklärt (Eindeutigkeit erst durch die Kombination)"
+      points: 1
+    - criterion: "Eigenes m:n-Beispiel mit vollständigem, korrekt notiertem Relationenschema"
+      points: 1
+    - criterion: "Beziehungsattribut korrekt in der Zwischentabelle platziert"
+      points: 1
+  space: lines:12
+- id: t06-p002
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [schwache-entitaet, mehrwertig, referenzielle-aktion]
+  type: define-example
+  difficulty: 2
+  points: 7
+  minutes: 8
+  prompt: |-
+    Erkläre, wie (a) ein **schwacher Entitätstyp** und (b) ein **mehrwertiges Attribut** in das Relationenmodell überführt werden.
+    Gib zu beiden je ein **eigenes** Beispiel als Relationenschema an.
+    (c) Begründe, warum für die Fremdschlüssel aus (a) und (b) `ON DELETE CASCADE` und `ON UPDATE CASCADE` sinnvoll sind, und nenne einen Fremdschlüssel, bei dem `ON DELETE CASCADE` gefährlich wäre.
+  solution: |-
+    (a) Der schwache Entitätstyp wird zu einer eigenen Tabelle. Sie enthält den Primärschlüssel des Besitzers als Fremdschlüssel. **PK = Besitzer-FK + partieller Schlüssel.** Die identifizierende Beziehung braucht keine eigene Tabelle.
+    Beispiel: Wagen eines Zuges werden je Zug ab 1 nummeriert.
+    - zug(<u>zug_nr</u>, bezeichnung)
+    - wagen(<u>zug_nr → zug, wagen_nr</u>, klasse, sitzplaetze)
+
+    (b) Das mehrwertige Attribut wird zu einer eigenen Tabelle aus dem Fremdschlüssel des Besitzers und dem Wert. **Beide zusammen bilden den PK.**
+    Beispiel: Eine Ferienwohnung hat mehrere Ausstattungsmerkmale (Balkon, Sauna, Kamin …).
+    - ferienwohnung(<u>whg_nr</u>, ort, zimmer)
+    - whg_ausstattung(<u>whg_nr → ferienwohnung, merkmal</u>)
+
+    (c) Wagen bzw. Ausstattungseinträge haben ohne ihren Besitzer keine Bedeutung und wären nicht einmal eindeutig zuzuordnen. Wird der Zug bzw. die Wohnung gelöscht, sollen sie automatisch verschwinden (`ON DELETE CASCADE`). Ändert sich die Nummer des Besitzers, sollen sie mitgezogen werden (`ON UPDATE CASCADE`), statt die Änderung zu blockieren. Gefährlich wäre `ON DELETE CASCADE` z. B. bei ausleihe.mitglied_nr → mitglied in einer Bibliothek: Das Löschen eines Mitglieds würde still die gesamte Ausleihhistorie (Geschäftsdaten) vernichten.
+  rubric:
+    - criterion: "(a) Regel korrekt: eigene Tabelle, PK = FK des Besitzers + partieller Schlüssel"
+      points: 1.5
+    - criterion: "(a) eigenes Beispiel mit korrektem Schema"
+      points: 1
+    - criterion: "(b) Regel korrekt: eigene Tabelle aus Besitzer-FK und Wert, beide als PK"
+      points: 1.5
+    - criterion: "(b) eigenes Beispiel mit korrektem Schema"
+      points: 1
+    - criterion: "(c) Löschweitergabe und Änderungsweitergabe mit der Abhängigkeit vom Besitzer begründet (je 0,5)"
+      points: 1
+    - criterion: "(c) Gegenbeispiel: FK auf Geschäftsdaten, deren Verlust beim Löschen schadet"
+      points: 1
+  space: lines:18
+- id: t06-p003
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-to-sql, 1-n, m-n, schwache-entitaet, check]
+  type: erm-to-sql
+  difficulty: 2
+  points: 11
+  minutes: 12
+  prompt: |-
+    Ein Escape-Room-Betrieb nutzt das folgende ER-Modell. Im Diagramm steht bei jeder Kante die Chen-Kardinalität, darunter die (min,max)-Angabe des jeweiligen Entitätstyps. In der Textfassung steht die (min,max)-Angabe direkt hinter der Chen-Kardinalität.
+
+    ![ERM Escape-Room: Spielleiter:in betreut Raum, Team spielt Raum, Raum hat Hinweise (schwach)](diagrams/escape-room.dot)
+
+    ```
+    Spielleiter:in (SL-Nr., Vorname, Nachname)
+    Raum           (Raum-Nr., Titel, Schwierigkeit, Max. Spielende)
+    Team           (Team-Nr., Teamname, Kontakt-E-Mail)
+    Hinweis        schwach, Besitzer Raum; partieller Schlüssel Hinweis-Nr.; Text, Strafminuten
+
+    Spielleiter:in 1 (0,n) —betreut— n (1,1) Raum
+    Team           m (0,n) —spielt—  n (0,n) Raum      Attribute: Datum, Dauer (min)
+    Raum           1 (0,n) —hat—     n (1,1) Hinweis   (identifizierend)
+    ```
+
+    Zusätzlich gilt: Die Schwierigkeit liegt zwischen 1 und 5, die maximale Spielendenzahl zwischen 2 und 8. Die Kontakt-E-Mail ist je Team eindeutig. Ein Team spielt jeden Raum höchstens einmal. Die Dauer wird erst nach dem Spiel eingetragen und ist dann positiv. Strafminuten sind nie negativ.
+
+    a) Gib das Relationenschema aller fünf Tabellen in Kurzschreibweise an.
+    b) Gib eine gültige Anlage-Reihenfolge aller fünf Tabellen an. Die Tabellen `spielleitung` und `team` existieren bereits. Schreibe die `CREATE TABLE`-Anweisungen für die Tabellen zu **Raum** und **Hinweis** in Firebird-3-Syntax mit allen passenden PRIMARY KEY-, FOREIGN KEY-, NOT NULL- und CHECK-Constraints. Gib beim Fremdschlüssel des schwachen Entitätstyps passende referenzielle Aktionen für Löschen und Ändern an.
+  solution: |-
+    **a) Relationenschema**
+    - spielleitung(<u>sl_nr</u>, vorname, nachname)
+    - team(<u>team_nr</u>, teamname, kontakt_email) mit kontakt_email UNIQUE
+    - raum(<u>raum_nr</u>, titel, schwierigkeit, max_spielende, sl_nr → spielleitung) mit sl_nr NOT NULL, weil (1,1)
+    - hinweis(<u>raum_nr → raum, hinweis_nr</u>, hinweistext, strafminuten): schwacher Typ, PK = Besitzer-FK + partieller Schlüssel
+    - spiel(<u>team_nr → team, raum_nr → raum</u>, datum, dauer_min): m:n als Zwischentabelle. Der PK aus beiden FKs reicht, weil jedes Paar höchstens einmal vorkommt.
+
+    **b) Reihenfolge:** spielleitung, team → raum → hinweis, spiel (team darf auch später kommen, nur vor spiel).
+    ```sql
+    CREATE TABLE raum (
+      raum_nr       INTEGER     NOT NULL,
+      titel         VARCHAR(60) NOT NULL,
+      schwierigkeit SMALLINT    NOT NULL,
+      max_spielende SMALLINT    NOT NULL,
+      sl_nr         INTEGER     NOT NULL,
+      CONSTRAINT pk_raum PRIMARY KEY (raum_nr),
+      CONSTRAINT fk_raum_spielleitung FOREIGN KEY (sl_nr)
+        REFERENCES spielleitung (sl_nr),
+      CONSTRAINT ck_raum_schwierigkeit CHECK (schwierigkeit BETWEEN 1 AND 5),
+      CONSTRAINT ck_raum_max CHECK (max_spielende BETWEEN 2 AND 8)
+    );
+
+    CREATE TABLE hinweis (
+      raum_nr      INTEGER      NOT NULL,
+      hinweis_nr   SMALLINT     NOT NULL,
+      hinweistext  VARCHAR(300) NOT NULL,
+      strafminuten SMALLINT DEFAULT 0 NOT NULL,
+      CONSTRAINT pk_hinweis PRIMARY KEY (raum_nr, hinweis_nr),
+      CONSTRAINT fk_hinweis_raum FOREIGN KEY (raum_nr)
+        REFERENCES raum (raum_nr) ON DELETE CASCADE ON UPDATE CASCADE,
+      CONSTRAINT ck_hinweis_strafe CHECK (strafminuten >= 0)
+    );
+    ```
+    Hinweise zur Bewertung: Datentypen und Constraint-Namen dürfen abweichen, unbenannte Constraints sind ebenfalls richtig. Die Spalte heißt `hinweistext` statt `text`, weil `TEXT` in anderen Systemen (z. B. PostgreSQL) ein Datentypname ist. In `spiel` bleibt `dauer_min` NULL-fähig, weil die Dauer erst nachträglich eingetragen wird. Ein `CHECK (dauer_min > 0)` ließe NULL zu, weil eine Bedingung mit UNKNOWN als erfüllt gilt. `ON DELETE CASCADE` wäre bei spiel unpassend, weil gespielte Partien Geschäftsdaten sind. Die Primärschlüssel werden nur in a) bewertet.
+  rubric:
+    - criterion: "a) spielleitung und team mit PK, kontakt_email als UNIQUE gekennzeichnet"
+      points: 1
+    - criterion: "a) raum mit sl_nr → spielleitung, NOT NULL wegen (1,1)"
+      points: 1
+    - criterion: "a) hinweis mit PK (raum_nr, hinweis_nr)"
+      points: 1.5
+    - criterion: "a) spiel als Zwischentabelle mit PK (team_nr, raum_nr) sowie Datum und Dauer (dauer_min als NULL-fähig gekennzeichnet)"
+      points: 1.5
+    - criterion: "b) raum: FK-Klausel (0,5), NOT NULL an sl_nr (0,5), CHECK Schwierigkeit (0,5), CHECK Spielendenzahl (0,5)"
+      points: 2
+    - criterion: "b) hinweis: FK mit ON DELETE CASCADE (0,5) und ON UPDATE CASCADE (0,5), CHECK strafminuten >= 0 (0,5)"
+      points: 1.5
+    - criterion: "b) Gültige Anlage-Reihenfolge aller fünf Tabellen (referenzierte zuerst)"
+      points: 1.5
+    - criterion: "b) Syntaktisch korrektes Firebird-SQL (Datentypen, Constraint-Klauseln, DEFAULT vor NOT NULL)"
+      points: 1
+  space: box:250
+- id: t06-p004
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-to-sql, 1-1, 1-n, m-n, zeitbezug]
+  type: erm-to-sql
+  difficulty: 2
+  points: 14
+  minutes: 16
+  prompt: |-
+    Ein Tierheim verwaltet seine Tiere mit folgendem ER-Modell. Bei jeder Beziehung steht direkt neben jedem Entitätstyp zuerst die Chen-Kardinalität, dann dessen (min,max)-Angabe.
+
+    ```
+    Entitätstypen (Schlüssel jeweils zuerst)
+      Tierart    (Art-Nr., Bezeichnung)
+      Tier       (Tier-Nr., Rufname, Geburtsjahr, aufgenommen am)
+      Chip       (Chip-Nr. (15 Ziffern), Hersteller, implantiert am)
+      Impfstoff  (Impfstoff-Nr., Bezeichnung)
+
+    Beziehungstypen
+      Tierart  1 (0,n) —umfasst—     n (1,1) Tier
+      Tier     1 (0,1) —trägt—       1 (1,1) Chip
+      Tier     m (1,n) —geimpft mit— n (0,n) Impfstoff   Attribute: Datum, Charge
+    ```
+
+    Zusätzlich gilt: Das Geburtsjahr ist oft unbekannt. Ein Chip wird erst erfasst, wenn er einem Tier eingesetzt wurde. Ein Tier kann denselben Impfstoff mehrfach erhalten (Auffrischung), aber nicht zweimal am selben Tag. Die Charge wird immer notiert.
+
+    a) Gib das Relationenschema aller fünf Tabellen in Kurzschreibweise an. Begründe kurz
+       (1) auf welche Seite du den Fremdschlüssel der 1:1-Beziehung legst, damit keine NULL-Werte entstehen, und nenne eine weitere zulässige Abbildung dieser Beziehung,
+       (2) den Primärschlüssel der Tabelle zu „geimpft mit“.
+    b) Gib eine gültige Anlage-Reihenfolge aller fünf Tabellen an. Schreibe die `CREATE TABLE`-Anweisungen für die Tabellen zu **Chip** und **geimpft mit** in Firebird-3-Syntax mit allen passenden PRIMARY KEY-, FOREIGN KEY-, NOT NULL- und UNIQUE-Constraints.
+    c) Welche (min,max)-Angabe lässt sich mit diesen Constraints **nicht** erzwingen? Begründe.
+  solution: |-
+    **a) Relationenschema**
+    - tierart(<u>art_nr</u>, bezeichnung)
+    - tier(<u>tier_nr</u>, rufname, geburtsjahr, aufgenommen_am, art_nr → tierart) mit art_nr NOT NULL wegen (1,1), geburtsjahr NULL-fähig
+    - chip(<u>chip_nr</u>, hersteller, implantiert_am, tier_nr → tier) mit tier_nr NOT NULL UNIQUE
+    - impfstoff(<u>impfstoff_nr</u>, bezeichnung)
+    - impfung(<u>tier_nr → tier, impfstoff_nr → impfstoff, datum</u>, charge)
+
+    (1) Chip hat (1,1), Tier nur (0,1). Der FK kommt auf die Pflichtseite `chip`. Dort ist er immer gefüllt (`NOT NULL`), und `UNIQUE` verhindert zwei Chips für dasselbe Tier. Weitere zulässige Abbildungen (eine genügt): FK `chip_nr → chip` mit `UNIQUE` in `tier`, dann NULL-fähig für Tiere ohne Chip, und die (1,1) des Chips ist nicht erzwingbar. Oder Zusammenlegen: Chip-Attribute als NULL-fähige Spalten in `tier`, `chip_nr UNIQUE`. Das passt, weil es keinen Chip ohne Tier gibt.
+    (2) Wegen der Auffrischungen kann dasselbe Paar (Tier, Impfstoff) mehrfach vorkommen. Erst mit dem Datum ist die Zeile eindeutig. Am selben Tag gibt es denselben Impfstoff nicht zweimal, deshalb reicht `datum`.
+
+    **b) Reihenfolge:** tierart, impfstoff → tier → chip, impfung
+    ```sql
+    CREATE TABLE chip (
+      chip_nr        CHAR(15)    NOT NULL,
+      hersteller     VARCHAR(40) NOT NULL,
+      implantiert_am DATE        NOT NULL,
+      tier_nr        INTEGER     NOT NULL,
+      CONSTRAINT pk_chip PRIMARY KEY (chip_nr),
+      CONSTRAINT uq_chip_tier UNIQUE (tier_nr),
+      CONSTRAINT fk_chip_tier FOREIGN KEY (tier_nr) REFERENCES tier (tier_nr)
+    );
+
+    CREATE TABLE impfung (
+      tier_nr      INTEGER     NOT NULL,
+      impfstoff_nr INTEGER     NOT NULL,
+      datum        DATE        NOT NULL,
+      charge       VARCHAR(20) NOT NULL,
+      CONSTRAINT pk_impfung PRIMARY KEY (tier_nr, impfstoff_nr, datum),
+      CONSTRAINT fk_impfung_tier FOREIGN KEY (tier_nr) REFERENCES tier (tier_nr),
+      CONSTRAINT fk_impfung_stoff FOREIGN KEY (impfstoff_nr)
+        REFERENCES impfstoff (impfstoff_nr)
+    );
+    ```
+    Wer in a) die Alternative mit dem FK in `tier` gewählt hat, schreibt `chip` ohne `tier_nr` und erhält die Punkte für b), wenn `tier.chip_nr` als UNIQUE-FK beschrieben ist. Die Musterlösung oben folgt der Vorgabe „keine NULL-Werte“.
+
+    **c)** Tier (1,n) bei „geimpft mit“: Jedes Tier soll mindestens eine Impfung haben. Das ist eine Mindestteilnahme der **referenzierten** Seite. Ob zu einem Tier Zeilen in `impfung` existieren, prüft kein PK-, FK-, NOT-NULL- oder UNIQUE-Constraint. Man bräuchte einen Trigger oder eine Prüfung in der Anwendung. Alle anderen Untergrenzen sind 0 oder werden über `NOT NULL` erzwungen.
+  rubric:
+    - criterion: "a) tierart, impfstoff und tier mit PKs; art_nr → tierart in tier mit NOT NULL"
+      points: 1.5
+    - criterion: "a) chip mit tier_nr → tier, NOT NULL und UNIQUE; Seite begründet (keine NULL, (1,1) erzwungen)"
+      points: 2
+    - criterion: "a) weitere zulässige 1:1-Abbildung genannt (UNIQUE-FK in tier oder Zusammenlegen)"
+      points: 1
+    - criterion: "a) impfung als Zwischentabelle mit PK (tier_nr, impfstoff_nr, datum), mit Auffrischungen begründet (PK nur aus beiden FKs: 0,5)"
+      points: 2
+    - criterion: "b) Gültige Anlage-Reihenfolge aller fünf Tabellen"
+      points: 1.5
+    - criterion: "b) chip: UNIQUE- und FK-Klausel, NOT NULL an tier_nr"
+      points: 1.5
+    - criterion: "b) impfung: beide FK-Klauseln, NOT NULL an allen Pflichtspalten inkl. charge"
+      points: 1.5
+    - criterion: "b) Syntaktisch korrektes Firebird-SQL"
+      points: 1.5
+    - criterion: "c) Tier (1,n) bei „geimpft mit“ als nicht erzwingbar erkannt (0,5) und mit der referenzierten Seite begründet (1)"
+      points: 1.5
+  space: box:250
+- id: t06-p005
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-to-sql, ternaer, rekursiv, 1-1]
+  type: erm-to-sql
+  difficulty: 3
+  points: 10
+  minutes: 10
+  prompt: |-
+    Ein Gemeinschaftsgarten verwaltet seine Mitglieder mit folgendem ER-Modell (Chen-Kardinalität, darunter die (min,max)-Angabe des jeweiligen Entitätstyps):
+
+    ![ERM Gemeinschaftsgarten: Gärtner:in, Arbeitsgruppe, Beet, Pflanzenart](diagrams/gemeinschaftsgarten.dot)
+
+    ```
+    Gärtner:in    (Mitglieds-Nr., Vorname, Nachname, E-Mail)
+    Arbeitsgruppe (AG-Nr., Bezeichnung)
+    Beet          (Beet-Nr., Fläche (m²), Lage)
+    Pflanzenart   (Art-Nr., Artname, Erntemonat)
+
+    Gärtner:in      n (1,1) —gehört zu—      1 (1,n) Arbeitsgruppe
+    Gärtner:in      1 (0,1) —spricht für—    1 (1,1) Arbeitsgruppe
+    Gärtner:in      rekursiv —ist Pat:in von—: Rolle Pat:in 1 (0,n), Rolle Neumitglied n (0,1)
+    betreut (ternär): Gärtner:in 1 (0,n), Beet m (0,n), Pflanzenart n (0,n); Attribut: gepflanzt am
+    ```
+
+    E-Mail-Adressen sind eindeutig.
+
+    a) Gib das Relationenschema in Kurzschreibweise an (mit NOT NULL und UNIQUE, wo nötig). Lege den Fremdschlüssel der 1:1-Beziehung „spricht für“ auf eine Seite deiner Wahl.
+    b) Begründe den Primärschlüssel der Tabelle für „betreut“.
+    c) Für „spricht für“ gibt es zwei Seiten für den Fremdschlüssel. Gib für **beide** an, ob die FK-Spalte laut ER-Modell `NOT NULL` sein müsste und ob zusammen mit „gehört zu“ ein Zyklus zwischen den Tabellen entsteht.
+  solution: |-
+    **a) Relationenschema** (FK von „spricht für“ hier in arbeitsgruppe)
+    - arbeitsgruppe(<u>ag_nr</u>, bezeichnung, sprecher_nr → gaertner) mit sprecher_nr UNIQUE
+    - gaertner(<u>mitglieds_nr</u>, vorname, nachname, email, ag_nr → arbeitsgruppe, pate_nr → gaertner) mit email UNIQUE, ag_nr NOT NULL (1,1), pate_nr NULL-fähig (Rollenname als Spaltenname, rekursiv)
+    - beet(<u>beet_nr</u>, flaeche_qm, lage)
+    - pflanzenart(<u>art_nr</u>, artname, erntemonat)
+    - betreuung(<u>beet_nr → beet, art_nr → pflanzenart</u>, mitglieds_nr → gaertner, gepflanzt_am) mit mitglieds_nr NOT NULL
+
+    Gleichwertig: FK in gaertner, z. B. spricht_fuer_ag → arbeitsgruppe mit UNIQUE und NULL-fähig, dann ohne sprecher_nr in arbeitsgruppe.
+
+    **b)** Die Chen-1 bei Gärtner:in bedeutet: Zu jeder Kombination aus Beet und Pflanzenart gehört höchstens eine Gärtner:in. (beet_nr, art_nr) bestimmt also die Gärtner:in, und ihr FK gehört nicht in den PK, sondern ist nur NOT NULL. Beet und Pflanzenart haben m bzw. n, ihre FKs gehören deshalb zum PK. Ein PK aus allen drei FKs (der Fall, den viele Beispiele zeigen) wäre hier zu schwach. Er ließe mehrere Gärtner:innen für dasselbe Beet und dieselbe Art zu.
+
+    **c)**
+    - FK in **arbeitsgruppe** (`sprecher_nr`): Arbeitsgruppe hat (1,1), also müsste die Spalte `NOT NULL UNIQUE` sein. Zusammen mit `gaertner.ag_nr → arbeitsgruppe` verweisen beide Tabellen aufeinander: **Zyklus**. Weil Firebird sofort prüft, muss eine der beiden Spalten trotzdem NULL-fähig bleiben.
+    - FK in **gaertner** (`spricht_fuer_ag`): Gärtner:in hat (0,1), die Spalte ist NULL-fähig und `UNIQUE`. Beide Fremdschlüssel zeigen dann von gaertner auf arbeitsgruppe: **kein Zyklus**. Dafür lässt sich die (1,1) der Arbeitsgruppe (jede AG hat eine Sprecher:in) nicht erzwingen.
+  rubric:
+    - criterion: "a) arbeitsgruppe, beet, pflanzenart mit korrekten PKs"
+      points: 1
+    - criterion: "a) gaertner mit email UNIQUE und ag_nr → arbeitsgruppe NOT NULL"
+      points: 1.5
+    - criterion: "a) rekursiv: pate_nr → gaertner mit Rollennamen, NULL-fähig"
+      points: 1
+    - criterion: "a) betreuung mit drei FKs, mitglieds_nr NOT NULL"
+      points: 1
+    - criterion: "a) spricht für: FK auf einer der beiden Seiten mit UNIQUE (beide Seiten gleichwertig)"
+      points: 1
+    - criterion: "b) PK (beet_nr, art_nr) mit der Chen-1 begründet (PK aus allen drei FKs mit sonst richtiger Begründung: 1)"
+      points: 2
+    - criterion: "c) Seite arbeitsgruppe: NOT NULL laut ERM, Zyklus erkannt, eine Spalte muss NULL-fähig bleiben"
+      points: 1.5
+    - criterion: "c) Seite gaertner: NULL-fähig, kein Zyklus, (1,1) der AG nicht erzwingbar"
+      points: 1
+  space: box:160
+- id: t06-p006
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung]
+  type: explain
+  difficulty: 2
+  points: 13
+  minutes: 13
+  prompt: |-
+    Im ER-Modell einer Bäckerei wird der Entitätstyp **Produkt** (Produkt-Nr., Bezeichnung, Preis) in die Subtypen **Brot** (Gewicht in g, Mehlsorte) und **Torte** (Durchmesser in cm, Vorbestellfrist in Tagen) spezialisiert. Die Spezialisierung ist **disjunkt und partiell**: Getränke und Kaffee werden nur als Produkt geführt.
+
+    a) Benenne die drei Varianten, eine Generalisierung ins Relationenmodell zu überführen, mit ihrem Fachbegriff, und skizziere für jede die entstehenden Tabellen in Kurzschreibweise.
+    b) Nenne für jede Variante einen Vorteil und einen Nachteil.
+    c) Welche Variante empfiehlst du für diesen Fall? Begründe, und gib an, welche Variante ausscheidet und warum.
+    d) Wie lässt sich in der Variante mit einer Gesamttabelle sicherstellen, dass jedes Produkt genau einer Art angehört und nicht zugleich Brot- und Tortenwerte hat? Verwende das Typ-Attribut `produktart` mit den Werten 'B' (Brot), 'T' (Torte) und 'S' (sonstiges Produkt), und gib seine Spaltendefinition und den CHECK an.
+  solution: |-
+    **a)** Als Benennung zählt der Fragmentierungsbegriff **oder** der ORM-Mustername. Eine eindeutige Beschreibung wie „Tabelle je Super- und Subtyp“ ist gleichwertig, eine bloße Nummer nicht, weil Quellen unterschiedlich nummerieren.
+    1. **Vertikale Fragmentierung / Class Table Inheritance** (Tabelle je Super- und Subtyp, Subtyp-PK = FK auf den Supertyp):
+       - produkt(<u>produkt_nr</u>, bezeichnung, preis)
+       - brot(<u>produkt_nr → produkt</u>, gewicht_g, mehlsorte)
+       - torte(<u>produkt_nr → produkt</u>, durchmesser_cm, vorbestellfrist_tage)
+    2. **Horizontale Fragmentierung / Concrete Table Inheritance** (nur Subtyp-Tabellen mit geerbten Attributen):
+       - brot(<u>produkt_nr</u>, bezeichnung, preis, gewicht_g, mehlsorte)
+       - torte(<u>produkt_nr</u>, bezeichnung, preis, durchmesser_cm, vorbestellfrist_tage)
+    3. **„Virtuelle“ Fragmentierung bzw. Gesamttabelle / Single Table Inheritance** (eine Tabelle mit Typ-Attribut):
+       - produkt(<u>produkt_nr</u>, bezeichnung, preis, produktart, gewicht_g, mehlsorte, durchmesser_cm, vorbestellfrist_tage)
+
+    **b)** (je ein zutreffendes Paar genügt)
+    1. Vorteil: keine NULL-Spalten und keine Redundanz. Fremdschlüssel auf alle Produkte oder gezielt auf einen Subtyp möglich, das DBMS kennt die Zusammengehörigkeit (PK = FK). Nachteil: Join aus zwei Tabellen für vollständige Daten, disjunkt/total nicht deklarativ erzwingbar.
+    2. Vorteil: Ein Subtyp steht komplett in einer Zeile, Abfragen ohne Join, kompakt. Nachteil: kein Platz für Produkte ohne Subtyp, kein gemeinsames FK-Ziel (z. B. für Bestellpositionen), Eindeutigkeit der Nummer über beide Tabellen nicht gesichert, Vereinigung für „alle Produkte“, eine Änderung an Supertyp-Attributen trifft jede Subtyp-Tabelle.
+    3. Vorteil: immer nur ein Tabellenzugriff, ein FK-Ziel für alle Produkte, disjunkt per CHECK erzwingbar. Nachteil: viele NULL-Werte (Speicher). Subtyp-Pflichtfelder gehen nur per CHECK, subtypspezifische Beziehungen sind nicht per FK einschränkbar.
+
+    **c)** Vertikale Fragmentierung (oder Gesamttabelle bei wenigen Subtyp-Attributen, wie hier vertretbar). Beide können Produkte ohne Subtyp speichern und bieten eine Tabelle `produkt` als Ziel für Fremdschlüssel. **Die horizontale Fragmentierung scheidet aus**, weil die Spezialisierung partiell ist: Getränke und Kaffee hätten keine Tabelle.
+
+    **d)** Typ-Attribut `produktart CHAR(1) NOT NULL` mit den Werten 'B', 'T' und 'S' und ein CHECK, der je Typ die fremden Spalten auf NULL zwingt:
+    ```sql
+    produktart CHAR(1) NOT NULL,
+    ...
+    CONSTRAINT ck_produkt_art CHECK (
+         (produktart = 'B' AND durchmesser_cm IS NULL AND vorbestellfrist_tage IS NULL)
+      OR (produktart = 'T' AND gewicht_g IS NULL AND mehlsorte IS NULL)
+      OR (produktart = 'S' AND gewicht_g IS NULL AND mehlsorte IS NULL
+                           AND durchmesser_cm IS NULL AND vorbestellfrist_tage IS NULL))
+    ```
+    Das `NOT NULL` ist nötig: Bei `produktart = NULL` ergäbe jeder Vergleich UNKNOWN, und ein CHECK mit UNKNOWN gilt als erfüllt. Dann würde eine Zeile mit Brot- **und** Tortenwerten akzeptiert.
+  rubric:
+    - criterion: "a) Vertikale Fragmentierung bzw. Class Table Inheritance benannt (0,5) und korrekt skizziert, Subtyp-PK zugleich FK (1,5)"
+      points: 2
+    - criterion: "a) Horizontale Fragmentierung bzw. Concrete Table Inheritance benannt (0,5) und korrekt skizziert, geerbte Attribute in jeder Subtyp-Tabelle (1,5)"
+      points: 2
+    - criterion: "a) Gesamttabelle bzw. Single Table Inheritance benannt (0,5) und korrekt skizziert, Typ-Attribut und alle Subtyp-Spalten (1,5)"
+      points: 2
+    - criterion: "b) Je Variante ein zutreffender Vor- und Nachteil (je 1 Punkt)"
+      points: 3
+    - criterion: "c) Passende Empfehlung begründet, Ausschluss der horizontalen Variante wegen partieller Spezialisierung"
+      points: 2
+    - criterion: "d) Typ-Attribut mit NOT NULL (0,5) und CHECK, der für alle drei Werte 'B', 'T', 'S' die fremden Subtyp-Spalten ausschließt (je Fall 0,5)"
+      points: 2
+  space: box:230
+- id: t06-p007
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [reihenfolge, zyklus]
+  type: explain
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Für ein Musikfestival ist folgendes Relationenschema gegeben (PK unterstrichen):
+
+    - band(<u>band_nr</u>, bandname, genre)
+    - buehne(<u>buehne_nr</u>, bezeichnung, leitung_nr → crew), leitung_nr NOT NULL UNIQUE
+    - crew(<u>crew_nr</u>, vorname, nachname, buehne_nr → buehne), buehne_nr NULL erlaubt
+    - auftritt(<u>band_nr → band, buehne_nr → buehne, beginn</u>, dauer_min)
+    - einsatz(<u>crew_nr → crew, band_nr, buehne_nr, beginn</u>) mit (band_nr, buehne_nr, beginn) → auftritt
+
+    a) Welche Tabellen bilden einen Zyklus?
+    b) Gib eine gültige Reihenfolge an, in der die Tabellen angelegt werden können. Schreibe die Anweisung aus, mit der du den Zyklus schließt.
+    c) In welcher Reihenfolge werden eine neue Bühne und ihre Leitung eingefügt? Begründe.
+    d) In welcher Reihenfolge werden alle Tabellen wieder gelöscht?
+  solution: |-
+    **a)** `buehne` und `crew` verweisen gegenseitig aufeinander (leitung_nr → crew, buehne_nr → buehne).
+
+    **b)** Zum Beispiel: `band`, `crew` (zunächst **ohne** FK auf buehne), `buehne` (mit FK auf crew), dann den Zyklus schließen, danach `auftritt`, `einsatz`.
+    ```sql
+    ALTER TABLE crew ADD CONSTRAINT fk_crew_buehne
+      FOREIGN KEY (buehne_nr) REFERENCES buehne (buehne_nr);
+    ```
+    `band` darf an jeder Stelle vor `auftritt` stehen. `einsatz` muss nach `crew` und `auftritt` kommen, weil sein zusammengesetzter FK auf `auftritt` zeigt. Gleichwertig: zuerst `buehne` ohne FK, dann `crew`, dann `ALTER TABLE buehne ADD CONSTRAINT …`.
+
+    **c)** Da `buehne.leitung_nr` NOT NULL ist, muss die Leitung zuerst existieren: 1. Crew-Mitglied mit `buehne_nr = NULL` einfügen, 2. Bühne mit dessen `crew_nr` als `leitung_nr` einfügen. Optional, falls die Leitung auch selbst zur Crew dieser Bühne gehören soll: 3. `UPDATE crew SET buehne_nr = …` für das Crew-Mitglied. Das Schema verlangt diesen Schritt nicht.
+
+    **d)** Umgekehrt zur Abhängigkeit: `einsatz`, `auftritt`, dann den Zyklus öffnen (`ALTER TABLE crew DROP CONSTRAINT fk_crew_buehne;`), dann `buehne`, `crew`. `band` jederzeit nach `auftritt`.
+    Bei der gleichwertigen Variante aus b) (FK von buehne auf crew per ALTER ergänzt) öffnet man den Zyklus mit `ALTER TABLE buehne DROP CONSTRAINT fk_buehne_leitung;` und löscht danach `crew` vor `buehne`.
+  rubric:
+    - criterion: "a) Zyklus buehne ↔ crew erkannt"
+      points: 1
+    - criterion: "b) Gültige Anlage-Reihenfolge mit einer Tabelle zunächst ohne den zyklischen FK"
+      points: 2
+    - criterion: "b) ALTER TABLE … ADD CONSTRAINT … FOREIGN KEY … REFERENCES … korrekt formuliert"
+      points: 1
+    - criterion: "b) einsatz nach auftritt eingeordnet (zusammengesetzter FK)"
+      points: 1
+    - criterion: "c) Crew-Mitglied (buehne_nr NULL) vor der Bühne eingefügt (1), mit NOT NULL an leitung_nr begründet (0,5); ein zusätzlicher UPDATE ist optional"
+      points: 1.5
+    - criterion: "d) Lösch-Reihenfolge umgekehrt, Zyklus vorher per DROP CONSTRAINT geöffnet"
+      points: 1.5
+  space: lines:16
+- id: t06-p008
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [min-max, umrechnung, not-null, unique]
+  type: explain
+  difficulty: 2
+  points: 8
+  minutes: 8
+  prompt: |-
+    Ein Repair-Café beschreibt seine Beziehungen nur in **(min,max)-Notation** (die Angabe steht beim jeweiligen Entitätstyp):
+
+    1. Reparateur:in (0,n) — repariert — (1,1) Gerät
+    2. Gerät (0,1) — erhält — (1,1) Garantieschein
+    3. Besucher:in (1,n) — bringt mit — (1,1) Gerät
+    4. Reparateur:in (0,n) — beherrscht — (1,n) Fachgebiet
+
+    Gib für jede Beziehung an: die Chen-Kardinalität (1:1, 1:n oder m:n), wie sie im Relationenschema abgebildet wird (welche Tabelle welchen Fremdschlüssel bekommt oder welche Zwischentabelle entsteht), ob die FK-Spalte `NOT NULL` und/oder `UNIQUE` braucht, und welche (min,max)-Angabe sich dabei **nicht** deklarativ erzwingen lässt.
+  solution: |-
+    1. **1:n** (Chen: 1 bei Reparateur:in, n bei Gerät). Gerät hat max = 1, also kommt der FK dorthin: `geraet.reparateur_nr → reparateur`, **NOT NULL** wegen (1,1), kein UNIQUE. Alles erzwingbar (Reparateur:in hat min = 0).
+    2. **1:1**. FK auf die Pflichtseite Garantieschein: `garantieschein.geraet_nr → geraet`, **NOT NULL UNIQUE**. Alles erzwingbar. (Ein UNIQUE-FK in `geraet` wäre ebenfalls zulässig, dann NULL-fähig, und die (1,1) des Garantiescheins wäre nicht erzwingbar.)
+    3. **1:n** (Chen: 1 bei Besucher:in, n bei Gerät). `geraet.besucher_nr → besucher`, **NOT NULL**. **Nicht erzwingbar:** Besucher:in (1,n), also dass jede Besucher:in mindestens ein Gerät mitbringt (Mindestteilnahme der referenzierten Seite).
+    4. **m:n**. Zwischentabelle beherrscht(<u>reparateur_nr → reparateur, fachgebiet_nr → fachgebiet</u>), beide Spalten NOT NULL als PK. **Nicht erzwingbar:** Fachgebiet (1,n), also dass jedes Fachgebiet mindestens eine Person hat.
+
+    Merkregel: In (min,max) kommt der FK auf die Seite mit max = 1. min = 1 dort ergibt NOT NULL. max = 1 auf beiden Seiten ergibt zusätzlich UNIQUE. min ≥ 1 auf der referenzierten Seite braucht Trigger oder die Anwendung.
+  rubric:
+    - criterion: "Beziehung 1: 1:n, FK in geraet mit NOT NULL"
+      points: 1.5
+    - criterion: "Beziehung 2: 1:1, FK mit UNIQUE, bei Garantieschein zusätzlich NOT NULL (UNIQUE-FK in geraet mit richtiger Einschränkung ebenfalls voll)"
+      points: 2
+    - criterion: "Beziehung 3: 1:n, FK in geraet mit NOT NULL; Mindestteilnahme der Besucher:in als nicht erzwingbar erkannt"
+      points: 2
+    - criterion: "Beziehung 4: m:n als Zwischentabelle mit PK aus beiden FKs; Mindestteilnahme des Fachgebiets als nicht erzwingbar erkannt"
+      points: 2.5
+  space: lines:14
+- id: t06-p009
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [erm-to-sql, zyklus, rekursiv, 1-1]
+  type: erm-to-sql
+  difficulty: 3
+  points: 13
+  minutes: 14
+  prompt: |-
+    Ein Gemeinschaftsgarten organisiert seine Mitglieder in Arbeitsgruppen. Folgender Ausschnitt des Relationenschemas ist festgelegt:
+
+    - arbeitsgruppe(<u>ag_nr</u>, bezeichnung, sprecher_nr → gaertner), sprecher_nr UNIQUE
+    - gaertner(<u>mitglieds_nr</u>, vorname, nachname, email, ag_nr → arbeitsgruppe, pate_nr → gaertner), email UNIQUE
+
+    Fachliche Regeln: Jede Arbeitsgruppe hat genau eine Sprecher:in (1,1) und mindestens ein Mitglied (1,n). Eine Gärtner:in spricht für höchstens eine Arbeitsgruppe. Jede Gärtner:in gehört genau einer Arbeitsgruppe an (1,1). Neumitglieder können eine Pat:in haben (pate_nr, Rolle „Pat:in“, optional), niemand ist Pat:in von sich selbst.
+
+    a) Schreibe die DDL-Anweisungen für beide Tabellen in Firebird-3-Syntax in einer gültigen Reihenfolge, mit allen passenden Constraints.
+    b) Laut den Regeln wären `sprecher_nr` und `ag_nr` beide Pflicht. Begründe, warum eine der beiden Spalten trotzdem NULL-fähig bleiben muss, und welche du dafür wählst.
+    c) Beschreibe in Schritten, wie eine neue Arbeitsgruppe mit ihrer ersten Gärtner:in eingefügt wird, die zugleich Sprecher:in ist. Welche Angabe aus dem ER-Modell bleibt auch danach deklarativ unerzwungen?
+  solution: |-
+    **a)**
+    ```sql
+    CREATE TABLE arbeitsgruppe (
+      ag_nr       INTEGER     NOT NULL,
+      bezeichnung VARCHAR(50) NOT NULL,
+      sprecher_nr INTEGER,                  -- (1,1), wegen Zyklus NULL-fähig
+      CONSTRAINT pk_arbeitsgruppe PRIMARY KEY (ag_nr),
+      CONSTRAINT uq_ag_sprecher UNIQUE (sprecher_nr)
+    );
+
+    CREATE TABLE gaertner (
+      mitglieds_nr INTEGER      NOT NULL,
+      vorname      VARCHAR(40)  NOT NULL,
+      nachname     VARCHAR(40)  NOT NULL,
+      email        VARCHAR(100) NOT NULL,
+      ag_nr        INTEGER      NOT NULL,
+      pate_nr      INTEGER,
+      CONSTRAINT pk_gaertner PRIMARY KEY (mitglieds_nr),
+      CONSTRAINT uq_gaertner_email UNIQUE (email),
+      CONSTRAINT fk_gaertner_ag FOREIGN KEY (ag_nr)
+        REFERENCES arbeitsgruppe (ag_nr),
+      CONSTRAINT fk_gaertner_pate FOREIGN KEY (pate_nr)
+        REFERENCES gaertner (mitglieds_nr),
+      CONSTRAINT ck_gaertner_pate CHECK (pate_nr <> mitglieds_nr)
+    );
+
+    ALTER TABLE arbeitsgruppe ADD CONSTRAINT fk_ag_sprecher
+      FOREIGN KEY (sprecher_nr) REFERENCES gaertner (mitglieds_nr);
+    ```
+    Gleichwertig ist die umgekehrte Wahl: `ag_nr` NULL-fähig und `sprecher_nr NOT NULL`. Dann legt man zuerst `gaertner` ohne FK auf `arbeitsgruppe` an, dann `arbeitsgruppe` mit FK, dann `ALTER TABLE gaertner ADD CONSTRAINT …`. Bewertet wird, ob DDL, b) und c) zur gewählten Spalte passen. Der CHECK lässt `pate_nr = NULL` zu, weil UNKNOWN als erfüllt gilt. `pate_nr IS NULL OR …` ist ebenfalls richtig.
+
+    **b)** Firebird prüft Fremdschlüssel sofort und kennt keine verzögerte Prüfung. Wären `ag_nr` und `sprecher_nr` beide `NOT NULL`, bräuchte jede neue Zeile einen schon vorhandenen Partner, und weder die erste AG noch die erste Gärtner:in könnte eingefügt werden. Hier bleibt `sprecher_nr` NULL-fähig: Eine AG ohne Sprecher:in ist ein kurzer Übergangszustand, eine Gärtner:in ohne AG wäre häufiger fachlich falsch. Die umgekehrte Wahl mit Begründung ist ebenfalls korrekt.
+
+    **c)**
+    1. AG mit `sprecher_nr = NULL` einfügen.
+    2. Gärtner:in mit `ag_nr` dieser AG einfügen.
+    3. `UPDATE arbeitsgruppe SET sprecher_nr = … WHERE ag_nr = …`.
+
+    (Bei der umgekehrten Wahl: Gärtner:in mit `ag_nr = NULL`, dann AG mit `sprecher_nr`, dann `UPDATE gaertner SET ag_nr = …`.)
+    Unerzwungen bleiben: die Mindestteilnahme (1,n) der AG bei „gehört zu“ (referenzierte Seite), die Pflicht zur Sprecher:in, solange `sprecher_nr` NULL-fähig ist, und dass die Sprecher:in Mitglied der eigenen AG ist. Eine dieser Angaben genügt.
+  rubric:
+    - criterion: "a) arbeitsgruppe: PK und UNIQUE auf sprecher_nr"
+      points: 1
+    - criterion: "a) gaertner: PK, UNIQUE auf email, FK ag_nr → arbeitsgruppe; genau eine der Spalten ag_nr/sprecher_nr NOT NULL, passend zu b)"
+      points: 2
+    - criterion: "a) rekursiver FK pate_nr → gaertner, NULL-fähig (1), CHECK gegen Selbstbezug (1)"
+      points: 2
+    - criterion: "a) Zyklus aufgelöst: eine Tabelle zunächst ohne den zyklischen FK, danach ALTER TABLE … ADD CONSTRAINT … FOREIGN KEY … REFERENCES korrekt"
+      points: 2
+    - criterion: "a) Syntaktisch korrektes Firebird-SQL"
+      points: 1.5
+    - criterion: "b) Sofortige FK-Prüfung als Grund erkannt (1), Wahl der Spalte fachlich begründet (1)"
+      points: 2
+    - criterion: "c) Einfüge-Schritte passend zur gewählten Spalte: NULL, Partner, UPDATE"
+      points: 1.5
+    - criterion: "c) Eine deklarativ unerzwungene Angabe genannt und begründet"
+      points: 1
+  space: box:250
+- id: t06-p010
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [ddl, fehler-finden, reihenfolge, firebird]
+  type: explain
+  difficulty: 2
+  points: 10
+  minutes: 10
+  prompt: |-
+    Eine Kletterhalle möchte folgendes Schema anlegen: routensetzer(<u>setzer_nr</u>, name), wand(<u>wand_nr</u>, hoehe_m), route(<u>route_nr</u>, name, grad, wand_nr → wand, setzer_nr → routensetzer) und den schwachen Entitätstyp umschraubung(<u>route_nr → route, lfd_nr</u>, datum). Die folgenden Firebird-3-Anweisungen werden in dieser Reihenfolge ausgeführt. Sie enthalten **sechs Fehler**.
+
+    ```sql
+    CREATE TABLE route (
+      route_nr  INTEGER     NOT NULL,
+      name      VARCHAR(40) NOT NULL,
+      grad      VARCHAR(3)  NOT NULL,
+      wand_nr   INTEGER     NOT NULL,
+      CONSTRAINT pk_route PRIMARY KEY (route_nr),
+      CONSTRAINT fk_route_wand FOREIGN KEY (wand_nr)
+        REFERENCES wand (wand_nr),
+      CONSTRAINT fk_route_setzer FOREIGN KEY (setzer_nr)
+        REFERENCES routensetzer (setzer_nr)
+    );
+
+    CREATE TABLE wand (
+      wand_nr INTEGER      NOT NULL,
+      hoehe_m NUMERIC(4,1) NOT NULL,
+      CONSTRAINT pk_wand PRIMARY KEY (wand_nr)
+    );
+
+    CREATE TABLE routensetzer (
+      setzer_nr INTEGER     NOT NULL,
+      name      VARCHAR(40) NOT NULL
+    );
+
+    CREATE TABLE umschraubung (
+      route_nr VARCHAR(10) NOT NULL,
+      lfd_nr   SMALLINT    NOT NULL,
+      datum    DATE        NOT NULL,
+      CONSTRAINT pk_umschraubung PRIMARY KEY (route_nr, lfd_nr),
+      CONSTRAINT fk_umschraubung_route FOREIGN KEY (route_nr)
+        REFERENCES routen (route_nr) ON DELETE RESTRICT
+    );
+    ```
+
+    Nenne jeden Fehler, begründe, warum er zu einem Fehler oder einer falschen Abbildung führt, und gib die Korrektur an. Gib zum Schluss eine korrigierte Anlage-Reihenfolge an.
+  solution: |-
+    1. **Falsche Reihenfolge:** `route` wird vor `wand` und `routensetzer` angelegt. Ein FK kann nur auf eine bereits existierende Tabelle zeigen. Korrektur: `route` nach `wand` und `routensetzer` anlegen.
+    2. **Fehlende FK-Spalte:** `route` deklariert keine Spalte `setzer_nr`, der Constraint `fk_route_setzer` verweist aber darauf. Korrektur: `setzer_nr INTEGER NOT NULL` (bzw. NULL-fähig, wenn eine Route ohne Setzer:in erlaubt ist) ergänzen, mit demselben Typ wie in `routensetzer`.
+    3. **Ziel ohne Schlüssel:** `routensetzer` hat keinen PRIMARY KEY. Ein FK darf nur auf einen PK oder UNIQUE-Schlüssel zeigen. Korrektur: `CONSTRAINT pk_routensetzer PRIMARY KEY (setzer_nr)`.
+    4. **Typkonflikt:** `umschraubung.route_nr` ist `VARCHAR(10)`, `route.route_nr` aber `INTEGER`. FK-Spalte und Zielspalte müssen zueinander passen. Korrektur: `route_nr INTEGER NOT NULL`.
+    5. **Tippfehler im Tabellennamen:** `REFERENCES routen` statt `route`. Die Tabelle `routen` gibt es nicht. Korrektur: `REFERENCES route (route_nr)`.
+    6. **Unbekannte referenzielle Aktion:** `ON DELETE RESTRICT` kennt Firebird 3 nicht, und für einen schwachen Entitätstyp wäre die Löschweitergabe ohnehin passend. Korrektur: `ON DELETE CASCADE ON UPDATE CASCADE` (oder die Klausel weglassen, dann gilt `NO ACTION`).
+
+    Korrigierte Reihenfolge: `wand`, `routensetzer` (beliebig untereinander) → `route` → `umschraubung`.
+  rubric:
+    - criterion: "Fehler 1 Reihenfolge (route vor wand und routensetzer zählt als ein Fehler): erkannt, begründet, korrigiert (je 0,5)"
+      points: 1.5
+    - criterion: "Fehler 2 fehlende Spalte setzer_nr: erkannt, begründet, korrigiert (je 0,5)"
+      points: 1.5
+    - criterion: "Fehler 3 kein PK in routensetzer: erkannt, begründet, korrigiert (je 0,5)"
+      points: 1.5
+    - criterion: "Fehler 4 Typkonflikt route_nr: erkannt, begründet, korrigiert (je 0,5)"
+      points: 1.5
+    - criterion: "Fehler 5 Tabellenname routen: erkannt, begründet, korrigiert (je 0,5)"
+      points: 1.5
+    - criterion: "Fehler 6 RESTRICT in Firebird 3: erkannt, begründet, korrigiert (je 0,5)"
+      points: 1.5
+    - criterion: "Korrigierte Anlage-Reihenfolge vollständig und gültig"
+      points: 1
+  space: lines:22
+- id: t06-p011
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [1-1, alternativen, zeitbezug]
+  type: explain
+  difficulty: 2
+  points: 11
+  minutes: 12
+  prompt: |-
+    Eine Stadtbibliothek modelliert: `Leser:in (0,1) — besitzt — (1,1) Leseausweis` mit den Beziehungsattributen „ausgestellt am“ und „gültig bis“. Leser:in (Leser-Nr., Name), Leseausweis (Ausweis-Nr., Ausweistyp). Ein Ausweis wird erst erfasst, wenn er ausgegeben wird.
+
+    a) Gib drei korrekte Abbildungen dieser Beziehung an: mit **einer**, mit **zwei** und mit **drei** Tabellen (Kurzschreibweise, NOT NULL und UNIQUE angeben).
+    b) Vergleiche die drei Abbildungen nach NULL-Werten, nötigen Joins und danach, welche (min,max)-Angaben deklarativ erzwungen werden.
+    c) Künftig werden abgelaufene Ausweiskarten an andere Leser:innen neu ausgegeben, und alle früheren Ausgaben sollen erhalten bleiben. Welche Abbildung passt dann, und wie musst du sie ändern?
+  solution: |-
+    **a)**
+    1. **Eine Tabelle (Zusammenlegen):** leser(<u>leser_nr</u>, name, ausweis_nr, ausweistyp, ausgestellt_am, gueltig_bis) mit ausweis_nr UNIQUE, alle Ausweisspalten NULL-fähig.
+    2. **Zwei Tabellen (FK mit UNIQUE):** leser(<u>leser_nr</u>, name), ausweis(<u>ausweis_nr</u>, ausweistyp, ausgestellt_am, gueltig_bis, leser_nr → leser) mit leser_nr NOT NULL UNIQUE.
+       Ebenfalls zulässig: FK in der anderen Richtung, leser(<u>leser_nr</u>, name, ausweis_nr → ausweis) mit ausweis_nr UNIQUE und NULL-fähig. Die Beziehungsattribute können dann in `ausweis` oder `leser` stehen. Dann ist die (1,1) des Ausweises nicht erzwingbar, denn ein Ausweis könnte ohne Leser:in existieren.
+    3. **Drei Tabellen (eigene Beziehungsrelation):** leser(<u>leser_nr</u>, name), ausweis(<u>ausweis_nr</u>, ausweistyp), ausgabe(<u>ausweis_nr → ausweis</u>, leser_nr → leser, ausgestellt_am, gueltig_bis) mit leser_nr NOT NULL UNIQUE.
+
+    **b)**
+    - 1 Tabelle: kein Join. NULL-Werte bei allen Leser:innen ohne Ausweis. Ein Ausweis ohne Leser:in ist ausgeschlossen, das passt zu (1,1). Höchstens ein Ausweis je Leser:in ergibt sich aus der Zeilenstruktur (eine Zeile, eine Ausweisspalte). `UNIQUE` auf `ausweis_nr` verhindert, dass dieselbe Karte bei zwei Leser:innen steht.
+    - 2 Tabellen (FK in ausweis): ein Join, keine NULL-Werte. (1,1) des Ausweises per NOT NULL, (0,1) der Leser:in per UNIQUE erzwungen. Beste Abdeckung. Bei der Variante mit dem FK in `leser`: NULL-Werte bei Leser:innen ohne Ausweis, (1,1) des Ausweises nicht erzwingbar.
+    - 3 Tabellen: zwei Joins, keine NULL-Werte. Die (1,1) des Ausweises ist **nicht** erzwingbar, denn ein Ausweis kann ohne Zeile in `ausgabe` existieren. Vorteil: am leichtesten um eine Historie erweiterbar.
+
+    **c)** Die Abbildung mit drei Tabellen. Über die Zeit hat ein Ausweis mehrere Leser:innen und eine Leser:in mehrere Ausweise. Die Beziehung wird zeitbezogen zu m:n. Änderung: PK um den Beginn erweitern und das UNIQUE auf leser_nr streichen: ausgabe(<u>ausweis_nr → ausweis, ausgestellt_am</u>, gueltig_bis, leser_nr → leser) mit leser_nr NOT NULL. Dass sich Gültigkeitszeiträume nicht überschneiden (zu jedem Zeitpunkt 1:1), lässt sich deklarativ nicht prüfen.
+  rubric:
+    - criterion: "a) Eine Tabelle: Ausweisdaten in leser, ausweis_nr UNIQUE und NULL-fähig"
+      points: 2
+    - criterion: "a) Zwei Tabellen: FK leser_nr in ausweis mit NOT NULL und UNIQUE oder FK ausweis_nr in leser mit UNIQUE und NULL-fähig (beide voll), Beziehungsattribute sinnvoll platziert"
+      points: 2
+    - criterion: "a) Drei Tabellen: Beziehungsrelation mit PK aus einem FK und UNIQUE auf dem anderen"
+      points: 2
+    - criterion: "b) Vergleich NULL-Werte und Joins für alle drei Abbildungen"
+      points: 1.5
+    - criterion: "b) Erzwingbarkeit: (1,1) des Ausweises bei 1 Tabelle und bei FK in ausweis gesichert, bei FK in leser und bei 3 Tabellen nicht (passend zur gewählten Variante)"
+      points: 1.5
+    - criterion: "c) Drei-Tabellen-Variante gewählt, PK um ausgestellt_am erweitert, UNIQUE auf leser_nr gestrichen"
+      points: 2
+  space: box:180
+- id: t06-p012
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [generalisierung, rekursiv, beispieldaten]
+  type: explain
+  difficulty: 2
+  points: 13
+  minutes: 14
+  prompt: |-
+    Eine Stadtteilbibliothek führt Medien (Medien-Nr., Titel, Jahr) mit den Subtypen Buch (Seiten) und Hörbuch (Laufzeit in min). Die Spezialisierung ist **disjunkt und partiell**: Zeitschriften sind nur Medien. Zusätzlich gibt es die rekursive 1:1-Beziehung „ist Fortsetzung von“ (jedes Medium hat höchstens einen direkten Vorgänger und höchstens eine direkte Fortsetzung).
+
+    Beispieldaten:
+    - Nr. 1 „Sturmflut“, 2019, Buch mit 320 Seiten
+    - Nr. 2 „Nachtzug“, 2021, Hörbuch mit 410 min
+    - Nr. 3 „Gartenjahr“, 2023, Zeitschrift
+    - Nr. 4 „Funkenflug“, 2020, Buch mit 188 Seiten, Fortsetzung von Nr. 1
+
+    a) Trage die vier Medien (ohne „ist Fortsetzung von“) in die Tabellen der **vertikalen Fragmentierung** (Class Table Inheritance) und der **Gesamttabelle** (Single Table Inheritance, Typ-Attribut `art` mit 'B', 'H', 'Z') ein. Zähle bei der Gesamttabelle die NULL-Werte.
+    b) Trage die Daten in die Tabellen der **horizontalen Fragmentierung** (Concrete Table Inheritance) ein. Was fällt auf?
+    c) Bilde „ist Fortsetzung von“ (i) als Fremdschlüssel in der Tabelle `medium` der vertikalen Variante und (ii) als eigene Relation ab. Gib jeweils die Tabelleninhalte für diese Spalte(n) an und vergleiche beide Lösungen kurz.
+  solution: |-
+    **a) Vertikal:**
+    - medium(medien_nr, titel, jahr): (1, Sturmflut, 2019), (2, Nachtzug, 2021), (3, Gartenjahr, 2023), (4, Funkenflug, 2020)
+    - buch(medien_nr → medium, seiten): (1, 320), (4, 188)
+    - hoerbuch(medien_nr → medium, laufzeit_min): (2, 410)
+
+    **Gesamttabelle:** medium(medien_nr, titel, jahr, art, seiten, laufzeit_min):
+    - (1, Sturmflut, 2019, 'B', 320, NULL)
+    - (2, Nachtzug, 2021, 'H', NULL, 410)
+    - (3, Gartenjahr, 2023, 'Z', NULL, NULL)
+    - (4, Funkenflug, 2020, 'B', 188, NULL)
+
+    Das sind **5 NULL-Werte**.
+
+    **b) Horizontal:**
+    - buch(medien_nr, titel, jahr, seiten): (1, Sturmflut, 2019, 320), (4, Funkenflug, 2020, 188)
+    - hoerbuch(medien_nr, titel, jahr, laufzeit_min): (2, Nachtzug, 2021, 410)
+
+    Die Zeitschrift Nr. 3 hat **keinen Platz**, weil sie keinem Subtyp angehört (partiell). Man bräuchte eine zusätzliche Tabelle für Medien ohne Subtyp.
+
+    **c)**
+    (i) medium(…, vorgaenger_nr → medium) mit vorgaenger_nr UNIQUE: Nr. 1 → NULL, Nr. 2 → NULL, Nr. 3 → NULL, Nr. 4 → 1.
+    (ii) fortsetzung(<u>medien_nr → medium</u>, vorgaenger_nr → medium) mit vorgaenger_nr NOT NULL UNIQUE: eine Zeile (4, 1).
+    Vergleich: (i) kommt ohne Join aus, erzeugt hier aber 3 NULL-Werte. (ii) hat keine NULL-Werte und speichert nur vorhandene Fortsetzungen, braucht aber eine Tabelle und einen Join mehr.
+  rubric:
+    - criterion: "a) Vertikale Fragmentierung: alle Zeilen korrekt auf medium, buch, hoerbuch verteilt, Zeitschrift nur in medium"
+      points: 2.5
+    - criterion: "a) Gesamttabelle korrekt mit Typ-Attribut (2), 5 NULL-Werte gezählt (0,5)"
+      points: 2.5
+    - criterion: "b) Horizontale Tabellen korrekt gefüllt (1,5), fehlender Platz für die Zeitschrift erkannt und mit partiell begründet (1,5)"
+      points: 3
+    - criterion: "c) (i) FK-Spalte in medium mit UNIQUE und Inhalt (nur Nr. 4 gefüllt)"
+      points: 1.5
+    - criterion: "c) (ii) eigene Relation mit PK und UNIQUE, Inhalt (4, 1)"
+      points: 1.5
+    - criterion: "c) Vergleich: NULL-Werte (1) vs. zusätzliche Tabelle und Join (1)"
+      points: 2
+  space: box:250
+- id: t06-p013
+  status: reviewed
+  reviews: [fach, aufgaben, leak]
+  tags: [alter-table, rekursiv, m-n]
+  type: erm-to-sql
+  difficulty: 2
+  points: 8
+  minutes: 9
+  prompt: |-
+    Ein Wanderverein hat bereits die gefüllten Tabellen fuehrer(<u>fuehrer_nr</u> INTEGER, name) und tour(<u>tour_nr</u> INTEGER, titel, km). Das ER-Modell wird um zwei Beziehungen erweitert:
+
+    1. Tourenführer:in 1 (0,n) —leitet— n (0,1) Tour
+    2. Tour —setzt voraus— Tour, rekursiv m:n mit den Rollen „Tour“ und „Voraussetzung“ (z. B. setzt die Gletschertour die Klettersteigtour voraus)
+
+    a) Ergänze Beziehung 1 in der bestehenden Tabelle mit `ALTER TABLE` (Firebird 3). Begründe, ob die neue Spalte `NOT NULL` sein kann.
+    b) Bilde Beziehung 2 ab: Gib das Relationenschema in Kurzschreibweise und die `CREATE TABLE`-Anweisung an. Verhindere, dass eine Tour sich selbst voraussetzt.
+    c) Warum lässt sich Beziehung 2 nicht wie Beziehung 1 als zusätzliche Spalte in `tour` abbilden?
+  solution: |-
+    **a)**
+    ```sql
+    ALTER TABLE tour ADD fuehrer_nr INTEGER;
+    ALTER TABLE tour ADD CONSTRAINT fk_tour_fuehrer
+      FOREIGN KEY (fuehrer_nr) REFERENCES fuehrer (fuehrer_nr);
+    ```
+    `NOT NULL` geht nicht. Fachlich hat Tour (0,1), eine Tour darf also ohne Leitung sein. Technisch sind außerdem alle vorhandenen Zeilen nach dem Hinzufügen NULL.
+
+    **b)** tour_voraussetzung(<u>tour_nr → tour, voraussetzung_nr → tour</u>)
+    ```sql
+    CREATE TABLE tour_voraussetzung (
+      tour_nr          INTEGER NOT NULL,
+      voraussetzung_nr INTEGER NOT NULL,
+      CONSTRAINT pk_tour_voraussetzung PRIMARY KEY (tour_nr, voraussetzung_nr),
+      CONSTRAINT fk_tv_tour FOREIGN KEY (tour_nr) REFERENCES tour (tour_nr),
+      CONSTRAINT fk_tv_voraussetzung FOREIGN KEY (voraussetzung_nr)
+        REFERENCES tour (tour_nr),
+      CONSTRAINT ck_tv_selbst CHECK (tour_nr <> voraussetzung_nr)
+    );
+    ```
+    Beide FKs zeigen auf dieselbe Tabelle, die Spaltennamen folgen den Rollen.
+
+    **c)** Eine Tour kann mehrere Voraussetzungen haben und Voraussetzung für mehrere Touren sein. Eine einzelne Spalte nimmt je Zeile nur **einen** Wert auf. Für m:n braucht man deshalb auch im rekursiven Fall eine Zwischentabelle.
+  rubric:
+    - criterion: "a) ADD-Spalte und ADD CONSTRAINT … FOREIGN KEY … REFERENCES korrekt"
+      points: 2
+    - criterion: "a) NOT NULL abgelehnt, mit (0,1) oder mit den bestehenden Zeilen begründet"
+      points: 1
+    - criterion: "b) Zwischentabelle mit zwei FKs auf tour, Rollennamen, PK aus beiden Spalten"
+      points: 2.5
+    - criterion: "b) CHECK gegen Selbstbezug, Syntax korrekt"
+      points: 1
+    - criterion: "c) Mehrere Werte je Zeile als Grund für die Zwischentabelle erklärt"
+      points: 1.5
+  space: lines:20

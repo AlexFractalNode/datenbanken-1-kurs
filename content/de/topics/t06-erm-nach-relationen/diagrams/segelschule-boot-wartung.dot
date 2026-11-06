@@ -1,0 +1,55 @@
+// Ausgangs-ERM Segelschule, Teil 2: Spezialisierung und schwacher Entitätstyp.
+// Boot wird disjunkt und total in Jolle und Kielboot spezialisiert
+// (EER-Erweiterung: Dreieck mit "d" für disjunkt, Doppellinie für total).
+// Wartung ist ein schwacher Entitätstyp (doppelter Rahmen) mit identifizierender
+// Beziehung (doppelte Raute). Der partielle Schlüssel Lfd.-Nr. ist nur je Boot
+// eindeutig; Lehrbuch-Variante: gestrichelt unterstrichen, hier unterstrichen mit Zusatz "(partiell)".
+// Kantenlabel: Chen-Kardinalität, darunter (min,max).
+graph segelschule_boot_wartung {
+  rankdir=TB;
+  node [fontsize=11];
+  edge [fontsize=10];
+
+  boot     [shape=box, label="Boot"];
+  isa      [shape=triangle, label="is-a\nd"];
+  jolle    [shape=box, label="Jolle"];
+  kielboot [shape=box, label="Kielboot"];
+
+  gewartet [shape=diamond, peripheries=2, label="wird gewartet"];
+  wartung  [shape=box, peripheries=2, label="Wartung"];
+
+  b_nr      [shape=ellipse, label=<<u>Boot-Nr.</u>>];
+  b_name    [shape=ellipse, label="Bootsname"];
+  b_baujahr [shape=ellipse, label="Baujahr"];
+
+  j_schwert [shape=ellipse, label="Schwertart"];
+  k_tief    [shape=ellipse, label="Tiefgang (m)"];
+  k_kojen   [shape=ellipse, label="Kojen"];
+
+  w_nr     [shape=ellipse, label=<<u>Lfd.-Nr.</u> (partiell)>];
+  w_datum  [shape=ellipse, label="Datum"];
+  w_text   [shape=ellipse, label="Beschreibung"];
+  w_kosten [shape=ellipse, label="Kosten"];
+
+  // Spezialisierung: total (Doppellinie), disjunkt (d)
+  boot -- isa [color="black:invis:black"];
+  isa -- jolle;
+  isa -- kielboot;
+
+  // identifizierende Beziehung
+  boot -- gewartet    [label="1\n(0,n)"];
+  gewartet -- wartung [label="n\n(1,1)", color="black:invis:black"];
+
+  boot -- b_nr;
+  boot -- b_name;
+  boot -- b_baujahr;
+
+  jolle -- j_schwert;
+  kielboot -- k_tief;
+  kielboot -- k_kojen;
+
+  wartung -- w_nr;
+  wartung -- w_datum;
+  wartung -- w_text;
+  wartung -- w_kosten;
+}

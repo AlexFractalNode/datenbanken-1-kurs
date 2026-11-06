@@ -1,0 +1,118 @@
+// Ausgangs-ERM Segelschule in Chen-Notation.
+// Kantenlabel: oben Chen-Kardinalität, darunter (min,max) - beide stehen an der
+// Kante des Entitätstyps, auf den sie sich beziehen. Chen liest man gegenüber,
+// (min,max) beim eigenen Typ; deshalb erscheinen die Obergrenzen vertauscht.
+// Enthalten: 1:n (leitet), rekursiv 1:n mit Rollen (ist Mentor:in von),
+// m:n mit Beziehungsattributen (bucht), ternär (wird eingeteilt), 1:1 (liegt an),
+// zusammengesetzte Attribute (Name, Adresse) und ein mehrwertiges Attribut (Telefon).
+graph segelschule_grundmodell {
+  layout=neato;
+  overlap=false;
+  splines=true;
+  sep="+12";
+  node [fontsize=11];
+  edge [fontsize=10];
+
+  // Entitätstypen
+  ausbilder  [shape=box, label="Ausbilder:in"];
+  kurs       [shape=box, label="Kurs"];
+  teilnehmer [shape=box, label="Teilnehmer:in"];
+  boot       [shape=box, label="Boot"];
+  liegeplatz [shape=box, label="Liegeplatz"];
+
+  // Beziehungstypen
+  leitet     [shape=diamond, label="leitet"];
+  mentor     [shape=diamond, label="ist Mentor:in von"];
+  bucht      [shape=diamond, label="bucht"];
+  einteilung [shape=diamond, label="wird eingeteilt"];
+  liegt      [shape=diamond, label="liegt an"];
+
+  // Attribute Ausbilder:in
+  a_nr     [shape=ellipse, label=<<u>Ausbilder-Nr.</u>>];
+  a_name   [shape=ellipse, label="Name"];
+  a_lizenz [shape=ellipse, label="Lizenz"];
+
+  // Attribute Kurs
+  k_nr     [shape=ellipse, label=<<u>Kurs-Nr.</u>>];
+  k_titel  [shape=ellipse, label="Titel"];
+  k_beginn [shape=ellipse, label="Beginn"];
+  k_ende   [shape=ellipse, label="Ende"];
+
+  // Attribute Teilnehmer:in (Name und Adresse zusammengesetzt, Telefon mehrwertig)
+  t_nr      [shape=ellipse, label=<<u>Teilnehmer-Nr.</u>>];
+  t_name    [shape=ellipse, label="Name"];
+  t_vorname [shape=ellipse, label="Vorname"];
+  t_nachname[shape=ellipse, label="Nachname"];
+  t_adresse [shape=ellipse, label="Adresse"];
+  t_strasse [shape=ellipse, label="Straße"];
+  t_plz     [shape=ellipse, label="PLZ"];
+  t_ort     [shape=ellipse, label="Ort"];
+  t_telefon [shape=ellipse, peripheries=2, label="Telefon"];
+  t_geb     [shape=ellipse, label="Geburtsdatum"];
+
+  // Attribute Boot
+  b_nr     [shape=ellipse, label=<<u>Boot-Nr.</u>>];
+  b_name   [shape=ellipse, label="Bootsname"];
+  b_baujahr[shape=ellipse, label="Baujahr"];
+
+  // Attribute Liegeplatz
+  l_nr     [shape=ellipse, label=<<u>Platz-Nr.</u>>];
+  l_steg   [shape=ellipse, label="Steg"];
+  l_laenge [shape=ellipse, label="Länge (m)"];
+
+  // Beziehungsattribute
+  bu_datum   [shape=ellipse, label="Buchungsdatum"];
+  bu_bezahlt [shape=ellipse, label="bezahlt"];
+
+  // leitet: 1:n
+  ausbilder -- leitet [label="1\n(0,n)"];
+  leitet -- kurs      [label="n\n(1,1)"];
+
+  // ist Mentor:in von: rekursiv 1:n mit Rollen
+  ausbilder -- mentor [label="Mentor:in\n1\n(0,n)"];
+  mentor -- ausbilder [label="Schützling\nn\n(0,1)"];
+
+  // bucht: m:n mit Attributen (ein Kurs hat höchstens 8 Teilnehmende)
+  teilnehmer -- bucht [label="m\n(1,n)"];
+  bucht -- kurs       [label="n\n(0,8)"];
+  bucht -- bu_datum;
+  bucht -- bu_bezahlt;
+
+  // wird eingeteilt: ternär (je Kurs und Teilnehmer:in höchstens ein Boot)
+  kurs -- einteilung       [label="m\n(0,n)"];
+  teilnehmer -- einteilung [label="n\n(0,n)"];
+  einteilung -- boot       [label="1\n(0,n)"];
+
+  // liegt an: 1:1 (jeder gemietete Liegeplatz gehört genau einem Boot)
+  boot -- liegt       [label="1\n(0,1)"];
+  liegt -- liegeplatz [label="1\n(1,1)"];
+
+  // Attributkanten
+  ausbilder -- a_nr;
+  ausbilder -- a_name;
+  ausbilder -- a_lizenz;
+
+  kurs -- k_nr;
+  kurs -- k_titel;
+  kurs -- k_beginn;
+  kurs -- k_ende;
+
+  teilnehmer -- t_nr;
+  teilnehmer -- t_name;
+  t_name -- t_vorname;
+  t_name -- t_nachname;
+  teilnehmer -- t_adresse;
+  t_adresse -- t_strasse;
+  t_adresse -- t_plz;
+  t_adresse -- t_ort;
+  teilnehmer -- t_telefon;
+  teilnehmer -- t_geb;
+
+  boot -- b_nr;
+  boot -- b_name;
+  boot -- b_baujahr;
+
+  liegeplatz -- l_nr;
+  liegeplatz -- l_steg;
+  liegeplatz -- l_laenge;
+}
