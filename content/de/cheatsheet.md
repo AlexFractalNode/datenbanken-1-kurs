@@ -1,7 +1,7 @@
 ---
 title: Cheatsheet Datenbanken 1 (A4)
 lang: de
-status: draft
+status: reviewed
 ---
 
 # Cheatsheet Datenbanken 1

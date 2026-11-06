@@ -1,7 +1,7 @@
 ---
 title: Spickzettel-Inhaltsliste (handschriftlich, 10×10 cm)
 lang: de
-status: draft
+status: reviewed
 ---
 
 # Spickzettel-Inhaltsliste

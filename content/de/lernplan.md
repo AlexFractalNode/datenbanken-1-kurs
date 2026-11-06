@@ -1,7 +1,7 @@
 ---
 title: Lernplan zwölf Wochen (relativ zum Prüfungstermin T)
 lang: de
-status: draft
+status: reviewed
 ---
 
 # Lernplan
